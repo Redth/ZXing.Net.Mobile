@@ -25,9 +25,9 @@ The simplest example of using ZxingSharp.Mobile looks something like this:
 ZxingSharp.Mobile is a combination of a lot of peoples' work that I've put together (including my own).  So naturally, I'd like to thank everyone who's helped out in any way.  Those of you I know have helped I'm listing here, but anyone else that was involved, please let me know!
 
 - ZXing Project and those responsible for porting it to C#
-- John Carruthers
-- Martin Bowling
-- Nirvanai 
+- John Carruthers - https://github.com/JohnACarruthers/zxing.MonoTouch
+- Martin Bowling - https://github.com/martinbowling
+- Alex Corrado - https://github.com/chkn/zxing.MonoTouch
 
 ###Custom Overlays
 By default, ZxingSharp.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
