@@ -61,4 +61,10 @@
     <AndroidResource Include="Resources\layout\ZxingOverlay.axml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ZingSharp.Mobile\ZxingSharp.Mobile.MonoForAndroid.csproj">
+      <Project>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</Project>
+      <Name>ZxingSharp.Mobile.MonoForAndroid</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
