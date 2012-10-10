@@ -1,75 +1,72 @@
-# zxing.MonoTouch
-ZXing (pronounced "zebra crossing") is an open-source, multi-format 1D/2D barcode image processing library implemented in Java. Our focus is on using the built-in camera on mobile phones to photograph and decode barcodes on the device, without communicating with a server.
-This project is built from the official csharp port from SVN and may be missing functionality.
+# ZxingSharp.Mobile
 
-## Usage
-A simple example of using zxing.MonoDroid might look like this:
+ZxingSharp.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing).  It works with MonoTouch, Mono for Android, and Windows Phone.  The goal of ZxingSharp.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  
 
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Net;
-  using MonoTouch.Foundation;
-  using MonoTouch.UIKit;
-  using com.google.zxing;
-  using com.google.zxing.common;
+### Usage
+The simplest example of using ZxingSharp.Mobile looks something like this:
 
-  namespace Camera.iPhone
-  {
+```csharp  
+  var scanner = new ZxingSharp.Mobile.ZxingScanner();
+  scanner.StartScanning((result) => {   
+     if (result != null)
+       Console.WriteLine("Scanned Barcode: " + result.Value);
+  });
+```
 
-    public class Application
-    {
-      static void Main (string[] args)
-      {
-        UIApplication.Main (args);
-      }
-    }
+###Features
+- MonoTouch
+- Mono for Android
+- Windows Phone
+- Simple API - Scan in as little as 2 lines of code!
 
-    // The name AppDelegate is referenced in the MainWindow.xib file.
-    public partial class AppDelegate : UIApplicationDelegate
-    {
-      // This method is invoked when the application has loaded its UI and its ready to run
-      public override bool FinishedLaunching (UIApplication app, NSDictionary options)
-      {
-        // If you have defined a view, add it here:
-        // window.AddSubview (navigationController.View);
 
-        window.MakeKeyAndVisible ();
+###Custom Overlays
+By default, ZxingSharp.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
 
-        try
-        {
-          var wc = new WebClient();
-          var uri = new Uri("http://www.theipadfan.com/wp-content/uploads/2010/07/barcode.png");
-          wc.DownloadFile(uri,"barcode.png");
+If you want to customize the overlay, you must create your own View for each platform.  You can customize your overlay like this:
 
-          UIImage image = UIImage.FromFile("barcode.png");
-          var srcbitmap = new System.Drawing.Bitmap(image);
+```csharp
+var scanner = new ZxingSharp.Mobile.ZxingScanner();
+scanner.UseCustomOverlay = true;
+scanner.CustomOverlay = myCustomOverlayInstance;
+scanner.StartScanning((result) => { //Handle Result });
+```
 
-          Reader barcodeReader = new MultiFormatReader();
-                  LuminanceSource source = new RGBLuminanceSource(srcbitmap, (int)image.Size.Width, (int)image.Size.Height);
-                  BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                  var result = barcodeReader.decode(bitmap);
-                  label.Text = result.Text;
-        } catch (Exception ex) {
-          label.Text = ex.ToString();
-          Console.WriteLine(ex.ToString());
-        }
+Keep in mind that when using a Custom Overlay, you are responsible for the entire overlay (you cannot mix and match custom elements with the default overlay).  The *ZxingScanner* instance has a *CustomOverlay* property, however on each platform this property is of a different type:
 
-        return true;
-      }
+- MonoTouch => **UIView**
+- Mono for Android => **View**
+- Windows Phone => **UIElement**
 
-      // This method is required in iPhoneOS 3.0
-      public override void OnActivated (UIApplication application)
-      {
-      }
-    }
-  }
+All of the platform samples have examples of custom overlays.
 
-## zxing
+###Barcode Formats
+By default, all barcode formats are monitored while scanning.  You can change which formats to check for by passing a ZxingScanningOptions instance into the StartScanning method:
+
+```csharp
+var options = new ZxingSharp.Mobile.ZxingScanningOptions();
+options.BarcodeFormats = ZxingSharp.Mobile.ZxingBarcodeFormat.Ean8 |
+                         ZxingSharp.Mobile.ZxingBarcodeFormat.Ean13;
+
+var scanner = new ZxingSharp.Mobile.ZxingScanner();
+scanner.StartScanning(options, (result) => { //Handle results });
+````
+
+###Samples
+Samples for implementing ZxingSharp.Mobile can be found in the /*sample*/ folder.  There is a sample for each platform including examples of how to use custom overlays.
+
+
+
+###License
+Apache PushSharp Copyright 2012 The Apache Software Foundation
+
+This product includes software developed at The Apache Software Foundation (http://www.apache.org/).
+
+### ZXing
 ZXing is released under the Apache 2.0 license.
 ZXing can be found here: http://code.google.com/p/zxing/
 A copy of the Apache 2.0 license can be found here: http://www.apache.org/licenses/LICENSE-2.0
 
-## System.Drawing
+### System.Drawing
 The System.Drawing classes included are from the mono source code which is property of Novell.
 Copyright notice is intact in source code files.
