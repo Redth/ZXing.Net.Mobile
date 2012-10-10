@@ -40,7 +40,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.BottomText = "Wait for the barcode to automatically scan!";
 
 				//Start scanning
-				scanner.StartScanning(ZxingScanningOptions.Default, (barcode) => {
+				scanner.StartScanning((barcode) => {
 					//Scanning finished callback
 					HandleScanResult(barcode);
 				});
@@ -66,7 +66,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.CustomOverlay = zxingOverlay;
 
 				//Start scanning!
-				scanner.StartScanning(ZxingScanningOptions.Default, (barcode) => {
+				scanner.StartScanning((barcode) => {
 					//Our scanning finished callback
 					HandleScanResult(barcode);
 				});

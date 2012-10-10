@@ -41,7 +41,7 @@ namespace ZxingSharp.MonoTouch.Sample
 				scanner.BottomText = "Barcode will automatically scan";
 
 				//Start scanning
-				scanner.StartScanning(ZxingScanningOptions.Default, (result) => 
+				scanner.StartScanning((result) => 
 				{
 					//Our scanning finished callback
 					HandleScanResult(result);
@@ -67,7 +67,7 @@ namespace ZxingSharp.MonoTouch.Sample
 				scanner.UseCustomOverlay = true;
 				scanner.CustomOverlay = customOverlay;
 
-				scanner.StartScanning(ZxingScanningOptions.Default, (result) => 
+				scanner.StartScanning((result) => 
 				{
 					//Our scanning finished callback
 					HandleScanResult(result);

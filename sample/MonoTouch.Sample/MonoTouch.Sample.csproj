@@ -99,4 +99,10 @@
     <Compile Include="CustomOverlayView.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ZingSharp.Mobile\ZxingSharp.Mobile.MonoTouch.csproj">
+      <Project>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</Project>
+      <Name>ZxingSharp.Mobile.MonoTouch</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

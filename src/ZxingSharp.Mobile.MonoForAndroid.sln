@@ -21,6 +21,6 @@ Global
 		{D72228AC-C356-4E1A-B56F-91C9A25F7286}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ZingSharp.Mobile\ZxingSharp.Mobile.MonoForAndroid.csproj
+		StartupItem = ..\sample\MonoForAndroid.Sample\MonoForAndroid.Sample.csproj
 	EndGlobalSection
 EndGlobal

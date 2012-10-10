@@ -37,7 +37,7 @@ namespace ZxingSharp.WindowsPhone.Sample
             scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
             
             //Start scanning
-            scanner.StartScanning(ZxingScanningOptions.Default, (result) =>
+            scanner.StartScanning((result) =>
             {
                 //Scanning finished callback
                 HandleScanResult(result);
@@ -69,7 +69,7 @@ namespace ZxingSharp.WindowsPhone.Sample
             scanner.UseCustomOverlay = true;
 
             //Start Scanning
-            scanner.StartScanning(ZxingScanningOptions.Default, (result) =>
+            scanner.StartScanning((result) =>
             {
                 //Scanning finished callback
                 HandleScanResult(result);

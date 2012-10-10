@@ -6,6 +6,7 @@ namespace ZxingSharp.Mobile
 	public interface IZxingScanner
 	{
 		void StartScanning(ZxingScanningOptions options, Action<ZxingBarcodeResult> onFinished);
+		void StartScanning(Action<ZxingBarcodeResult> onFinished);
 		void StopScanning();
 
 		void Torch(bool on);
@@ -28,6 +29,11 @@ namespace ZxingSharp.Mobile
 		public string BottomText { get; set; }
 
 		public abstract void StartScanning(ZxingScanningOptions options, Action<ZxingBarcodeResult> onFinished);
+
+		public void StartScanning(Action<ZxingBarcodeResult> onFinished)
+		{
+			StartScanning(ZxingScanningOptions.Default, onFinished);
+		}
 
 		public abstract void StopScanning();
 

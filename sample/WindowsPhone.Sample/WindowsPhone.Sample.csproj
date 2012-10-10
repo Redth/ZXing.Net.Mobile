@@ -90,7 +90,7 @@
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ZingSharp\ZxingSharp.WindowsPhone.csproj">
+    <ProjectReference Include="..\..\src\ZingSharp.Mobile\ZxingSharp.Mobile.WindowsPhone.csproj">
       <Project>{DB217028-8A8D-4A3B-A062-A6335A081287}</Project>
       <Name>ZxingSharp.WindowsPhone</Name>
     </ProjectReference>
