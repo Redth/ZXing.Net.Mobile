@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="ZxingSharp.MonoForAndroid.Sample">
+	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="15" />
+	<application android:label="ZxingSharp.MonoForAndroid.Sample"></application>
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.VIBRATE" />
+</manifest>
