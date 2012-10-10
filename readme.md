@@ -2,6 +2,8 @@
 
 ZxingSharp.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing).  It works with MonoTouch, Mono for Android, and Windows Phone.  The goal of ZxingSharp.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  
 
+*NOTE*: ZxingSharp.Mobile is still quite BETA!  Your mileage may vary!
+
 ### Usage
 The simplest example of using ZxingSharp.Mobile looks something like this:
 
@@ -58,8 +60,7 @@ Samples for implementing ZxingSharp.Mobile can be found in the /*sample*/ folder
 
 
 ###License
-Apache PushSharp Copyright 2012 The Apache Software Foundation
-
+Apache ZxingSharp.Mobile Copyright 2012 The Apache Software Foundation
 This product includes software developed at The Apache Software Foundation (http://www.apache.org/).
 
 ### ZXing
