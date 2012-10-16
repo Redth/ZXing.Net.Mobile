@@ -192,6 +192,7 @@ namespace com.google.zxing.oned
 					catch (ReaderException re)
 					{
 						// continue -- just couldn't decode this row
+                        Console.WriteLine(re);
 					}
 				}
 			}

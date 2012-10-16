@@ -85,10 +85,10 @@ namespace com.google.zxing
 					readers.Add(new QRCodeReader());
 					
 					// TODO re-enable once Data Matrix is ready
-					// readers.addElement(new DataMatrixReader());
+					readers.Add(new DataMatrixReader());
 					
 					// TODO: Enable once PDF417 has passed QA
-					//readers.addElement(new PDF417Reader());
+					readers.Add(new PDF417Reader());
 					
 					if (tryHarder)
 					{
@@ -163,9 +163,10 @@ namespace com.google.zxing
 				{
 					return reader.decode(image, hints);
 				}
-				catch (ReaderException)
+				catch (ReaderException re)
 				{
 					// continue
+                    Console.WriteLine(re.ToString());
 				}
 			}
 			
