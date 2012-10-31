@@ -8,9 +8,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using com.google.zxing;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
     public class PhotoCameraLuminanceSource : LuminanceSource
     {
@@ -22,20 +22,20 @@ namespace ZxingSharp.Mobile
             PreviewBufferY = new byte[width * height];
         }
 
-        public override sbyte[] Matrix
+        public override byte[] Matrix
         {
-            get { return (sbyte[])(Array)PreviewBufferY; }
+            get { return (byte[])(Array)PreviewBufferY; }
         }
 
-        public override sbyte[] getRow(int y, sbyte[] row)
+        public override byte[] getRow(int y, byte[] row)
         {
             if (row == null || row.Length < Width)
             {
-                row = new sbyte[Width];
+                row = new byte[Width];
             }
 
             for (int i = 0; i < Height; i++)
-                row[i] = (sbyte)PreviewBufferY[i * Width + y];
+                row[i] = (byte)PreviewBufferY[i * Width + y];
 
             return row;
         }

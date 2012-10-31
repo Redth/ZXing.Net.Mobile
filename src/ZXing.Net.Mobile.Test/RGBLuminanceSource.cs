@@ -8,8 +8,8 @@ using System.Drawing;
 #endif
 using System;
 
-using Com.Google.Zxing;
-using Com.Google.Zxing.Common;
+using ZXing;
+using ZXing.Common;
 
 public class RGBLuminanceSource : LuminanceSource
 {
@@ -120,7 +120,7 @@ public class RGBLuminanceSource : LuminanceSource
             }
         }
     }
-    override public byte[] GetRow(int y, byte[] row)
+    override public byte[] getRow(int y, byte[] row)
     {
         if (isRotated == false)
         {
@@ -148,16 +148,16 @@ public class RGBLuminanceSource : LuminanceSource
             return row;
         }
     }
-    public byte[] Matrix
+    public override byte[] Matrix
     {
         get { return luminances; }
     }
 
-    public override LuminanceSource Crop(int left, int top, int width, int height)
+    public override LuminanceSource crop(int left, int top, int width, int height)
     {
-        return base.Crop(left, top, width, height);
+        return base.crop(left, top, width, height);
     }
-    public override LuminanceSource RotateCounterClockwise()
+    public override LuminanceSource rotateCounterClockwise()
     {
         isRotated = true;
         return this;
@@ -171,10 +171,8 @@ public class RGBLuminanceSource : LuminanceSource
 
     }
 
-    public override byte[] GetMatrix()
-    {
-        return (byte[])luminances;
-    }
+    
+   
 
     
 }

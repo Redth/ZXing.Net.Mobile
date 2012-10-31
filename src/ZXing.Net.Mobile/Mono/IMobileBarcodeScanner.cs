@@ -23,7 +23,7 @@ namespace ZXing.Mobile
 		bool IsTorchOn { get; }
 	}
 
-	public abstract class ZxingScannerBase : IMobileBarcodeScanner
+	public abstract class MobileBarcodeScannerBase : IMobileBarcodeScanner
 	{
 		public bool UseCustomOverlay { get; set; }
 		public string TopText { get; set; }

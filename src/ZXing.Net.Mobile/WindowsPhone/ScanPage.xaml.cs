@@ -13,23 +13,24 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Devices;
 using Microsoft.Phone.Controls;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
-	public partial class Scan : PhoneApplicationPage
+	public partial class ScanPage : PhoneApplicationPage
 	{
-        public static ZxingScanningOptions ScanningOptions { get; set; }
-        public static ZxingScannerBase Scanner { get; set; }
+        public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
+        public static MobileBarcodeScannerBase Scanner { get; set; }
         public static System.Windows.UIElement CustomOverlay { get; set; }
         public static string TopText { get; set; }
         public static string BottomText { get; set; }
         public static bool UseCustomOverlay { get; set; }
 
-        public static ZxingBarcodeResult LastScanResult { get; set; }
+        public static Result LastScanResult { get; set; }
 
 		SimpleCameraReader _reader;
 
-        public static Action<ZxingBarcodeResult> FinishedAction { get; set; }
+        public static Action<Result> FinishedAction { get; set; }
 
         public static event Action<bool> OnRequestTorch;
         public static event Action OnRequestToggleTorch;
@@ -74,7 +75,7 @@ namespace ZxingSharp.Mobile
                 evt();
         }
 
-		public Scan()
+		public ScanPage()
 		{
 			InitializeComponent();
 		}
@@ -178,14 +179,14 @@ namespace ZxingSharp.Mobile
 
 		bool successScan = false;
 
-        private void DisplayResult(com.google.zxing.Result result)
+        private void DisplayResult(Result result)
         {
 			_reader.Stop();
 
 			successScan = true;
 
             if (result != null)
-                LastScanResult = ZxingBarcodeResult.FromZxingResult(result);
+                LastScanResult = result;
             else
                 LastScanResult = null;
 

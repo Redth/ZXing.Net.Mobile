@@ -11,10 +11,9 @@ using System.Windows.Threading;
 using Microsoft.Devices;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using com.google.zxing;
+using ZXing;
 
-
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 	/// <summary>
 	/// A simple and easy to use wrapper for ZXing 2.0 for use with Windows Phone 7
@@ -119,14 +118,14 @@ namespace ZxingSharp.Mobile
 			}
 		}
 
-        public ZxingScanningOptions Options { get; set; }
-        public ZxingScannerBase Scanner { get; set; }
+        public MobileBarcodeScanningOptions Options { get; set; }
+        public MobileBarcodeScannerBase Scanner { get; set; }
 
 		/// <summary>
 		/// Initializes the SimpleCameraReader
 		/// </summary>
 		/// <param name="scanOnAutoFocus">Sets whether the camera should scan on completed autofocus or on a timely fashion</param>
-		public SimpleCameraReader(ZxingScannerBase scanner, ZxingScanningOptions options)
+		public SimpleCameraReader(MobileBarcodeScannerBase scanner, MobileBarcodeScanningOptions options)
 		{
             this.Options = options;
             this.Scanner = scanner;
@@ -144,14 +143,8 @@ namespace ZxingSharp.Mobile
 
 			InitializeCamera();
 
-			_reader = new MultiFormatReader();
-
-
-            var hints = new System.Collections.Hashtable();
-           
-            hints.Add(DecodeHintType.POSSIBLE_FORMATS, this.Options.GetFormats());
-            _reader.Hints = hints;
-
+			
+            _reader = this.Options.BuildMultiFormatReader();
 		}
 
 		private void InitializeCamera()
@@ -258,7 +251,7 @@ namespace ZxingSharp.Mobile
 			try
 			{
 				_photoCamera.GetPreviewBufferY(_luminance.PreviewBufferY);
-				var binarizer = new com.google.zxing.common.HybridBinarizer(_luminance);
+				var binarizer = new ZXing.Common.HybridBinarizer(_luminance);
 
 				var binBitmap = new BinaryBitmap(binarizer);
 

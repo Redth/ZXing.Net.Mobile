@@ -66,9 +66,9 @@
       <Project>{8971B59D-78F1-49BA-808D-CBADB37F571F}</Project>
       <Name>zxing.monoandroid</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\ZingSharp.Mobile\ZXing.Mobile.MonoForAndroid.csproj">
+    <ProjectReference Include="..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.MonoForAndroid.csproj">
       <Project>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</Project>
-      <Name>ZXing.Mobile.MonoForAndroid</Name>
+      <Name>ZXing.Net.Mobile.MonoForAndroid</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

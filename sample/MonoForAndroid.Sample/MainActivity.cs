@@ -19,7 +19,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 		Button buttonScanCustomView;
 		Button buttonScanDefaultView;
 
-		ZxingScanner scanner;
+		MobileBarcodeScanner scanner;
 	
 		protected override void OnCreate (Bundle bundle)
 		{
@@ -29,7 +29,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			SetContentView (Resource.Layout.Main);
 
 			//Create a new instance of our Scanner
-			scanner = new ZxingScanner(this);
+			scanner = new MobileBarcodeScanner(this);
 
 			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
 			buttonScanDefaultView.Click += delegate {

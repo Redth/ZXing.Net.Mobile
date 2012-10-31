@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Net;
 using System.Windows;
@@ -10,14 +11,14 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using ZxingSharp.Mobile;
+using ZXing.Mobile;
 
 namespace ZxingSharp.WindowsPhone.Sample
 {
     public partial class MainPage : PhoneApplicationPage
     {
         UIElement customOverlayElement = null;
-        ZxingScanner scanner;
+        MobileBarcodeScanner scanner;
 
         // Constructor
         public MainPage()
@@ -25,7 +26,7 @@ namespace ZxingSharp.WindowsPhone.Sample
             InitializeComponent();
 
             //Create a new instance of our scanner
-            scanner = new ZxingScanner();
+            scanner = new MobileBarcodeScanner();
         }
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
@@ -37,10 +38,11 @@ namespace ZxingSharp.WindowsPhone.Sample
             scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
             
             //Start scanning
-            scanner.StartScanning((result) =>
+            scanner.Scan().ContinueWith((t) =>
             {
                 //Scanning finished callback
-                HandleScanResult(result);
+                if (t.Status == TaskStatus.RanToCompletion)                   
+                    HandleScanResult(t.Result);
             });
         }
 
@@ -57,7 +59,7 @@ namespace ZxingSharp.WindowsPhone.Sample
             //Wireup our buttons from the custom overlay
             this.buttonCancel.Click += (s, e2) =>
             {
-                scanner.StopScanning();
+                scanner.Cancel();
             };
             this.buttonFlash.Click += (s, e2) =>
             {
@@ -68,20 +70,21 @@ namespace ZxingSharp.WindowsPhone.Sample
             scanner.CustomOverlay = customOverlayElement;
             scanner.UseCustomOverlay = true;
 
-            //Start Scanning
-            scanner.StartScanning((result) =>
+            //Start scanning
+            scanner.Scan().ContinueWith((t) =>
             {
                 //Scanning finished callback
-                HandleScanResult(result);
+                if (t.Status == TaskStatus.RanToCompletion)
+                    HandleScanResult(t.Result);
             });
         }
 
-        void HandleScanResult(ZxingBarcodeResult result)
+        void HandleScanResult(ZXing.Result result)
         {
             string msg = "";
 
-            if (result != null && !string.IsNullOrEmpty(result.Value))
-                msg = "Found Barcode: " + result.Value;
+            if (result != null && !string.IsNullOrEmpty(result.Text))
+                msg = "Found Barcode: " + result.Text;
             else
                 msg = "Scanning Canceled!";
 

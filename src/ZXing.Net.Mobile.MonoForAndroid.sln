@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Mobile.MonoForAndroid", "ZingSharp.Mobile\ZXing.Mobile.MonoForAndroid.csproj", "{D72228AC-C356-4E1A-B56F-91C9A25F7286}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoForAndroid.Sample", "..\sample\MonoForAndroid.Sample\MonoForAndroid.Sample.csproj", "{660D9346-D70B-4C54-8402-E5F6DF48E9AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.monoandroid", "Zxing.Net\Source\lib\zxing.monoandroid.csproj", "{8971B59D-78F1-49BA-808D-CBADB37F571F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.MonoForAndroid", "ZXing.Net.Mobile\ZXing.Net.Mobile.MonoForAndroid.csproj", "{D72228AC-C356-4E1A-B56F-91C9A25F7286}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,13 +6,13 @@ using ZXing;
 namespace ZXing.Mobile
 {
 
-	public class ZxingScanner : ZxingScannerBase
+	public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-		public ZxingScanner () : this(Android.App.Application.Context)
+		public MobileBarcodeScanner () : this(Android.App.Application.Context)
 		{
 		}
 
-		public ZxingScanner (Context context)
+		public MobileBarcodeScanner (Context context)
 		{
 			this.Context = context;
 		}

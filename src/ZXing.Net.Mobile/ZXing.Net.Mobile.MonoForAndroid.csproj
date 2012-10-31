@@ -39,8 +39,8 @@
     <Compile Include="MonoForAndroid\ZxingActivity.cs" />
     <Compile Include="MonoForAndroid\ZxingOverlayView.cs" />
     <Compile Include="MonoForAndroid\ZxingScanner.cs" />
-    <Compile Include="Mono\IZxingScanner.cs" />
-    <Compile Include="Mono\ZxingScanningOptions.cs" />
+    <Compile Include="Mono\IMobileBarcodeScanner.cs" />
+    <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MonoForAndroid\" />
