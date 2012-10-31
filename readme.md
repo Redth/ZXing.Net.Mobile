@@ -8,10 +8,10 @@ ZxingSharp.Mobile is a C#/.NET library based on the open source Barcode Library:
 The simplest example of using ZxingSharp.Mobile looks something like this:
 
 ```csharp  
-  var scanner = new ZxingSharp.Mobile.ZxingScanner();
-  scanner.StartScanning((result) => {   
+  var scanner = new ZXing.Mobile.MobileBarcodeScanner();
+  scanner.Scan().ContinueWith((result) => {   
      if (result != null)
-       Console.WriteLine("Scanned Barcode: " + result.Value);
+       Console.WriteLine("Scanned Barcode: " + result.Text);
   });
 ```
 
@@ -28,6 +28,7 @@ ZxingSharp.Mobile is a combination of a lot of peoples' work that I've put toget
 - John Carruthers - https://github.com/JohnACarruthers/zxing.MonoTouch
 - Martin Bowling - https://github.com/martinbowling
 - Alex Corrado - https://github.com/chkn/zxing.MonoTouch
+- ZXing.Net Project - http://zxingnet.codeplex.com - HUGE effort here to port ZXing to .NET
 
 ###Custom Overlays
 By default, ZxingSharp.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
@@ -35,10 +36,10 @@ By default, ZxingSharp.Mobile provides a very simple overlay for your barcode sc
 If you want to customize the overlay, you must create your own View for each platform.  You can customize your overlay like this:
 
 ```csharp
-var scanner = new ZxingSharp.Mobile.ZxingScanner();
+var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 scanner.UseCustomOverlay = true;
 scanner.CustomOverlay = myCustomOverlayInstance;
-scanner.StartScanning((result) => { //Handle Result });
+scanner.Scan().ContinueWith((result) => { //Handle Result });
 ```
 
 Keep in mind that when using a Custom Overlay, you are responsible for the entire overlay (you cannot mix and match custom elements with the default overlay).  The *ZxingScanner* instance has a *CustomOverlay* property, however on each platform this property is of a different type:
