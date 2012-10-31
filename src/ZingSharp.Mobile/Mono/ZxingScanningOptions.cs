@@ -1,69 +1,70 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using com.google.zxing;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
-	public class ZxingScanningOptions
+	public class MobileBarcodeScanningOptions
 	{
-		public ZxingScanningOptions ()
+		public MobileBarcodeScanningOptions ()
 		{
+			this.PossibleFormats = new List<BarcodeFormat>();
+
 		}
 
-		public ZxingBarcodeFormat BarcodeFormat { get;set; }
+		public List<BarcodeFormat> PossibleFormats { get;set; }
+		public bool? TryHarder { get;set; }
+		public bool? PureBarcode { get;set; }
+		public bool? AutoRotate { get;set; }
+		public string CharacterSet { get;set; }
 
-		public static ZxingScanningOptions Default
+		public static MobileBarcodeScanningOptions Default
 		{
 			get 
 			{
-				return new ZxingScanningOptions() { BarcodeFormat = ZxingBarcodeFormat.None };
+				return new MobileBarcodeScanningOptions() { PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.All_1D } };
 			}
 		}
 
-		public ArrayList GetFormats()
+		public BarcodeReader BuildBarcodeReader ()
 		{
-            var barcodeTypes = new ArrayList();
+			var reader = new BarcodeReader ();
+			if (this.TryHarder.HasValue)
+				reader.TryHarder = this.TryHarder.Value;
+			if (this.PureBarcode.HasValue)
+				reader.PureBarcode = this.PureBarcode.Value;
+			if (this.AutoRotate.HasValue)
+				reader.AutoRotate = this.AutoRotate.Value;
+			if (!string.IsNullOrEmpty (this.CharacterSet))
+				reader.CharacterSet = this.CharacterSet;
 
-			var format = this.BarcodeFormat;
+			reader.PossibleFormats = new List<BarcodeFormat> ();
 
-			if ((format & ZxingBarcodeFormat.QrCode) == ZxingBarcodeFormat.QrCode)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.QR_CODE);
-			if ((format & ZxingBarcodeFormat.DataMatrix) == ZxingBarcodeFormat.DataMatrix)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.DATAMATRIX);
-			if ((format & ZxingBarcodeFormat.UpcE) == ZxingBarcodeFormat.UpcE)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.UPC_E);
-			if ((format & ZxingBarcodeFormat.UpcA) == ZxingBarcodeFormat.UpcA)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.UPC_A);
-			if ((format & ZxingBarcodeFormat.Ean8) == ZxingBarcodeFormat.Ean8)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.EAN_8);
-			if ((format & ZxingBarcodeFormat.Ean13) == ZxingBarcodeFormat.Ean13)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.EAN_13);
-			if ((format & ZxingBarcodeFormat.Code128) == ZxingBarcodeFormat.Code128)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.CODE_128);
-			if ((format & ZxingBarcodeFormat.Code39) == ZxingBarcodeFormat.Code39)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.CODE_39);
-			if ((format & ZxingBarcodeFormat.Itf) == ZxingBarcodeFormat.Itf)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.ITF);
-			if ((format & ZxingBarcodeFormat.Pdf417) == ZxingBarcodeFormat.Pdf417)
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.PDF417);
-
-
-			if (barcodeTypes.Count <= 0)
-			{
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.QR_CODE);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.DATAMATRIX);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.UPC_E);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.UPC_A);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.EAN_8);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.EAN_13);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.CODE_128);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.CODE_39);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.ITF);
-				barcodeTypes.Add(com.google.zxing.BarcodeFormat.PDF417);
+			foreach (var pf in this.PossibleFormats) {
+				reader.PossibleFormats.Add(pf);
 			}
 
-			return barcodeTypes;
+			return reader;
+		}
+
+		public MultiFormatReader BuildMultiFormatReader()
+		{
+			var reader = new MultiFormatReader();
+
+			var hints = new Dictionary<DecodeHintType, object>();
+
+			if (this.TryHarder.HasValue && this.TryHarder.Value)
+				hints.Add(DecodeHintType.TRY_HARDER, this.TryHarder.Value);
+			if (this.PureBarcode.HasValue && this.PureBarcode.Value)
+				hints.Add(DecodeHintType.PURE_BARCODE, this.PureBarcode.Value);
+			//if (this.AutoRotate.HasValue && this.AutoRotate.Value)
+
+			hints.Add(DecodeHintType.POSSIBLE_FORMATS, this.PossibleFormats);
+
+			reader.Hints = hints;
+
+			return reader;
 		}
 	}
 }

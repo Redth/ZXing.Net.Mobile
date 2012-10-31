@@ -14,7 +14,7 @@ using Android.Widget;
 using Android.Graphics;
 using Android.Text;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 	public class ZxingOverlayView : View 
 	{
@@ -32,7 +32,7 @@ namespace ZxingSharp.Mobile
 		private Color laserColor;
 		private Color resultPointColor;
 		private int scannerAlpha;
-		private List<com.google.zxing.ResultPoint> possibleResultPoints;
+		private List<ZXing.ResultPoint> possibleResultPoints;
 		//private List<com.google.zxing.ResultPoint> lastPossibleResultPoints;
 
 		//private ZxingSurfaceView scanner;
@@ -48,7 +48,7 @@ namespace ZxingSharp.Mobile
 			laserColor = Color.Red; //  resources.getColor(R.color.viewfinder_laser);
 			resultPointColor = Color.LightCoral; // resources.getColor(R.color.possible_result_points);
 			scannerAlpha = 0;
-			possibleResultPoints = new List<com.google.zxing.ResultPoint>(5);
+			possibleResultPoints = new List<ZXing.ResultPoint>(5);
 			//lastPossibleResultPoints = null;
 			this.SetBackgroundColor(Color.Transparent);
 
@@ -243,7 +243,7 @@ namespace ZxingSharp.Mobile
 			Invalidate();
 		}
 
-		public void AddPossibleResultPoint(com.google.zxing.ResultPoint point)
+		public void AddPossibleResultPoint(ZXing.ResultPoint point)
 		{
 			var points = possibleResultPoints;
 

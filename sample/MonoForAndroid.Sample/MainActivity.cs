@@ -8,11 +8,12 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 
-using ZxingSharp.Mobile;
+using ZXing;
+using ZXing.Mobile;
 
 namespace ZxingSharp.MonoForAndroid.Sample
 {
-	[Activity (Label = "ZxingSharp", MainLauncher = true, ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)]
+	[Activity (Label = "ZXing.Mobile", MainLauncher = true, ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)]
 	public class Activity1 : Activity
 	{
 		Button buttonScanCustomView;
@@ -40,9 +41,9 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.BottomText = "Wait for the barcode to automatically scan!";
 
 				//Start scanning
-				scanner.StartScanning((barcode) => {
-					//Scanning finished callback
-					HandleScanResult(barcode);
+				scanner.Scan().ContinueWith((t) => {
+					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
+						HandleScanResult(t.Result);
 				});
 			};
 
@@ -66,24 +67,23 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.CustomOverlay = zxingOverlay;
 
 				//Start scanning!
-				scanner.StartScanning((barcode) => {
-					//Our scanning finished callback
-					HandleScanResult(barcode);
+				scanner.Scan().ContinueWith((t) => {
+					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
+						HandleScanResult(t.Result);
 				});
-
 			};
 		}
 
-		void HandleScanResult (ZxingBarcodeResult result)
+		void HandleScanResult (ZXing.Result result)
 		{
 			string msg = "";
 
-			if (result != null && !string.IsNullOrEmpty(result.Value))
-				msg = "Found Barcode: " + result.Value;
+			if (result != null && !string.IsNullOrEmpty(result.Text))
+				msg = "Found Barcode: " + result.Text;
 			else
 				msg = "Scanning Canceled!";
 
-			Toast.MakeText(this, msg, ToastLength.Short).Show();
+			this.RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
 		}
 	}
 }

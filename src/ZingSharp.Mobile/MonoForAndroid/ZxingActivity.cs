@@ -13,16 +13,14 @@ using Android.Content;
 using Android.Runtime;
 using Android.Widget;
 
-using com.google.zxing;
-using com.google.zxing.common;
-using com.google.zxing.client.android;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 	[Activity (Label = "Scanner", ScreenOrientation=ScreenOrientation.Portrait)] //, ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)] // ScreenOrientation = ScreenOrientation.Portrait)]
 	public class ZxingActivity : Activity 
 	{
-		public static event Action<com.google.zxing.Result> OnScanCompleted;
+		public static event Action<ZXing.Result> OnScanCompleted;
 		public static event Action OnCanceled;
 
 		public static event Action OnCancelRequested;
@@ -52,7 +50,7 @@ namespace ZxingSharp.Mobile
 
 		public static View CustomOverlayView { get;set; }
 		public static bool UseCustomView { get; set; }
-		public static ZxingScanningOptions ScanningOptions { get;set; }
+		public static MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public static string TopText { get;set; }
 		public static string BottomText { get;set; }
 
@@ -138,7 +136,7 @@ namespace ZxingSharp.Mobile
 			return base.OnKeyDown (keyCode, e);
 		}
 
-		public virtual void OnScan (com.google.zxing.Result result)
+		public virtual void OnScan (ZXing.Result result)
 		{
 			var evt = OnScanCompleted;
 			if (evt != null)
@@ -163,12 +161,13 @@ namespace ZxingSharp.Mobile
 		ZxingActivity activity;
 		ISurfaceHolder surface_holder;
 		Android.Hardware.Camera camera;
-		ZxingScanningOptions options;
+		MobileBarcodeScanningOptions options;
 
 		int width, height;
 		MultiFormatReader reader;
+		//BarcodeReader reader;
 
-		public ZxingSurfaceView (ZxingActivity activity, ZxingScanningOptions options)
+		public ZxingSurfaceView (ZxingActivity activity, MobileBarcodeScanningOptions options)
 			: base (activity)
 		{
 			this.activity = activity;
@@ -177,12 +176,8 @@ namespace ZxingSharp.Mobile
 
 			this.options = options;
 
-			this.reader = new MultiFormatReader {
-				Hints = new Hashtable {
-					//Formats to use
-					{ DecodeHintType.POSSIBLE_FORMATS, this.options.GetFormats() }
-				}
-			};
+
+			this.reader = this.options.BuildMultiFormatReader();
 
 			this.surface_holder = Holder;
 			this.surface_holder.AddCallback (this);
@@ -218,6 +213,8 @@ namespace ZxingSharp.Mobile
 
 			width = parameters.PreviewSize.Width;
 			height = parameters.PreviewSize.Height;
+			//parameters.PreviewFormat = ImageFormatType.Rgb565;
+			//parameters.PreviewFrameRate = 15;
 
 			camera.SetParameters (parameters);
 			camera.SetDisplayOrientation (90);
@@ -233,11 +230,15 @@ namespace ZxingSharp.Mobile
 			ShutdownCamera ();
 		}
 
+		DateTime lastPreviewAnalysis = DateTime.Now.AddMilliseconds(500);
+
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
+			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 250)
+				return;
 
-			try {
-
+			try 
+			{
 				byte[] rotatedData = new byte[bytes.Length];
 				for (int y = 0; y < height; y++) {
 				    for (int x = 0; x < width; x++)
@@ -246,28 +247,23 @@ namespace ZxingSharp.Mobile
 
 				var dataRect = GetFramingRectInPreview();
 
-				var luminance = new YUVLuminanceSource ((sbyte[])(Array)rotatedData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height());
-				var binarized = new BinaryBitmap (new HybridBinarizer (luminance));
-				var result = reader.decodeWithState (binarized);
+				var luminance = new YUVLuminanceSource (rotatedData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height());
+				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
+				var result = reader.decodeWithState(binarized);
 
-				//drawResultPoints(binarized, result);
+				lastPreviewAnalysis = DateTime.Now;
 
-				// an exception would be thrown before this point if the QR code was not detected
-
-				if (string.IsNullOrEmpty (result.Text))
+				if (result == null || string.IsNullOrEmpty (result.Text))
 					return;
 
-				Android.Util.Log.Debug("AEGISSHIELD", "Barcode Found: " + result.Text);
-				//ShutdownCamera ();
+				Android.Util.Log.Debug("ZXing.Mobile", "Barcode Found: " + result.Text);
 
 				ShutdownCamera();
 
 				activity.OnScan (result);
 
-
-
 			} catch (ReaderException) {
-				Android.Util.Log.Debug("AEGISSHIELD", "No barcode Found");
+				Android.Util.Log.Debug("ZXing.Mobile", "No barcode Found");
 				// ignore this exception; it happens every time there is a failed scan
 
 			} catch (Exception){
@@ -281,7 +277,7 @@ namespace ZxingSharp.Mobile
 
 		public void OnAutoFocus (bool success, Android.Hardware.Camera camera)
 		{
-			Android.Util.Log.Debug("ZXING", "AutoFocused");
+			Android.Util.Log.Debug("ZXing.Mobile", "AutoFocused");
 
 			System.Threading.Tasks.Task.Factory.StartNew(() => 
 			{
@@ -356,7 +352,7 @@ namespace ZxingSharp.Mobile
 		}
 
 
-		private void drawResultPoints(Android.Graphics.Bitmap barcode, com.google.zxing.Result rawResult) 
+		private void drawResultPoints(Android.Graphics.Bitmap barcode, ZXing.Result rawResult) 
 		{
 			var points = rawResult.ResultPoints;
 

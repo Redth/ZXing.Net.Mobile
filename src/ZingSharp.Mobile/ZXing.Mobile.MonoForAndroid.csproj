@@ -8,8 +8,8 @@
     <ProjectGuid>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>ZxingSharp</RootNamespace>
-    <AssemblyName>zxing.MonoDroid</AssemblyName>
+    <RootNamespace>ZXing.Mobile</RootNamespace>
+    <AssemblyName>ZXing.Mobile</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -40,11 +40,16 @@
     <Compile Include="MonoForAndroid\ZxingOverlayView.cs" />
     <Compile Include="MonoForAndroid\ZxingScanner.cs" />
     <Compile Include="Mono\IZxingScanner.cs" />
-    <Compile Include="Mono\ZxingBarcodeResult.cs" />
     <Compile Include="Mono\ZxingScanningOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MonoForAndroid\" />
     <Folder Include="Mono\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Zxing.Net\Source\lib\zxing.monoandroid.csproj">
+      <Project>{8971B59D-78F1-49BA-808D-CBADB37F571F}</Project>
+      <Name>zxing.monoandroid</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

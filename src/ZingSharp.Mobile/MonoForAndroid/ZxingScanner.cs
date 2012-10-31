@@ -1,7 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using Android.Content;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 
 	public class ZxingScanner : ZxingScannerBase
@@ -21,30 +23,44 @@ namespace ZxingSharp.Mobile
 			
 		bool torch = false;
 
-		public override void StartScanning(ZxingScanningOptions options, Action<ZxingBarcodeResult> onFinishedScanning)
+		public override Task<Result> Scan(MobileBarcodeScanningOptions options)
 		{
-			var scanIntent = new Intent(this.Context, typeof(ZxingActivity));
+			var task = Task.Factory.StartNew(() => {
+			      
+				var waitScanResetEvent = new System.Threading.ManualResetEvent(false);
 
-			ZxingActivity.UseCustomView = this.UseCustomOverlay;
-			ZxingActivity.CustomOverlayView = this.CustomOverlay;
-			ZxingActivity.ScanningOptions = options;
-			ZxingActivity.TopText = TopText;
-			ZxingActivity.BottomText = BottomText;
+				var scanIntent = new Intent(this.Context, typeof(ZxingActivity));
 
-			ZxingActivity.OnCanceled += () => 
-			{
-				onFinishedScanning(null);
-			};
+				ZxingActivity.UseCustomView = this.UseCustomOverlay;
+				ZxingActivity.CustomOverlayView = this.CustomOverlay;
+				ZxingActivity.ScanningOptions = options;
+				ZxingActivity.TopText = TopText;
+				ZxingActivity.BottomText = BottomText;
 
-			ZxingActivity.OnScanCompleted += (com.google.zxing.Result result) => 
-			{
-				onFinishedScanning(ZxingBarcodeResult.FromZxingResult(result));
-			};
+				Result scanResult = null;
 
-			this.Context.StartActivity(scanIntent);
+				ZxingActivity.OnCanceled += () => 
+				{
+					waitScanResetEvent.Set();
+				};
+
+				ZxingActivity.OnScanCompleted += (Result result) => 
+				{
+					scanResult = result;
+					waitScanResetEvent.Set();
+				};
+
+				this.Context.StartActivity(scanIntent);
+
+				waitScanResetEvent.WaitOne();
+
+				return scanResult;
+			});
+
+			return task;
 		}
 
-		public override void StopScanning()
+		public override void Cancel()
 		{
 			ZxingActivity.RequestCancel();
 		}

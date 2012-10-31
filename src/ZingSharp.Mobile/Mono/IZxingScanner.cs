@@ -1,13 +1,16 @@
 using System;
+using System.Threading.Tasks;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 
-	public interface IZxingScanner
+	public interface IMobileBarcodeScanner
 	{
-		void StartScanning(ZxingScanningOptions options, Action<ZxingBarcodeResult> onFinished);
-		void StartScanning(Action<ZxingBarcodeResult> onFinished);
-		void StopScanning();
+		Task<Result> Scan(MobileBarcodeScanningOptions options);
+		Task<Result> Scan();
+
+		void Cancel();
 
 		void Torch(bool on);
 		void AutoFocus();
@@ -18,24 +21,22 @@ namespace ZxingSharp.Mobile
 		string BottomText { get; set; }
 
 		bool IsTorchOn { get; }
-
-
 	}
 
-	public abstract class ZxingScannerBase : IZxingScanner
+	public abstract class ZxingScannerBase : IMobileBarcodeScanner
 	{
 		public bool UseCustomOverlay { get; set; }
 		public string TopText { get; set; }
 		public string BottomText { get; set; }
 
-		public abstract void StartScanning(ZxingScanningOptions options, Action<ZxingBarcodeResult> onFinished);
+		public abstract Task<Result> Scan(MobileBarcodeScanningOptions options);
 
-		public void StartScanning(Action<ZxingBarcodeResult> onFinished)
+		public Task<Result> Scan()
 		{
-			StartScanning(ZxingScanningOptions.Default, onFinished);
+			return Scan(MobileBarcodeScanningOptions.Default);
 		}
 
-		public abstract void StopScanning();
+		public abstract void Cancel();
 
 		public abstract void Torch(bool on);
 
