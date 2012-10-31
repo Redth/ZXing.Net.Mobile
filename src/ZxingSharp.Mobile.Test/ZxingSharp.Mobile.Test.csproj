@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\..\..\Sharpen-Zxing\Zxing.Sharpened\Zxing.Sharpened\bin\Debug\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="IKVM.OpenJDK.Core">
       <HintPath>..\IKVM.OpenJDK.Core.dll</HintPath>
     </Reference>
@@ -64,15 +67,31 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DecodingTests.cs" />
+    <Compile Include="IKVMDecodingTests.cs" />
+    <Compile Include="IKVMRGBLuminanceSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RGBLuminanceSource.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Sharpen-Zxing\Zxing.Sharpened\Zxing.Sharpened\Zxing.Sharpened.csproj">
+      <Project>{d86fb1e8-4556-4183-b246-7f5c27ece460}</Project>
+      <Name>Zxing.Sharpened</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\aztec.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\codabar.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\code128.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\code39.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\code93.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\datamatrix.gif">

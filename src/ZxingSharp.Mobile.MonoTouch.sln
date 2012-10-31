@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZxingSharp.Mobile.MonoTouch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoTouch.Sample", "..\sample\MonoTouch.Sample\MonoTouch.Sample.csproj", "{2A305540-C079-4588-B1E3-064174257DCA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZxingSharp.Mobile.Ikvm.MonoTouch", "ZxingSharp.Mobile.Ikvm.MonoTouch\ZxingSharp.Mobile.Ikvm.MonoTouch.csproj", "{A786E795-4F57-44E0-AF0A-B0F8056699CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,22 @@ Global
 		{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}.Release|iPhone.Build.0 = Release|iPhone
 		{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Ad-Hoc|iPhone.ActiveCfg = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Ad-Hoc|iPhone.Build.0 = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.AppStore|iPhone.ActiveCfg = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.AppStore|iPhone.Build.0 = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Release|iPhone.Build.0 = Release|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{A786E795-4F57-44E0-AF0A-B0F8056699CE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = ..\sample\MonoTouch.Sample\MonoTouch.Sample.csproj

@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using com.google.zxing;
+using Com.Google.Zxing;
 
 namespace ZxingSharp.Mobile.Test
 {
@@ -12,21 +13,21 @@ namespace ZxingSharp.Mobile.Test
         {
             var i = GetImage("datamatrix.gif");
 
-            var r = new com.google.zxing.datamatrix.DataMatrixReader();
+            var r = new Com.Google.Zxing.Datamatrix.DataMatrixReader(); 
            
-            var result = r.decode(i);
+            var result = r.Decode(i);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("test", StringComparison.InvariantCultureIgnoreCase), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("test", StringComparison.InvariantCultureIgnoreCase), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
         public void QrCode()
         {
-            var result = Decode("qrcode.png", BarcodeFormat.QR_CODE);
+            var result = Decode("qrcode.png", BarcodeFormat.QR_CODE, new KeyValuePair<DecodeHintType, object>[] { new KeyValuePair<DecodeHintType,object>(DecodeHintType.PURE_BARCODE, "TRUE") });
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("test", StringComparison.InvariantCultureIgnoreCase), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("http://google.com", StringComparison.InvariantCultureIgnoreCase), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -35,7 +36,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("ean8.png", BarcodeFormat.EAN_8);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("12345670"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("12345670"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -44,7 +45,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("ean13.gif", BarcodeFormat.EAN_13);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("123456789012"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("1234567890128"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -53,7 +54,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("code128.png", BarcodeFormat.CODE_128);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("1234567"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("1234567"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -62,7 +63,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("code39.png", BarcodeFormat.CODE_39);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("1234567"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("1234567"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -71,7 +72,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("itf.png", BarcodeFormat.ITF);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("1234567890123"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("1234567890123"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -80,7 +81,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("pdf417.png", BarcodeFormat.PDF_417);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("PDF417"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("PDF417"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -89,7 +90,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("upca.png", BarcodeFormat.UPC_A);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("123456789012"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("123456789012"), "Result Text Incorrect: " + result.GetText());
         }
 
         [TestMethod]
@@ -98,46 +99,53 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("upce.png", BarcodeFormat.UPC_E);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.getText().Equals("01234565"), "Result Text Incorrect: " + result.getText());
+            Assert.IsTrue(result.GetText().Equals("01234565"), "Result Text Incorrect: " + result.GetText());
         }
 
-        public com.google.zxing.MultiFormatReader GetReader(BarcodeFormat format)
-        {            
+        public Com.Google.Zxing.MultiFormatReader GetReader(BarcodeFormat format, KeyValuePair<DecodeHintType, object>[] additionalHints)
+        {
+
+            Com.Google.Zxing.MultiFormatReader reader = new Com.Google.Zxing.MultiFormatReader();
+
+            var hints = new System.Collections.Generic.Dictionary<Com.Google.Zxing.DecodeHintType, object>();
+
+                   
+
+
+            hints.Add(DecodeHintType.POSSIBLE_FORMATS, new List<Com.Google.Zxing.BarcodeFormat>() { format } );
+
+
+            if (additionalHints != null)
+                foreach (var ah in additionalHints)
+                    hints.Add(ah.Key, ah.Value);
+    
+
+            reader.SetHints(hints);
             
-            com.google.zxing.MultiFormatReader reader = new com.google.zxing.MultiFormatReader();
-            var hints = new System.Collections.Hashtable();
-            hints.Add(com.google.zxing.DecodeHintType.POSSIBLE_FORMATS, format);
-            var map = new java.util.HashMap();
-            var bclst = new java.util.ArrayList();
-            bclst.add(format);
-            map.put(com.google.zxing.DecodeHintType.POSSIBLE_FORMATS, bclst);
-
-            reader.setHints(map);
-
             return reader;
         }
 
-        public com.google.zxing.BinaryBitmap GetImage(string file)
+        public Com.Google.Zxing.BinaryBitmap GetImage(string file)
         {
 
             var fullName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", file);
 
             var bmp = new System.Drawing.Bitmap(fullName);
 
-            var bin = new com.google.zxing.common.HybridBinarizer(new RGBLuminanceSource(bmp, bmp.Width, bmp.Height));
+            var bin = new Com.Google.Zxing.Common.HybridBinarizer(new RGBLuminanceSource(bmp, bmp.Width, bmp.Height));
 
-            var i = new com.google.zxing.BinaryBitmap(bin);
+            var i = new Com.Google.Zxing.BinaryBitmap(bin);
 
             return i;
         }
 
-        com.google.zxing.Result Decode(string file, BarcodeFormat format)
+        Com.Google.Zxing.Result Decode(string file, BarcodeFormat format, KeyValuePair<DecodeHintType, object>[] additionalHints = null)
         {
-            var r = GetReader(format);
+            var r = GetReader(format, additionalHints);
 
             var i = GetImage(file);
 
-            var result = r.decode(i);
+            var result = r.Decode(i); // decode(i);
 
             return result;
         }

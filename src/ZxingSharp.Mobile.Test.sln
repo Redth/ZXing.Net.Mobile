@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZxingSharp.Mobile.Test", "Z
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZxingSharp.Mobile.Desktop", "ZingSharp.Mobile\ZxingSharp.Mobile.Desktop.csproj", "{5E9E5EE5-9A05-4841-8095-FBC9A89ECA28}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zxing.Sharpened", "..\..\Sharpen-Zxing\Zxing.Sharpened\Zxing.Sharpened\Zxing.Sharpened.csproj", "{D86FB1E8-4556-4183-B246-7F5C27ECE460}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{5E9E5EE5-9A05-4841-8095-FBC9A89ECA28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E9E5EE5-9A05-4841-8095-FBC9A89ECA28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E9E5EE5-9A05-4841-8095-FBC9A89ECA28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D86FB1E8-4556-4183-B246-7F5C27ECE460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D86FB1E8-4556-4183-B246-7F5C27ECE460}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D86FB1E8-4556-4183-B246-7F5C27ECE460}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D86FB1E8-4556-4183-B246-7F5C27ECE460}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

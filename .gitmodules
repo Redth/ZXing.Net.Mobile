@@ -1,0 +1,3 @@
+[submodule "src/Zxing.Net"]
+	path = src/Zxing.Net
+	url = https://github.com/Redth/Zxing.Net.git

@@ -1,6 +1,4 @@
-﻿using com.google.zxing;
-using com.google.zxing.common;
-//using System.Drawing.Imaging;
+﻿//using System.Drawing.Imaging;
 #if WINDOWS_PHONE
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -9,6 +7,9 @@ using System.Windows.Shapes;
 using System.Drawing;
 #endif
 using System;
+
+using Com.Google.Zxing;
+using Com.Google.Zxing.Common;
 
 public class RGBLuminanceSource : LuminanceSource
 {
@@ -119,7 +120,7 @@ public class RGBLuminanceSource : LuminanceSource
             }
         }
     }
-    override public byte[] getRow(int y, byte[] row)
+    override public byte[] GetRow(int y, byte[] row)
     {
         if (isRotated == false)
         {
@@ -152,11 +153,11 @@ public class RGBLuminanceSource : LuminanceSource
         get { return luminances; }
     }
 
-    public override LuminanceSource crop(int left, int top, int width, int height)
+    public override LuminanceSource Crop(int left, int top, int width, int height)
     {
-        return base.crop(left, top, width, height);
+        return base.Crop(left, top, width, height);
     }
-    public override LuminanceSource rotateCounterClockwise()
+    public override LuminanceSource RotateCounterClockwise()
     {
         isRotated = true;
         return this;
@@ -170,7 +171,7 @@ public class RGBLuminanceSource : LuminanceSource
 
     }
 
-    public override byte[] getMatrix()
+    public override byte[] GetMatrix()
     {
         return (byte[])luminances;
     }
