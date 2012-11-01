@@ -4,7 +4,7 @@ using MonoTouch.Foundation;
 using MonoTouch.CoreFoundation;
 using MonoTouch.UIKit;
 
-namespace ZxingSharp.MonoTouch.Sample
+namespace ZXing.MonoTouch.Sample
 {
 	public class CustomOverlayView : UIView
 	{

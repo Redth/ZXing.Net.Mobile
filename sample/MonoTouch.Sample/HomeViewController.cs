@@ -6,10 +6,11 @@ using System.Linq;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
-using ZxingSharp.Mobile;
+using ZXing;
+using ZXing.Mobile;
 
 
-namespace ZxingSharp.MonoTouch.Sample
+namespace ZXing.MonoTouch.Sample
 {
 	public class HomeViewController : UIViewController
 	{
@@ -20,13 +21,13 @@ namespace ZxingSharp.MonoTouch.Sample
 		{
 		}
 
-		ZxingScanner scanner;
+		MobileBarcodeScanner scanner;
 		CustomOverlayView customOverlay;
 	
 		public override void ViewDidLoad ()
 		{
 			//Create a new instance of our scanner
-			scanner = new ZxingScanner();
+			scanner = new MobileBarcodeScanner();
 
 			//Setup our button
 			buttonDefaultScan = new UIButton(UIButtonType.RoundedRect);
@@ -41,10 +42,11 @@ namespace ZxingSharp.MonoTouch.Sample
 				scanner.BottomText = "Barcode will automatically scan";
 
 				//Start scanning
-				scanner.StartScanning((result) => 
-				{
+				scanner.Scan ().ContinueWith((t) => 
+				                             {
 					//Our scanning finished callback
-					HandleScanResult(result);
+					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
+						HandleScanResult(t.Result);
 				});
 			};
 
@@ -60,17 +62,18 @@ namespace ZxingSharp.MonoTouch.Sample
 					scanner.ToggleTorch();		
 				};
 				customOverlay.ButtonCancel.TouchUpInside += delegate {
-					scanner.StopScanning();
+					scanner.Cancel();
 				};
 
 				//Tell our scanner to use our custom overlay
 				scanner.UseCustomOverlay = true;
 				scanner.CustomOverlay = customOverlay;
 
-				scanner.StartScanning((result) => 
+				scanner.Scan ().ContinueWith((t) => 
 				{
 					//Our scanning finished callback
-					HandleScanResult(result);
+					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
+						HandleScanResult(t.Result);
 				});
 			};
 
@@ -78,12 +81,12 @@ namespace ZxingSharp.MonoTouch.Sample
 			this.View.AddSubview(buttonCustomScan);
 		}
 
-		void HandleScanResult(ZxingBarcodeResult result)
+		void HandleScanResult(ZXing.Result result)
 		{
 			string msg = "";
 
-			if (result != null && !string.IsNullOrEmpty(result.Value))
-				msg = "Found Barcode: " + result.Value;
+			if (result != null && !string.IsNullOrEmpty(result.Text))
+				msg = "Found Barcode: " + result.Text;
 			else
 				msg = "Scanning Canceled!";
 

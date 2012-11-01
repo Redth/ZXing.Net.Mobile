@@ -8,10 +8,10 @@ using MonoTouch.AVFoundation;
 using MonoTouch.CoreVideo;
 using MonoTouch.CoreMedia;
 using MonoTouch.CoreGraphics;
-using com.google.zxing;
-using com.google.zxing.common;
+using ZXing;
+using ZXing.Common;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 	public class ZxingOverlayView : UIView
 	{

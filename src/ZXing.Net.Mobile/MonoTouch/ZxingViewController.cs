@@ -6,17 +6,18 @@ using MonoTouch.CoreFoundation;
 using MonoTouch.AVFoundation;
 using MonoTouch.CoreVideo;
 using MonoTouch.CoreMedia;
-using com.google.zxing;
-using com.google.zxing.common;
+using ZXing;
+using ZXing.Common;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
 	// based on https://github.com/xamarin/monotouch-samples/blob/master/AVCaptureFrames/Main.cs
 	public class ZxingViewController : UIViewController
 	{
 
-		public ZxingViewController(bool showButtons, bool showOverlay) : base()
+		public ZxingViewController(MobileBarcodeScanningOptions options, bool showButtons, bool showOverlay) : base()
 		{
+			this.Options = options;
 			this.ShowButtons = showButtons;
 			this.ShowOverlay = showOverlay;
 		}
@@ -37,6 +38,8 @@ namespace ZxingSharp.Mobile
 
 		public bool ShowButtons { get; private set; }
 		public bool ShowOverlay { get; private set; }
+
+		public MobileBarcodeScanningOptions Options { get; private set; }
 
 		public override void LoadView ()
 		{
@@ -155,16 +158,8 @@ namespace ZxingSharp.Mobile
 			public ZxingScanner (ZxingViewController parent)
 			{
 				this.parent = parent;
-				this.reader = new MultiFormatReader {
-					Hints = new Hashtable {
-						{ DecodeHintType.POSSIBLE_FORMATS, new ArrayList { 
-							BarcodeFormat.UPC_A, BarcodeFormat.UPC_E , BarcodeFormat.CODE_128,
-							BarcodeFormat.CODE_39, BarcodeFormat.EAN_13, BarcodeFormat.EAN_8,
-								BarcodeFormat.QR_CODE
-							}  }
-						, { DecodeHintType.TRY_HARDER, true }
-					}
-				};
+
+				this.reader = this.parent.Options.BuildMultiFormatReader();
 			}
 
 			public override void DidOutputSampleBuffer (AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)

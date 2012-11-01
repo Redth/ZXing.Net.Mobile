@@ -3,30 +3,29 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2A305540-C079-4588-B1E3-064174257DCA}</ProjectGuid>
+    <ProjectGuid>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</ProjectGuid>
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ZXing.MonoTouch.Sample</RootNamespace>
-    <AssemblyName>ZxingSharpMonoTouchSample</AssemblyName>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ZxingSharp</RootNamespace>
+    <AssemblyName>zxingMonoTouch</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
-    <MtouchDebug>True</MtouchDebug>
-    <MtouchProfiling>True</MtouchProfiling>
     <MtouchLink>None</MtouchLink>
+    <MtouchDebug>True</MtouchDebug>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -38,44 +37,21 @@
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\iPhone\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
-    <MtouchUseSGen>True</MtouchUseSGen>
-    <IpaPackageName />
-    <CrashReportingApiKey />
-    <MtouchI18n />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\iPhone\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
-    <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
-    <OutputPath>bin\iPhone\Ad-Hoc</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
-    <BuildIpa>True</BuildIpa>
-    <CodesignKey>iPhone Distribution</CodesignKey>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
-    <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
-    <OutputPath>bin\iPhone\AppStore</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
-    <CodesignKey>iPhone Distribution</CodesignKey>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -83,22 +59,22 @@
     <Reference Include="System.Core" />
     <Reference Include="monotouch" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Info.plist" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Main.cs" />
-    <Compile Include="AppDelegate.cs" />
-    <Compile Include="HomeViewController.cs" />
-    <Compile Include="CustomOverlayView.cs" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.MonoTouch.csproj">
-      <Project>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</Project>
-      <Name>ZXing.Net.Mobile.MonoTouch</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Zxing.Net\Source\lib\zxing.monotouch.csproj">
+    <Compile Include="MonoTouch\ZxingOverlayView.cs" />
+    <Compile Include="MonoTouch\ZxingViewController.cs" />
+    <Compile Include="MonoTouch\ZxingSurfaceView.cs" />
+    <Compile Include="MonoTouch\ZxingCameraViewController.cs" />
+    <Compile Include="Mono\IMobileBarcodeScanner.cs" />
+    <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
+    <Compile Include="MonoTouch\MobileBarcodeScanner.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MonoTouch\" />
+    <Folder Include="Mono\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Zxing.Net\Source\lib\zxing.monotouch.csproj">
       <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
       <Name>zxing.monotouch</Name>
     </ProjectReference>

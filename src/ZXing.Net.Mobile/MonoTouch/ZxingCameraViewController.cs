@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
-using com.google.zxing;
+using ZXing;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
     
 	public class BarCodeEventArgs : EventArgs
@@ -36,10 +36,10 @@ namespace ZxingSharp.Mobile
         public ZxingSurfaceView SurfaceView;
        	public event BarCodeEventHandler BarCodeEvent;
 
-		public ZxingScanningOptions ScanningOptions { get;set; }
-		public ZxingScanner Scanner { get;set; }
+		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
+		public MobileBarcodeScanner Scanner { get;set; }
 
-        public ZxingCameraViewController(ZxingScanningOptions options, ZxingScanner scanner)
+        public ZxingCameraViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
             : base()
         {
 			this.ScanningOptions = options;

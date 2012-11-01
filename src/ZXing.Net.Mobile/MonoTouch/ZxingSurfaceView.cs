@@ -5,16 +5,16 @@ using System.Collections.Generic;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using MonoTouch.CoreGraphics;
-using com.google.zxing;
-using com.google.zxing.common;
+using ZXing;
+using ZXing.Common;
 using System.Collections;
 using MonoTouch.AudioToolbox;
 //using BarcodeTesting.Utilities;
 
-namespace ZxingSharp.Mobile
+namespace ZXing.Mobile
 {
     
-	public class ResultCallBack : ResultPointCallback
+	/*public class ResultCallBack : ResultPointCallback
 	{
 		ZxingSurfaceView _view;
 		public ResultCallBack(ZxingSurfaceView view)
@@ -35,7 +35,7 @@ namespace ZxingSharp.Mobile
 		}
 		#endregion	
 		
-	}
+	}*/
 	
 	public class ZxingSurfaceView : UIView
     {
@@ -55,7 +55,7 @@ namespace ZxingSharp.Mobile
 		private Hashtable hints;
 		
 		//private static com.google.zxing.oned.MultiFormatOneDReader _multiFormatReader = null;
-		private static com.google.zxing.MultiFormatReader _multiFormatReader = null;
+		private static MultiFormatReader _multiFormatReader = null;
 
 		//private static RectangleF picFrame = new RectangleF(0, 146, 320, 157);
 		private static RectangleF picFrame = new RectangleF(); //, UIScreen.MainScreen.Bounds.Width, 257);
@@ -64,10 +64,10 @@ namespace ZxingSharp.Mobile
 	  #endregion
 
 		public UIView OverlayView { get;set; }
-		public ZxingScanner Scanner { get;set; }
-		public ZxingScanningOptions Options { get;set; }
+		public MobileBarcodeScanner Scanner { get;set; }
+		public MobileBarcodeScanningOptions Options { get;set; }
 		
-        public ZxingSurfaceView(ZxingCameraViewController parentController, ZxingScanner scanner, ZxingScanningOptions options, UIView overlayView) : base()
+        public ZxingSurfaceView(ZxingCameraViewController parentController, MobileBarcodeScanner scanner, MobileBarcodeScanningOptions options, UIView overlayView) : base()
         {
 			var screenFrame = UIScreen.MainScreen.Bounds;
 			var scale = UIScreen.MainScreen.Scale;
@@ -236,18 +236,10 @@ namespace ZxingSharp.Mobile
 		private void Worker()
         {
        
-				if(hints==null)
-				{
-					hints = new Hashtable();
-					hints.Add(com.google.zxing.DecodeHintType.POSSIBLE_FORMATS, this.Options.GetFormats());
-					hints.Add(com.google.zxing.DecodeHintType.NEED_RESULT_POINT_CALLBACK, new ResultCallBack(this));
-				}
 				
 				if(_multiFormatReader == null)
 				{
-				//_multiFormatReader = new com.google.zxing.oned.MultiFormatOneDReader(hints);
-				_multiFormatReader = new com.google.zxing.MultiFormatReader();
-				_multiFormatReader.Hints = hints;
+				_multiFormatReader = this.Options.BuildMultiFormatReader();
 				//_multiFormatReader = new MultiFormatReader {
 				//		Hints = new Hashtable {
 				//			{ DecodeHintType.POSSIBLE_FORMATS, new ArrayList { 
