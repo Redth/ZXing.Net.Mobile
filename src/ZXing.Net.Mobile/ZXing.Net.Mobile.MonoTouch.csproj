@@ -74,7 +74,7 @@
     <Folder Include="Mono\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zxing.Net\Source\lib\zxing.monotouch.csproj">
+    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.monotouch.csproj">
       <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
       <Name>zxing.monotouch</Name>
     </ProjectReference>
