@@ -257,7 +257,8 @@ namespace ZXing.Mobile
 
 				var result = _reader.decode(binBitmap);
 
-				OnDecodingCompleted(result);
+				if (result != null)
+					OnDecodingCompleted(result);
 			}
 			catch (Exception)
 			{

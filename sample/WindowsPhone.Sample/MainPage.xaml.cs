@@ -26,7 +26,7 @@ namespace ZxingSharp.WindowsPhone.Sample
             InitializeComponent();
 
             //Create a new instance of our scanner
-            scanner = new MobileBarcodeScanner();
+            scanner = new MobileBarcodeScanner(this.Dispatcher);
         }
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
@@ -88,13 +88,16 @@ namespace ZxingSharp.WindowsPhone.Sample
             else
                 msg = "Scanning Canceled!";
 
-            MessageBox.Show(msg);
+			this.Dispatcher.BeginInvoke(() =>
+			{
+				MessageBox.Show(msg);
 
-            //Go back to the main page
-            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+				//Go back to the main page
+				NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
 
-            //Don't allow to navigate back to the scanner with the back button
-            NavigationService.RemoveBackEntry();
+				//Don't allow to navigate back to the scanner with the back button
+				NavigationService.RemoveBackEntry();
+			});
         }
     }
 }

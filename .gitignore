@@ -12,7 +12,7 @@ obj
 *.suo
 *.resharper
 *.svn
-
+*.csproj.user
 
 # mstest test results
 TestResults

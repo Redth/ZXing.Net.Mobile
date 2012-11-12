@@ -15,10 +15,12 @@ namespace ZXing.Mobile
 {
     public class MobileBarcodeScanner : MobileBarcodeScannerBase
     {
-        public MobileBarcodeScanner() : base()
+        public MobileBarcodeScanner(System.Windows.Threading.Dispatcher dispatcher) : base()
         {
-            
+			this.Dispatcher = dispatcher;
         }
+
+		System.Windows.Threading.Dispatcher Dispatcher { get; set; }
 
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
@@ -42,8 +44,11 @@ namespace ZXing.Mobile
                 ScanPage.TopText = TopText;
                 ScanPage.BottomText = BottomText;
 
-                ((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
-                    new Uri("/ZxingSharpWindowsPhone;component/WindowsPhone/Scan.xaml", UriKind.Relative));
+				this.Dispatcher.BeginInvoke(() =>
+				{
+					((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
+						new Uri("/ZXingNetMobile;component/WindowsPhone/ScanPage.xaml", UriKind.Relative));
+				});
 
                 scanResultResetEvent.WaitOne();
 
