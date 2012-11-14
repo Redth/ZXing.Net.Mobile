@@ -79,7 +79,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zxing.Net\Source\lib\zxing.wp7.1.csproj">
+    <ProjectReference Include="..\ZXing.Net\zxing.wp7.1.csproj">
       <Project>{EC6F52B8-AF75-4FA2-85C1-82BF77861FFF}</Project>
       <Name>zxing.wp7.1</Name>
     </ProjectReference>
