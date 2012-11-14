@@ -47,7 +47,7 @@
     <Folder Include="Mono\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zxing.Net\Source\lib\zxing.monoandroid.csproj">
+    <ProjectReference Include="..\ZXing.Net\zxing.monoandroid.csproj">
       <Project>{8971B59D-78F1-49BA-808D-CBADB37F571F}</Project>
       <Name>zxing.monoandroid</Name>
     </ProjectReference>
