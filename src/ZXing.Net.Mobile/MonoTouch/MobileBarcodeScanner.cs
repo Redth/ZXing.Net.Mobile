@@ -27,32 +27,42 @@ namespace ZXing.Mobile
 		{
 			return Task.Factory.StartNew(() => {
 
-				var scanResultResetEvent = new System.Threading.ManualResetEvent(false);
-				Result result = null;
+				try
+				{
+					var scanResultResetEvent = new System.Threading.ManualResetEvent(false);
+					Result result = null;
 
-				viewController = new ZxingCameraViewController(options, this);
+					this.appController.InvokeOnMainThread(() => {
+						viewController = new ZxingCameraViewController(options, this);
 
-				viewController.BarCodeEvent += (BarCodeEventArgs e) => {
+						viewController.BarCodeEvent += (BarCodeEventArgs e) => {
 
-					viewController.DismissViewController();
+							viewController.DismissViewController();
 
-					result = e.BarcodeResult;
-					scanResultResetEvent.Set();
+							result = e.BarcodeResult;
+							scanResultResetEvent.Set();
 
-				};
+						};
 
-				viewController.Canceled += (sender, e) => {
+						viewController.Canceled += (sender, e) => {
 
-					viewController.DismissViewController();
+							viewController.DismissViewController();
 
-					scanResultResetEvent.Set();
-				};
+							scanResultResetEvent.Set();
+						};
 
-				appController.PresentViewController(viewController, true, () => { });
+						appController.PresentViewController(viewController, true, () => { });
 
-				scanResultResetEvent.WaitOne();
+					});
 
-				return result;
+					scanResultResetEvent.WaitOne();
+
+					return result;
+				}
+				catch (Exception ex)
+				{
+					return null;
+				}
 			});
 
 		}

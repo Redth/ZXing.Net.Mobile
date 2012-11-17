@@ -50,28 +50,29 @@ namespace ZXing.Mobile
 		#region Public methods
 		public void Initialize()
         {
-            
-		    if (IsSourceTypeAvailable(UIImagePickerControllerSourceType.Camera))
-                SourceType = UIImagePickerControllerSourceType.Camera;
-            else
-                SourceType = UIImagePickerControllerSourceType.PhotoLibrary;
+			this.InvokeOnMainThread (() => {
+				if (IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera))
+					SourceType = UIImagePickerControllerSourceType.Camera;
+				else
+					SourceType = UIImagePickerControllerSourceType.PhotoLibrary;
 			
 
 			
-            ShowsCameraControls = false;
-            AllowsEditing = true;
-			WantsFullScreenLayout = true;
-			var tf =  MonoTouch.CoreGraphics.CGAffineTransform.MakeScale(1.25f,  1.25f); //CGAffineTransformScale(_picker.cameraViewTransform, CAMERA_TRANSFORM, CAMERA_TRANSFORM);
-			CameraViewTransform = tf;
+				ShowsCameraControls = false;
+				AllowsEditing = true;
+				WantsFullScreenLayout = true;
+				var tf = MonoTouch.CoreGraphics.CGAffineTransform.MakeScale (1.25f, 1.25f); //CGAffineTransformScale(_picker.cameraViewTransform, CAMERA_TRANSFORM, CAMERA_TRANSFORM);
+				CameraViewTransform = tf;
 
-			UIView overlayView = null;
+				UIView overlayView = null;
 
-			if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
-				overlayView = Scanner.CustomOverlay;
+				if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
+					overlayView = Scanner.CustomOverlay;
 
-			SurfaceView = new ZxingSurfaceView(this, Scanner, this.ScanningOptions, overlayView);
+				SurfaceView = new ZxingSurfaceView (this, Scanner, this.ScanningOptions, overlayView);
 
-			CameraOverlayView = SurfaceView;
+				CameraOverlayView = SurfaceView;
+			});
         }
        	
 		
