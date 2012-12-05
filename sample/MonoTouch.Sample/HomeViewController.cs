@@ -90,9 +90,10 @@ namespace ZXing.MonoTouch.Sample
 			else
 				msg = "Scanning Canceled!";
 
-			var av = new UIAlertView("Barcode Result", msg, null, "OK", null);
-			av.Show();
-
+			this.InvokeOnMainThread(() => {
+				var av = new UIAlertView("Barcode Result", msg, null, "OK", null);
+				av.Show();
+			});
 		}
 	}
 }
