@@ -1,59 +1,88 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{20ED3331-13D2-4384-A962-027894272421}</ProjectGuid>
+    <ProjectGuid>{B90C2C94-B895-4C7F-BD20-32135AE5D49B}</ProjectGuid>
+    <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ZXing</RootNamespace>
-    <AssemblyName>zxing.ce3.5</AssemblyName>
-    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PlatformFamilyName>WindowsCE</PlatformFamilyName>
-    <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
-    <OSVersion>5.0</OSVersion>
-    <DeployDirSuffix>zxing.ce3._5</DeployDirSuffix>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <NativePlatformName>Windows CE</NativePlatformName>
-    <FormFactorID>
-    </FormFactorID>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
+    <AssemblyName>zxing.wp8.0</AssemblyName>
+    <TargetFrameworkIdentifier>WindowsPhone</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v8.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Build\Debug\ce3.5\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <OutputPath>..\..\Build\Debug\wp8.0\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE80</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
-    <FileAlignment>512</FileAlignment>
     <WarningLevel>4</WarningLevel>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\Release\ce3.5\</OutputPath>
-    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <OutputPath>..\..\Build\Release\wp8.0\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE;WINDOWS_PHONE80</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <ErrorReport>prompt</ErrorReport>
-    <FileAlignment>512</FileAlignment>
     <WarningLevel>4</WarningLevel>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <DocumentationFile>..\..\Build\Release\ce3.5\zxing.ce3.5.XML</DocumentationFile>
+    <DocumentationFile>..\..\Build\Release\wp8.0\zxing.wp8.0.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\x86\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\x86\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|ARM' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\ARM\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|ARM' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\ARM\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="aztec\AztecDetectorResult.cs" />
     <Compile Include="aztec\AztecReader.cs" />
@@ -67,7 +96,7 @@
     <Compile Include="BaseLuminanceSource.cs" />
     <Compile Include="Binarizer.cs" />
     <Compile Include="BinaryBitmap.cs" />
-    <Compile Include="BitmapLuminanceSource.cs" />
+    <Compile Include="BitmapLuminanceSource.Silverlight.cs" />
     <Compile Include="client\result\AbstractDoCoMoResultParser.cs" />
     <Compile Include="client\result\AddressBookAUResultParser.cs" />
     <Compile Include="client\result\AddressBookDoCoMoResultParser.cs" />
@@ -103,13 +132,21 @@
     <Compile Include="client\result\VEventResultParser.cs" />
     <Compile Include="client\result\WifiParsedResult.cs" />
     <Compile Include="client\result\WifiResultParser.cs" />
-    <Compile Include="common\BigInteger\Base10BigInteger.cs" />
-    <Compile Include="common\BigInteger\BigInteger.cs" />
-    <Compile Include="common\BigInteger\BigIntegerException.cs" />
-    <Compile Include="common\BigInteger\Sign.cs" />
+    <Compile Include="common\BigInteger\Base10BigInteger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="common\BigInteger\BigInteger.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="common\BigInteger\BigIntegerException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="common\BigInteger\Sign.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="common\BitArray.cs" />
     <Compile Include="common\BitMatrix.cs" />
-    <Compile Include="common\BitMatrix.Drawing.cs" />
+    <Compile Include="common\BitMatrix.Silverlight.cs" />
     <Compile Include="common\BitSource.cs" />
     <Compile Include="common\CharacterSetECI.cs" />
     <Compile Include="common\DecoderResult.cs" />
@@ -158,7 +195,6 @@
     <Compile Include="multi\qrcode\detector\MultiDetector.cs" />
     <Compile Include="multi\qrcode\detector\MultiFinderPatternFinder.cs" />
     <Compile Include="multi\qrcode\QRCodeMultiReader.cs" />
-    <Compile Include="net2.0\TimeZoneInfo.cs" />
     <Compile Include="NotFoundException.cs" />
     <Compile Include="oned\CodaBarReader.cs" />
     <Compile Include="oned\CodaBarWriter.cs" />
@@ -260,32 +296,23 @@
     <Compile Include="qrcode\QRCodeWriter.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderException.cs" />
-    <Compile Include="renderer\BitmapRenderer.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />
     <Compile Include="renderer\SvgRenderer.cs" />
+    <Compile Include="renderer\WriteableBitmapRenderer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultMetadataType.cs" />
     <Compile Include="ResultPoint.cs" />
     <Compile Include="ResultPointCallback.cs" />
+    <Compile Include="RGB565LuminanceSource.cs" />
     <Compile Include="RGBLuminanceSource.cs" />
-    <Compile Include="silverlight\BrowsableAttribute.cs" />
+    <Compile Include="silverlight\SerializableAttribute.cs" />
     <Compile Include="SupportClass.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="WriterException.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Key\private.snk">
-      <Link>Properties\private.snk</Link>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
-  <ProjectExtensions>
-    <VisualStudio>
-      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
-        <HostingProcess disable="1" />
-      </FlavorProperties>
-    </VisualStudio>
-  </ProjectExtensions>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
+  <ProjectExtensions />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

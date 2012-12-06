@@ -30,6 +30,12 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\Build\Release\net4.5\zxing.XML</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -178,6 +184,7 @@
     <Compile Include="oned\rss\expanded\decoders\FieldParser.cs" />
     <Compile Include="oned\rss\expanded\decoders\GeneralAppIdDecoder.cs" />
     <Compile Include="oned\rss\expanded\ExpandedPair.cs" />
+    <Compile Include="oned\rss\expanded\ExpandedRow.cs" />
     <Compile Include="oned\rss\expanded\RSSExpandedReader.cs" />
     <Compile Include="oned\rss\FinderPattern.cs" />
     <Compile Include="oned\rss\Pair.cs" />
@@ -238,6 +245,7 @@
     <Compile Include="ReaderException.cs" />
     <Compile Include="renderer\BitmapRenderer.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />
+    <Compile Include="renderer\SvgRenderer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultMetadataType.cs" />
     <Compile Include="ResultPoint.cs" />
@@ -247,6 +255,11 @@
     <Compile Include="SupportClass.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="WriterException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Key\private.snk">
+      <Link>Properties\private.snk</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

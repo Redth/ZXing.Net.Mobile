@@ -33,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DocumentationFile>..\..\Build\Release\winrt\zxing.winrt.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -102,6 +103,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <None Include="..\..\Key\private.snk">
+      <Link>Properties\private.snk</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="aztec\AztecDetectorResult.cs" />
@@ -245,6 +249,7 @@
     <Compile Include="oned\rss\expanded\decoders\FieldParser.cs" />
     <Compile Include="oned\rss\expanded\decoders\GeneralAppIdDecoder.cs" />
     <Compile Include="oned\rss\expanded\ExpandedPair.cs" />
+    <Compile Include="oned\rss\expanded\ExpandedRow.cs" />
     <Compile Include="oned\rss\expanded\RSSExpandedReader.cs" />
     <Compile Include="oned\rss\FinderPattern.cs" />
     <Compile Include="oned\rss\Pair.cs" />
@@ -304,6 +309,7 @@
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderException.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />
+    <Compile Include="renderer\SvgRenderer.cs" />
     <Compile Include="renderer\WriteableBitmapRenderer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultMetadataType.cs" />
@@ -319,6 +325,12 @@
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -196,6 +196,7 @@
     <Compile Include="FormatException.cs" />
     <Compile Include="IBarcodeReader.cs" />
     <Compile Include="IBarcodeReaderGeneric.cs" />
+    <Compile Include="oned\rss\expanded\ExpandedRow.cs" />
     <Compile Include="pdf417\encoder\PDF417EncodingOptions.cs" />
     <Compile Include="qrcode\encoder\QrCodeEncodingOptions.cs" />
     <Compile Include="renderer\BitmapRenderer.cs" />
@@ -316,6 +317,7 @@
     <Compile Include="qrcode\QRCodeWriter.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderException.cs" />
+    <Compile Include="renderer\SvgRenderer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultMetadataType.cs" />
     <Compile Include="ResultPoint.cs" />

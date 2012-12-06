@@ -17,7 +17,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-#if !(SILVERLIGHT || MONOTOUCH)
+#if !SILVERLIGHT
 using System.Drawing.Imaging;
 using System.Drawing;
 #endif
@@ -110,7 +110,7 @@ namespace ZXing.Common
          return result.ToString();
       }
 
-#if !(SILVERLIGHT || MONOTOUCH)
+#if !SILVERLIGHT
 
       /// <summary>
       /// Converts this ByteMatrix to a black and white bitmap.
