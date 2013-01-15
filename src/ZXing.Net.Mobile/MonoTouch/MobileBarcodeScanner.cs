@@ -11,6 +11,11 @@ namespace ZXing.Mobile
 		ZxingCameraViewController viewController;
 		UIViewController appController;
 
+		public MobileBarcodeScanner (object delegateController)
+		{
+			appController = (UIViewController)delegatecontroller;
+		}
+
 		public MobileBarcodeScanner ()
 		{
 			foreach (var window in UIApplication.SharedApplication.Windows)
