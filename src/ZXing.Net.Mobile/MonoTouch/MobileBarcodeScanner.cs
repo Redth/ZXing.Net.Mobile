@@ -13,7 +13,7 @@ namespace ZXing.Mobile
 
 		public MobileBarcodeScanner (object delegateController)
 		{
-			appController = (UIViewController)delegatecontroller;
+			appController = (UIViewController)delegateController;
 		}
 
 		public MobileBarcodeScanner ()
