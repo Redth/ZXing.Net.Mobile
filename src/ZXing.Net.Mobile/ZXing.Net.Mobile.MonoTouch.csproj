@@ -72,11 +72,20 @@
   <ItemGroup>
     <Folder Include="MonoTouch\" />
     <Folder Include="Mono\" />
+    <Folder Include="i18n\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zxing.Net\zxing.monotouch.csproj">
       <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
       <Name>zxing.monotouch</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="i18n\Resources.de.resx">
+      <LogicalName>Resources.de.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="i18n\Resources.resx">
+      <LogicalName>Resources.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

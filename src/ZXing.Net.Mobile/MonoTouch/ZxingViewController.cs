@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Resources;
 using System.Runtime.InteropServices;
 using MonoTouch.UIKit;
 using MonoTouch.CoreFoundation;
@@ -14,15 +15,18 @@ namespace ZXing.Mobile
 	// based on https://github.com/xamarin/monotouch-samples/blob/master/AVCaptureFrames/Main.cs
 	public class ZxingViewController : UIViewController
 	{
-
 		public ZxingViewController(MobileBarcodeScanningOptions options, bool showButtons, bool showOverlay) : base()
 		{
 			this.Options = options;
 			this.ShowButtons = showButtons;
 			this.ShowOverlay = showOverlay;
+
+			this.resxMgr = new ResourceManager("Resources", System.Reflection.Assembly.GetExecutingAssembly());
 		}
 
 		public event Action<Result> Scan;
+
+		ResourceManager resxMgr;
 
 		AVCaptureSession session;
 		AVCaptureVideoPreviewLayer previewLayer;
@@ -46,7 +50,7 @@ namespace ZXing.Mobile
 			base.LoadView ();
 
 			if (!SetupCaptureSession ())
-				throw new NotSupportedException ("Unable to setup camera for scan");
+				throw new NotSupportedException (resxMgr.GetString("NoCamera"));
 
 			previewLayer.Frame = UIScreen.MainScreen.Bounds;
 			View.Layer.AddSublayer (previewLayer);
@@ -66,7 +70,7 @@ namespace ZXing.Mobile
 			{
 				buttonCancel = new UIButton(UIButtonType.RoundedRect);
 				buttonCancel.Frame = new System.Drawing.RectangleF(20, 20, 130, 30);
-				buttonCancel.SetTitle("Cancel", UIControlState.Normal);
+				buttonCancel.SetTitle(resxMgr.GetString("Cancel"), UIControlState.Normal);
 				buttonCancel.Alpha = 0.3f;
 				buttonCancel.SetTitleColor(UIColor.White, UIControlState.Normal);
 				buttonCancel.TintColor = UIColor.Gray;
@@ -78,7 +82,7 @@ namespace ZXing.Mobile
 
 				buttonFlash = new UIButton(UIButtonType.RoundedRect);
 				buttonFlash.Frame = new System.Drawing.RectangleF(170, 20, 130, 30);
-				buttonFlash.SetTitle("Flash On", UIControlState.Normal);
+				buttonFlash.SetTitle(resxMgr.GetString("FlashOn"), UIControlState.Normal);
 				buttonFlash.Alpha = 0.3f;
 				buttonFlash.TintColor = UIColor.Gray;
 				buttonFlash.SetTitleColor(UIColor.White, UIControlState.Normal);
@@ -100,10 +104,10 @@ namespace ZXing.Mobile
 							captureDevice.UnlockForConfiguration();
 
 							this.BeginInvokeOnMainThread(() => {
-								if (buttonFlash.CurrentTitle == "Flash On")
-									buttonFlash.SetTitle("Flash Off", UIControlState.Normal);
+								if (buttonFlash.CurrentTitle == resxMgr.GetString("FlashOn"))
+									buttonFlash.SetTitle(resxMgr.GetString("FlashOff"), UIControlState.Normal);
 								else
-									buttonFlash.SetTitle("Flash On", UIControlState.Normal);
+									buttonFlash.SetTitle(resxMgr.GetString("FlashOn"), UIControlState.Normal);
 							});
 						}
 					}

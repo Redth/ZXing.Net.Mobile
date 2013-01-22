@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Resources;
 
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
@@ -10,6 +11,7 @@ using ZXing.Common;
 using System.Collections;
 using MonoTouch.AudioToolbox;
 //using BarcodeTesting.Utilities;
+using MonoTouch.AVFoundation;
 
 namespace ZXing.Mobile
 {
@@ -61,7 +63,23 @@ namespace ZXing.Mobile
 		private static RectangleF picFrame = new RectangleF(); //, UIScreen.MainScreen.Bounds.Width, 257);
 
 		//private static UIImage _theScreenImage = null;
+
+		private ResourceManager resxMgr;
+
 	  #endregion
+
+		/// <summary>
+		/// Gets a value indicating whether this iOS device has flash.
+		/// </summary>
+		/// <value><c>true</c> if this iOS device has flash; otherwise, <c>false</c>.</value>
+		private bool HasFlash
+		{
+			get
+			{
+				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+				return device.FlashAvailable;
+			}
+		}
 
 		public UIView OverlayView { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }
@@ -84,6 +102,7 @@ namespace ZXing.Mobile
 			this.OverlayView = overlayView;
 			this.Scanner = scanner;
 			this.Options = options;
+			this.resxMgr = new ResourceManager("Resources", System.Reflection.Assembly.GetExecutingAssembly());
 
             Initialize();
 			_parentViewController = parentController;
@@ -166,22 +185,28 @@ namespace ZXing.Mobile
 
 				InvokeOnMainThread(delegate {
 					// Setting tool bar
-					var toolBar = new UIToolbar(new RectangleF(0, UIScreen.MainScreen.Bounds.Height - 44, 320, 44));
-					toolBar.Items = new UIBarButtonItem[] {
-						new UIBarButtonItem("Cancel", UIBarButtonItemStyle.Done, 
-						                    delegate {
+					var toolBar = new UIToolbar(new RectangleF(0, UIScreen.MainScreen.Bounds.Height - 44, UIScreen.MainScreen.Bounds.Width, 44));
 
-							_parentViewController.BarCodeScanned(null);
-							//DismissViewController();
-							
-						}),
-						new UIBarButtonItem(UIBarButtonSystemItem.FlexibleSpace),
-						new UIBarButtonItem("Light", UIBarButtonItemStyle.Done,
-						                    delegate {
+					List<UIBarButtonItem> buttons = new List<UIBarButtonItem>();
+					buttons.Add(new UIBarButtonItem(resxMgr.GetString("Cancel"), UIBarButtonItemStyle.Done, 
+					                                delegate {
+						
+						_parentViewController.BarCodeScanned(null);
+						//DismissViewController();
+						
+					}));
+
+					if (HasFlash)
+					{
+						buttons.Add(new UIBarButtonItem(UIBarButtonSystemItem.FlexibleSpace));
+						buttons.Add(new UIBarButtonItem(resxMgr.GetString("Flash"), UIBarButtonItemStyle.Done,
+						                                delegate {
 							//TODO: Flash
 							_parentViewController.ToggleTorch();
-						}),
-					};
+						}));
+					}
+
+					toolBar.Items = buttons.ToArray();
 
 					toolBar.TintColor = UIColor.Black;
 					Add(toolBar);
