@@ -20,5 +20,7 @@ TestResults
 #NuGet
 packages/
 
-binaries/
-*.resources
+Libraries/
+XamarinComponent/
+
+
