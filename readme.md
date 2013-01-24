@@ -1,4 +1,6 @@
-# ZXing.Mobile
+# ZXing.Net.Mobile
+
+![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/Icon_128x128.png)
 
 ZXing.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with MonoTouch, Mono for Android, and Windows Phone.  The goal of ZXing.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  
 
