@@ -94,9 +94,9 @@
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.WindowsPhone.csproj">
-      <Project>{DB217028-8A8D-4A3B-A062-A6335A081287}</Project>
-      <Name>ZXing.Net.Mobile.WindowsPhone</Name>
+    <ProjectReference Include="..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.WindowsPhone7.csproj">
+      <Project>{CD15825D-D4CC-4BC4-9163-9CFB460AF836}</Project>
+      <Name>ZXing.Net.Mobile.WindowsPhone7</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\ZXing.Net\zxing.wp7.1.csproj">
       <Project>{EC6F52B8-AF75-4FA2-85C1-82BF77861FFF}</Project>
