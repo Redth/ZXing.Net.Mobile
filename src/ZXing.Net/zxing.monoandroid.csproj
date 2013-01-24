@@ -161,6 +161,9 @@
     <Compile Include="oned\EANManufacturerOrgSupport.cs" />
     <Compile Include="oned\ITFReader.cs" />
     <Compile Include="oned\ITFWriter.cs" />
+    <Compile Include="oned\MSIReader.cs" />
+    <Compile Include="oned\MSIWriter.cs" />
+    <Compile Include="oned\PlesseyWriter.cs" />
     <Compile Include="oned\MultiFormatOneDReader.cs" />
     <Compile Include="oned\MultiFormatUPCEANReader.cs" />
     <Compile Include="oned\OneDimensionalCodeWriter.cs" />
@@ -248,6 +251,7 @@
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderException.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />
+    <Compile Include="renderer\SVGRenderer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultMetadataType.cs" />
     <Compile Include="ResultPoint.cs" />

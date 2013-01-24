@@ -74,9 +74,15 @@ namespace ZXing
       /// <summary>UPC/EAN extension format. Not a stand-alone format.</summary>
       UPC_EAN_EXTENSION = 65536,
 
+      /// <summary>MSI</summary>
+      MSI = 131072,
+
+      /// <summary>Plessey</summary>
+      Plessey = 262144,
+
       /// <summary>
       /// UPC_A | UPC_E | EAN_13 | EAN_8 | CODABAR | CODE_39 | CODE_93 | CODE_128 | ITF | RSS_14 | RSS_EXPANDED
       /// </summary>
-      All_1D = UPC_A | UPC_E | EAN_13 | EAN_8 | CODABAR | CODE_39 | CODE_93 | CODE_128 | ITF | RSS_14 | RSS_EXPANDED
+      All_1D = UPC_A | UPC_E | EAN_13 | EAN_8 | CODABAR | CODE_39 | CODE_93 | CODE_128 | ITF | RSS_14 | RSS_EXPANDED | MSI
    }
 }
