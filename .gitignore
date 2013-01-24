@@ -21,3 +21,4 @@ TestResults
 packages/
 
 binaries/
+*.resources

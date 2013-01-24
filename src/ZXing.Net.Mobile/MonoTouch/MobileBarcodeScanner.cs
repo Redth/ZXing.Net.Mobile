@@ -38,6 +38,13 @@ namespace ZXing.Mobile
 					Result result = null;
 
 					this.appController.InvokeOnMainThread(() => {
+						// Free memory first and release resources
+						if (viewController != null)
+						{
+							viewController.Dispose();
+							viewController = null;
+						}
+
 						viewController = new ZxingCameraViewController(options, this);
 
 						viewController.BarCodeEvent += (BarCodeEventArgs e) => {
