@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsPhone.Sample", "WindowsPhone.Sample\WindowsPhone.Sample.csproj", "{BC6808C6-5CEF-4D29-A23B-D2155334243D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{BC6808C6-5CEF-4D29-A23B-D2155334243D}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
