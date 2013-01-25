@@ -182,9 +182,7 @@ namespace ZXing.Mobile
 			this.surface_holder = Holder;
 			this.surface_holder.AddCallback (this);
 			this.surface_holder.SetType (SurfaceType.PushBuffers);
-
-
-
+			
 			this.tokenSource = new System.Threading.CancellationTokenSource();
 		}
 
@@ -215,7 +213,8 @@ namespace ZXing.Mobile
 			height = parameters.PreviewSize.Height;
 			//parameters.PreviewFormat = ImageFormatType.Rgb565;
 			//parameters.PreviewFrameRate = 15;
-
+			
+			
 			camera.SetParameters (parameters);
 			camera.SetDisplayOrientation (90);
 			camera.StartPreview ();
@@ -234,20 +233,27 @@ namespace ZXing.Mobile
 
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
-			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 250)
+			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 100)
 				return;
-
+			
 			try 
 			{
-				byte[] rotatedData = new byte[bytes.Length];
+				/*byte[] rotatedData = new byte[bytes.Length];
 				for (int y = 0; y < height; y++) {
 				    for (int x = 0; x < width; x++)
 				        rotatedData[x * height + height - y - 1] = bytes[x + y * width];
 				}
+				*/
+				var cameraParameters = camera.GetParameters();
 
+				//Changed to using a YUV Image to get the byte data instead of manually working with it!
+				YuvImage img = new YuvImage(bytes, cameraParameters.PreviewFormat, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);
+				var yuvData = img.GetYuvData();
+	
 				var dataRect = GetFramingRectInPreview();
-
-				var luminance = new PlanarYUVLuminanceSource (rotatedData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
+				
+				//var luminance = new PlanarYUVLuminanceSource (rotatedData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
+				var luminance = new PlanarYUVLuminanceSource(yuvData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
 				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
 				var result = reader.decodeWithState(binarized);
 

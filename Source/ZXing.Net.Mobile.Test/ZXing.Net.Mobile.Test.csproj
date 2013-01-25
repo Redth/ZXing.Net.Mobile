@@ -100,7 +100,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zxing.Net\Source\lib\zxing.vs2012.csproj">
+    <ProjectReference Include="..\ZXing.Net\zxing.vs2012.csproj">
       <Project>{24074395-0196-4204-b516-cb6dba2fc4b9}</Project>
       <Name>zxing.vs2012</Name>
     </ProjectReference>

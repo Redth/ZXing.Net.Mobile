@@ -21,10 +21,7 @@ namespace ZXing.Mobile
 
 		public static MobileBarcodeScanningOptions Default
 		{
-			get 
-			{
-				return new MobileBarcodeScanningOptions() { PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.All_1D } };
-			}
+			get { return new MobileBarcodeScanningOptions(); }
 		}
 
 		public BarcodeReader BuildBarcodeReader ()
