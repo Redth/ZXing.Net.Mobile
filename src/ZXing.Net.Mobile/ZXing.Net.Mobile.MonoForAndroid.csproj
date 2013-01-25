@@ -10,6 +10,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>ZXing.Mobile</RootNamespace>
     <AssemblyName>ZXing.Net.Mobile</AssemblyName>
+    <TargetFrameworkVersion>v2.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>none</DebugType>
