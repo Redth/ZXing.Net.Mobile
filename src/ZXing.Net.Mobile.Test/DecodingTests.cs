@@ -11,11 +11,7 @@ namespace ZxingSharp.Mobile.Test
         [TestMethod]
         public void DataMatrix()
         {
-            var i = GetImage("datamatrix.gif");
-
-            var r = new ZXing.Datamatrix.DataMatrixReader(); 
-           
-            var result = r.decode(i);
+          var result = Decode("datamatrix.png", BarcodeFormat.DATA_MATRIX, new KeyValuePair<DecodeHintType, object>[] { new KeyValuePair<DecodeHintType, object>(DecodeHintType.PURE_BARCODE, "TRUE") });
 
             Assert.IsNotNull(result, "NULL Result");
             Assert.IsTrue(result.Text.Equals("test", StringComparison.InvariantCultureIgnoreCase), "Result Text Incorrect: " + result.Text);
@@ -69,7 +65,7 @@ namespace ZxingSharp.Mobile.Test
         [TestMethod]
         public void ITF()
         {
-            var result = Decode("itf.png", BarcodeFormat.ITF);
+            var result = Decode("itf.gif", BarcodeFormat.ITF);
 
             Assert.IsNotNull(result, "NULL Result");
             Assert.IsTrue(result.Text.Equals("1234567890123"), "Result Text Incorrect: " + result.Text);
@@ -81,7 +77,7 @@ namespace ZxingSharp.Mobile.Test
             var result = Decode("pdf417.png", BarcodeFormat.PDF_417);
 
             Assert.IsNotNull(result, "NULL Result");
-            Assert.IsTrue(result.Text.Equals("PDF417"), "Result Text Incorrect: " + result.Text);
+            Assert.IsTrue(result.Text.Equals("PDF417", StringComparison.InvariantCultureIgnoreCase), "Result Text Incorrect: " + result.Text);
         }
 
         [TestMethod]
