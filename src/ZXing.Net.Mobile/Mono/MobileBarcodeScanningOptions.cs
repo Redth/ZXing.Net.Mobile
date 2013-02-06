@@ -36,10 +36,12 @@ namespace ZXing.Mobile
 			if (!string.IsNullOrEmpty (this.CharacterSet))
 				reader.CharacterSet = this.CharacterSet;
 
-			reader.PossibleFormats = new List<BarcodeFormat> ();
+			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
+			{
+				reader.PossibleFormats = new List<BarcodeFormat>();
 
-			foreach (var pf in this.PossibleFormats) {
-				reader.PossibleFormats.Add(pf);
+				foreach (var pf in this.PossibleFormats)
+					reader.PossibleFormats.Add(pf);
 			}
 
 			return reader;
@@ -57,6 +59,7 @@ namespace ZXing.Mobile
 				hints.Add(DecodeHintType.PURE_BARCODE, this.PureBarcode.Value);
 			//if (this.AutoRotate.HasValue && this.AutoRotate.Value)
 
+			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
 			hints.Add(DecodeHintType.POSSIBLE_FORMATS, this.PossibleFormats);
 
 			reader.Hints = hints;

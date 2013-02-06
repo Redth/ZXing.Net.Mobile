@@ -68,6 +68,10 @@ namespace ZXing.QrCode
       {
          DecoderResult decoderResult;
          ResultPoint[] points;
+	     
+		 if (image == null || image.BlackMatrix == null)
+		     return null;
+
          if (hints != null && hints.ContainsKey(DecodeHintType.PURE_BARCODE))
          {
             BitMatrix bits = extractPureBits(image.BlackMatrix);

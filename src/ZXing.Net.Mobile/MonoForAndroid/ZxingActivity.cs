@@ -74,8 +74,8 @@ namespace ZXing.Mobile
 			if (!UseCustomView)
 			{
 				zxingOverlay = new ZxingOverlayView (this);
-				zxingOverlay.TopText = TopText;
-				zxingOverlay.BottomText = BottomText;
+				zxingOverlay.TopText = TopText ?? "";
+				zxingOverlay.BottomText = BottomText ?? "";
 
 				this.AddContentView (zxingOverlay, layoutParams);
 			}
@@ -242,7 +242,8 @@ namespace ZXing.Mobile
 			//parameters.PreviewFormat = ImageFormatType.Rgb565;
 			//parameters.PreviewFrameRate = 15;
 			
-			
+			parameters.PreviewFormat = ImageFormatType.Nv21;
+
 			camera.SetParameters (parameters);
 			camera.SetDisplayOrientation (90);
 			camera.StartPreview ();
@@ -257,31 +258,30 @@ namespace ZXing.Mobile
 			ShutdownCamera ();
 		}
 
-		DateTime lastPreviewAnalysis = DateTime.Now.AddMilliseconds(500);
+		DateTime lastPreviewAnalysis = DateTime.Now.AddMilliseconds(250);
 
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
-			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 100)
+			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 150)
 				return;
 			
 			try 
 			{
-				/*byte[] rotatedData = new byte[bytes.Length];
+				//Fix for image not rotating on devices
+				byte[] rotatedData = new byte[bytes.Length];
 				for (int y = 0; y < height; y++) {
 				    for (int x = 0; x < width; x++)
 				        rotatedData[x * height + height - y - 1] = bytes[x + y * width];
 				}
-				*/
+				
 				var cameraParameters = camera.GetParameters();
 
 				//Changed to using a YUV Image to get the byte data instead of manually working with it!
-				YuvImage img = new YuvImage(bytes, cameraParameters.PreviewFormat, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);
-				var yuvData = img.GetYuvData();
-	
+				var img = new YuvImage(rotatedData, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
 				var dataRect = GetFramingRectInPreview();
-				
-				//var luminance = new PlanarYUVLuminanceSource (rotatedData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
-				var luminance = new PlanarYUVLuminanceSource(yuvData, width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
+			
+				var luminance = new PlanarYUVLuminanceSource (img.GetYuvData(), width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
+				//var luminance = new PlanarYUVLuminanceSource(img.GetYuvData(), width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
 				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
 				var result = reader.decodeWithState(binarized);
 
