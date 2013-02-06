@@ -63,14 +63,6 @@
     <Reference Include="WriteableBitmapExWinPhone">
       <HintPath>.\WriteableBitmapExWinPhone.dll</HintPath>
     </Reference>
-    <Reference Include="zxing.wp7.1, Version=0.10.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\zxing.wp7.1.dll</HintPath>
-    </Reference>
-    <Reference Include="ZXingNetMobile, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\ZXingNetMobile.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
@@ -104,6 +96,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SplashScreenImage.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.WindowsPhone7.csproj">
+      <Project>{CD15825D-D4CC-4BC4-9163-9CFB460AF836}</Project>
+      <Name>ZXing.Net.Mobile.WindowsPhone7</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.wp7.1.csproj">
+      <Project>{EC6F52B8-AF75-4FA2-85C1-82BF77861FFF}</Project>
+      <Name>zxing.wp7.1</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

@@ -281,7 +281,7 @@ namespace ZXing.Mobile
 				var dataRect = GetFramingRectInPreview();
 			
 				var luminance = new PlanarYUVLuminanceSource (img.GetYuvData(), width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
-				//var luminance = new PlanarYUVLuminanceSource(img.GetYuvData(), width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
+				//var luminance = new PlanarYUVLuminanceSource(img.GetYuvData(), cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, 0, 0, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, false);
 				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
 				var result = reader.decodeWithState(binarized);
 

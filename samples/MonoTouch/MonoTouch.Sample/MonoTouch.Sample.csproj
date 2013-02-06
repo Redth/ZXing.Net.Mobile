@@ -82,12 +82,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="monotouch" />
-    <Reference Include="ZXing.Net.Mobile">
-      <HintPath>ZXing.Net.Mobile.dll</HintPath>
-    </Reference>
-    <Reference Include="zxing.monotouch">
-      <HintPath>zxing.monotouch.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -99,4 +93,14 @@
     <Compile Include="CustomOverlayView.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monotouch.csproj">
+      <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
+      <Name>zxing.monotouch</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.MonoTouch.csproj">
+      <Project>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</Project>
+      <Name>ZXing.Net.Mobile.MonoTouch</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
