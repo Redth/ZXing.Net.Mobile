@@ -130,13 +130,16 @@ namespace ZXing.Rendering
       {
          int width = matrix.Width;
          int height = matrix.Height;
-         bool outputContent = !options.PureBarcode && !String.IsNullOrEmpty(content) && (format == BarcodeFormat.CODE_39 ||
+         bool outputContent = (options == null || !options.PureBarcode) &&
+                              !String.IsNullOrEmpty(content) && (format == BarcodeFormat.CODE_39 ||
                                                                  format == BarcodeFormat.CODE_128 ||
                                                                  format == BarcodeFormat.EAN_13 ||
                                                                  format == BarcodeFormat.EAN_8 ||
                                                                  format == BarcodeFormat.CODABAR ||
                                                                  format == BarcodeFormat.ITF ||
-                                                                 format == BarcodeFormat.UPC_A);
+                                                                 format == BarcodeFormat.UPC_A ||
+                                                                 format == BarcodeFormat.MSI ||
+                                                                 format == BarcodeFormat.PLESSEY);
          int emptyArea = outputContent ? 16 : 0;
 
 #if NETFX_CORE
