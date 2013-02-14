@@ -26,8 +26,10 @@ namespace ZXing
    /// YCbCr_420_SP and YCbCr_422_SP.
    /// @author dswitkin@google.com (Daniel Switkin)
    /// </summary>
-   public sealed class PlanarYUVLuminanceSource : LuminanceSource
+   public sealed class PlanarYUVLuminanceSource : BaseLuminanceSource
    {
+      private const int THUMBNAIL_SCALE_FACTOR = 2;
+
       private readonly byte[] yuvData;
       private readonly int dataWidth;
       private readonly int dataHeight;
@@ -69,6 +71,23 @@ namespace ZXing
          {
             reverseHorizontal(width, height);
          }
+      }
+
+      /// <summary>
+      /// Initializes a new instance of the <see cref="PlanarYUVLuminanceSource"/> class.
+      /// </summary>
+      /// <param name="luminances">The luminances.</param>
+      /// <param name="width">The width.</param>
+      /// <param name="height">The height.</param>
+      private PlanarYUVLuminanceSource(byte[] luminances, int width, int height)
+         : base(width, height)
+      {
+         yuvData = luminances;
+         this.luminances = luminances;
+         dataWidth = width;
+         dataHeight = height;
+         left = 0;
+         top = 0;
       }
 
       /// <summary>
@@ -175,10 +194,10 @@ namespace ZXing
       /// Renders the cropped greyscale bitmap.
       /// </summary>
       /// <returns></returns>
-      public int[] renderCroppedGreyscaleBitmap()
+      public int[] renderThumbnail()
       {
-         int width = Width;
-         int height = Height;
+         int width = Width / THUMBNAIL_SCALE_FACTOR;
+         int height = Height / THUMBNAIL_SCALE_FACTOR;
          int[] pixels = new int[width * height];
          byte[] yuv = yuvData;
          int inputOffset = top * dataWidth + left;
@@ -188,12 +207,34 @@ namespace ZXing
             int outputOffset = y * width;
             for (int x = 0; x < width; x++)
             {
-               int grey = yuv[inputOffset + x] & 0xff;
-               pixels[outputOffset + x] = ((0x00FF0000 << 8)| (grey * 0x00010101));
+               int grey = yuv[inputOffset + x * THUMBNAIL_SCALE_FACTOR] & 0xff;
+               pixels[outputOffset + x] = ((0x00FF0000 << 8) | (grey * 0x00010101));
             }
-            inputOffset += dataWidth;
+            inputOffset += dataWidth * THUMBNAIL_SCALE_FACTOR;
          }
          return pixels;
+      }
+
+      /// <summary>
+      /// width of image from {@link #renderThumbnail()}
+      /// </summary>
+      public int ThumbnailWidth
+      {
+         get
+         {
+            return Width / THUMBNAIL_SCALE_FACTOR;
+         }
+      }
+
+      /// <summary>
+      /// height of image from {@link #renderThumbnail()}
+      /// </summary>
+      public int ThumbnailHeight
+      {
+         get
+         {
+            return Height / THUMBNAIL_SCALE_FACTOR;
+         }
       }
 
       private void reverseHorizontal(int width, int height)
@@ -209,6 +250,11 @@ namespace ZXing
                yuvData[x2] = temp;
             }
          }
+      }
+
+      protected override LuminanceSource CreateLuminanceSource(byte[] newLuminances, int width, int height)
+      {
+         return new PlanarYUVLuminanceSource(newLuminances, width, height);
       }
    }
 }

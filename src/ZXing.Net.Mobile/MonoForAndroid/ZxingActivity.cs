@@ -267,6 +267,7 @@ namespace ZXing.Mobile
 			
 			try 
 			{
+				/* OLD Android Code
 				//Fix for image not rotating on devices
 				byte[] rotatedData = new byte[bytes.Length];
 				for (int y = 0; y < height; y++) {
@@ -284,6 +285,27 @@ namespace ZXing.Mobile
 				//var luminance = new PlanarYUVLuminanceSource(img.GetYuvData(), cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, 0, 0, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, false);
 				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
 				var result = reader.decodeWithState(binarized);
+				*/
+
+
+				
+				var cameraParameters = camera.GetParameters();
+				var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
+				var dataRect = GetFramingRectInPreview();
+				var barcodeReader = new BarcodeReader(null, null, null, (data, w, h, format) => new PlanarYUVLuminanceSource(data, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
+				{
+					AutoRotate = true,
+					TryHarder = true,
+				};
+
+				if (this.options.PureBarcode.HasValue && this.options.PureBarcode.Value)
+					barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+
+				if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+					barcodeReader.PossibleFormats = this.options.PossibleFormats;
+
+				var result = barcodeReader.Decode(img.GetYuvData(), width, height, RGBLuminanceSource.BitmapFormat.Unknown);
+
 
 				lastPreviewAnalysis = DateTime.Now;
 
