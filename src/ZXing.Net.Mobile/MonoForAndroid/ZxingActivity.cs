@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 
 using Android.App;
@@ -286,8 +287,7 @@ namespace ZXing.Mobile
 				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
 				var result = reader.decodeWithState(binarized);
 				*/
-
-
+				
 				
 				var cameraParameters = camera.GetParameters();
 				var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
@@ -372,9 +372,18 @@ namespace ZXing.Mobile
 
 		public void Torch(bool on)
 		{
-			var p = camera.GetParameters();
+			if (!this.Context.PackageManager.HasSystemFeature(PackageManager.FeatureCameraFlash))
+			{
+				Android.Util.Log.Info("ZXING", "Flash not supported on this device");
+				return;
+			}
 
+			var p = camera.GetParameters();
 			var supportedFlashModes = p.SupportedFlashModes;
+
+			if (supportedFlashModes == null)
+				supportedFlashModes = new List<string>();
+
 			var flashMode=  string.Empty;
 
 			if (on)
@@ -391,7 +400,10 @@ namespace ZXing.Mobile
 			}
 
 			if (!string.IsNullOrEmpty(flashMode))
+			{
 				p.FlashMode = flashMode;
+				camera.SetParameters(p);
+			}
 		}
 
 

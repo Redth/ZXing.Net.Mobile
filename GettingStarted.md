@@ -1,16 +1,20 @@
 # Getting Started #
 
-You can use ZXing.Net.Mobile in your MonoTouch, Mono for Android, and Windows Phone apps.  Simply download the component, and reference the dll's for yoru platform.
+You can use ZXing.Net.Mobile in your Xamarin.iOS, Xamarin.Android, and Windows Phone apps.  Simply download the component, and reference the dll's for yoru platform.
 
 ### Usage
 The simplest example of using ZXing.Net.Mobile looks something like this:
 
 ```csharp  
-var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-scanner.Scan().ContinueWith((result) => {   
-   if (result != null)
-     Console.WriteLine("Scanned Barcode: " + result.Text);
-});
+buttonScan.Click += (sender, e) => {
+
+	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
+	scanner.Scan().ContinueWith(t => {   
+   		if (t.Result != null)
+    		Console.WriteLine("Scanned Barcode: " + t.Result.Text);
+	});
+
+};
 ```
 
 ###Custom Overlays
@@ -22,13 +26,13 @@ If you want to customize the overlay, you must create your own View for each pla
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 scanner.UseCustomOverlay = true;
 scanner.CustomOverlay = myCustomOverlayInstance;
-scanner.Scan().ContinueWith((result) => { //Handle Result });
+scanner.Scan().ContinueWith(t => { //Handle Result });
 ```
 
 Keep in mind that when using a Custom Overlay, you are responsible for the entire overlay (you cannot mix and match custom elements with the default overlay).  The *ZxingScanner* instance has a *CustomOverlay* property, however on each platform this property is of a different type:
 
-- MonoTouch => **UIView**
-- Mono for Android => **View**
+- Xamarin.iOS => **UIView**
+- Xamarin.Android => **View**
 - Windows Phone => **UIElement**
 
 All of the platform samples have examples of custom overlays.
@@ -39,12 +43,17 @@ By default, all barcode formats are monitored while scanning.  You can change wh
 ```csharp
 var options = new ZXing.Mobile.MobileBarcodeScanningOptions();
 options.PossibleFormats = new List<ZXing.BarcodeFormat>() { 
-    ZXing.BarcodeFormat.Ean8 | ZXing.BarcodeFormat.Ean13 
+    ZXing.BarcodeFormat.Ean8, ZXing.BarcodeFormat.Ean13 
 };
 
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-scanner.Scan(options).ContinueWith((result) => { //Handle results });
+scanner.Scan(options).ContinueWith(t => { //Handle results });
 ```
+
+###Important Additional Notes
+
+- Scanning will crash the iOS Simulator.  Currently scanning only works on devices in Xamarin.iOS
+
 
 ###License
 Apache ZXing.Net.Mobile Copyright 2012 The Apache Software Foundation

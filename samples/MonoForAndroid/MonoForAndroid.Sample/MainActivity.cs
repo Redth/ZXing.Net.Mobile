@@ -55,10 +55,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 
 				//Find the button from our resource layout and wire up the click event
 				var flashButton = zxingOverlay.FindViewById<Button>(Resource.Id.buttonZxingFlash);
-				flashButton.Click += (sender, e) => {
-					//Tell our scanner to toggle the torch/flash
-					scanner.ToggleTorch();
-				};
+				flashButton.Click += (sender, e) => scanner.ToggleTorch();
 
 				//Set our custom overlay
 				scanner.CustomOverlay = zxingOverlay;

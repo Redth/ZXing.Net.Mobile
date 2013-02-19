@@ -2,7 +2,7 @@
 
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/Icon_128x128.png)
 
-ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with MonoTouch, Mono for Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  
+ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  
 
 *NOTE*: ZXing.Net.Mobile is still quite BETA!  Your mileage may vary!
 
@@ -10,16 +10,20 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 The simplest example of using ZXing.Net.Mobile looks something like this:
 
 ```csharp  
-var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-scanner.Scan().ContinueWith((result) => {   
-   if (result != null)
-     Console.WriteLine("Scanned Barcode: " + result.Text);
-});
+buttonScan.Click += (sender, e) => {
+
+	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
+	scanner.Scan().ContinueWith(t => {   
+   		if (t.Result != null)
+    		Console.WriteLine("Scanned Barcode: " + t.Result.Text);
+	});
+
+};
 ```
 
 ###Features
-- MonoTouch
-- Mono for Android
+- Xamarin.iOS
+- Xamarin.Android
 - Windows Phone
 - Simple API - Scan in as little as 2 lines of code!
 
@@ -41,13 +45,13 @@ If you want to customize the overlay, you must create your own View for each pla
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 scanner.UseCustomOverlay = true;
 scanner.CustomOverlay = myCustomOverlayInstance;
-scanner.Scan().ContinueWith((result) => { //Handle Result });
+scanner.Scan().ContinueWith(t => { //Handle Result });
 ```
 
 Keep in mind that when using a Custom Overlay, you are responsible for the entire overlay (you cannot mix and match custom elements with the default overlay).  The *ZxingScanner* instance has a *CustomOverlay* property, however on each platform this property is of a different type:
 
-- MonoTouch => **UIView**
-- Mono for Android => **View**
+- Xamarin.iOS => **UIView**
+- Xamarin.Android => **View**
 - Windows Phone => **UIElement**
 
 All of the platform samples have examples of custom overlays.
@@ -58,11 +62,11 @@ By default, all barcode formats are monitored while scanning.  You can change wh
 ```csharp
 var options = new ZXing.Mobile.MobileBarcodeScanningOptions();
 options.PossibleFormats = new List<ZXing.BarcodeFormat>() { 
-    ZXing.BarcodeFormat.Ean8 | ZXing.BarcodeFormat.Ean13 
+    ZXing.BarcodeFormat.Ean8, ZXing.BarcodeFormat.Ean13 
 };
 
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-scanner.Scan(options).ContinueWith((result) => { //Handle results });
+scanner.Scan(options).ContinueWith(t => { //Handle results });
 ````
 
 ###Samples
