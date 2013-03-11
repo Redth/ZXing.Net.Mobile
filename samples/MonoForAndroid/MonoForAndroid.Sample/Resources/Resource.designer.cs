@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: Android.Runtime.ResourceDesignerAttribute("ZxingSharp.MonoForAndroid.Sample.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("ZxingSharp.MonoForAndroid.Sample.Resource", IsApplication=true)]
 
 namespace ZxingSharp.MonoForAndroid.Sample
 {
@@ -19,9 +19,9 @@ namespace ZxingSharp.MonoForAndroid.Sample
 	public partial class Resource
 	{
 		
-		Resource()
+		static Resource()
 		{
-			global::Android.Runtime.ResourceIdManager.UpdateIdValues ();
+			global::Android.Runtime.ResourceIdManager.UpdateIdValues();
 		}
 		
 		public static void UpdateIdValues()
@@ -30,6 +30,11 @@ namespace ZxingSharp.MonoForAndroid.Sample
 		
 		public partial class Attribute
 		{
+			
+			static Attribute()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
 			
 			private Attribute()
 			{
@@ -41,6 +46,11 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			
 			// aapt resource value: 0x7f020000
 			public const int Icon = 2130837504;
+			
+			static Drawable()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
 			
 			private Drawable()
 			{
@@ -74,6 +84,11 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			// aapt resource value: 0x7f050006
 			public const int textView3 = 2131034118;
 			
+			static Id()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
 			private Id()
 			{
 			}
@@ -88,6 +103,11 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			// aapt resource value: 0x7f030001
 			public const int ZxingOverlay = 2130903041;
 			
+			static Layout()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
 			private Layout()
 			{
 			}
@@ -101,6 +121,11 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			
 			// aapt resource value: 0x7f040000
 			public const int hello = 2130968576;
+			
+			static String()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
 			
 			private String()
 			{
