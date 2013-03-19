@@ -303,7 +303,7 @@ namespace ZXing.Mobile
 						
 								//srcbitmap.Dispose();
 
-							if(result.Text!=null)
+							if(result != null && result.Text!=null)
 							{
 								//BeepOrVibrate();
 								_parentViewController.BarCodeScanned(result);
