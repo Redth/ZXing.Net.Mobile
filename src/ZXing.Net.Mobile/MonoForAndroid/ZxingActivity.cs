@@ -263,7 +263,7 @@ namespace ZXing.Mobile
 
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
-			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 150)
+			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 250)
 				return;
 			
 			try 
@@ -289,16 +289,24 @@ namespace ZXing.Mobile
 				*/
 				
 				
+				
 				var cameraParameters = camera.GetParameters();
 				var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
 				var dataRect = GetFramingRectInPreview();
-				var luminance = new PlanarYUVLuminanceSource(img.GetYuvData(), img.Width, img.Height, dataRect.Left, dataRect.Top,
-				                                             dataRect.Width(), dataRect.Height(), false);
+				
+				//var barcodeReader = new BarcodeReader(null, p => new PlanarYUVLuminanceSource(img.GetYuvData(), img.Width, img.Height, dataRect.Left, dataRect.Top,
+				//                                            dataRect.Width(), dataRect.Height(), false), null, null)
+				//{
+				//	AutoRotate = true,
+				//	TryHarder = true,
+				//};
 
-				var barcodeReader = new BarcodeReader(null, p => luminance, null, null)
+				var barcodeReader = new BarcodeReader(null, null, null, (p, w, h, f) => 
+				    new PlanarYUVLuminanceSource(p, w, h, 0, 0, w, h, false))
+					//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
 				{
 					AutoRotate = true,
-					TryHarder = true,
+					TryHarder = false
 				};
 
 				if (this.options.PureBarcode.HasValue && this.options.PureBarcode.Value)
@@ -307,7 +315,7 @@ namespace ZXing.Mobile
 				if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
 					barcodeReader.PossibleFormats = this.options.PossibleFormats;
 
-				var result = barcodeReader.Decode(img.GetYuvData(), width, height, RGBLuminanceSource.BitmapFormat.Gray8);
+				var result = barcodeReader.Decode(img.GetYuvData(), img.Width, img.Height, RGBLuminanceSource.BitmapFormat.Unknown);
 
 
 				lastPreviewAnalysis = DateTime.Now;
