@@ -176,7 +176,7 @@ namespace ZXing.Mobile
 			screenResolution = new Size(this.activity.WindowManager.DefaultDisplay.Width, this.activity.WindowManager.DefaultDisplay.Height);
 
 			this.options = options;
-
+			lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
 
 			this.reader = this.options.BuildMultiFormatReader();
 
@@ -259,11 +259,11 @@ namespace ZXing.Mobile
 			ShutdownCamera ();
 		}
 
-		DateTime lastPreviewAnalysis = DateTime.Now.AddMilliseconds(250);
+		DateTime lastPreviewAnalysis = DateTime.Now;
 
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
-			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < 250)
+			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
 				return;
 			
 			try 

@@ -450,6 +450,8 @@ namespace ZXing.Mobile
 			
 			if (animated) UIView.CommitAnimations();
 		}*/
+
+		bool firstTimeWorker = true;
 		
 		public void StartWorker()
         {
@@ -458,9 +460,16 @@ namespace ZXing.Mobile
 			{
 				return;
 			}
+
+			var delay = TimeSpan.FromMilliseconds(_parentViewController.ScanningOptions.DelayBetweenAnalyzingFrames);
+
+			if (firstTimeWorker)
+			{
+				delay = TimeSpan.FromMilliseconds(_parentViewController.ScanningOptions.InitialDelayBeforeAnalyzingFrames);
+				firstTimeWorker = false;
+			}
 			
-			
-			 WorkerTimer = NSTimer.CreateRepeatingTimer(TimeSpan.FromMilliseconds(150), delegate { 
+			 WorkerTimer = NSTimer.CreateRepeatingTimer(delay, delegate { 
 				Worker(); 
 			});
 			NSRunLoop.Current.AddTimer(WorkerTimer, NSRunLoopMode.Default);

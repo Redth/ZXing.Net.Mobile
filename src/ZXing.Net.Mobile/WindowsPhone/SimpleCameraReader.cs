@@ -55,7 +55,7 @@ namespace ZXing.Mobile
 		{
 			get
 			{
-				return _scanInterval.TotalMilliseconds <= 0 ? _scanInterval.TotalMilliseconds : 250;
+				return _scanInterval.TotalMilliseconds <= 0 ? _scanInterval.TotalMilliseconds : 150;
 			}
 			set
 			{

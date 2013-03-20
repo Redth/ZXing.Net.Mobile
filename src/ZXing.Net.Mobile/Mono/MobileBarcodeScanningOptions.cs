@@ -10,7 +10,8 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanningOptions ()
 		{
 			this.PossibleFormats = new List<BarcodeFormat>();
-
+			this.DelayBetweenAnalyzingFrames = 150;
+			this.InitialDelayBeforeAnalyzingFrames = 300;
 		}
 
 		public List<BarcodeFormat> PossibleFormats { get;set; }
@@ -18,6 +19,9 @@ namespace ZXing.Mobile
 		public bool? PureBarcode { get;set; }
 		public bool? AutoRotate { get;set; }
 		public string CharacterSet { get;set; }
+
+		public int DelayBetweenAnalyzingFrames { get;set;}
+		public int InitialDelayBeforeAnalyzingFrames { get;set; }
 
 		public static MobileBarcodeScanningOptions Default
 		{

@@ -2,6 +2,13 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 
 GitHub Project: https://github.com/Redth/ZXing.Net.Mobile
 
+### Changes
+ - v1.3.3
+   - Fixed Android not scanning some barcodes in Portrait
+   - Fixed Android scanning very slowly
+   - Added to MobileBarcodeScanningOptions: IntervalBetweenAnalyzingFrames to configure how 'fast' frames from the live scanner view are analyzed in an attempt to decode barcodes 
+
+
 ### Usage
 ```csharp
 buttonScan.Click += (sender, e) => {

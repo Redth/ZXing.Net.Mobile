@@ -101,6 +101,7 @@ namespace ZXing.Mobile
 
             // Initialize a new instance of SimpleCameraReader with Auto-Focus mode on
             _reader = new SimpleCameraReader(Scanner, ScanningOptions);
+			_reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
 
             OnRequestAutoFocus += () =>
             {
