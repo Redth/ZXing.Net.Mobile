@@ -43,6 +43,7 @@ namespace ZXing.Mobile
     {
         #region Variables
         public NSTimer WorkerTimer;
+		volatile bool wasStopped = false;
 		
      	private ZxingCameraViewController _parentViewController;
 		
@@ -273,126 +274,135 @@ namespace ZXing.Mobile
 				//	};
 				}
 				
+
+			if (wasStopped)
+				return;
 				
 			using (var ap = new NSAutoreleasePool())
 			{
-				// Capturing screen image            
-				using (var screenImage = CGImage.ScreenImage.WithImageInRect(picFrame)) //.WithImageInRect(picFrame))
-	            {
-					using (var _theScreenImage = UIImage.FromImage(screenImage))
-					using (var srcbitmap = new Bitmap(_theScreenImage))
-					{
-						LuminanceSource source = null;
-						BinaryBitmap bitmap = null;
-						try 
+				try
+				{
+					// Capturing screen image            
+					using (var screenImage = CGImage.ScreenImage.WithImageInRect(picFrame)) //.WithImageInRect(picFrame))
+		            {
+						using (var _theScreenImage = UIImage.FromImage(screenImage))
+						using (var srcbitmap = new Bitmap(_theScreenImage))
 						{
-							//Console.WriteLine(screenImage.Width.ToString() + " x " + screenImage.Height.ToString());
-
-							//var cropY = (int)((screenImage.Height * 0.4) / 2);
-							source = new RGBLuminanceSource(srcbitmap, screenImage.Width, screenImage.Height); //.crop(0, cropY, 0, screenImage.Height - cropY - cropY);
-
-							//Console.WriteLine(source.Width + " x " + source.Height);
-
-			              	bitmap = new BinaryBitmap(new HybridBinarizer(source));
-												
-					
-						try
-						{
-							var result = _multiFormatReader.decodeWithState(bitmap); //
-							//var result = _multiFormatReader.decodeWithState (bitmap);
-						
-								//srcbitmap.Dispose();
-
-							if(result != null && result.Text!=null)
+							LuminanceSource source = null;
+							BinaryBitmap bitmap = null;
+							try 
 							{
-								//BeepOrVibrate();
-								_parentViewController.BarCodeScanned(result);
-							}
-						}
-						catch (ReaderException)
-						{
-						}
+								//Console.WriteLine(screenImage.Width.ToString() + " x " + screenImage.Height.ToString());
 
+								//var cropY = (int)((screenImage.Height * 0.4) / 2);
+								source = new RGBLuminanceSource(srcbitmap, screenImage.Width, screenImage.Height); //.crop(0, cropY, 0, screenImage.Height - cropY - cropY);
+
+								//Console.WriteLine(source.Width + " x " + source.Height);
+
+				              	bitmap = new BinaryBitmap(new HybridBinarizer(source));
+													
 						
-					/*
-						com.google.zxing.common.BitArray row = new com.google.zxing.common.BitArray(screenImage.Width);
-						
-						int middle = screenImage.Height >> 1;
-						int rowStep = System.Math.Max(1, screenImage.Height >> (4));
-						
-						for (int x = 0; x < 9; x++)
-						{
-							
-							// Scanning from the middle out. Determine which row we're looking at next:
-							int rowStepsAboveOrBelow = (x + 1) >> 1;
-							bool isAbove = (x & 0x01) == 0; // i.e. is x even?
-							int rowNumber = middle + rowStep * (isAbove?rowStepsAboveOrBelow:- rowStepsAboveOrBelow);
-							if (rowNumber < 0 || rowNumber >= screenImage.Height)
-							{
-								// Oops, if we run off the top or bottom, stop
-								break;
-							}
-							
-							// Estimate black point for this row and load it:
 							try
 							{
-								row = bitmap.getBlackRow(rowNumber, row);
-								
-								
-								var resultb = _multiFormatReader.decodeRow(rowNumber, row, hints);
-								if(resultb.Text!=null)
+								var result = _multiFormatReader.decodeWithState(bitmap); //
+								//var result = _multiFormatReader.decodeWithState (bitmap);
+							
+									//srcbitmap.Dispose();
+
+								if(result != null && result.Text!=null)
 								{
-									Console.WriteLine("SCANNED");
-									BeepOrVibrate();
-									_parentViewController.BarCodeScanned(resultb);
-										
+									//BeepOrVibrate();
+									_parentViewController.BarCodeScanned(result);
+								}
+							}
+							catch (ReaderException)
+							{
+							}
+
+							
+						/*
+							com.google.zxing.common.BitArray row = new com.google.zxing.common.BitArray(screenImage.Width);
+							
+							int middle = screenImage.Height >> 1;
+							int rowStep = System.Math.Max(1, screenImage.Height >> (4));
+							
+							for (int x = 0; x < 9; x++)
+							{
 								
+								// Scanning from the middle out. Determine which row we're looking at next:
+								int rowStepsAboveOrBelow = (x + 1) >> 1;
+								bool isAbove = (x & 0x01) == 0; // i.e. is x even?
+								int rowNumber = middle + rowStep * (isAbove?rowStepsAboveOrBelow:- rowStepsAboveOrBelow);
+								if (rowNumber < 0 || rowNumber >= screenImage.Height)
+								{
+									// Oops, if we run off the top or bottom, stop
 									break;
 								}
-								else {
+								
+								// Estimate black point for this row and load it:
+								try
+								{
+									row = bitmap.getBlackRow(rowNumber, row);
+									
+									
+									var resultb = _multiFormatReader.decodeRow(rowNumber, row, hints);
+									if(resultb.Text!=null)
+									{
+										Console.WriteLine("SCANNED");
+										BeepOrVibrate();
+										_parentViewController.BarCodeScanned(resultb);
+											
+									
+										break;
+									}
+									else {
+										continue;
+									}
+									
+								}
+								catch (ReaderException re)
+								{
 									continue;
 								}
-								
+						
 							}
-							catch (ReaderException re)
-							{
-								continue;
-							}
-					
+	*/
+							
+							
+		//					var result = _barcodeReader.decodeWithState(bitmap);
+		//					
+		//					if(result.Text!=null)
+		//					{
+		//						_multiFormatOneDReader = null;
+		//						BeepOrVibrate();
+		//						_parentViewController.BarCodeScanned(result);
+		//					}
+							
+						} catch (Exception ex) {
+							Console.WriteLine(ex.Message);
 						}
-*/
-						
-						
-	//					var result = _barcodeReader.decodeWithState(bitmap);
-	//					
-	//					if(result.Text!=null)
-	//					{
-	//						_multiFormatOneDReader = null;
-	//						BeepOrVibrate();
-	//						_parentViewController.BarCodeScanned(result);
-	//					}
-						
-					} catch (Exception ex) {
-						Console.WriteLine(ex.Message);
-					}
-					finally {
-						if(bitmap!=null)
-							bitmap = null;
+						finally {
+							if(bitmap!=null)
+								bitmap = null;
 
-						 if(source!=null)
-							source = null;
+							 if(source!=null)
+								source = null;
+							
+			              //  if(srcbitmap!=null)
+							//	srcbitmap = null;
 						
-		              //  if(srcbitmap!=null)
-						//	srcbitmap = null;
-					
-						//if (_theScreenImage != null)
-						//	_theScreenImage = null;
+							//if (_theScreenImage != null)
+							//	_theScreenImage = null;
 
-						
-					}	
+							
+						}	
+						}
 					}
+	      		
 				}
-	      
+				catch 
+				{
+				}
 	        }
 
 			GC.Collect();
@@ -480,6 +490,8 @@ namespace ZXing.Mobile
         
 		public void StopWorker()
         {
+			wasStopped = true;
+
             // starting timer
             if (WorkerTimer != null)
             {
