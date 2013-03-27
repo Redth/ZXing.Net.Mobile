@@ -82,7 +82,7 @@ public class RGBLuminanceSource : LuminanceSource
     private int __height;
     private int __width;
 
-    public RGBLuminanceSource(byte[] d, int W, int H)
+    public RGBLuminanceSource(byte[] d, int W, int H, RGBLuminanceSource.BitmapFormat format)
         : base(W, H)
     {
         __width = W;

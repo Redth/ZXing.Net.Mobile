@@ -8,7 +8,8 @@ namespace ZXing.Mobile
 {
 	public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-		ZxingCameraViewController viewController;
+		//ZxingCameraViewController viewController;
+		ZXingScannerViewController viewController;
 		UIViewController appController;
 
 		public MobileBarcodeScanner (object delegateController)
@@ -45,9 +46,10 @@ namespace ZXing.Mobile
 							viewController = null;
 						}
 
-						viewController = new ZxingCameraViewController(options, this);
+						//viewController = new ZxingCameraViewController(options, this);
+						viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
 
-						viewController.BarCodeEvent += (BarCodeEventArgs e) => {
+						/*viewController.BarCodeEvent += (BarCodeEventArgs e) => {
 
 							viewController.DismissViewController();
 
@@ -60,6 +62,15 @@ namespace ZXing.Mobile
 
 							viewController.DismissViewController();
 
+							scanResultResetEvent.Set();
+						};*/
+
+						viewController.OnScannedResult += barcodeResult => {
+
+							viewController.InvokeOnMainThread(() => 
+								viewController.DismissViewController(true, null));
+
+							result = barcodeResult;
 							scanResultResetEvent.Set();
 						};
 
@@ -82,7 +93,7 @@ namespace ZXing.Mobile
 		public override void Cancel ()
 		{
 			if (viewController != null)
-				viewController.DismissViewController();
+				viewController.DismissViewController(true, null);
 		}
 
 		public override void Torch (bool on)

@@ -30,7 +30,7 @@ namespace ZXing.Client.Result
    {
       private const String ALPHANUM_PART = "[a-zA-Z0-9\\-]";
       private static readonly Regex URL_WITH_PROTOCOL_PATTERN = new Regex("[a-zA-Z0-9]{2,}:"
-#if !(SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE)
+#if !(SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE)
 , RegexOptions.Compiled);
 #else
 );
@@ -39,7 +39,7 @@ namespace ZXing.Client.Result
            "(" + ALPHANUM_PART + "+\\.)+" + ALPHANUM_PART + "{2,}" + // host name elements
            "(:\\d{1,5})?" + // maybe port
            "(/|\\?|$)" // query, path or nothing
-#if !(SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE)
+#if !(SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE)
               , RegexOptions.Compiled);
 #else
 );
@@ -60,9 +60,15 @@ namespace ZXing.Client.Result
 
       internal static bool isBasicallyValidURI(String uri)
       {
+         if (uri.IndexOf(" ") >= 0)
+         {
+            // Quick hack check for a common case
+            return false;
+         }
          var m = URL_WITH_PROTOCOL_PATTERN.Match(uri);
          if (m.Success && m.Index == 0)
-         { // match at start only
+         {
+            // match at start only
             return true;
          }
          m = URL_WITHOUT_PROTOCOL_PATTERN.Match(uri);

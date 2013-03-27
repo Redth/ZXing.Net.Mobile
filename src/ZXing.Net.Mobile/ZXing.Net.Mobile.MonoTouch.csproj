@@ -73,6 +73,9 @@
     <Compile Include="Properties\AssemblyVersionInfo.cs">
       <Link>AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="MonoTouch\ZXingScannerView.cs" />
+    <Compile Include="MonoTouch\ZXingScannerViewController.cs" />
+    <Compile Include="MonoTouch\ZXingDefaultOverlayView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MonoTouch\" />

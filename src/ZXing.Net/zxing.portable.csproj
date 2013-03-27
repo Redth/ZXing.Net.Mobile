@@ -1,52 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{41B69545-AAB6-42A6-96A0-6F6817E654A3}</ProjectGuid>
+    <ProjectGuid>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ZXing</RootNamespace>
-    <AssemblyName>zxing</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <AssemblyName>zxing.portable</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile1</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SccProjectName>Svn</SccProjectName>
-    <SccLocalPath>Svn</SccLocalPath>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccProvider>SubversionScc</SccProvider>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\Build\Debug\net2.0\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET20</DefineConstants>
+    <OutputPath>..\..\Build\Debug\portable\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PORTABLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\Release\net2.0\</OutputPath>
-    <DefineConstants>TRACE;NET20</DefineConstants>
+    <OutputPath>..\..\Build\Release\portable\</OutputPath>
+    <DefineConstants>TRACE;PORTABLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\Build\Release\net2.0\zxing.XML</DocumentationFile>
+    <DocumentationFile>..\..\Build\Release\portable\zxing.portable.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="aztec\AztecDetectorResult.cs" />
     <Compile Include="aztec\AztecReader.cs" />
@@ -64,7 +56,6 @@
     <Compile Include="BaseLuminanceSource.cs" />
     <Compile Include="Binarizer.cs" />
     <Compile Include="BinaryBitmap.cs" />
-    <Compile Include="BitmapLuminanceSource.cs" />
     <Compile Include="client\result\AbstractDoCoMoResultParser.cs" />
     <Compile Include="client\result\AddressBookAUResultParser.cs" />
     <Compile Include="client\result\AddressBookDoCoMoResultParser.cs" />
@@ -81,12 +72,6 @@
     <Compile Include="client\result\GeoResultParser.cs" />
     <Compile Include="client\result\ISBNParsedResult.cs" />
     <Compile Include="client\result\ISBNResultParser.cs" />
-    <None Include="client\result\optional\AbstractNDEFResultParser.cs" />
-    <None Include="client\result\optional\NDEFRecord.cs" />
-    <None Include="client\result\optional\NDEFSmartPosterParsedResult.cs" />
-    <None Include="client\result\optional\NDEFSmartPosterResultParser.cs" />
-    <None Include="client\result\optional\NDEFTextResultParser.cs" />
-    <None Include="client\result\optional\NDEFURIResultParser.cs" />
     <Compile Include="client\result\ParsedResult.cs" />
     <Compile Include="client\result\ParsedResultType.cs" />
     <Compile Include="client\result\ProductParsedResult.cs" />
@@ -106,15 +91,12 @@
     <Compile Include="client\result\VEventResultParser.cs" />
     <Compile Include="client\result\WifiParsedResult.cs" />
     <Compile Include="client\result\WifiResultParser.cs" />
-    <Compile Include="common\BigInteger\Base10BigInteger.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="common\BigInteger\Base10BigInteger.cs" />
     <Compile Include="common\BigInteger\BigInteger.cs" />
     <Compile Include="common\BigInteger\BigIntegerException.cs" />
     <Compile Include="common\BigInteger\Sign.cs" />
     <Compile Include="common\BitArray.cs" />
     <Compile Include="common\BitMatrix.cs" />
-    <Compile Include="common\BitMatrix.Drawing.cs" />
     <Compile Include="common\BitSource.cs" />
     <Compile Include="common\CharacterSetECI.cs" />
     <Compile Include="common\DecoderResult.cs" />
@@ -181,7 +163,6 @@
     <Compile Include="multi\qrcode\detector\MultiDetector.cs" />
     <Compile Include="multi\qrcode\detector\MultiFinderPatternFinder.cs" />
     <Compile Include="multi\qrcode\QRCodeMultiReader.cs" />
-    <Compile Include="net2.0\Func.cs" />
     <Compile Include="net2.0\TimeZoneInfo.cs" />
     <Compile Include="NotFoundException.cs" />
     <Compile Include="oned\CodaBarReader.cs" />
@@ -287,25 +268,29 @@
     <Compile Include="qrcode\QRCodeWriter.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderException.cs" />
-    <Compile Include="renderer\BitmapRenderer.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />
-    <Compile Include="renderer\SvgRenderer.cs" />
+    <Compile Include="renderer\SVGRenderer.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ResultMetadataType.cs" />
     <Compile Include="ResultPoint.cs" />
     <Compile Include="ResultPointCallback.cs" />
     <Compile Include="RGB565LuminanceSource.cs" />
     <Compile Include="RGBLuminanceSource.cs" />
+    <Compile Include="silverlight\BrowsableAttribute.cs" />
+    <Compile Include="silverlight\SerializableAttribute.cs" />
     <Compile Include="SupportClass.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="WriterException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Key\private.snk">
       <Link>Properties\private.snk</Link>
     </None>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
