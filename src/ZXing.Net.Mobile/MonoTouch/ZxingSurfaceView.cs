@@ -45,7 +45,7 @@ namespace ZXing.Mobile
         public NSTimer WorkerTimer;
 		volatile bool wasStopped = false;
 		
-     	private ZxingCameraViewController _parentViewController;
+     	//private ZxingCameraViewController _parentViewController;
 		
 		//private UIImageView _mainView;
 		//private UIImageView _greenTopArrow;
@@ -211,6 +211,7 @@ namespace ZXing.Mobile
 					Add(toolBar);
 				});	
 
+
 				//_textCue = new UILabel ()
 				//{
 				//	Frame = new RectangleF(0,topBg.Frame.Bottom - 50,this.Frame.Width,21),
@@ -294,8 +295,8 @@ namespace ZXing.Mobile
 							{
 								//Console.WriteLine(screenImage.Width.ToString() + " x " + screenImage.Height.ToString());
 
-								//var cropY = (int)((screenImage.Height * 0.4) / 2);
-								source = new RGBLuminanceSource(srcbitmap, screenImage.Width, screenImage.Height); //.crop(0, cropY, 0, screenImage.Height - cropY - cropY);
+								var cropY = (int)((screenImage.Height * 0.4) / 2);
+								source = new RGBLuminanceSource(srcbitmap, screenImage.Width, screenImage.Height);
 
 								//Console.WriteLine(source.Width + " x " + source.Height);
 

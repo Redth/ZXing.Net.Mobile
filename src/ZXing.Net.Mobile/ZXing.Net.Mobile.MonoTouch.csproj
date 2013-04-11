@@ -64,9 +64,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="MonoTouch\ZxingOverlayView.cs" />
-    <Compile Include="MonoTouch\ZxingSurfaceView.cs" />
-    <Compile Include="MonoTouch\ZxingCameraViewController.cs" />
     <Compile Include="Mono\IMobileBarcodeScanner.cs" />
     <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
     <Compile Include="MonoTouch\MobileBarcodeScanner.cs" />

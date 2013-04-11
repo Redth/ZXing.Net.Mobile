@@ -15,6 +15,9 @@ namespace ZXing.UIImageTool
 	{
 		// class-level declarations
 		UIWindow window;
+		TestScannerViewController testVc;
+		UINavigationController navCon;
+		MainViewController mvc;
 
 		//
 		// This method is invoked when the application has loaded and is ready to run. In this 
@@ -30,7 +33,15 @@ namespace ZXing.UIImageTool
 			
 			// If you have defined a root view controller, set it here:
 			// window.RootViewController = myViewController;
-			
+			//testVc = new TestScannerViewController(new ZXing.Mobile.MobileBarcodeScanningOptions(),
+			  //                                     new ZXing.Mobile.MobileBarcodeScanner());
+
+			mvc = new MainViewController();
+
+			navCon = new UINavigationController(mvc);
+
+			window.RootViewController = navCon;
+
 			// make the window visible
 			window.MakeKeyAndVisible ();
 			

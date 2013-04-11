@@ -11,7 +11,7 @@ using MonoTouch.AVFoundation;
 
 namespace ZXing.UIImageTool
 {	
-	public class ZXingScannerViewController : UIViewController
+	public class TestScannerViewController : UIViewController
 	{
 		TestScannerView scannerView;
 
@@ -22,7 +22,7 @@ namespace ZXing.UIImageTool
 
 		UIView overlayView = null;
 		
-		public ZXingScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
+		public TestScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
 			: base()
 		{
 
@@ -37,17 +37,17 @@ namespace ZXing.UIImageTool
 			this.ScanningOptions = options;
 			this.Scanner = scanner;
 
-			scannerView = new ZXingScannerView(this.View.Frame);
+			scannerView = new TestScannerView(this.View.Frame);
 			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
 			
 			this.View.AddSubview(scannerView);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
 
-			if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
-				overlayView = Scanner.CustomOverlay;
-			else
-				overlayView = new ZXingDefaultOverlayView(scanner, this.View.Frame,
-				                                          () => Scanner.Cancel(), () => Scanner.ToggleTorch());
+			//if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
+			//	overlayView = Scanner.CustomOverlay;
+			//else
+			//	overlayView = new ZXingDefaultOverlayView(scanner, this.View.Frame,
+				                                          //() => Scanner.Cancel(), () => Scanner.ToggleTorch());
 					
 			if (overlayView != null)
 			{
@@ -57,6 +57,22 @@ namespace ZXing.UIImageTool
 				this.View.AddSubview(overlayView);
 				this.View.BringSubviewToFront(overlayView);
 			}
+
+			var buttonCapture = new UIBarButtonItem(UIBarButtonSystemItem.Save);
+			buttonCapture.Clicked += (sender, e) => {
+				Console.WriteLine("CLICKED!!!!");
+
+				scannerView.Capture();
+			};
+			this.NavigationItem.RightBarButtonItem = buttonCapture;
+
+			var buttonClar = new UIBarButtonItem(UIBarButtonSystemItem.Cancel);
+			buttonClar.Clicked += (sender, e) => {
+				scannerView.Clear();
+			};
+
+		
+			this.NavigationItem.LeftBarButtonItem = buttonClar;
 		}
 
 		bool torch = false;
@@ -201,7 +217,7 @@ namespace ZXing.UIImageTool
 		{
 			scannerView.ResizePreview(this.InterfaceOrientation);
 
-			overlayView.LayoutSubviews();
+			//overlayView.LayoutSubviews();
 		}
 		
 		

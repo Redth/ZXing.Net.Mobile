@@ -27,7 +27,7 @@ namespace ZXing.MonoTouch.Sample
 		public override void ViewDidLoad ()
 		{
 			//Create a new instance of our scanner
-			scanner = new MobileBarcodeScanner();
+			scanner = new MobileBarcodeScanner(this.NavigationController);
 
 			//Setup our button
 			buttonDefaultScan = new UIButton(UIButtonType.RoundedRect);
@@ -41,8 +41,15 @@ namespace ZXing.MonoTouch.Sample
 				scanner.TopText = "Hold camera up to barcode to scan";
 				scanner.BottomText = "Barcode will automatically scan";
 
+				var options = new MobileBarcodeScanningOptions()
+				{
+					PossibleFormats = new List<BarcodeFormat>() { BarcodeFormat.QR_CODE, BarcodeFormat.AZTEC, BarcodeFormat.All_1D, BarcodeFormat.PDF_417 },
+					AutoRotate = false,
+					TryHarder = false
+				};
+
 				//Start scanning
-				scanner.Scan ().ContinueWith((t) => 
+				scanner.Scan (options).ContinueWith((t) => 
 				                             {
 					//Our scanning finished callback
 					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
@@ -81,6 +88,8 @@ namespace ZXing.MonoTouch.Sample
 			this.View.AddSubview(buttonCustomScan);
 		}
 
+
+
 		void HandleScanResult(ZXing.Result result)
 		{
 			string msg = "";
@@ -90,10 +99,10 @@ namespace ZXing.MonoTouch.Sample
 			else
 				msg = "Scanning Canceled!";
 
-			this.InvokeOnMainThread(() => {
-				var av = new UIAlertView("Barcode Result", msg, null, "OK", null);
-				av.Show();
-			});
+			//this.InvokeOnMainThread(() => {
+			//	var av = new UIAlertView("Barcode Result", msg, null, "OK", null);
+			//	av.Show();
+			//});
 		}
 	}
 }

@@ -24,6 +24,11 @@ namespace ZXing.Mobile
 		Action OnCancel;
 		Action OnTorch;
 
+		UIView topBg;
+		UIView bottomBg;
+		UILabel textTop;
+		UILabel textBottom;
+
 		private void Initialize ()
 		{   
 			Opaque = false;
@@ -41,34 +46,29 @@ namespace ZXing.Mobile
 			//Setup Overlay
 			var overlaySize = new SizeF (this.Frame.Width, this.Frame.Height - 44);
 			
-			var topBg = new UIView (new RectangleF (0, 0, this.Frame.Width, (overlaySize.Height - picFrame.Height) / 2));
+			topBg = new UIView (new RectangleF (0, 0, this.Frame.Width, (overlaySize.Height - picFrame.Height) / 2));
 			topBg.Frame = new RectangleF (0, 0, this.Frame.Width, this.Frame.Height * 0.30f);
 			topBg.BackgroundColor = UIColor.Black;
 			topBg.Alpha = 0.6f;
-
+			topBg.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin;
 			
-			var bottomBg = new UIView (new RectangleF (0, topBg.Frame.Height + picFrame.Height, this.Frame.Width, topBg.Frame.Height));
+			bottomBg = new UIView (new RectangleF (0, topBg.Frame.Height + picFrame.Height, this.Frame.Width, topBg.Frame.Height));
 			bottomBg.Frame = new RectangleF (0, this.Frame.Height * 0.70f, this.Frame.Width, this.Frame.Height * 0.30f);
 			bottomBg.BackgroundColor = UIColor.Black;
 			bottomBg.Alpha = 0.6f;
-			
-			//var grad = new MonoTouch.CoreAnimation.CAGradientLayer();
-			//grad.Frame = bottomBg.Bounds;
-			//grad.Colors = new CGColor[] { new CGColor()UIColor.Black, UIColor.FromWhiteAlpha(0.0f, 0.6f) };
-			//bottomBg.Layer.InsertSublayer(grad, 0);
-			
-			//			[v.layer insertSublayer:gradient atIndex:0];
-			
+			bottomBg.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleTopMargin;
+
 			
 			var redLine = new UIView (new RectangleF (0, this.Frame.Height * 0.5f - 2.0f, this.Frame.Width, 4.0f));
 			redLine.BackgroundColor = UIColor.Red;
 			redLine.Alpha = 0.4f;
-			
+			redLine.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin | UIViewAutoresizing.FlexibleTopMargin;
+
 			this.AddSubview (redLine);
 			this.AddSubview (topBg);
 			this.AddSubview (bottomBg);
 			
-			var textTop = new UILabel () 
+			textTop = new UILabel () 
 			{
 				Frame = new RectangleF(0, this.Frame.Height *  0.10f, this.Frame.Width, 42),
 				Text = Scanner.TopText,
@@ -81,7 +81,7 @@ namespace ZXing.Mobile
 			
 			this.AddSubview (textTop);
 			
-			var textBottom = new UILabel () 
+			textBottom = new UILabel () 
 			{
 				Frame = new RectangleF(0, this.Frame.Height *  0.825f - 32f, this.Frame.Width, 64),
 				Text = Scanner.BottomText,
@@ -121,11 +121,23 @@ namespace ZXing.Mobile
 				toolBar.Items = buttons.ToArray();
 				
 				toolBar.TintColor = UIColor.Black;
+				toolBar.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleTopMargin;
 				Add(toolBar);
 			});	
 			
 
 
+		}
+
+		public override void LayoutSubviews ()
+		{
+			base.LayoutSubviews ();
+
+			topBg.Frame = new RectangleF (0, 0, this.Frame.Width, this.Frame.Height * 0.30f);
+			bottomBg.Frame = new RectangleF (0, this.Frame.Height * 0.70f, this.Frame.Width, this.Frame.Height * 0.30f);
+
+			textTop.Frame = new RectangleF(0, this.Frame.Height *  0.10f, this.Frame.Width, 42);
+			textBottom.Frame = new RectangleF(0, this.Frame.Height *  0.825f - 32f, this.Frame.Width, 64);
 		}
 
 	}

@@ -19,9 +19,7 @@ namespace ZXing.Mobile
 		{
 	
 		}
-
-		Random rnd = new Random();
-
+	
 		float laserAlpha = 0.5f;
 
 		public override void Draw (RectangleF rect)

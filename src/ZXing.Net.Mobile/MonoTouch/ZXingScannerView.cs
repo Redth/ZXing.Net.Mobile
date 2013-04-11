@@ -9,10 +9,12 @@ using MonoTouch.CoreVideo;
 using MonoTouch.CoreGraphics;
 using ZXing.Mobile;
 using ZXing.Common;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ZXing.Mobile
 {
-	public class ZXingScannerView : UIImageView
+	public class ZXingScannerView : UIView
 	{
 		public ZXingScannerView(IntPtr handle) : base(handle)
 		{
@@ -24,13 +26,14 @@ namespace ZXing.Mobile
 
 		AVCaptureSession session;
 		AVCaptureVideoPreviewLayer previewLayer;
+		AVCaptureVideoDataOutput output;
 		OutputRecorder outputRecorder;
 		DispatchQueue queue;
 		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = false;
-		MultiFormatReader multiFormatReader = null;
-		DateTime lastAnalysis = DateTime.MinValue;
+		//BarcodeReader barcodeReader;
+
 		UIView layerView;
 
 		public void StartScanning(Action<ZXing.Result> callback, MobileBarcodeScanningOptions options)
@@ -40,18 +43,19 @@ namespace ZXing.Mobile
 
 			//this.options.TryHarder = true;
 			//this.options.AutoRotate = true;
+			Console.WriteLine("StartScanning");
 
-			multiFormatReader = this.options.BuildMultiFormatReader();
+			this.InvokeOnMainThread(() => {
+				if (!SetupCaptureSession())
+				{
+					//Setup 'simulated' view:
+					Console.WriteLine("Capture Session FAILED");
+					var simView = new UIView(this.Frame);
+					simView.BackgroundColor = UIColor.LightGray;
+					this.AddSubview(simView);
 
-			if (!SetupCaptureSession())
-			{
-				//Setup 'simulated' view:
-
-				var simView = new UIView(this.Frame);
-				simView.BackgroundColor = UIColor.LightGray;
-				this.AddSubview(simView);
-
-			}
+				}
+			});
 		}
 
 		public void StopScanning()
@@ -59,26 +63,19 @@ namespace ZXing.Mobile
 			if (stopped)
 				return;
 
-			if (previewLayer != null)
-				previewLayer.RemoveFromSuperLayer();
+			Console.WriteLine("Stopping...");
 
-			if (session != null)
-				session.StopRunning();
+			session.StopRunning();
+
+			stopped = true;
 		}
-
-		protected override void Dispose (bool disposing)
-		{
-			StopScanning();
-
-			base.Dispose (disposing);
-		}
-		
+				
 		bool SetupCaptureSession ()
 		{
 			// configure the capture session for low resolution, change this if your code
 			// can cope with more data or volume
 			session = new AVCaptureSession () {
-				SessionPreset = AVCaptureSession.Preset640x480
+				SessionPreset = AVCaptureSession.Preset352x288
 			};
 			
 			// create a device input and attach it to the session
@@ -88,114 +85,200 @@ namespace ZXing.Mobile
 				return false;
 			}
 
+			NSError err = null;
+			if (captureDevice.LockForConfiguration(out err))
+			{
+				captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+				captureDevice.UnlockForConfiguration();
+			}
+			else
+				Console.WriteLine("Failed to Lock for Config: " + err.Description);
+
 			var input = AVCaptureDeviceInput.FromDevice (captureDevice);
 			if (input == null){
 				Console.WriteLine ("No input - this won't work on the simulator, try a physical device");
 				return false;
 			}
-			session.AddInput (input);
+			else
+				session.AddInput (input);
 			
 			// create a VideoDataOutput and add it to the sesion
-			var output = new AVCaptureVideoDataOutput () {
+			output = new AVCaptureVideoDataOutput () {
 				VideoSettings = new AVVideoSettings (CVPixelFormatType.CV32BGRA),
+
 			};
 			
 			// configure the output
-			queue = new MonoTouch.CoreFoundation.DispatchQueue ("myQueue");
-			outputRecorder = new OutputRecorder (img => 
+			queue = new MonoTouch.CoreFoundation.DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
+
+
+			var barcodeReader = new BarcodeReader(null, (img) => 	
 			{
+				using (var bmp = new Bitmap(img))
+				{
+					var src = new RGBLuminanceSource(bmp, bmp.Width, bmp.Height);
+
+					//Don't try and rotate properly if we're autorotating anyway
+					if (options.AutoRotate.HasValue && options.AutoRotate.Value)
+						return src;
+
+					switch (UIDevice.CurrentDevice.Orientation)
+					{
+						case UIDeviceOrientation.Portrait:
+							return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
+						case UIDeviceOrientation.PortraitUpsideDown:
+							return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
+						case UIDeviceOrientation.LandscapeLeft:
+							return src;
+						case UIDeviceOrientation.LandscapeRight:
+							return src;
+					}
+
+					return src;
+				}
+
+			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
+
+			if (this.options.TryHarder.HasValue)
+				barcodeReader.TryHarder = this.options.TryHarder.Value;
+			if (this.options.PureBarcode.HasValue)
+				barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+			if (this.options.AutoRotate.HasValue)
+				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
+			if (!string.IsNullOrEmpty (this.options.CharacterSet))
+				barcodeReader.CharacterSet = this.options.CharacterSet;
+			
+			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+			{
+				barcodeReader.PossibleFormats = new List<BarcodeFormat>();
+				
+				foreach (var pf in this.options.PossibleFormats)
+					barcodeReader.PossibleFormats.Add(pf);
+			}
+
+
+			//var multiFormatReader = new MultiFormatReader(); // this.options.BuildMultiFormatReader();
+
+			outputRecorder = new OutputRecorder (this.options, img => 
+			{
+			
+				Console.WriteLine("OutputRecorder Callback");
+
+				try
+				{
+					DateTime started = DateTime.UtcNow;
+
+
+					var rs = barcodeReader.Decode(img); //, 640, 480, RGBLuminanceSource.BitmapFormat.Unknown);
+					System.Threading.Thread.Sleep(400);
+					var ended = DateTime.UtcNow - started;
+
+					Console.WriteLine("Analyze Time: " + ended.TotalMilliseconds);
+
+
+					if (rs != null)
+						resultCallback(rs);
+
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("DECODE FAILED: " + ex);
+				}
+			});
+
+			output.AlwaysDiscardsLateVideoFrames = true;
+
+			Console.WriteLine("Setting Sample Buffer: " + outputRecorder.Description + " :> " + (queue != null).ToString());
+
+			output.SetSampleBufferDelegate (outputRecorder, queue);
+			Console.WriteLine("Set Sample Buffer");
+
+			session.AddOutput (output);
+			Console.WriteLine("Added Output");
+			session.StartRunning ();
+			Console.WriteLine("Started Running");
+
+			Console.WriteLine("IS SESSION RUNNING: " + session.Running);
+
+			previewLayer = new AVCaptureVideoPreviewLayer(session);
+
+			//Framerate set here (15 fps)
+			previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
+			//previewLayer.Bounds = this.Layer.Frame;
+			previewLayer.Frame = this.Frame;
+
+
+			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
+
+			layerView = new UIView(this.Frame);
+			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+
+			layerView.Layer.AddSublayer(previewLayer);
+
+			this.AddSubview(layerView);
+
+			ResizePreview(UIApplication.SharedApplication.StatusBarOrientation);
+
+			Console.WriteLine("SetupCamera Finished");
+
+			return true;
+		}
+
+		public void ResizePreview (UIInterfaceOrientation orientation)
+		{
+			previewLayer.Frame = this.Frame;
+
+			switch (orientation)
+			{
+				case UIInterfaceOrientation.LandscapeLeft:
+					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeLeft;
+					break;
+				case UIInterfaceOrientation.LandscapeRight:
+					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeRight;
+					break;
+				case UIInterfaceOrientation.Portrait:
+					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
+					break;
+				case UIInterfaceOrientation.PortraitUpsideDown:
+					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.PortraitUpsideDown;
+					break;
+			}
+		}
+	
+		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
+		{
+			public OutputRecorder(MobileBarcodeScanningOptions options, Action<UIImage> handleImage) : base()
+			{
+				HandleImage = handleImage;
+				this.options = options;
+			}
+
+			MobileBarcodeScanningOptions options;
+			Action<UIImage> HandleImage;
+
+			DateTime lastAnalysis = DateTime.MinValue;
+
+			[Export ("captureOutput:didDropSampleBuffer:fromConnection:")]
+			public void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
+			{
+				Console.WriteLine("DROPPED");
+			}
+
+			public override void DidOutputSampleBuffer (AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
+			{
+				Console.WriteLine("SAMPLE");
+
 				//Only analyze so often
 				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
 					return;
 
 				lastAnalysis = DateTime.UtcNow;
 
-
-				using (var srcbitmap = new Bitmap(img))
-				{
-					LuminanceSource source = null;
-					BinaryBitmap bitmap = null;
-					try 
-					{
-						source = new RGBLuminanceSource(srcbitmap, srcbitmap.Width, srcbitmap.Height); //.crop(0, cropY, 0, screenImage.Height - cropY - cropY);
-
-						bitmap = new BinaryBitmap(new HybridBinarizer(source.rotateCounterClockwise()));
-					
-						
-						try
-						{
-						
-							var result = multiFormatReader.decodeWithState(bitmap); //
-
-							if(result != null && result.Text!=null)
-							{
-								Console.WriteLine("W=" + bitmap.Width + ", H=" + bitmap.Height);
-								Console.WriteLine("RESULT: " + result.Text);
-								//BeepOrVibrate();
-								resultCallback(result);
-							}
-						}
-						catch (ReaderException)
-						{
-						}
-					} 
-					catch (Exception ex) 
-					{
-						Console.WriteLine(ex.Message);
-					}
-					finally 
-					{
-						if(bitmap!=null)
-							bitmap = null;
-						
-						if(source!=null)
-							source = null;
-					}	
-				}
-
-
-			});
-
-			output.SetSampleBufferDelegate (outputRecorder, queue);
-
-			session.AddOutput (output);
-			session.StartRunning ();
-
-			previewLayer = new AVCaptureVideoPreviewLayer(session);
-
-			//Framerate set here (15 fps)
-			previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 15);
-			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
-			//previewLayer.Bounds = this.Layer.Frame;
-			previewLayer.Frame = this.Frame;
-
-			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
-
-			layerView = new UIView(this.Frame);
-
-			layerView.Layer.AddSublayer(previewLayer);
-
-			this.AddSubview(layerView);
-
-			return true;
-		}
-	
-		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
-		{
-			public OutputRecorder(Action<UIImage> handleImage) : base()
-			{
-				HandleImage = handleImage;
-			}
-
-			Action<UIImage> HandleImage;
-
-			public override void DidOutputSampleBuffer (AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
-			{
 				try 
 				{
-					var image = ImageFromSampleBuffer (sampleBuffer);
-
-					HandleImage(image);
+					using (var image = ImageFromSampleBuffer (sampleBuffer))
+						HandleImage(image);
 					
 					//
 					// Although this looks innocent "Oh, he is just optimizing this case away"
@@ -211,6 +294,8 @@ namespace ZXing.Mobile
 			
 			UIImage ImageFromSampleBuffer (CMSampleBuffer sampleBuffer)
 			{
+				UIImage img = null;
+
 				// Get the CoreVideo image
 				using (var pixelBuffer = sampleBuffer.GetImageBuffer () as CVPixelBuffer)
 				{
@@ -224,14 +309,16 @@ namespace ZXing.Mobile
 					var flags = CGBitmapFlags.PremultipliedFirst | CGBitmapFlags.ByteOrder32Little;
 					// Create a CGImage on the RGB colorspace from the configured parameter above
 					using (var cs = CGColorSpace.CreateDeviceRGB ())
-						using (var context = new CGBitmapContext (baseAddress,width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
+					using (var context = new CGBitmapContext (baseAddress,width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
 					using (var cgImage = context.ToImage ())
 					{
-
 						pixelBuffer.Unlock (0);
-						return UIImage.FromImage (cgImage);
+
+						img = UIImage.FromImage (cgImage);
 					}
 				}
+
+				return img;
 			}
 		}
 	

@@ -6,58 +6,28 @@ using System.Collections.Generic;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using ZXing;
+using MonoTouch.AVFoundation;
 
 namespace ZXing.Mobile
 {	
 	public class ZXingScannerViewController : UIViewController
 	{
-
-
 		ZXingScannerView scannerView;
 
 		public event Action<ZXing.Result> OnScannedResult;
 
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }
+
+		UIView overlayView = null;
 		
 		public ZXingScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
-			: base()
 		{
-
-			this.View.Frame = new RectangleF(0, 0, View.Frame.Width, View.Frame.Height);
-			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-
-
-			Console.WriteLine("SCREEN W="+ UIScreen.MainScreen.Bounds.Width + ", H=" + UIScreen.MainScreen.Bounds.Height);
-			Console.WriteLine("SCREEN W="+ View.Frame.Width + ", H=" + View.Frame.Height);
-
 			this.ScanningOptions = options;
 			this.Scanner = scanner;
 
-			scannerView = new ZXingScannerView(this.View.Frame);
-			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-			
-			this.View.AddSubview(scannerView);
+			this.View.Frame = new RectangleF(0, 0, View.Frame.Width, View.Frame.Height);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-
-			UIView overlayView = null;
-			
-			if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
-				overlayView = Scanner.CustomOverlay;
-			else
-				overlayView = new ZXingDefaultOverlayView(scanner, this.View.Frame,
-				                                          () => Scanner.Cancel(), () => Scanner.ToggleTorch());
-					
-			if (overlayView != null)
-			{
-				overlayView.Frame = this.View.Frame;
-
-
-
-				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-				this.View.AddSubview(overlayView);
-				this.View.BringSubviewToFront(overlayView);
-			}
 		}
 
 		bool torch = false;
@@ -83,9 +53,7 @@ namespace ZXing.Mobile
 					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
 					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
 				}
-				
-				
-				
+
 				device.UnlockForConfiguration();
 				device = null;
 				
@@ -114,9 +82,7 @@ namespace ZXing.Mobile
 					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
 					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
 				}
-				
-				
-				
+
 				device.UnlockForConfiguration();
 				device = null;
 				
@@ -126,43 +92,109 @@ namespace ZXing.Mobile
 			
 		}
 
-		public override void ViewWillAppear (bool animated)
+		public void Cancel()
 		{
-			
-			base.ViewWillAppear (animated);
-			
-			
-			
-			scannerView.StartScanning(result => 
-			{
+			this.InvokeOnMainThread(() => scannerView.StopScanning());
+		}
 
-				//Handle scanning result
-				if (scannerView != null)
-					scannerView.StopScanning();
+		UIStatusBarStyle originalStatusBarStyle = UIStatusBarStyle.Default;
+
+		public override void ViewDidLoad ()
+		{
+			scannerView = new ZXingScannerView(this.View.Frame);
+			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
+			
+			this.View.AddSubview(scannerView);
+			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
+			
+			if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
+				overlayView = Scanner.CustomOverlay;
+			else
+				overlayView = new ZXingDefaultOverlayView(this.Scanner, this.View.Frame,
+				                                          () => Scanner.Cancel(), () => Scanner.ToggleTorch());
+			
+			if (overlayView != null)
+			{
+				overlayView.Frame = this.View.Frame;
+				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 				
+				this.View.AddSubview(overlayView);
+				this.View.BringSubviewToFront(overlayView);
+			}
+		}
+
+
+
+		public override void ViewDidAppear (bool animated)
+		{
+			originalStatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
+			
+			UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
+
+			Console.WriteLine("Starting to scan...");
+
+			scannerView.StartScanning(result => {
+
+				Console.WriteLine("Stopping scan...");
+
+				scannerView.StopScanning();
+
 				var evt = this.OnScannedResult;
 				if (evt != null)
 					evt(result);
-
-
+				
+				
 			}, this.ScanningOptions);
-			
-
-			
 		}
 
 		public override void ViewWillDisappear(bool animated)
 		{
-			base.ViewWillDisappear(animated);
+			UIApplication.SharedApplication.SetStatusBarStyle(originalStatusBarStyle, false);
 			
-			if (scannerView != null)
-				scannerView.StopScanning();
-			
+			//if (scannerView != null)
+			//	scannerView.StopScanning();
+
+			//scannerView.RemoveFromSuperview();
+			//scannerView.Dispose();			
+			//scannerView = null;
 		}
 
-		
-		
-		
+		public override void TouchesEnded (NSSet touches, UIEvent evt)
+		{
+			if (touches == null || touches.Count <= 0)
+				return;
+
+			var touch = touches.AnyObject as UITouch;
+
+			//Get the device
+			var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+
+			if (device == null || touch == null)
+				return;
+
+			//See if it supports focusing on a point
+			if (device.FocusPointOfInterestSupported && !device.AdjustingFocus)
+			{
+				NSError err = null;
+
+				//Lock device to config
+				if (device.LockForConfiguration(out err))
+				{
+					//Focus at the point touched
+					device.FocusPointOfInterest = touch.LocationInView(this.View);
+					device.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					device.UnlockForConfiguration();
+				}
+			}
+		}
+
+
+		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
+		{
+			scannerView.ResizePreview(this.InterfaceOrientation);
+
+			overlayView.LayoutSubviews();
+		}		
 	}
 }
 

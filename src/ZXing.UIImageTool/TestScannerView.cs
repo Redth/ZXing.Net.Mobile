@@ -11,28 +11,31 @@ using ZXing.Mobile;
 using ZXing.Common;
 using System.Collections.Generic;
 
-namespace ZXing.Mobile
+namespace ZXing.UIImageTool
 {
-	public class ZXingScannerView : UIImageView
+	public class TestScannerView : UIImageView
 	{
-		public ZXingScannerView(IntPtr handle) : base(handle)
+		public TestScannerView(IntPtr handle) : base(handle)
 		{
 		}
 
-		public ZXingScannerView (RectangleF frame) : base(frame)
+		public TestScannerView (RectangleF frame) : base(frame)
 		{
 		}
+
+		volatile bool captureImg = false;
 
 		AVCaptureSession session;
 		AVCaptureVideoPreviewLayer previewLayer;
-		OutputRecorder outputRecorder;
+		TestOutputRecorder outputRecorder;
 		DispatchQueue queue;
 		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = false;
 		BarcodeReader barcodeReader;
-
+		UIButton buttonCapture;
 		UIView layerView;
+		UIImageView imgView;
 
 		public void StartScanning(Action<ZXing.Result> callback, MobileBarcodeScanningOptions options)
 		{
@@ -136,8 +139,17 @@ namespace ZXing.Mobile
 
 			var multiFormatReader = new MultiFormatReader(); // this.options.BuildMultiFormatReader();
 
-			outputRecorder = new OutputRecorder (this.options, img => 
+			outputRecorder = new TestOutputRecorder (this.options, img => 
 			{
+
+				//Console.WriteLine("HandleImage");
+
+				if (!captureImg)
+					return;
+
+				Console.WriteLine("OK To HandleImage");
+				captureImg = false;
+
 				/*
 				var started = DateTime.UtcNow;
 
@@ -182,16 +194,13 @@ namespace ZXing.Mobile
 
 				try
 				{
-					DateTime started = DateTime.UtcNow;
 
-					var rs = barcodeReader.Decode(img); //, 640, 480, RGBLuminanceSource.BitmapFormat.Unknown);
+					this.InvokeOnMainThread(() => {
+						this.imgView.Image = img;
 
-					var ended = DateTime.UtcNow - started;
-
-					Console.WriteLine("Analyze Time: " + ended.TotalMilliseconds);
-
-					if (rs != null)
-						resultCallback(rs);
+							this.imgView.Alpha = 1.0f;
+					});
+					Console.WriteLine("Set IMage: " + img.Size.Width + " x " + img.Size.Height + " : " + UIDevice.CurrentDevice.Orientation.ToString());
 				}
 				catch (Exception ex)
 				{
@@ -200,6 +209,8 @@ namespace ZXing.Mobile
 			});
 
 			output.SetSampleBufferDelegate (outputRecorder, queue);
+
+
 
 			session.AddOutput (output);
 			session.StartRunning ();
@@ -210,19 +221,46 @@ namespace ZXing.Mobile
 			previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 15);
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
 			//previewLayer.Bounds = this.Layer.Frame;
-			previewLayer.Frame = this.Frame;
+			previewLayer.Frame = new RectangleF(this.Frame.X, this.Frame.Y, this.Frame.Width, this.Frame.Height / 2);
+
 
 
 			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
 
+
 			layerView = new UIView(this.Frame);
 			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-
 			layerView.Layer.AddSublayer(previewLayer);
 
+
+			imgView = new UIImageView(this.Frame);
+			imgView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+			imgView.ContentMode = UIViewContentMode.ScaleAspectFit;
+			imgView.Alpha = 0.5f;
+
+			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+
+		
+
 			this.AddSubview(layerView);
+			this.AddSubview(imgView);
+
+
+			//this.BringSubviewToFront(buttonCapture);
+
+			//captureImg = true;
 
 			return true;
+		}
+
+		public void Capture()
+		{
+			captureImg = true;
+		}
+
+		public void Clear()
+		{
+			this.InvokeOnMainThread(() => imgView.Alpha = 0.0f);
 		}
 
 		public void ResizePreview (UIInterfaceOrientation orientation)
@@ -247,12 +285,13 @@ namespace ZXing.Mobile
 			}
 		}
 	
-		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
+		public class TestOutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
 		{
-			public OutputRecorder(MobileBarcodeScanningOptions options, Action<UIImage> handleImage) : base()
+			public TestOutputRecorder(MobileBarcodeScanningOptions options, Action<UIImage> handleImage) : base()
 			{
 				HandleImage = handleImage;
 				this.options = options;
+			
 			}
 
 			MobileBarcodeScanningOptions options;
@@ -263,16 +302,16 @@ namespace ZXing.Mobile
 
 			public override void DidOutputSampleBuffer (AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
-				if (isWorking)
-					return;
+				//if (isWorking)
+				//	return;
 
-				isWorking = true;
+				//isWorking = true;
 
 				//Only analyze so often
-				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
-					return;
+				//if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
+				//	return;
 				
-				lastAnalysis = DateTime.UtcNow;
+				//lastAnalysis = DateTime.UtcNow;
 
 				try 
 				{
@@ -291,7 +330,7 @@ namespace ZXing.Mobile
 					Console.WriteLine (e);
 				}
 
-				isWorking = false;
+				//isWorking = false;
 			}
 			
 			UIImage ImageFromSampleBuffer (CMSampleBuffer sampleBuffer)
