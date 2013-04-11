@@ -26,8 +26,10 @@ namespace ZXing.Mobile
 			this.ScanningOptions = options;
 			this.Scanner = scanner;
 
-			this.View.Frame = new RectangleF(0, 0, View.Frame.Width, View.Frame.Height);
-			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
+			var appFrame = UIScreen.MainScreen.ApplicationFrame;
+
+			this.View.Frame = new RectangleF(0, 0, appFrame.Width, appFrame.Height);
+			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 		}
 
 		bool torch = false;
@@ -101,8 +103,8 @@ namespace ZXing.Mobile
 
 		public override void ViewDidLoad ()
 		{
-			scannerView = new ZXingScannerView(this.View.Frame);
-			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
+			scannerView = new ZXingScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
+			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			
 			this.View.AddSubview(scannerView);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
@@ -110,12 +112,12 @@ namespace ZXing.Mobile
 			if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
 				overlayView = Scanner.CustomOverlay;
 			else
-				overlayView = new ZXingDefaultOverlayView(this.Scanner, this.View.Frame,
+				overlayView = new ZXingDefaultOverlayView(this.Scanner, new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height),
 				                                          () => Scanner.Cancel(), () => Scanner.ToggleTorch());
 			
 			if (overlayView != null)
 			{
-				overlayView.Frame = this.View.Frame;
+				overlayView.Frame = new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 				
 				this.View.AddSubview(overlayView);
@@ -159,8 +161,10 @@ namespace ZXing.Mobile
 			//scannerView = null;
 		}
 
-		public override void TouchesEnded (NSSet touches, UIEvent evt)
+		/*public override void TouchesEnded (NSSet touches, UIEvent evt)
 		{
+			return;
+
 			if (touches == null || touches.Count <= 0)
 				return;
 
@@ -186,7 +190,7 @@ namespace ZXing.Mobile
 					device.UnlockForConfiguration();
 				}
 			}
-		}
+		}*/
 
 
 		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)

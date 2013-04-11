@@ -58,19 +58,6 @@ namespace ZXing.Mobile
 						};
 
 						appController.PresentViewController(viewController, true, null);
-
-						System.Threading.Tasks.Task.Factory.StartNew(() => {
-
-							System.Threading.Thread.Sleep(8000);
-
-							viewController.InvokeOnMainThread(() => {
-								viewController.Cancel();
-								viewController.DismissViewController(true, null);
-							});
-
-							scanResultResetEvent.Set();
-
-						});
 					});
 
 					scanResultResetEvent.WaitOne();

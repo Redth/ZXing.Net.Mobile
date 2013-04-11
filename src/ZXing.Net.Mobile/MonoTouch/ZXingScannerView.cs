@@ -11,6 +11,7 @@ using ZXing.Mobile;
 using ZXing.Common;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ZXing.Mobile
 {
@@ -41,8 +42,6 @@ namespace ZXing.Mobile
 			this.options = options;
 			this.resultCallback = callback;
 
-			//this.options.TryHarder = true;
-			//this.options.AutoRotate = true;
 			Console.WriteLine("StartScanning");
 
 			this.InvokeOnMainThread(() => {
@@ -65,6 +64,7 @@ namespace ZXing.Mobile
 
 			Console.WriteLine("Stopping...");
 
+			outputRecorder.CancelTokenSource.Cancel();
 			session.StopRunning();
 
 			stopped = true;
@@ -258,20 +258,25 @@ namespace ZXing.Mobile
 			Action<UIImage> HandleImage;
 
 			DateTime lastAnalysis = DateTime.MinValue;
+			volatile bool working = false;
 
 			[Export ("captureOutput:didDropSampleBuffer:fromConnection:")]
 			public void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
-				Console.WriteLine("DROPPED");
+				//Console.WriteLine("DROPPED");
 			}
+
+			public CancellationTokenSource CancelTokenSource = new CancellationTokenSource();
+
 
 			public override void DidOutputSampleBuffer (AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
-				Console.WriteLine("SAMPLE");
-
-				//Only analyze so often
-				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
+				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames || working
+				    || CancelTokenSource.IsCancellationRequested)
 					return;
+
+				working = true;
+				Console.WriteLine("SAMPLE");
 
 				lastAnalysis = DateTime.UtcNow;
 
@@ -290,6 +295,8 @@ namespace ZXing.Mobile
 				} catch (Exception e){
 					Console.WriteLine (e);
 				}
+
+				working = false;
 			}
 			
 			UIImage ImageFromSampleBuffer (CMSampleBuffer sampleBuffer)
