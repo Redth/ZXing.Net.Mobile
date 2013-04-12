@@ -75,7 +75,7 @@ namespace ZXing.Mobile
 			// configure the capture session for low resolution, change this if your code
 			// can cope with more data or volume
 			session = new AVCaptureSession () {
-				SessionPreset = AVCaptureSession.Preset352x288
+				SessionPreset = AVCaptureSession.Preset640x480
 			};
 			
 			// create a device input and attach it to the session
@@ -105,8 +105,8 @@ namespace ZXing.Mobile
 			// create a VideoDataOutput and add it to the sesion
 			output = new AVCaptureVideoDataOutput () {
 				VideoSettings = new AVVideoSettings (CVPixelFormatType.CV32BGRA),
-
 			};
+
 			
 			// configure the output
 			queue = new MonoTouch.CoreFoundation.DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
@@ -147,7 +147,9 @@ namespace ZXing.Mobile
 				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
 			if (!string.IsNullOrEmpty (this.options.CharacterSet))
 				barcodeReader.CharacterSet = this.options.CharacterSet;
-			
+			if (this.options.TryInverted.HasValue)
+				barcodeReader.TryHarder = this.options.TryInverted.Value;
+
 			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
 			{
 				barcodeReader.PossibleFormats = new List<BarcodeFormat>();
@@ -157,28 +159,14 @@ namespace ZXing.Mobile
 			}
 
 
-			//var multiFormatReader = new MultiFormatReader(); // this.options.BuildMultiFormatReader();
-
 			outputRecorder = new OutputRecorder (this.options, img => 
 			{
-			
-				Console.WriteLine("OutputRecorder Callback");
-
 				try
 				{
-					DateTime started = DateTime.UtcNow;
-
-
-					var rs = barcodeReader.Decode(img); //, 640, 480, RGBLuminanceSource.BitmapFormat.Unknown);
-					System.Threading.Thread.Sleep(400);
-					var ended = DateTime.UtcNow - started;
-
-					Console.WriteLine("Analyze Time: " + ended.TotalMilliseconds);
-
-
+					var rs = barcodeReader.Decode(img);
+			
 					if (rs != null)
 						resultCallback(rs);
-
 				}
 				catch (Exception ex)
 				{
@@ -187,33 +175,21 @@ namespace ZXing.Mobile
 			});
 
 			output.AlwaysDiscardsLateVideoFrames = true;
-
-			Console.WriteLine("Setting Sample Buffer: " + outputRecorder.Description + " :> " + (queue != null).ToString());
-
 			output.SetSampleBufferDelegate (outputRecorder, queue);
-			Console.WriteLine("Set Sample Buffer");
 
 			session.AddOutput (output);
-			Console.WriteLine("Added Output");
 			session.StartRunning ();
-			Console.WriteLine("Started Running");
-
-			Console.WriteLine("IS SESSION RUNNING: " + session.Running);
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
 			//Framerate set here (15 fps)
 			previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
-			//previewLayer.Bounds = this.Layer.Frame;
 			previewLayer.Frame = this.Frame;
-
-
 			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
 
 			layerView = new UIView(this.Frame);
 			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-
 			layerView.Layer.AddSublayer(previewLayer);
 
 			this.AddSubview(layerView);
@@ -276,7 +252,7 @@ namespace ZXing.Mobile
 					return;
 
 				working = true;
-				Console.WriteLine("SAMPLE");
+				//Console.WriteLine("SAMPLE");
 
 				lastAnalysis = DateTime.UtcNow;
 

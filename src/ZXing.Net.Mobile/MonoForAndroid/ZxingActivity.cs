@@ -174,14 +174,14 @@ namespace ZXing.Mobile
 		Size cameraResolution = Size.Empty;
 
 		System.Threading.CancellationTokenSource tokenSource;
-		DateTime lastAutoFocus = DateTime.MinValue;
+		//DateTime lastAutoFocus = DateTime.MinValue;
 		ZxingActivity activity;
 		ISurfaceHolder surface_holder;
 		Android.Hardware.Camera camera;
 		MobileBarcodeScanningOptions options;
 
-		int width, height;
-		MultiFormatReader reader;
+		//int width, height;
+		//MultiFormatReader reader;
 		//BarcodeReader reader;
 
 		public ZxingSurfaceView (ZxingActivity activity, MobileBarcodeScanningOptions options)
@@ -194,7 +194,7 @@ namespace ZXing.Mobile
 			this.options = options;
 			lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
 
-			this.reader = this.options.BuildMultiFormatReader();
+			//this.reader = this.options.BuildMultiFormatReader();
 
 			this.surface_holder = Holder;
 			this.surface_holder.AddCallback (this);
@@ -256,8 +256,8 @@ namespace ZXing.Mobile
 
 			var parameters = camera.GetParameters ();
 
-			width = parameters.PreviewSize.Width;
-			height = parameters.PreviewSize.Height;
+			//width = parameters.PreviewSize.Width;
+			//height = parameters.PreviewSize.Height;
 			//parameters.PreviewFormat = ImageFormatType.Rgb565;
 			//parameters.PreviewFrameRate = 15;
 			
@@ -278,6 +278,7 @@ namespace ZXing.Mobile
 		}
 
 		DateTime lastPreviewAnalysis = DateTime.Now;
+		BarcodeReader barcodeReader = null;
 
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
@@ -286,55 +287,38 @@ namespace ZXing.Mobile
 			
 			try 
 			{
-				/* OLD Android Code
-				//Fix for image not rotating on devices
-				byte[] rotatedData = new byte[bytes.Length];
-				for (int y = 0; y < height; y++) {
-				    for (int x = 0; x < width; x++)
-				        rotatedData[x * height + height - y - 1] = bytes[x + y * width];
-				}
-				
-				var cameraParameters = camera.GetParameters();
-
-				//Changed to using a YUV Image to get the byte data instead of manually working with it!
-				var img = new YuvImage(rotatedData, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
-				var dataRect = GetFramingRectInPreview();
-			
-				var luminance = new PlanarYUVLuminanceSource (img.GetYuvData(), width, height, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false);
-				//var luminance = new PlanarYUVLuminanceSource(img.GetYuvData(), cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, 0, 0, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, false);
-				var binarized = new BinaryBitmap (new ZXing.Common.HybridBinarizer(luminance));
-				var result = reader.decodeWithState(binarized);
-				*/
-				
-				
-				
 				var cameraParameters = camera.GetParameters();
 				var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
-				var dataRect = GetFramingRectInPreview();
-				
-				//var barcodeReader = new BarcodeReader(null, p => new PlanarYUVLuminanceSource(img.GetYuvData(), img.Width, img.Height, dataRect.Left, dataRect.Top,
-				//                                            dataRect.Width(), dataRect.Height(), false), null, null)
-				//{
-				//	AutoRotate = true,
-				//	TryHarder = true,
-				//};
-
-				var barcodeReader = new BarcodeReader(null, null, null, (p, w, h, f) => 
-				    new PlanarYUVLuminanceSource(p, w, h, 0, 0, w, h, false))
-					//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
+			
+				if (barcodeReader == null)
 				{
-					AutoRotate = true,
-					TryHarder = false
-				};
+					barcodeReader = new BarcodeReader(null, null, null, (p, w, h, f) => 
+					                                      new PlanarYUVLuminanceSource(p, w, h, 0, 0, w, h, false));
+						//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
+					
+					if (this.options.TryHarder.HasValue)
+						barcodeReader.TryHarder = this.options.TryHarder.Value;
+					if (this.options.PureBarcode.HasValue)
+						barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+					if (!string.IsNullOrEmpty (this.options.CharacterSet))
+						barcodeReader.CharacterSet = this.options.CharacterSet;
+					if (this.options.TryInverted.HasValue)
+						barcodeReader.TryHarder = this.options.TryInverted.Value;
+					
+					if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+					{
+						barcodeReader.PossibleFormats = new List<BarcodeFormat>();
+						
+						foreach (var pf in this.options.PossibleFormats)
+							barcodeReader.PossibleFormats.Add(pf);
+					}
 
-				if (this.options.PureBarcode.HasValue && this.options.PureBarcode.Value)
-					barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+					//Always autorotate on android
+					barcodeReader.AutoRotate = true;
+				}
 
-				if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
-					barcodeReader.PossibleFormats = this.options.PossibleFormats;
-
+				//Try and decode the result
 				var result = barcodeReader.Decode(img.GetYuvData(), img.Width, img.Height, RGBLuminanceSource.BitmapFormat.Unknown);
-
 
 				lastPreviewAnalysis = DateTime.Now;
 
@@ -374,7 +358,8 @@ namespace ZXing.Mobile
 					slept += 100;
 				}
 
-				AutoFocus();
+				if (!tokenSource.IsCancellationRequested)
+					AutoFocus();
 			});
 		}
 
@@ -530,7 +515,7 @@ namespace ZXing.Mobile
 			int topOffset = (screenResolution.Height - height) / 2;
 			framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
 
-			Android.Util.Log.Debug("ZXING", "Framing Rect: X=" + framingRect.Left + " Y=" + framingRect.Top + " W=" + framingRect.Width() + " H=" + framingRect.Height());
+			//Android.Util.Log.Debug("ZXING", "Framing Rect: X=" + framingRect.Left + " Y=" + framingRect.Top + " W=" + framingRect.Width() + " H=" + framingRect.Height());
 			return framingRect;
 		}
 
@@ -560,7 +545,7 @@ namespace ZXing.Mobile
 
 			}
 
-			Android.Util.Log.Debug("ZXING", "Preview Framing Rect: X=" + framingRectInPreview.Left + " Y=" + framingRectInPreview.Top + " W=" + framingRectInPreview.Width() + " H=" + framingRectInPreview.Height());
+			//Android.Util.Log.Debug("ZXING", "Preview Framing Rect: X=" + framingRectInPreview.Left + " Y=" + framingRectInPreview.Top + " W=" + framingRectInPreview.Width() + " H=" + framingRectInPreview.Height());
 
 			return framingRectInPreview;
 		}

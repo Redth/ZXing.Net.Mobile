@@ -27,6 +27,20 @@ buttonScan.Click += (sender, e) => {
 - Windows Phone
 - Simple API - Scan in as little as 2 lines of code!
 
+###Changes
+ - v1.3.4
+   - iOS: Scanning Engine rebuilt to use AVCaptureSession
+   - iOS: ZXingScannerView inherits from UIView can now be used independently for advanced use cases
+   - Android: Fixed Torch bug on Android
+   - Android: Front Cameras now work in Sample by default
+   - Performance improvements
+
+   
+ - v1.3.3
+   - Fixed Android not scanning some barcodes in Portrait
+   - Fixed Android scanning very slowly
+   - Added to MobileBarcodeScanningOptions: IntervalBetweenAnalyzingFrames to configure how 'fast' frames from the live scanner view are analyzed in an attempt to decode barcodes 
+   
 ###Thanks
 ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put together (including my own).  So naturally, I'd like to thank everyone who's helped out in any way.  Those of you I know have helped I'm listing here, but anyone else that was involved, please let me know!
 

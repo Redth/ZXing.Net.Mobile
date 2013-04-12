@@ -19,7 +19,7 @@ namespace ZXing.Mobile
 
 		public Context Context { get; private set; }
 		public Android.Views.View CustomOverlay { get; set; }
-		public int CaptureSound { get;set; }
+		//public int CaptureSound { get;set; }
 			
 		bool torch = false;
 
