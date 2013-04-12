@@ -208,6 +208,7 @@ namespace ZXing.Mobile
 			try 
 			{
 #if __ANDROID_9__
+
 				var numCameras = Android.Hardware.Camera.NumberOfCameras;
 				var camInfo = new Android.Hardware.Camera.CameraInfo();
 				var found = false;
@@ -239,11 +240,11 @@ namespace ZXing.Mobile
 				camera.SetPreviewDisplay (holder);
 				camera.SetPreviewCallback (this);
 
-			} catch (Exception) {
+			} catch (Exception ex) {
 				ShutdownCamera ();
 
 				// TODO: log or otherwise handle this exception
-
+				Console.WriteLine("Setup Error: " + ex);
 				//throw;
 			}
 		}
