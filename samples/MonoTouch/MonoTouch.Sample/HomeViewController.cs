@@ -27,7 +27,7 @@ namespace ZXing.MonoTouch.Sample
 		public override void ViewDidLoad ()
 		{
 			//Create a new instance of our scanner
-			scanner = new MobileBarcodeScanner();
+			scanner = new MobileBarcodeScanner(this.NavigationController);
 
 			//Setup our button
 			buttonDefaultScan = new UIButton(UIButtonType.RoundedRect);
@@ -80,6 +80,8 @@ namespace ZXing.MonoTouch.Sample
 			this.View.AddSubview(buttonDefaultScan);
 			this.View.AddSubview(buttonCustomScan);
 		}
+
+
 
 		void HandleScanResult(ZXing.Result result)
 		{

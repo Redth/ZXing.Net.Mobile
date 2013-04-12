@@ -44,7 +44,6 @@
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
-    <MtouchUseSGen>True</MtouchUseSGen>
     <IpaPackageName />
     <CrashReportingApiKey />
     <MtouchI18n />

@@ -64,15 +64,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="MonoTouch\ZxingOverlayView.cs" />
-    <Compile Include="MonoTouch\ZxingSurfaceView.cs" />
-    <Compile Include="MonoTouch\ZxingCameraViewController.cs" />
     <Compile Include="Mono\IMobileBarcodeScanner.cs" />
     <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
     <Compile Include="MonoTouch\MobileBarcodeScanner.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs">
       <Link>AssemblyVersionInfo.cs</Link>
     </Compile>
+    <Compile Include="MonoTouch\ZXingScannerView.cs" />
+    <Compile Include="MonoTouch\ZXingScannerViewController.cs" />
+    <Compile Include="MonoTouch\ZXingDefaultOverlayView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MonoTouch\" />

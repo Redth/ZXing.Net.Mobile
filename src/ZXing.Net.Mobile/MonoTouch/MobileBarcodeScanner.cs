@@ -3,17 +3,20 @@ using System.Threading.Tasks;
 using MonoTouch.Foundation;
 using MonoTouch.CoreFoundation;
 using MonoTouch.UIKit;
+using System.Threading;
 
 namespace ZXing.Mobile
 {
 	public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-		ZxingCameraViewController viewController;
+		//ZxingCameraViewController viewController;
+		ZXingScannerViewController viewController;
 		UIViewController appController;
+		ManualResetEvent scanResultResetEvent = new ManualResetEvent(false);
 
-		public MobileBarcodeScanner (object delegateController)
+		public MobileBarcodeScanner (UIViewController delegateController)
 		{
-			appController = (UIViewController)delegateController;
+			appController = delegateController;
 		}
 
 		public MobileBarcodeScanner ()
@@ -34,45 +37,37 @@ namespace ZXing.Mobile
 
 				try
 				{
-					var scanResultResetEvent = new System.Threading.ManualResetEvent(false);
+					scanResultResetEvent.Reset();
+
 					Result result = null;
 
 					this.appController.InvokeOnMainThread(() => {
-						// Free memory first and release resources
-						if (viewController != null)
-						{
-							viewController.Dispose();
-							viewController = null;
-						}
 
-						viewController = new ZxingCameraViewController(options, this);
+						//viewController = new ZxingCameraViewController(options, this);
+						viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
 
-						viewController.BarCodeEvent += (BarCodeEventArgs e) => {
+						viewController.OnScannedResult += barcodeResult => {
 
-							viewController.DismissViewController();
+							viewController.InvokeOnMainThread(() => {
+								viewController.Cancel();
+								viewController.DismissViewController(true, null);
+							});
 
-							result = e.BarcodeResult;
-							scanResultResetEvent.Set();
-
-						};
-
-						viewController.Canceled += (sender, e) => {
-
-							viewController.DismissViewController();
-
+							result = barcodeResult;
 							scanResultResetEvent.Set();
 						};
 
-						appController.PresentViewController(viewController, true, () => { });
-
+						appController.PresentViewController(viewController, true, null);
 					});
 
 					scanResultResetEvent.WaitOne();
+					viewController.Dispose();
 
 					return result;
 				}
 				catch (Exception ex)
 				{
+					Console.WriteLine(ex);
 					return null;
 				}
 			});
@@ -82,7 +77,15 @@ namespace ZXing.Mobile
 		public override void Cancel ()
 		{
 			if (viewController != null)
-				viewController.DismissViewController();
+			{
+				viewController.InvokeOnMainThread(() => {
+					viewController.Cancel();
+
+					viewController.DismissViewController(true, null);
+				});
+			}
+
+			scanResultResetEvent.Set();
 		}
 
 		public override void Torch (bool on)

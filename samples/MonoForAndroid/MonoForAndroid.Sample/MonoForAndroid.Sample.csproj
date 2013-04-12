@@ -16,6 +16,7 @@
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AssemblyName>ZxingSharp.MonoForAndroid.Sample</AssemblyName>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
+    <TargetFrameworkVersion>v2.3</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -27,6 +28,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -37,6 +39,7 @@
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <ConsolePause>False</ConsolePause>
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -62,11 +65,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.MonoForAndroid.csproj">
-      <Project>{d72228ac-c356-4e1a-b56f-91c9a25f7286}</Project>
+      <Project>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</Project>
       <Name>ZXing.Net.Mobile.MonoForAndroid</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monoandroid.csproj">
-      <Project>{8971b59d-78f1-49ba-808d-cbadb37f571f}</Project>
+      <Project>{8971B59D-78F1-49BA-808D-CBADB37F571F}</Project>
       <Name>zxing.monoandroid</Name>
     </ProjectReference>
   </ItemGroup>

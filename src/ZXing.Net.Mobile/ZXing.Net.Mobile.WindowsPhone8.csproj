@@ -107,7 +107,12 @@
     <Compile Include="WindowsPhone\SimpleCameraReader.cs" />
     <Compile Include="WindowsPhone\MobileBarcodeScanner.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ZXing.Net\zxing.wp8.0.csproj">
+      <Project>{B90C2C94-B895-4C7F-BD20-32135AE5D49B}</Project>
+      <Name>zxing.wp8.0</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Page Include="WindowsPhone\ScanPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -116,12 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ZXing.Net\zxing.wp8.0.csproj">
-      <Project>{B90C2C94-B895-4C7F-BD20-32135AE5D49B}</Project>
-      <Name>zxing.wp8.0</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />

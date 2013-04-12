@@ -44,6 +44,9 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				});
 			};
 
+			Button flashButton;
+			View zxingOverlay;
+
 			buttonScanCustomView = this.FindViewById<Button>(Resource.Id.buttonScanCustomView);
 			buttonScanCustomView.Click += delegate {
 
@@ -51,10 +54,10 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.UseCustomOverlay = true;
 
 				//Inflate our custom overlay from a resource layout
-				var zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlay, null);
+				zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlay, null);
 
 				//Find the button from our resource layout and wire up the click event
-				var flashButton = zxingOverlay.FindViewById<Button>(Resource.Id.buttonZxingFlash);
+				flashButton = zxingOverlay.FindViewById<Button>(Resource.Id.buttonZxingFlash);
 				flashButton.Click += (sender, e) => scanner.ToggleTorch();
 
 				//Set our custom overlay

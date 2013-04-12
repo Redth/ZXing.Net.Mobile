@@ -85,18 +85,34 @@ namespace ZXing.Mobile
 				this.AddContentView(CustomOverlayView, layoutParams);
 			}
 
-			OnCancelRequested += () => {
-				this.CancelScan();
-			};
+			OnCancelRequested += HandleCancelScan;
+			OnAutoFocusRequested += HandleAutoFocus;
+			OnTorchRequested += HandleTorchRequested;
 
-			OnAutoFocusRequested += () => {
-				this.AutoFocus();
-			};
+		}
 
-			OnTorchRequested += (bool on) => {
-				this.SetTorch(on);
-			};
+		void HandleTorchRequested(bool on)
+		{
+			this.SetTorch(on);
+		}
 
+		void HandleAutoFocus()
+		{
+			this.AutoFocus();
+		}
+
+		void HandleCancelScan()
+		{
+			this.CancelScan();
+		}
+
+		protected override void OnDestroy ()
+		{
+			OnCancelRequested -= HandleCancelScan;
+			OnAutoFocusRequested -= HandleAutoFocus;
+			OnTorchRequested -= HandleTorchRequested;
+
+			base.OnDestroy ();
 		}
 
 		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
@@ -192,6 +208,7 @@ namespace ZXing.Mobile
 			try 
 			{
 #if __ANDROID_9__
+
 				var numCameras = Android.Hardware.Camera.NumberOfCameras;
 				var camInfo = new Android.Hardware.Camera.CameraInfo();
 				var found = false;
@@ -217,16 +234,17 @@ namespace ZXing.Mobile
 #endif
 				if (camera == null)
 					Android.Util.Log.Debug("ZXing.Net.Mobile", "Camera is null :(");
-				
+
+
 				//camera = Android.Hardware.Camera.Open ();
 				camera.SetPreviewDisplay (holder);
 				camera.SetPreviewCallback (this);
 
-			} catch (Exception) {
+			} catch (Exception ex) {
 				ShutdownCamera ();
 
 				// TODO: log or otherwise handle this exception
-
+				Console.WriteLine("Setup Error: " + ex);
 				//throw;
 			}
 		}
@@ -236,7 +254,7 @@ namespace ZXing.Mobile
 			if (camera == null)
 				return;
 
-			Android.Hardware.Camera.Parameters parameters = camera.GetParameters ();
+			var parameters = camera.GetParameters ();
 
 			width = parameters.PreviewSize.Width;
 			height = parameters.PreviewSize.Height;
@@ -386,6 +404,12 @@ namespace ZXing.Mobile
 			if (!this.Context.PackageManager.HasSystemFeature(PackageManager.FeatureCameraFlash))
 			{
 				Android.Util.Log.Info("ZXING", "Flash not supported on this device");
+				return;
+			}
+
+			if (camera == null)
+			{
+				Android.Util.Log.Info("ZXING", "NULL Camera");
 				return;
 			}
 
