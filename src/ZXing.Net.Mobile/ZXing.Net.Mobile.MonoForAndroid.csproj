@@ -7,7 +7,11 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <OutputType>Library</OutputType>
+     <OutputType>Library</OutputType>
+     <AppDesignerFolder>Properties</AppDesignerFolder>
+     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
+     <FileAlignment>512</FileAlignment>
+     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <RootNamespace>ZXing.Mobile</RootNamespace>
     <AssemblyName>ZXing.Net.Mobile</AssemblyName>
     <TargetFrameworkVersion>v2.3</TargetFrameworkVersion>
@@ -34,6 +38,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
+    <Reference Include="Mono.Android.Support.v4" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
@@ -43,6 +48,9 @@
     <Compile Include="Mono\IMobileBarcodeScanner.cs" />
     <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="MonoForAndroid\ZXingScannerFragment.cs" />
+    <Compile Include="MonoForAndroid\ZXingSurfaceView.cs" />
+    <Compile Include="Resources\Resource.designer.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -50,5 +58,14 @@
       <Project>{8971B59D-78F1-49BA-808D-CBADB37F571F}</Project>
       <Name>zxing.monoandroid</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+    <Folder Include="Resources\layout\" />
+    <Folder Include="Resources\drawable\" />
+    <Folder Include="Resources\values\" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\zxingscanneractivitylayout.axml" />
   </ItemGroup>
 </Project>

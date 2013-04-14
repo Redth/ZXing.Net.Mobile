@@ -8,10 +8,6 @@ namespace ZXing.Mobile
 
 	public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-		public MobileBarcodeScanner () : this(Android.App.Application.Context)
-		{
-		}
-
 		public MobileBarcodeScanner (Context context)
 		{
 			this.Context = context;
