@@ -28,6 +28,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 		{
 			ZXing.Mobile.Resource.Id.contentFrame = ZxingSharp.MonoForAndroid.Sample.Resource.Id.contentFrame;
 			ZXing.Mobile.Resource.Layout.zxingscanneractivitylayout = ZxingSharp.MonoForAndroid.Sample.Resource.Layout.zxingscanneractivitylayout;
+			ZXing.Mobile.Resource.Layout.zxingscannerfragmentlayout = ZxingSharp.MonoForAndroid.Sample.Resource.Layout.zxingscannerfragmentlayout;
 		}
 		
 		public partial class Attribute
@@ -110,6 +111,9 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			
 			// aapt resource value: 0x7f030002
 			public const int zxingscanneractivitylayout = 2130903042;
+			
+			// aapt resource value: 0x7f030003
+			public const int zxingscannerfragmentlayout = 2130903043;
 			
 			static Layout()
 			{

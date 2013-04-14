@@ -17,7 +17,7 @@ namespace ZXing.Mobile
 {
 	public class ZXingScannerFragment : Fragment
 	{
-		public ZXingScannerFragment(Action<ZXing.Result> scanResultCallback) : base()
+		public ZXingScannerFragment(Action<ZXing.Result> scanResultCallback)
 		{
 			this.callback = scanResultCallback;
 		}
@@ -26,7 +26,8 @@ namespace ZXing.Mobile
 
 		public override View OnCreateView (LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
 		{
-			var frame = new FrameLayout(this.Activity);
+			var frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, null);
+
 			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
 
 			scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, callback);
@@ -53,8 +54,6 @@ namespace ZXing.Mobile
 		{
 			scanner.ShutdownCamera();
 		}
-
-		public event Action<ZXing.Result> OnScanCompleted;
 
 		public View CustomOverlayView { get;set; }
 		public bool UseCustomView { get; set; }

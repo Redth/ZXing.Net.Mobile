@@ -59,6 +59,9 @@ namespace ZXing.Mobile
 			// aapt resource value: 0x7f020000
 			public static int zxingscanneractivitylayout = 2130837504;
 			
+			// aapt resource value: 0x7f020001
+			public static int zxingscannerfragmentlayout = 2130837505;
+			
 			static Layout()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
