@@ -117,10 +117,10 @@ namespace ZXing.PDF417
         private static Result[] Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints, bool multiple)
         {
             List<Result> results = new List<Result>();
-            PDF417DetectorResult detectorResult = Detector.detect(image, hints, multiple);
+            PDF417DetectorResult detectorResult = Detector.Detect(image, hints, multiple);
             foreach (ResultPoint[] points in detectorResult.Points)
             {
-                DecoderResult decoderResult = PDF417ScanningDecoder.decode(detectorResult.Bits, points[4], points[5],
+                DecoderResult decoderResult = PDF417ScanningDecoder.Decode(detectorResult.Bits, points[4], points[5],
                                                                            points[6], points[7], GetMinCodewordWidth(points), GetMaxCodewordWidth(points));
                 if (decoderResult == null)
                 {

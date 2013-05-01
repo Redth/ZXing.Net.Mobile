@@ -288,5 +288,7 @@
     <Compile Include="xamarin\BitmapLuminanceSource.monoandroid.cs" />
     <Compile Include="pdf417\PDF417Common.cs" />
     <Compile Include="pdf417\PDF417ResultMetadata.cs" />
+    <Compile Include="pdf417\detector\PDF417DetectorResult.cs" />
+    <Compile Include="pdf417\detector\BitMatrixExtensions.cs" />
   </ItemGroup>
 </Project>

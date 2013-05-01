@@ -15,19 +15,31 @@
 //  */
 using System;
 
-namespace ZXing.PDF417
+using ZXing.Common;
+using System.Collections.Generic;
+
+namespace ZXing.PDF417.Internal
 {
     /// <summary>
-    /// PDF 417 result meta data.  Skipped private backing stores.
+    /// PDF 417 Detector Result class.  Skipped private backing stores.
     /// <author>Guenther Grau (Java Core)</author> 
     /// <author>Stephen Furlani (C# Port)</author> 
     /// </summary>
-    public sealed class PDF417ResultMetadata
+    public sealed class PDF417DetectorResult
     {
-        public int SegmentIndex { get; set; }
-        public string FileId { get; set; }
-        public int[] OptionalData { get; set; }
-        public bool IsLastSegment { get; set; }
+        public BitMatrix Bits { get; private set; }
+        public List<ResultPoint[]> Points { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZXing.PDF417.Internal.PDF417DetectorResult"/> class.
+        /// </summary>
+        /// <param name="bits">Bits.</param>
+        /// <param name="points">Points.</param>
+        public PDF417DetectorResult(BitMatrix bits, List<ResultPoint[]> points)
+        {
+            this.Bits = bits;
+            this.Points = points;
+        }
     }
 }
 
