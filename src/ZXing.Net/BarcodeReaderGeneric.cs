@@ -411,7 +411,7 @@ namespace ZXing
             }
             else
             {
-               result = Reader.decode(binaryBitmap, hints);
+               result = Reader.Decode(binaryBitmap, hints);
                usePreviousState = true;
             }
 
@@ -426,7 +426,7 @@ namespace ZXing
                   }
                   else
                   {
-                     result = Reader.decode(binaryBitmap, hints);
+                     result = Reader.Decode(binaryBitmap, hints);
                      usePreviousState = true;
                   }
                }

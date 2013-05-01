@@ -48,7 +48,7 @@ namespace ZXing
       /// <returns> The contents of the image
       /// </returns>
       /// <throws>  ReaderException Any errors which occurred </throws>
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
          Hints = null;
          return decodeInternal(image);
@@ -64,7 +64,7 @@ namespace ZXing
       /// <returns> The contents of the image
       /// </returns>
       /// <throws>  ReaderException Any errors which occurred </throws>
-      public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
          Hints = hints;
          return decodeInternal(image);
@@ -178,13 +178,13 @@ namespace ZXing
          }
       }
 
-      public void reset()
+      public void Reset()
       {
          if (readers != null)
          {
             foreach (var reader in readers)
             {
-               reader.reset();
+               reader.Reset();
             }
          }
       }
@@ -200,8 +200,8 @@ namespace ZXing
             for (var index = 0; index < readers.Count; index++)
             {
                var reader = readers[index];
-               reader.reset();
-               var result = reader.decode(image, hints);
+               reader.Reset();
+               var result = reader.Decode(image, hints);
                if (result != null)
                {
                   // found a barcode, pushing the successful reader up front

@@ -44,9 +44,9 @@ namespace ZXing.OneD
       /// <returns>
       /// String which the barcode encodes
       /// </returns>
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
-         return decode(image, null);
+         return Decode(image, null);
       }
 
       /// <summary>
@@ -62,7 +62,7 @@ namespace ZXing.OneD
       /// <returns>
       /// String which the barcode encodes
       /// </returns>
-      virtual public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      virtual public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
          var result = doDecode(image, hints);
          if (result == null)
@@ -104,7 +104,7 @@ namespace ZXing.OneD
       /// Resets any internal state the implementation has after a decode, to prepare it
       /// for reuse.
       /// </summary>
-      virtual public void reset()
+      virtual public void Reset()
       {
          // do nothing
       }

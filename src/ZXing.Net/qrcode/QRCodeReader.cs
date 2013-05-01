@@ -47,9 +47,9 @@ namespace ZXing.QrCode
       ///
       /// <returns>a String representing the content encoded by the QR code</returns>
       /// </summary>
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
-         return decode(image, null);
+         return Decode(image, null);
       }
 
       /// <summary>
@@ -64,7 +64,7 @@ namespace ZXing.QrCode
       /// <returns>
       /// String which the barcode encodes
       /// </returns>
-      public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
          DecoderResult decoderResult;
          ResultPoint[] points;
@@ -110,7 +110,7 @@ namespace ZXing.QrCode
       /// Resets any internal state the implementation has after a decode, to prepare it
       /// for reuse.
       /// </summary>
-      public void reset()
+      public void Reset()
       {
          // do nothing
       }

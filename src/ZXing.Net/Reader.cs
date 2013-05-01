@@ -36,7 +36,7 @@ namespace ZXing
       /// </summary>
       /// <param name="image">image of barcode to decode</param>
       /// <returns>String which the barcode encodes</returns>
-      Result decode(BinaryBitmap image);
+      Result Decode(BinaryBitmap image);
 
       /// <summary> Locates and decodes a barcode in some format within an image. This method also accepts
       /// hints, each possibly associated to some data, which may help the implementation decode.
@@ -48,12 +48,12 @@ namespace ZXing
       /// anything with these hints.
       /// </param>
       /// <returns>String which the barcode encodes</returns>
-      Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints);
+      Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints);
 
       /// <summary>
       /// Resets any internal state the implementation has after a decode, to prepare it
       /// for reuse.
       /// </summary>
-      void reset();
+      void Reset();
    }
 }

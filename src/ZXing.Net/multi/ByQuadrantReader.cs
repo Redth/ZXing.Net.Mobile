@@ -35,12 +35,12 @@ namespace ZXing.Multi
          this.@delegate = @delegate;
       }
 
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
-         return decode(image, null);
+         return Decode(image, null);
       }
 
-      public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
          int width = image.Width;
          int height = image.Height;
@@ -48,34 +48,34 @@ namespace ZXing.Multi
          int halfHeight = height/2;
 
          var topLeft = image.crop(0, 0, halfWidth, halfHeight);
-         var result = @delegate.decode(topLeft, hints);
+         var result = @delegate.Decode(topLeft, hints);
          if (result != null)
             return result;
 
          var topRight = image.crop(halfWidth, 0, halfWidth, halfHeight);
-         result = @delegate.decode(topRight, hints);
+         result = @delegate.Decode(topRight, hints);
          if (result != null)
             return result;
 
          var bottomLeft = image.crop(0, halfHeight, halfWidth, halfHeight);
-         result = @delegate.decode(bottomLeft, hints);
+         result = @delegate.Decode(bottomLeft, hints);
          if (result != null)
             return result;
 
          var bottomRight = image.crop(halfWidth, halfHeight, halfWidth, halfHeight);
-         result = @delegate.decode(bottomRight, hints);
+         result = @delegate.Decode(bottomRight, hints);
          if (result != null)
             return result;
 
          int quarterWidth = halfWidth/2;
          int quarterHeight = halfHeight/2;
          var center = image.crop(quarterWidth, quarterHeight, halfWidth, halfHeight);
-         return @delegate.decode(center, hints);
+         return @delegate.Decode(center, hints);
       }
 
-      public void reset()
+      public void Reset()
       {
-         @delegate.reset();
+         @delegate.Reset();
       }
    }
 }

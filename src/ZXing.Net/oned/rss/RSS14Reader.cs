@@ -125,7 +125,7 @@ namespace ZXing.OneD.RSS
       /// <summary>
       /// Resets this instance.
       /// </summary>
-      public override void reset()
+      public override void Reset()
       {
          possibleLeftPairs.Clear();
          possibleRightPairs.Clear();

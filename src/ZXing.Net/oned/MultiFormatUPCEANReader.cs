@@ -131,11 +131,11 @@ namespace ZXing.OneD
       /// Resets any internal state the implementation has after a decode, to prepare it
       /// for reuse.
       /// </summary>
-      public override void reset()
+      public override void Reset()
       {
          foreach (Reader reader in readers)
          {
-            reader.reset();
+            reader.Reset();
          }
       }
    }

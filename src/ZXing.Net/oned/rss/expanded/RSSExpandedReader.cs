@@ -139,7 +139,7 @@ namespace ZXing.OneD.RSS.Expanded
       /// <summary>
       /// Resets this instance.
       /// </summary>
-      public override void reset()
+      public override void Reset()
       {
          pairs.Clear();
          rows.Clear();

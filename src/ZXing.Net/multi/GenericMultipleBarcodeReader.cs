@@ -85,7 +85,7 @@ namespace ZXing.Multi
             return;
          }
 
-         Result result = _delegate.decode(image, hints);
+         Result result = _delegate.Decode(image, hints);
          if (result == null)
             return;
 
@@ -179,9 +179,9 @@ namespace ZXing.Multi
       /// <returns>
       /// String which the barcode encodes
       /// </returns>
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
-         return _delegate.decode(image);
+         return _delegate.Decode(image);
       }
 
       /// <summary>
@@ -196,18 +196,18 @@ namespace ZXing.Multi
       /// <returns>
       /// String which the barcode encodes
       /// </returns>
-      public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
-         return _delegate.decode(image, hints);
+         return _delegate.Decode(image, hints);
       }
 
       /// <summary>
       /// Resets any internal state the implementation has after a decode, to prepare it
       /// for reuse.
       /// </summary>
-      public void reset()
+      public void Reset()
       {
-         _delegate.reset();
+         _delegate.Reset();
       }
    }
 }

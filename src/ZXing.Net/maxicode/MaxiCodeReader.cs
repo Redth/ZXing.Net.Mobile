@@ -38,9 +38,9 @@ namespace ZXing.Maxicode
       /// <returns>a String representing the content encoded by the MaxiCode</returns>
       /// <exception cref="FormatException">if a MaxiCode cannot be decoded</exception>
       /// </summary>
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
-         return decode(image, null);
+         return Decode(image, null);
       }
 
       /// <summary>
@@ -55,7 +55,7 @@ namespace ZXing.Maxicode
       /// <returns>
       /// String which the barcode encodes
       /// </returns>
-      public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
          DecoderResult decoderResult;
          if (hints != null && hints.ContainsKey(DecodeHintType.PURE_BARCODE))
@@ -83,7 +83,7 @@ namespace ZXing.Maxicode
          return result;
       }
 
-      public void reset()
+      public void Reset()
       {
          // do nothing
       }

@@ -5,12 +5,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.MonoForAnd
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.monoandroid", "ZXing.Net\zxing.monoandroid.csproj", "{8971B59D-78F1-49BA-808D-CBADB37F571F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoAppTest", "MonoAppTest\MonoAppTest.csproj", "{1B5FA8B7-4B22-4043-A80C-18CB38545453}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B5FA8B7-4B22-4043-A80C-18CB38545453}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B5FA8B7-4B22-4043-A80C-18CB38545453}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B5FA8B7-4B22-4043-A80C-18CB38545453}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B5FA8B7-4B22-4043-A80C-18CB38545453}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8971B59D-78F1-49BA-808D-CBADB37F571F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8971B59D-78F1-49BA-808D-CBADB37F571F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8971B59D-78F1-49BA-808D-CBADB37F571F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -21,7 +27,11 @@ Global
 		{D72228AC-C356-4E1A-B56F-91C9A25F7286}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ZXing.Net.Mobile\ZXing.Net.Mobile.MonoForAndroid.csproj
+		StartupItem = MonoAppTest\MonoAppTest.csproj
+		Policies = $0
+		$0.StandardHeader = $1
+		$1.Text = @/*\n * Copyright 2009 ZXing authors\n *\n * Licensed under the Apache License, Version 2.0 (the "License");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an "AS IS" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */
+		$1.IncludeInNewFiles = True
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

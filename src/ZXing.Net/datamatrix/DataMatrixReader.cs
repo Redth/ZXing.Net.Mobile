@@ -38,12 +38,12 @@ namespace ZXing.Datamatrix
       /// <returns>a String representing the content encoded by the Data Matrix code</returns>
       /// <exception cref="FormatException">if a Data Matrix code cannot be decoded</exception>
       /// </summary>
-      public Result decode(BinaryBitmap image)
+      public Result Decode(BinaryBitmap image)
       {
-         return decode(image, null);
+         return Decode(image, null);
       }
 
-      public Result decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
+      public Result Decode(BinaryBitmap image, IDictionary<DecodeHintType, object> hints)
       {
          DecoderResult decoderResult;
          ResultPoint[] points;
@@ -81,7 +81,7 @@ namespace ZXing.Datamatrix
          return result;
       }
 
-      public void reset()
+      public void Reset()
       {
          // do nothing
       }

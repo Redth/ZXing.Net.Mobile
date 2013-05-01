@@ -12,6 +12,7 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AssemblyName>zxing.monoandroid</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -285,5 +286,7 @@
     <Compile Include="WriterException.cs" />
     <Compile Include="xamarin\BitmapRenderer.monoandroid.cs" />
     <Compile Include="xamarin\BitmapLuminanceSource.monoandroid.cs" />
+    <Compile Include="pdf417\PDF417Common.cs" />
+    <Compile Include="pdf417\PDF417ResultMetaData.cs" />
   </ItemGroup>
 </Project>
