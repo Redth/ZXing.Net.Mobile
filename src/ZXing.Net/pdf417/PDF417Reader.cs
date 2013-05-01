@@ -55,6 +55,7 @@ namespace ZXing.PDF417
         /// <summary>
         /// Locates and decodes a barcode in some format within an image. This method also accepts
         /// hints, each possibly associated to some data, which may help the implementation decode.
+        /// **Note** this will return the FIRST barcode discovered if there are many.
         /// </summary>
         /// <param name="image">image of barcode to decode</param>
         /// <param name="hints">passed as a <see cref="IDictionary{TKey, TValue}"/> from <see cref="DecodeHintType"/>
@@ -67,28 +68,14 @@ namespace ZXing.PDF417
         public Result Decode(BinaryBitmap image,
                            IDictionary<DecodeHintType, object> hints)
         {
-            DecoderResult decoderResult;
-            ResultPoint[] points;
-            if (hints != null && hints.ContainsKey(DecodeHintType.PURE_BARCODE))
+            Result[] results = Decode(image, hints, false);
+            if (results.Length == 0)
             {
-                BitMatrix bits = ExtractPureBits(image.BlackMatrix);
-                if (bits == null)
-                    return null;
-                decoderResult = decoder.decode(bits);
-                points = NO_POINTS;
+                return null;
             } else
             {
-                DetectorResult detectorResult = new Detector(image).detect(hints);
-                if (detectorResult == null || detectorResult.Bits == null)
-                    return null;
-                decoderResult = decoder.decode(detectorResult.Bits);
-                points = detectorResult.Points;
+                return results[0]; // First barcode discovered.
             }
-            if (decoderResult == null)
-                return null;
-
-            return new Result(decoderResult.Text, decoderResult.RawBytes, points,
-             BarcodeFormat.PDF_417);
         }
 
         /// <summary>
