@@ -37,11 +37,6 @@ namespace ZXing.PDF417
         private static readonly ResultPoint[] NO_POINTS = new ResultPoint[0];
 
         /// <summary>
-        /// Internal Decoder()
-        /// </summary>
-        private readonly Decoder decoder = new Decoder();
-
-        /// <summary>
         /// Locates and decodes a PDF417 code in an image.
         ///
         /// <returns>a String representing the content encoded by the PDF417 code</returns>

@@ -44,10 +44,305 @@ namespace ZXing.PDF417.Internal
             this.IsLeft = isLeft;
         }
 
+        /// <summary>
+        /// Sets the Row Numbers as Inidicator Columns
+        /// </summary>
         public void SetRowNumbers()
         {
-            (from cw in Codewords where cw != null select cw.SetRowNumberAsRowIndicatorColumn());
-            Codewords.Where( cw => cw != null).Select( cw => { cw.SetRowNumberAsRowIndicatorColumn(); });
+            Codewords.Where(cw => cw != null).Select(cw => cw.SetRowNumberAsRowIndicatorColumn());
+            // (from item in items where item != null do item.SomeMethod())
+        }
+
+
+        /// <summary>
+        /// TODO implement properly
+        /// TODO maybe we should add missing codewords to store the correct row number to make
+        /// finding row numbers for other columns easier
+        /// use row height count to make detection of invalid row numbers more reliable
+        /// </summary>
+        /// <returns>The indicator column row numbers.</returns>
+        /// <param name="metadata">Metadata.</param>
+        public int AdjustCompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
+        {
+            SetRowNumbers(); // Assign this as an indicator column
+            RemoveIncorrectCodewords(Codewords, metadata);
+
+            ResultPoint top = IsLeft ? Box.TopLeft : Box.TopRight;
+            ResultPoint bottom = IsLeft ? Box.BottomLeft : Box.BottomRight;
+
+            int firstRow = IndexForRow((int)top.Y);
+            int lastRow = IndexForRow((int)bottom.Y);
+
+            // We need to be careful using the average row height.  
+            // Barcode could be skewed so that we have smaller and taller rows
+            float averageRowHeight = (lastRow - firstRow) / (float)metadata.RowCount;
+
+            // initialize loop
+            int barcodeRow = -1;
+            int maxRowHeight = 1;
+            int currentRowHeight = 0;
+
+            for (int codewordRow = firstRow; codewordRow < lastRow; codewordRow++)
+            {
+                var codeword = Codewords[codewordRow];
+                if (codeword == null)
+                {
+                    continue;
+                }
+
+                //      float expectedRowNumber = (codewordsRow - firstRow) / averageRowHeight;
+                //      if (Math.abs(codeword.getRowNumber() - expectedRowNumber) > 2) {
+                //        SimpleLog.log(LEVEL.WARNING,
+                //            "Removing codeword, rowNumberSkew too high, codeword[" + codewordsRow + "]: Expected Row: " +
+                //                expectedRowNumber + ", RealRow: " + codeword.getRowNumber() + ", value: " + codeword.getValue());
+                //        codewords[codewordsRow] = null;
+                //      }
+
+                int rowDifference = codeword.RowNumber - barcodeRow;
+
+                // TODO improve handling with case where first row indicator doesn't start with 0
+
+                if (rowDifference == 0)
+                {
+                    currentRowHeight ++;
+                } else if (rowDifference == 1)
+                {
+                    maxRowHeight = Math.Max(maxRowHeight, currentRowHeight);
+                    currentRowHeight = 1;
+                    barcodeRow = codeword.RowNumber;
+                } else if (rowDifference < 0)
+                {
+                    Codewords[codewordRow] = null;
+                } else if (codeword.RowNumber >= metadata.RowCount)
+                {
+                    Codewords[codewordRow] = null;
+                } else if (rowDifference > codewordRow)
+                {
+                    Codewords[codewordRow] = null;
+                } else
+                {
+                    int checkedRows;
+                    if (maxRowHeight > 2)
+                    {
+                        checkedRows = (maxRowHeight - 2) * rowDifference;
+                    } else
+                    {
+                        checkedRows = rowDifference;
+                    }
+                    bool closePreviousCodewordFound = checkedRows > codewordRow;
+                    for (int i = 1; i <= checkedRows && !closePreviousCodewordFound; i++)
+                    {
+                        closePreviousCodewordFound = Codewords[codewordRow - i] != null;
+                    }
+                    if (closePreviousCodewordFound)
+                    {
+                        Codewords[codewordRow] = null;
+                    } else
+                    {
+                        barcodeRow = codeword.RowNumber;
+                        currentRowHeight = 1;
+                    }
+                }
+
+            }
+            return (int)(averageRowHeight + 0.5);
+        }
+
+        /// <summary>
+        /// Adjusts the in omplete indicator column row numbers.
+        /// </summary>
+        /// <param name="metadata">Metadata.</param>
+        void AdjustInCompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
+        {
+            ResultPoint top = IsLeft ? Box.TopLeft : Box.TopRight;
+            ResultPoint bottom = IsLeft ? Box.BottomLeft : Box.BottomRight;
+            
+            int firstRow = IndexForRow((int)top.Y);
+            int lastRow = IndexForRow((int)bottom.Y);
+            
+            // We need to be careful using the average row height.  
+            // Barcode could be skewed so that we have smaller and taller rows
+            float averageRowHeight = (lastRow - firstRow) / (float)metadata.RowCount;
+
+            // initialize loop
+            int barcodeRow = -1;
+            int maxRowHeight = 1;
+            int currentRowHeight = 0;
+            
+            for (int codewordRow = firstRow; codewordRow < lastRow; codewordRow++)
+            {
+                var codeword = Codewords[codewordRow];
+                if (codeword == null)
+                {
+                    continue;
+                }
+
+                codeword.SetRowNumberAsRowIndicatorColumn();
+
+                int rowDifference = codeword.RowNumber - barcodeRow;
+
+                if (rowDifference == 0)
+                {
+                    currentRowHeight++;
+                } else if (rowDifference == 1)
+                {
+                    maxRowHeight = Math.Max(maxRowHeight, currentRowHeight);
+                    currentRowHeight = 1;
+                    barcodeRow = codeword.RowNumber;
+                } else if (codeword.RowNumber > metadata.RowCount)
+                {
+                    Codewords[codewordRow] = null;
+                } else
+                {
+                    barcodeRow = codeword.RowNumber;
+                    currentRowHeight = 1;
+                }
+
+            }
+            return (int)(averageRowHeight + 0.5);
+        }
+
+        /// <summary>
+        /// Gets the row heights.
+        /// </summary>
+        /// <returns>The row heights.</returns>
+        public int[] GetRowHeights()
+        {
+            BarcodeMetadata metadata = GetBarcodeMetadata();
+            if (metadata == null)
+            {
+                return null;
+            }
+            AdjustInCompleteIndicatorColumnRowNumbers(metadata);
+            int[] result = Enumerable.Repeat(0, metadata.RowCount).ToArray();
+            foreach (var word in Codewords)
+            {
+                if (word != null)
+                {
+                    result[word.RowNumber]++;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the barcode metadata.
+        /// </summary>
+        /// <returns>The barcode metadata.</returns>
+        BarcodeMetadata GetBarcodeMetadata()
+        {
+            BarcodeValue barcodeColumnCount = new BarcodeValue();
+            BarcodeValue barcodeRowCountUpperPart = new BarcodeValue();
+            BarcodeValue barcodeRowCountLowerPart = new BarcodeValue();
+            BarcodeValue barcodeECLevel = new BarcodeValue();
+            foreach (Codeword codeword in Codewords)
+            {
+                if (codeword == null)
+                {
+                    continue;
+                }
+                codeword.SetRowNumberAsRowIndicatorColumn();
+                int rowIndicatorValue = codeword.Value % 30;
+                int codewordRowNumber = codeword.RowNumber;
+                if (!IsLeft)
+                {
+                    codewordRowNumber += 2;
+                }
+                switch (codewordRowNumber % 3)
+                {
+                    case 0:
+                        barcodeRowCountUpperPart.AddConfidenceToValue(rowIndicatorValue * 3 + 1);
+                        break;
+                    case 1:
+                        barcodeECLevel.AddConfidenceToValue(rowIndicatorValue / 3);
+                        barcodeRowCountLowerPart.AddConfidenceToValue(rowIndicatorValue % 3);
+                        break;
+                    case 2:
+                        barcodeColumnCount.AddConfidenceToValue(rowIndicatorValue + 1);
+                        break;
+                }
+            }
+            // Maybe we should check if we have ambiguous values?
+            if ((barcodeColumnCount.GetConfidentValues().Length == 0) ||
+                (barcodeRowCountUpperPart.GetConfidentValues().Length == 0) ||
+                (barcodeRowCountLowerPart.GetConfidentValues().Length == 0) ||
+                (barcodeECLevel.GetConfidentValues().Length == 0) ||
+                barcodeColumnCount.GetConfidentValues()[0] < 1 ||
+                barcodeRowCountUpperPart.GetConfidentValues()[0] + barcodeRowCountLowerPart.GetConfidentValues()[0] < PDF417Common.MIN_ROWS_IN_BARCODE ||
+                barcodeRowCountUpperPart.GetConfidentValues()[0] + barcodeRowCountLowerPart.GetConfidentValues()[0] > PDF417Common.MAX_ROWS_IN_BARCODE)
+            {
+                return null;
+            }
+            BarcodeMetadata barcodeMetadata = new BarcodeMetadata(barcodeColumnCount.GetConfidentValues()[0],
+                                                                  barcodeRowCountUpperPart.GetConfidentValues()[0], 
+                                                                  barcodeRowCountLowerPart.GetConfidentValues()[0], 
+                                                                  barcodeECLevel.GetConfidentValues()[0]);
+            RemoveIncorrectCodewords(Codewords, barcodeMetadata);
+            return barcodeMetadata;
+        }
+
+        /// <summary>
+        /// Prune the codewords which do not match the metadata
+        /// TODO Maybe we should keep the incorrect codewords for the start and end positions?
+        /// </summary>
+        /// <param name="codewords">Codewords.</param>
+        /// <param name="metadata">Metadata.</param>
+        private void RemoveIncorrectCodewords(ref Codeword[] codewords, BarcodeMetadata metadata)
+        {
+            for (int row = 0; row < codewords.Length; row++)
+            {
+                var codeword = codewords[row];
+                int indicatorValue = codeword.Value % 30;
+                int rowNumber = codeword.RowNumber;
+
+                // Row does not exist in the metadata
+                if (rowNumber > metadata.RowCount)
+                {
+                    codewords[row] = null; // remove this.
+                    continue;
+                }
+
+                if (!IsLeft)
+                {
+                    rowNumber += 2;
+                }
+
+                switch (rowNumber % 3)
+                {
+                    default:
+                    case 0:
+                        if (indicatorValue * 3 + 1 != metadata.RowCountUpper)
+                        {
+                            codewords[row] = null;
+                        }
+                        break;
+
+                    case 1:
+                        if (indicatorValue % 3 != metadata.RowCountLower ||
+                            indicatorValue / 3 != metadata.ErrorCorrectionLevel)
+                        {
+                            codewords[row] = null;
+                        }
+                        break;
+
+                    case 2:
+                        if (indicatorValue + 1 != metadata.ColumnCount)
+                        {
+                            codewords[row] = null;
+                        }
+                        break;
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResultRowIndicatorColumn"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResultRowIndicatorColumn"/>.</returns>
+        public override string ToString()
+        {
+            return (IsLeft ? "Is Left\n" : "Is Right\n") + base.ToString();
         }
 
     }
