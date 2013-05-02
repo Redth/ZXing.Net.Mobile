@@ -41,6 +41,10 @@ namespace ZXing.PDF417.Internal
             this.DetectionResultColumns = new DetectionResultColumn[ColumnCount + 2];
         }
 
+        /// <summary>
+        /// Returns the DetectionResult Columns.  This does a fair bit of calculation, so call it sparingly.
+        /// </summary>
+        /// <returns>The detection result columns.</returns>
         DetectionResultColumn[] GetDetectionResultColumns()
         {
             AdjustIndicatorColumnRowNumbers(DetectionResultColumns[0]);
@@ -299,7 +303,7 @@ namespace ZXing.PDF417.Internal
             }
             foreach (Codeword otherCodeword in otherCodewords)
             {
-                if (adjustRowNumber(codeword, otherCodeword))
+                if (AdjustRowNumber(codeword, otherCodeword))
                 {
                     return;
                 }
@@ -311,7 +315,7 @@ namespace ZXing.PDF417.Internal
         /// <returns><c>true</c>, if row number was adjusted, <c>false</c> otherwise.</returns>
         /// <param name="codeword">Codeword.</param>
         /// <param name="otherCodeword">Other codeword.</param>
-        private static bool adjustRowNumber(Codeword codeword, Codeword otherCodeword)
+        private static bool AdjustRowNumber(Codeword codeword, Codeword otherCodeword)
         {
             if (otherCodeword == null)
             {
