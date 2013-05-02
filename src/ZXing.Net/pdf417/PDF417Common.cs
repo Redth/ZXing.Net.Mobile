@@ -29,6 +29,8 @@ namespace ZXing.PDF417
     /// </summary>
     public sealed class PDF417Common
     {
+        public static readonly int INVALID_CODEWORD = -1;
+
         public static readonly int NUMBER_OF_CODEWORDS = 929;
         /// <summary>
         /// Maximum Codewords (Data + Error).
@@ -101,7 +103,7 @@ namespace ZXing.PDF417
             int i = FindCodewordIndex(sym);
             if (i == -1)
             {
-                return -1;
+                return INVALID_CODEWORD;
             }
             return (CODEWORD_TABLE[i] - 1) % NUMBER_OF_CODEWORDS;
         }
