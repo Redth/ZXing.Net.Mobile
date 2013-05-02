@@ -146,7 +146,7 @@ namespace ZXing.PDF417.Internal
             // Too many errors or EC Codewords is corrupted
             return false;
          }
-         return errorCorrection.decode(codewords, numECCodewords, erasures);
+         return errorCorrection.Decode(codewords, numECCodewords, erasures);
       }
    }
 }

@@ -87,7 +87,7 @@ namespace ZXing.PDF417.Internal
             return new PDF417DetectorResult(bitMatrix, barcodeCoordinates);
         }
         /// <summary>
-        /// Detects PDF417 codes in an image. Only checks 0 degree rotation
+        /// Detects PDF417 codes in an image. Only checks 0 degree rotation (so rotate the matrix and check again outside of this method)
         /// </summary>
         /// <param name="multiple">multiple if true, then the image is searched for multiple codes. If false, then at most one code will be found and returned.</param>
         /// <param name="bitMatrix">bitMatrix bit matrix to detect barcodes in.</param>
@@ -257,7 +257,7 @@ namespace ZXing.PDF417.Internal
             return result;
         }
 
-        // TODO use a lambda to do the set in-place
+        // TODO use a lambda to do the counter set in-place?
         //private static readonly Converter<int, int> ConvertAllToZero = new Converter<int, int>(input => {return 0;});
 
         /// <summary>
