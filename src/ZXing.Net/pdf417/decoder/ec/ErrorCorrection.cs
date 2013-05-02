@@ -49,7 +49,7 @@ namespace ZXing.PDF417.Internal.EC
             bool error = false;
             for (int i = numECCodewords; i > 0; i--)
             {
-                int eval = poly.evaluateAt(field.Exp(i));
+                int eval = poly.EvaluateAt(field.Exp(i));
                 S[numECCodewords - i] = eval;
                 if (eval != 0)
                 {
@@ -68,7 +68,7 @@ namespace ZXing.PDF417.Internal.EC
                         field.Subtract(0, b),
                         1
                     });
-                    knownErrors = knownErrors.multiply(term);
+                    knownErrors = knownErrors.Multiply(term);
                 }
 
                 ModulusPoly syndrome = new ModulusPoly(field, S);
@@ -139,28 +139,28 @@ namespace ZXing.PDF417.Internal.EC
                 }
                 r = rLastLast;
                 ModulusPoly q = field.getZero();
-                int denominatorLeadingTerm = rLast.getCoefficient(rLast.Degree);
+                int denominatorLeadingTerm = rLast.GetCoefficient(rLast.Degree);
                 int dltInverse = field.Inverse(denominatorLeadingTerm);
                 while (r.Degree >= rLast.Degree && !r.isZero)
                 {
                     int degreeDiff = r.Degree - rLast.Degree;
-                    int scale = field.Multiply(r.getCoefficient(r.Degree), dltInverse);
-                    q = q.add(field.BuildMonomial(degreeDiff, scale));
-                    r = r.subtract(rLast.multiplyByMonomial(degreeDiff, scale));
+                    int scale = field.Multiply(r.GetCoefficient(r.Degree), dltInverse);
+                    q = q.Add(field.BuildMonomial(degreeDiff, scale));
+                    r = r.Subtract(rLast.MultiplyByMonomial(degreeDiff, scale));
                 }
 
-                t = q.multiply(tLast).subtract(tLastLast).negative();
+                t = q.Multiply(tLast).Subtract(tLastLast).GetNegative();
             }
 
-            int sigmaTildeAtZero = t.getCoefficient(0);
+            int sigmaTildeAtZero = t.GetCoefficient(0);
             if (sigmaTildeAtZero == 0)
             {
                 return null;
             }
 
             int inverse = field.Inverse(sigmaTildeAtZero);
-            ModulusPoly sigma = t.multiply(inverse);
-            ModulusPoly omega = r.multiply(inverse);
+            ModulusPoly sigma = t.Multiply(inverse);
+            ModulusPoly omega = r.Multiply(inverse);
             return new ModulusPoly[] { sigma, omega };
         }
 
@@ -177,7 +177,7 @@ namespace ZXing.PDF417.Internal.EC
             int e = 0;
             for (int i = 1; i < field.Size && e < numErrors; i++)
             {
-                if (errorLocator.evaluateAt(i) == 0)
+                if (errorLocator.EvaluateAt(i) == 0)
                 {
                     result[e] = field.Inverse(i);
                     e++;
@@ -206,7 +206,7 @@ namespace ZXing.PDF417.Internal.EC
             for (int i = 1; i <= errorLocatorDegree; i++)
             {
                 formalDerivativeCoefficients[errorLocatorDegree - i] =
-                field.Multiply(i, errorLocator.getCoefficient(i));
+                field.Multiply(i, errorLocator.GetCoefficient(i));
             }
             ModulusPoly formalDerivative = new ModulusPoly(field, formalDerivativeCoefficients);
 
@@ -216,8 +216,8 @@ namespace ZXing.PDF417.Internal.EC
             for (int i = 0; i < s; i++)
             {
                 int xiInverse = field.Inverse(errorLocations[i]);
-                int numerator = field.Subtract(0, errorEvaluator.evaluateAt(xiInverse));
-                int denominator = field.Inverse(formalDerivative.evaluateAt(xiInverse));
+                int numerator = field.Subtract(0, errorEvaluator.EvaluateAt(xiInverse));
+                int denominator = field.Inverse(formalDerivative.EvaluateAt(xiInverse));
                 result[i] = field.Multiply(numerator, denominator);
             }
             return result;

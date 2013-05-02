@@ -20,7 +20,7 @@ using System.Text;
 namespace ZXing.PDF417.Internal.EC
 {
     /// <summary>
-    /// @see com.google.zxing.common.reedsolomon.GenericGFPoly
+    /// <see cref="com.google.zxing.common.reedsolomon.GenericGFPoly"/>
     /// </summary>
     /// <author>Sean Owen</author>
     internal sealed class ModulusPoly
@@ -46,7 +46,7 @@ namespace ZXing.PDF417.Internal.EC
                 }
                 if (firstNonZero == coefficientsLength)
                 {
-                    this.coefficients = field.getZero().coefficients;
+                    this.coefficients = field.Zero.coefficients;
                 } else
                 {
                     this.coefficients = new int[coefficientsLength - firstNonZero];
@@ -62,6 +62,10 @@ namespace ZXing.PDF417.Internal.EC
             }
         }
 
+        /// <summary>
+        /// Gets the coefficients.
+        /// </summary>
+        /// <value>The coefficients.</value>
         internal int[] Coefficients
         {
             get
@@ -86,7 +90,7 @@ namespace ZXing.PDF417.Internal.EC
         /// </summary>
         /// <value>true if this polynomial is the monomial "0"
         /// </value>
-        internal bool isZero
+        internal bool IsZero
         {
             get { return coefficients[0] == 0; }
         }
@@ -96,7 +100,7 @@ namespace ZXing.PDF417.Internal.EC
         /// </summary>
         /// <param name="degree">The degree.</param>
         /// <returns>coefficient of x^degree term in this polynomial</returns>
-        internal int getCoefficient(int degree)
+        internal int GetCoefficient(int degree)
         {
             return coefficients[coefficients.Length - 1 - degree];
         }
@@ -106,12 +110,12 @@ namespace ZXing.PDF417.Internal.EC
         /// </summary>
         /// <param name="a">A.</param>
         /// <returns>evaluation of this polynomial at a given point</returns>
-        internal int evaluateAt(int a)
+        internal int EvaluateAt(int a)
         {
             if (a == 0)
             {
                 // Just return the x^0 coefficient
-                return getCoefficient(0);
+                return GetCoefficient(0);
             }
             int size = coefficients.Length;
             int result = 0;
@@ -132,7 +136,11 @@ namespace ZXing.PDF417.Internal.EC
             return result;
         }
 
-        internal ModulusPoly add(ModulusPoly other)
+        /// <summary>
+        /// Adds another Modulus
+        /// </summary>
+        /// <param name="other">Other.</param>
+        internal ModulusPoly Add(ModulusPoly other)
         {
             if (!field.Equals(other.field))
             {
@@ -168,7 +176,11 @@ namespace ZXing.PDF417.Internal.EC
             return new ModulusPoly(field, sumDiff);
         }
 
-        internal ModulusPoly subtract(ModulusPoly other)
+        /// <summary>
+        /// Subtract another Modulus
+        /// </summary>
+        /// <param name="other">Other.</param>
+        internal ModulusPoly Subtract(ModulusPoly other)
         {
             if (!field.Equals(other.field))
             {
@@ -178,10 +190,14 @@ namespace ZXing.PDF417.Internal.EC
             {
                 return this;
             }
-            return add(other.negative());
+            return Add(other.GetNegative());
         }
 
-        internal ModulusPoly multiply(ModulusPoly other)
+        /// <summary>
+        /// Multiply by another Modulus
+        /// </summary>
+        /// <param name="other">Other.</param>
+        internal ModulusPoly Multiply(ModulusPoly other)
         {
             if (!field.Equals(other.field))
             {
@@ -189,7 +205,7 @@ namespace ZXing.PDF417.Internal.EC
             }
             if (IsZero || other.IsZero)
             {
-                return field.getZero();
+                return field.Zero;
             }
             int[] aCoefficients = this.coefficients;
             int aLength = aCoefficients.Length;
@@ -207,7 +223,10 @@ namespace ZXing.PDF417.Internal.EC
             return new ModulusPoly(field, product);
         }
 
-        internal ModulusPoly negative()
+        /// <summary>
+        /// Returns a Negative version of this instance
+        /// </summary>
+        internal ModulusPoly GetNegative()
         {
             int size = coefficients.Length;
             int[] negativeCoefficients = new int[size];
@@ -218,11 +237,15 @@ namespace ZXing.PDF417.Internal.EC
             return new ModulusPoly(field, negativeCoefficients);
         }
 
-        internal ModulusPoly multiply(int scalar)
+        /// <summary>
+        /// Multiply by a Scalar.
+        /// </summary>
+        /// <param name="scalar">Scalar.</param>
+        internal ModulusPoly Multiply(int scalar)
         {
             if (scalar == 0)
             {
-                return field.getZero();
+                return field.Zero;
             }
             if (scalar == 1)
             {
@@ -237,7 +260,13 @@ namespace ZXing.PDF417.Internal.EC
             return new ModulusPoly(field, product);
         }
 
-        internal ModulusPoly multiplyByMonomial(int degree, int coefficient)
+        /// <summary>
+        /// Multiplies by a Monomial
+        /// </summary>
+        /// <returns>The by monomial.</returns>
+        /// <param name="degree">Degree.</param>
+        /// <param name="coefficient">Coefficient.</param>
+        internal ModulusPoly MultiplyByMonomial(int degree, int coefficient)
         {
             if (degree < 0)
             {
@@ -245,7 +274,7 @@ namespace ZXing.PDF417.Internal.EC
             }
             if (coefficient == 0)
             {
-                return field.getZero();
+                return field.Zero;
             }
             int size = coefficients.Length;
             int[] product = new int[size + degree];
@@ -256,7 +285,11 @@ namespace ZXing.PDF417.Internal.EC
             return new ModulusPoly(field, product);
         }
 
-        internal ModulusPoly[] divide(ModulusPoly other)
+        /// <summary>
+        /// Divide by another modulus
+        /// </summary>
+        /// <param name="other">Other.</param>
+        internal ModulusPoly[] Divide(ModulusPoly other)
         {
             if (!field.Equals(other.field))
             {
@@ -264,34 +297,38 @@ namespace ZXing.PDF417.Internal.EC
             }
             if (other.IsZero)
             {
-                throw new ArgumentException("Divide by 0");
+                throw new DivideByZeroException();
             }
 
-            ModulusPoly quotient = field.getZero();
+            ModulusPoly quotient = field.Zero;
             ModulusPoly remainder = this;
 
-            int denominatorLeadingTerm = other.getCoefficient(other.Degree);
+            int denominatorLeadingTerm = other.GetCoefficient(other.Degree);
             int inverseDenominatorLeadingTerm = field.Inverse(denominatorLeadingTerm);
 
             while (remainder.Degree >= other.Degree && !remainder.IsZero)
             {
                 int degreeDifference = remainder.Degree - other.Degree;
-                int scale = field.Multiply(remainder.getCoefficient(remainder.Degree), inverseDenominatorLeadingTerm);
-                ModulusPoly term = other.multiplyByMonomial(degreeDifference, scale);
+                int scale = field.Multiply(remainder.GetCoefficient(remainder.Degree), inverseDenominatorLeadingTerm);
+                ModulusPoly term = other.MultiplyByMonomial(degreeDifference, scale);
                 ModulusPoly iterationQuotient = field.BuildMonomial(degreeDifference, scale);
-                quotient = quotient.add(iterationQuotient);
-                remainder = remainder.subtract(term);
+                quotient = quotient.Add(iterationQuotient);
+                remainder = remainder.Subtract(term);
             }
 
             return new ModulusPoly[] { quotient, remainder };
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.EC.ModulusPoly"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.EC.ModulusPoly"/>.</returns>
         override public String ToString()
         {
             var result = new StringBuilder(8 * Degree);
             for (int degree = Degree; degree >= 0; degree--)
             {
-                int coefficient = getCoefficient(degree);
+                int coefficient = GetCoefficient(degree);
                 if (coefficient != 0)
                 {
                     if (coefficient < 0)
