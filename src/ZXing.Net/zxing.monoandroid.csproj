@@ -228,7 +228,6 @@
     <Compile Include="oned\UPCEANReader.cs" />
     <Compile Include="oned\UPCEANWriter.cs" />
     <Compile Include="oned\UPCEReader.cs" />
-    <Compile Include="pdf417\decoder\BitMatrixParser.cs" />
     <Compile Include="pdf417\decoder\DecodedBitStreamParser.cs" />
     <Compile Include="pdf417\decoder\Decoder.cs" />
     <Compile Include="pdf417\decoder\ec\ErrorCorrection.cs" />
@@ -290,5 +289,6 @@
     <Compile Include="pdf417\PDF417ResultMetadata.cs" />
     <Compile Include="pdf417\detector\PDF417DetectorResult.cs" />
     <Compile Include="pdf417\detector\BitMatrixExtensions.cs" />
+    <Compile Include="pdf417\decoder\BitMatrixParser.cs" />
   </ItemGroup>
 </Project>
