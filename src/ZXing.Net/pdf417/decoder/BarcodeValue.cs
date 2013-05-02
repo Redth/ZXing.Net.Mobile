@@ -14,16 +14,61 @@
 //  * limitations under the License.
 //  */
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 using ZXing.Common;
 
 namespace ZXing.PDF417.Internal
 {
-    public class BarcodeValue
+    /// <summary>
+    /// A Barcode Value for the PDF417 barcode.  
+    /// The scanner will iterate through the bitmatrix, 
+    /// and given the different methods or iterations 
+    /// will increment a given barcode value's confidence.
+    /// 
+    /// When done, this will return the values of highest confidence.
+    /// </summary>
+    /// <author>Guenther Grau (Java Core)</author>
+    /// <author>Stephen Furlani (C# Port)</author>
+    public sealed class BarcodeValue
     {
-        public BarcodeValue()
+        private readonly IDictionary<int, int> confidence = new Dictionary<int, int>();
+
+        /// <summary>
+        /// Incremenets the Confidence for a given value
+        /// </summary>
+        /// <param name="value">Value.</param>
+        public void AddConfidenceToValue(int barcodeValue)
         {
+            if (confidence.ContainsKey(barcodeValue))
+            {
+                confidence[barcodeValue]++;
+            } else
+            {
+                confidence.Add(barcodeValue, 1);
+            }
         }
+
+        /// <summary>
+        /// Determines the maximum occurrence of a set value and returns all values which were set with this occurrence.
+        /// </summary>
+        /// <returns>an array of int, containing the values with the highest occurrence, or null, if no value was set.</returns>
+        public int[] GetConfidentValues()
+        {
+            int max = (from pair in confidence select pair.Value).Max();
+            return (from pair in confidence where pair.Value == max select pair.Key).ToArray();
+        }
+
+        /// <summary>
+        /// Returns the confience value for a given barcode value
+        /// </summary>
+        /// <param name="barcodeValue">Barcode value.</param>
+        public int ConfidenceForValue(int barcodeValue)
+        {
+            return confidence.ContainsKey(barcodeValue) ? confidence[barcodeValue] : 0;
+        }
+
     }
 }
 
