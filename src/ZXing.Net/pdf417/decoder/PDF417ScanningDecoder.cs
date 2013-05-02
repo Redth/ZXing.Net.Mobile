@@ -15,7 +15,9 @@
 //  */
 using System;
 
-namespace zxing.monoandroid
+using ZXing.Common;
+
+namespace ZXing.PDF417.Internal
 {
     public class PDF417ScanningDecoder
     {

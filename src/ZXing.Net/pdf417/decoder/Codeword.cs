@@ -15,11 +15,21 @@
 //  */
 using System;
 
-namespace zxing.monoandroid
+using ZXing.Common;
+
+namespace ZXing.PDF417.Internal
 {
-    public class Codeword
+    /// <summary>
+    /// Codeword.
+    /// </summary>
+    /// <author>Guenther Grau (Java Core)</author>
+    /// <author>Stephen Furlani (C# Port)</author>
+    public sealed class Codeword
     {
-        public Codeword()
+
+
+
+        public Codeword(int startX, int endX, int bucket, int value)
         {
         }
     }
