@@ -58,7 +58,7 @@ namespace ZXing.PDF417.Internal.EC
             }
             if (error)
             {
-                ModulusPoly knownErrors = field.getOne();
+                ModulusPoly knownErrors = field.One;
                 foreach (int erasure in erasures)
                 {
                     int b = field.Exp(received.Length - 1 - erasure);
@@ -120,8 +120,8 @@ namespace ZXing.PDF417.Internal.EC
 
             ModulusPoly rLast = a;
             ModulusPoly r = b;
-            ModulusPoly tLast = field.getZero();
-            ModulusPoly t = field.getOne();
+            ModulusPoly tLast = field.Zero;
+            ModulusPoly t = field.One;
 
             // Run Euclidean algorithm until r's degree is less than R/2
             while (r.Degree >= R / 2)
@@ -138,10 +138,10 @@ namespace ZXing.PDF417.Internal.EC
                     return null;
                 }
                 r = rLastLast;
-                ModulusPoly q = field.getZero();
+                ModulusPoly q = field.Zero;
                 int denominatorLeadingTerm = rLast.GetCoefficient(rLast.Degree);
                 int dltInverse = field.Inverse(denominatorLeadingTerm);
-                while (r.Degree >= rLast.Degree && !r.isZero)
+                while (r.Degree >= rLast.Degree && !r.IsZero)
                 {
                     int degreeDiff = r.Degree - rLast.Degree;
                     int scale = field.Multiply(r.GetCoefficient(r.Degree), dltInverse);

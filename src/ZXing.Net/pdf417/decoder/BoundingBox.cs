@@ -94,11 +94,11 @@ namespace ZXing.PDF417.Internal
                 BottomRight = new ResultPoint(0, TopLeft.Y);
             }
 
-            MinX = Math.Min(TopLeft.X, BottomLeft.X);
-            MinY = Math.Min(TopLeft.Y, TopRight.Y);
+            MinX = (int)Math.Min(TopLeft.X, BottomLeft.X);
+            MinY = (int)Math.Min(TopLeft.Y, TopRight.Y);
 
-            MaxX = Math.Max(TopRight.X, BottomRight.X);
-            MaxY = Math.Max(BottomLeft.Y, BottomRight.Y); // Y points down
+            MaxX = (int)Math.Max(TopRight.X, BottomRight.X);
+            MaxY = (int)Math.Max(BottomLeft.Y, BottomRight.Y); // Y points down
 
         }
 

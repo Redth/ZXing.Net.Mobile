@@ -19,6 +19,11 @@ using ZXing.Common;
 
 namespace ZXing.PDF417.Internal
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <author>Guenther Grau (Java Core)</author>
+    /// <author>Stephen Furlani (C# Port)</author>
     public class PDF417ScanningDecoder
     {
         public PDF417ScanningDecoder()

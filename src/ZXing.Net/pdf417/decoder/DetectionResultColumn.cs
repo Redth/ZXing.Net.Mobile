@@ -39,13 +39,13 @@ namespace ZXing.PDF417.Internal
         /// The Bounding Box around the column (in the BitMatrix)
         /// </summary>
         /// <value>The box.</value>
-        public sealed BoundingBox Box { get; private set; }
+        public BoundingBox Box { get; private set; }
 
         /// <summary>
         /// The Codewords the Box encodes for, offset by the Box minY.
         /// </summary>
         /// <value>The codewords.</value>
-        public sealed Codeword[] Codewords { get; private set; } // TODO convert this to a dictionary? Dictionary<imageRow, Codeword> ??
+        public Codeword[] Codewords { get; set; } // TODO convert this to a dictionary? Dictionary<imageRow, Codeword> ??
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZXing.PDF417.Internal.DetectionResultColumn"/> class.
@@ -62,7 +62,7 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         /// <returns>The Codeword Index.</returns>
         /// <param name="imageRow">Image row.</param>
-        public sealed int IndexForRow(int imageRow)
+        public int IndexForRow(int imageRow)
         {
             return imageRow - Box.MinY;
         }
@@ -72,7 +72,7 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         /// <returns>The Image Row.</returns>
         /// <param name="codewordIndex">Codeword index.</param>
-        public sealed int RowForIndex(int codewordIndex)
+        public int RowForIndex(int codewordIndex)
         {
             return Box.MinY + codewordIndex;
         }
@@ -82,7 +82,7 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         /// <returns>The codeword.</returns>
         /// <param name="imageRow">Image row.</param>
-        public sealed Codeword GetCodeword(int imageRow)
+        public Codeword GetCodeword(int imageRow)
         {
             return Codewords[IndexForRow(imageRow)];
         }
@@ -91,7 +91,7 @@ namespace ZXing.PDF417.Internal
         /// Gets the codeword closest to the specified row in the image
         /// </summary>
         /// <param name="imageRow">Image row.</param>
-        public sealed Codeword GetNearestCodeword(int imageRow)
+        public Codeword GetNearestCodeword(int imageRow)
         {
             Codeword codeword = GetCodeword(imageRow);
             if (codeword == null)

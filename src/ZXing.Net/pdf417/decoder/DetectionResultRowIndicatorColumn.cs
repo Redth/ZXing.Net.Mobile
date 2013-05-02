@@ -49,7 +49,13 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         public void SetRowNumbers()
         {
-            Codewords.Where(cw => cw != null).Select(cw => cw.SetRowNumberAsRowIndicatorColumn());
+            foreach (var cw in Codewords)
+            {
+                if (cw != null)
+                {
+                    cw.SetRowNumberAsRowIndicatorColumn();
+                }
+            }
             // (from item in items where item != null do item.SomeMethod())
         }
 
@@ -65,7 +71,7 @@ namespace ZXing.PDF417.Internal
         public int AdjustCompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
         {
             SetRowNumbers(); // Assign this as an indicator column
-            RemoveIncorrectCodewords(Codewords, metadata);
+            RemoveIncorrectCodewords(metadata);
 
             ResultPoint top = IsLeft ? Box.TopLeft : Box.TopRight;
             ResultPoint bottom = IsLeft ? Box.BottomLeft : Box.BottomRight;
@@ -152,7 +158,7 @@ namespace ZXing.PDF417.Internal
         /// Adjusts the in omplete indicator column row numbers.
         /// </summary>
         /// <param name="metadata">Metadata.</param>
-        void AdjustInCompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
+        int AdjustInCompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
         {
             ResultPoint top = IsLeft ? Box.TopLeft : Box.TopRight;
             ResultPoint bottom = IsLeft ? Box.BottomLeft : Box.BottomRight;
@@ -277,7 +283,7 @@ namespace ZXing.PDF417.Internal
                                                                   barcodeRowCountUpperPart.GetConfidentValues()[0], 
                                                                   barcodeRowCountLowerPart.GetConfidentValues()[0], 
                                                                   barcodeECLevel.GetConfidentValues()[0]);
-            RemoveIncorrectCodewords(Codewords, barcodeMetadata);
+            RemoveIncorrectCodewords(barcodeMetadata);
             return barcodeMetadata;
         }
 
@@ -287,18 +293,18 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         /// <param name="codewords">Codewords.</param>
         /// <param name="metadata">Metadata.</param>
-        private void RemoveIncorrectCodewords(ref Codeword[] codewords, BarcodeMetadata metadata)
+        private void RemoveIncorrectCodewords(BarcodeMetadata metadata)
         {
-            for (int row = 0; row < codewords.Length; row++)
+            for (int row = 0; row < Codewords.Length; row++)
             {
-                var codeword = codewords[row];
+                var codeword = Codewords[row];
                 int indicatorValue = codeword.Value % 30;
                 int rowNumber = codeword.RowNumber;
 
                 // Row does not exist in the metadata
                 if (rowNumber > metadata.RowCount)
                 {
-                    codewords[row] = null; // remove this.
+                    Codewords[row] = null; // remove this.
                     continue;
                 }
 
@@ -313,7 +319,7 @@ namespace ZXing.PDF417.Internal
                     case 0:
                         if (indicatorValue * 3 + 1 != metadata.RowCountUpper)
                         {
-                            codewords[row] = null;
+                            Codewords[row] = null;
                         }
                         break;
 
@@ -321,14 +327,14 @@ namespace ZXing.PDF417.Internal
                         if (indicatorValue % 3 != metadata.RowCountLower ||
                             indicatorValue / 3 != metadata.ErrorCorrectionLevel)
                         {
-                            codewords[row] = null;
+                            Codewords[row] = null;
                         }
                         break;
 
                     case 2:
                         if (indicatorValue + 1 != metadata.ColumnCount)
                         {
-                            codewords[row] = null;
+                            Codewords[row] = null;
                         }
                         break;
                 }

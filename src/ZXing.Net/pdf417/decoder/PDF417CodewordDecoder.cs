@@ -25,22 +25,21 @@ namespace ZXing.PDF417.Internal
     /// <author>Guenther Grau (Java Core)</author>
     /// <author>creatale GmbH (christoph.schulz@creatale.de)</author>
     /// <author>Stephen Furlani (C# Port)</author>
-    public class PDF417CodewordDecoder
+    public static class PDF417CodewordDecoder
     {
         /// <summary>
         /// The ratios table
         /// </summary>
-        private static readonly float[][] RATIOS_TABLE = new float[PDF417Common.SYMBOL_TABLE.Length][PDF417Common.BARS_IN_MODULE];
-
-        private PDF417CodewordDecoder()
-        {
-        }
+        private static readonly float[][] RATIOS_TABLE; // = new float[PDF417Common.SYMBOL_TABLE.Length][PDF417Common.BARS_IN_MODULE];
 
         /// <summary>
         /// Initializes the <see cref="ZXing.PDF417.Internal.PDF417CodewordDecoder"/> class & Pre-computes the symbol ratio table.
         /// </summary>
         static PDF417CodewordDecoder()
         {
+            // Readonly
+            RATIOS_TABLE = new float[PDF417Common.SYMBOL_TABLE.Length][PDF417Common.BARS_IN_MODULE];
+
             // Pre-computes the symbol ratio table.
             for (int i = 0; i < PDF417Common.SYMBOL_TABLE.Length; i++)
             {

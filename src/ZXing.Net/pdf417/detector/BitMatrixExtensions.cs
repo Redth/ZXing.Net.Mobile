@@ -38,10 +38,10 @@ namespace ZXing.PDF417
             {
                 firstRowBitArray = bitMatrix.getRow(y, firstRowBitArray);
 
-                Mirror(bitMatrix.getRow(height - 1 - y, secondRowBitArray), out tmpBitArray);
+                Mirror(bitMatrix.getRow(height - 1 - y, secondRowBitArray), ref tmpBitArray);
                 bitMatrix.setRow(y, tmpBitArray);
 
-                Mirror(firstRowBitArray, out tmpBitArray);
+                Mirror(firstRowBitArray, ref tmpBitArray);
                 bitMatrix.setRow(height - 1 - y, tmpBitArray);
             }
         }
@@ -52,7 +52,7 @@ namespace ZXing.PDF417
         /// </summary>
         /// <param name="input">Input.</param>
         /// <param name="result">Result.</param>
-        private static void Mirror(BitArray input, out BitArray result)
+        private static void Mirror(BitArray input, ref BitArray result)
         {
             result.clear();
             int size = input.Size;
