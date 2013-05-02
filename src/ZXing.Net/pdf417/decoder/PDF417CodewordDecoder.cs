@@ -37,8 +37,13 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         static PDF417CodewordDecoder()
         {
-            // Readonly
-            RATIOS_TABLE = new float[PDF417Common.SYMBOL_TABLE.Length][PDF417Common.BARS_IN_MODULE];
+            // Jagged arrays in Java assign the memory automatically, but C# has no equivalent. (Jon Skeet says so!)
+            // http://stackoverflow.com/a/5313879/266252
+            RATIOS_TABLE = new float[PDF417Common.SYMBOL_TABLE.Length][];
+            for (int s = 0; s < RATIOS_TABLE.Length; s++)
+            {
+                RATIOS_TABLE[s] = new float[PDF417Common.BARS_IN_MODULE];
+            }
 
             // Pre-computes the symbol ratio table.
             for (int i = 0; i < PDF417Common.SYMBOL_TABLE.Length; i++)
@@ -119,12 +124,12 @@ namespace ZXing.PDF417.Internal
         /// <param name="moduleBitCount">Module bit count.</param>
         private static int GetBitValue(int[] moduleBitCount)
         {
-            long result = 0;
-            for (int i = 0; i < moduleBitCount.Length; i++)
+            ulong result = 0;
+            for (ulong i = 0; i < (ulong)moduleBitCount.Length; i++)
             {
-                for (int bit = 0; bit < moduleBitCount[i]; bit++)
+                foreach (var bit in moduleBitCount)
                 {
-                    result = (result << 1) | (i % 2 == 0 ? 1 : 0);
+                    result = (result << 1) | (i % 2ul == 0ul ? 1ul : 0ul); // C# was warning about using the bit-wise 'OR' here with a mix of int/longs.
                 }
             }
             return (int)result;
