@@ -229,7 +229,6 @@
     <Compile Include="oned\UPCEANWriter.cs" />
     <Compile Include="oned\UPCEReader.cs" />
     <Compile Include="pdf417\decoder\DecodedBitStreamParser.cs" />
-    <Compile Include="pdf417\decoder\Decoder.cs" />
     <Compile Include="pdf417\decoder\ec\ErrorCorrection.cs" />
     <Compile Include="pdf417\decoder\ec\ModulusGF.cs" />
     <Compile Include="pdf417\decoder\ec\ModulusPoly.cs" />
@@ -289,6 +288,14 @@
     <Compile Include="pdf417\PDF417ResultMetadata.cs" />
     <Compile Include="pdf417\detector\PDF417DetectorResult.cs" />
     <Compile Include="pdf417\detector\BitMatrixExtensions.cs" />
-    <Compile Include="pdf417\decoder\BitMatrixParser.cs" />
+    <Compile Include="pdf417\decoder\Codeword.cs" />
+    <Compile Include="pdf417\decoder\BoundingBox.cs" />
+    <Compile Include="pdf417\decoder\BarcodeValue.cs" />
+    <Compile Include="pdf417\decoder\BarcodeMetadata.cs" />
+    <Compile Include="pdf417\decoder\DetectionResult.cs" />
+    <Compile Include="pdf417\decoder\DetectionResultColumn.cs" />
+    <Compile Include="pdf417\decoder\DetectionResultRowIndicatorColumn.cs" />
+    <Compile Include="pdf417\decoder\PDF417CodewordDecoder.cs" />
+    <Compile Include="pdf417\decoder\PDF417ScanningDecoder.cs" />
   </ItemGroup>
 </Project>
