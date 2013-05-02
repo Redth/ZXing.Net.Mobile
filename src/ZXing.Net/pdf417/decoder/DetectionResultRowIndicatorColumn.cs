@@ -14,16 +14,42 @@
 //  * limitations under the License.
 //  */
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using ZXing.Common;
 
 namespace ZXing.PDF417.Internal
 {
-    public class DetectionResultRowIndicatorColumn
+    /// <summary>
+    /// Represents a Column in the Detection Result
+    /// </summary>
+    /// <author>Guenther Grau (Java Core)</author>
+    /// <author>Stephen Furlani (C# Port)</author>
+    public sealed class DetectionResultRowIndicatorColumn : DetectionResultColumn
     {
-        public DetectionResultRowIndicatorColumn()
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is the left indicator
+        /// </summary>
+        /// <value><c>true</c> if this instance is left; otherwise, <c>false</c>.</value>
+        public bool IsLeft { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZXing.PDF417.Internal.DetectionResultRowIndicatorColumn"/> class.
+        /// </summary>
+        /// <param name="box">Box.</param>
+        /// <param name="isLeft">If set to <c>true</c> is left.</param>
+        public DetectionResultRowIndicatorColumn(BoundingBox box, bool isLeft) : base (box)
         {
+            this.IsLeft = isLeft;
         }
+
+        public void SetRowNumbers()
+        {
+            (from cw in Codewords where cw != null select cw.SetRowNumberAsRowIndicatorColumn());
+            Codewords.Where( cw => cw != null).Select( cw => { cw.SetRowNumberAsRowIndicatorColumn(); });
+        }
+
     }
 }
 

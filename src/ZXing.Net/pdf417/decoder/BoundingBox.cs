@@ -20,7 +20,7 @@ using ZXing.Common;
 namespace ZXing.PDF417.Internal
 {
     /// <summary>
-    /// Metadata about a PDF417 Barcode
+    /// A Bounding Box helper class
     /// </summary>
     /// <author>Guenther Grau (Java Core)</author>
     /// <author>Stephen Furlani (C# Port)</author>
