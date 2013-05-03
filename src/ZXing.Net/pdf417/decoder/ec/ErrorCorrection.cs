@@ -42,8 +42,11 @@ namespace ZXing.PDF417.Internal.EC
         /// <param name="numECCodewords">The num EC codewords.</param>
         /// <param name="erasures">The erasures.</param>
         /// <returns></returns>
-        public bool Decode(int[] received, int numECCodewords, int[] erasures)
+        public int Decode(int[] received,
+                          int numECCodewords,
+                          int[] erasures)
         {
+            
             ModulusPoly poly = new ModulusPoly(field, received);
             int[] S = new int[numECCodewords];
             bool error = false;
@@ -56,54 +59,49 @@ namespace ZXing.PDF417.Internal.EC
                     error = true;
                 }
             }
-            if (error)
+            
+            if (!error)
             {
-                ModulusPoly knownErrors = field.One;
-                foreach (int erasure in erasures)
-                {
-                    int b = field.Exp(received.Length - 1 - erasure);
-                    // Add (1 - bx) term:
-                    ModulusPoly term = new ModulusPoly(field, new int[]
-                    {
-                        field.Subtract(0, b),
-                        1
-                    });
-                    knownErrors = knownErrors.Multiply(term);
-                }
-
-                ModulusPoly syndrome = new ModulusPoly(field, S);
-                //syndrome = syndrome.multiply(knownErrors);
-
-                ModulusPoly[] sigmaOmega =
-                RunEuclideanAlgorithm(field.BuildMonomial(numECCodewords, 1), syndrome, numECCodewords);
-                if (sigmaOmega == null)
-                    return false;
-                ModulusPoly sigma = sigmaOmega[0];
-                ModulusPoly omega = sigmaOmega[1];
-
-                //sigma = sigma.multiply(knownErrors);
-
-                int[] errorLocations = FindErrorLocations(sigma);
-                if (errorLocations == null)
-                    return false;
-                int[] errorMagnitudes = FindErrorMagnitudes(omega, sigma, errorLocations);
-                if (errorMagnitudes == null)
-                    return false;
-
-                for (int i = 0; i < errorLocations.Length; i++)
-                {
-                    int position = received.Length - 1 - field.Log(errorLocations[i]);
-                    if (position < 0)
-                    {
-                        return false;
-                    }
-                    received[position] = field.Subtract(received[position], errorMagnitudes[i]);
-                }
+                return 0;
             }
+            
+            ModulusPoly knownErrors = field.One;
+            foreach (int erasure in erasures)
+            {
+                int b = field.Exp(received.Length - 1 - erasure);
+                // Add (1 - bx) term:
+                ModulusPoly term = new ModulusPoly(field, new int[]
+                {
+                    field.Subtract(0, b),
+                    1
+                });
+                knownErrors = knownErrors.Multiply(term);
+            }
+            
+            ModulusPoly syndrome = new ModulusPoly(field, S);
+            //syndrome = syndrome.multiply(knownErrors);
+            
+            ModulusPoly[] sigmaOmega = RunEuclideanAlgorithm(field.BuildMonomial(numECCodewords, 1), syndrome, numECCodewords);
+            ModulusPoly sigma = sigmaOmega[0];
+            ModulusPoly omega = sigmaOmega[1];
 
-            return true;
+            //sigma = sigma.multiply(knownErrors);
+            
+            int[] errorLocations = FindErrorLocations(sigma);
+            int[] errorMagnitudes = FindErrorMagnitudes(omega, sigma, errorLocations);
+            
+            for (int i = 0; i < errorLocations.Length; i++)
+            {
+                int position = received.Length - 1 - field.Log(errorLocations[i]);
+                if (position < 0)
+                {
+                    throw ReaderException.Instance;
+                }
+                received[position] = field.Subtract(received[position], errorMagnitudes[i]);
+            }
+            return errorLocations.Length;
         }
-      
+
         /// <summary>
         /// Runs the euclidean algorithm (Greatest Common Divisor) until r's degree is less than R/2
         /// </summary>

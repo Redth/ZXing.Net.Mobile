@@ -70,7 +70,7 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         /// <returns>The decoded value.</returns>
         /// <param name="moduleBitCount">Module bit count.</param>
-        static int GetDecodedValue(int[] moduleBitCount)
+        public static int GetDecodedValue(int[] moduleBitCount)
         {
             int decodedValue = GetDecodedCodewordValue(SampleBitCounts(moduleBitCount));
             if (decodedValue == PDF417Common.INVALID_CODEWORD)

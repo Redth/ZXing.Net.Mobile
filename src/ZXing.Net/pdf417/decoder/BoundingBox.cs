@@ -137,6 +137,61 @@ namespace ZXing.PDF417.Internal
             return new BoundingBox(left.Image, left.TopLeft, left.BottomLeft, right.TopRight, right.BottomRight);
         }
 
+        /// <summary>
+        /// Adds the missing rows.
+        /// </summary>
+        /// <returns>The missing rows.</returns>
+        /// <param name="missingStartRows">Missing start rows.</param>
+        /// <param name="missingEndRows">Missing end rows.</param>
+        /// <param name="isLeft">If set to <c>true</c> is left.</param>
+        public BoundingBox AddMissingRows(int missingStartRows, int missingEndRows, bool isLeft)
+        {
+            ResultPoint newTopLeft = TopLeft;
+            ResultPoint newBottomLeft = BottomLeft;
+            ResultPoint newTopRight = TopRight;
+            ResultPoint newBottomRight = BottomRight;
+            
+            if (missingStartRows > 0)
+            {
+                ResultPoint top = isLeft ? TopLeft : TopRight;
+                int newMinY = (int)top.Y - missingStartRows;
+                if (newMinY < 0)
+                {
+                    newMinY = 0;
+                }
+                // TODO use existing points to better interpolate the new x positions
+                ResultPoint newTop = new ResultPoint(top.X, newMinY);
+                if (isLeft)
+                {
+                    newTopLeft = newTop;
+                } else
+                {
+                    newTopRight = newTop;
+                }
+            }
+
+            if (missingEndRows > 0)
+            {
+                ResultPoint bottom = isLeft ? BottomLeft : BottomRight;
+                int newMaxY = (int)bottom.Y + missingEndRows;
+                if (newMaxY >= Image.Height)
+                {
+                    newMaxY = Image.Height - 1;
+                }
+                // TODO use existing points to better interpolate the new x positions
+                ResultPoint newBottom = new ResultPoint(bottom.X, newMaxY);
+                if (isLeft)
+                {
+                    newBottomLeft = newBottom;
+                } else
+                {
+                    newBottomRight = newBottom;
+                }
+            }
+            
+            CalculateMinMaxValues();
+            return new BoundingBox(Image, newTopLeft, newBottomLeft, newTopRight, newBottomRight);
+        }
 
     }
 }

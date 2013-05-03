@@ -123,6 +123,16 @@ namespace ZXing.PDF417.Internal
             return codeword;
         }
 
+        /// <summary>
+        /// Sets the codeword for an image row
+        /// </summary>
+        /// <param name="imageRow">Image row.</param>
+        /// <param name="codeword">Codeword.</param>
+        public void SetCodeword(int imageRow, Codeword codeword)
+        {
+            Codewords[IndexForRow(imageRow)] = codeword;
+        }
+
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResultColumn"/>.

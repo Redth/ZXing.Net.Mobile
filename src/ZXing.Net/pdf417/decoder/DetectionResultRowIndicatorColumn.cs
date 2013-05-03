@@ -235,7 +235,7 @@ namespace ZXing.PDF417.Internal
         /// Gets the barcode metadata.
         /// </summary>
         /// <returns>The barcode metadata.</returns>
-        BarcodeMetadata GetBarcodeMetadata()
+        public BarcodeMetadata GetBarcodeMetadata()
         {
             BarcodeValue barcodeColumnCount = new BarcodeValue();
             BarcodeValue barcodeRowCountUpperPart = new BarcodeValue();

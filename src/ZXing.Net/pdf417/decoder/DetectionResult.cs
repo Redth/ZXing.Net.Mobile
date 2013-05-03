@@ -29,9 +29,11 @@ namespace ZXing.PDF417.Internal
         private static readonly int ADJUST_ROW_NUMBER_SKIP = 2;
 
         public BarcodeMetadata Metadata { get; private set; }
-        private DetectionResultColumn[] DetectionResultColumns { get; set; }
-        public BoundingBox Box { get; private set; }
+        public DetectionResultColumn[] DetectionResultColumns { get; set; }
+        public BoundingBox Box { get; set; }
         public int ColumnCount { get; private set; }
+        public int RowCount { get { return Metadata.RowCount; } }
+        public int ErrorCorrectionLevel { get { return Metadata.ErrorCorrectionLevel; } }
 
         public DetectionResult(BarcodeMetadata metadata, BoundingBox box)
         {
@@ -45,7 +47,7 @@ namespace ZXing.PDF417.Internal
         /// Returns the DetectionResult Columns.  This does a fair bit of calculation, so call it sparingly.
         /// </summary>
         /// <returns>The detection result columns.</returns>
-        DetectionResultColumn[] GetDetectionResultColumns()
+        public DetectionResultColumn[] GetDetectionResultColumns()
         {
             AdjustIndicatorColumnRowNumbers(DetectionResultColumns[0]);
             AdjustIndicatorColumnRowNumbers(DetectionResultColumns[ColumnCount + 1]);
