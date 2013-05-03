@@ -85,14 +85,17 @@ namespace ZXing.Mobile
 				return false;
 			}
 
-			NSError err = null;
-			if (captureDevice.LockForConfiguration(out err))
+			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
 			{
-				captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
-				captureDevice.UnlockForConfiguration();
+				NSError err = null;
+				if (captureDevice.LockForConfiguration(out err))
+				{
+					captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					captureDevice.UnlockForConfiguration();
+				}
+				else
+					Console.WriteLine("Failed to Lock for Config: " + err.Description);
 			}
-			else
-				Console.WriteLine("Failed to Lock for Config: " + err.Description);
 
 			var input = AVCaptureDeviceInput.FromDevice (captureDevice);
 			if (input == null){
