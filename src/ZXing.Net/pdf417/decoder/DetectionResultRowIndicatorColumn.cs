@@ -159,7 +159,7 @@ namespace ZXing.PDF417.Internal
         /// Adjusts the in omplete indicator column row numbers.
         /// </summary>
         /// <param name="metadata">Metadata.</param>
-        int AdjustInCompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
+        public int AdjustIncompleteIndicatorColumnRowNumbers(BarcodeMetadata metadata)
         {
             ResultPoint top = IsLeft ? Box.TopLeft : Box.TopRight;
             ResultPoint bottom = IsLeft ? Box.BottomLeft : Box.BottomRight;
@@ -187,6 +187,8 @@ namespace ZXing.PDF417.Internal
                 codeword.SetRowNumberAsRowIndicatorColumn();
 
                 int rowDifference = codeword.RowNumber - barcodeRow;
+
+                // TODO improve handling with case where first row indicator doesn't start with 0
 
                 if (rowDifference == 0)
                 {
@@ -220,7 +222,7 @@ namespace ZXing.PDF417.Internal
             {
                 return null;
             }
-            AdjustInCompleteIndicatorColumnRowNumbers(metadata);
+            AdjustIncompleteIndicatorColumnRowNumbers(metadata);
             int[] result = Enumerable.Repeat(0, metadata.RowCount).ToArray();
             foreach (var word in Codewords)
             {
