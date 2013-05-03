@@ -326,7 +326,7 @@ namespace ZXing.PDF417.Internal
                 Log.WriteLine("numberOfCodewords didn't match calculatedNumberOfCodewords, using calculatedNumberOfCodewords");
                 barcodeMatrix[0][1].AddConfidenceToValue(calculatedNumberOfCodewords);
             }
-            return detectRecursive(detectionResult, barcodeMatrix);
+            return DetectRecursive(detectionResult, barcodeMatrix);
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace ZXing.PDF417.Internal
         /// <returns>Decoder Result.</returns>
         /// <param name="detectionResult">Detection result.</param>
         /// <param name="barcodeMatrix">Barcode matrix.</param>
-        private static DecoderResult detectRecursive(DetectionResult detectionResult, BarcodeValue[][] barcodeMatrix)
+        private static DecoderResult DetectRecursive(DetectionResult detectionResult, BarcodeValue[][] barcodeMatrix)
         {
             ICollection<int> erasures = new List<int>();
             int[] codewords = new int[detectionResult.RowCount * detectionResult.ColumnCount];
@@ -405,35 +405,35 @@ namespace ZXing.PDF417.Internal
             }
             if (decoderResult.ErrorsCorrected > 0)
             {
-                logCorrectedOutput(detectionResult, barcodeMatrix, codewords);
+                LogCorrectedOutput(detectionResult, barcodeMatrix, codewords);
             }
             return decoderResult;
         }
         
-        private static void logCorrectedOutput(DetectionResult detectionResult,
+        private static void LogCorrectedOutput(DetectionResult detectionResult,
                                                BarcodeValue[][] barcodeMatrix,
                                                int[] codewords)
         {
             StringBuilder differences = new StringBuilder();
-            differences.AppendFormat("%s\n", "Corrected values");
+            differences.AppendFormat("{0}\n", "Corrected values");
             StringBuilder formatter = new StringBuilder();
-            formatter.AppendFormat("%s", "After error correction");
+            formatter.AppendFormat("{0}", "After error correction");
             int row = -1;
             for (int i = 0; i < codewords.Length; i++)
             {
                 int column = i % detectionResult.ColumnCount;
                 if (column == 0)
                 {
-                    formatter.AppendFormat("\nRow %2d:         ", ++row);
+                    formatter.AppendFormat("\nRow {0,2}:         ", ++row);
                 }
-                formatter.AppendFormat("%4d    ", codewords[i]);
+                formatter.AppendFormat("{0,4}    ", codewords[i]);
                 int[] barcodeValue = barcodeMatrix[row][column + 1].GetConfidentValues();
                 if (barcodeValue.Length == 0)
                 {
-                    differences.AppendFormat("barcode[%2d][%2d] was null, new value %3d\n", row, column + 1, codewords[i]);
+                    differences.AppendFormat("barcode[{0,2}][{1,2}] was null, new value {2,3}\n", row, column + 1, codewords[i]);
                 } else if (barcodeValue[0] != codewords[i])
                 {
-                    differences.AppendFormat("barcode[%2d][%2d] was %3d, corrected value %3d\n", row, column + 1, barcodeValue[0],
+                    differences.AppendFormat("barcode[{0,2}][{1,2}] was {2,3}, corrected value {3,3}\n", row, column + 1, barcodeValue[0],
                                        codewords[i]);
                 }
             }
@@ -482,9 +482,9 @@ namespace ZXing.PDF417.Internal
         /// <returns><c>true</c>, if barcode column is valid, <c>false</c> otherwise.</returns>
         /// <param name="detectionResult">Detection result.</param>
         /// <param name="barcodeColumn">Barcode column.</param>
-        private static bool isValidBarcodeColumn(DetectionResult detectionResult, int barcodeColumn)
+        private static bool IsValidBarcodeColumn(DetectionResult detectionResult, int barcodeColumn)
         {
-            return barcodeColumn >= 0 && barcodeColumn <= detectionResult.ColumnCount + 1;
+            return (barcodeColumn >= 0) && (barcodeColumn < detectionResult.DetectionResultColumns.Length);
         }
 
         /// <summary>
@@ -502,9 +502,9 @@ namespace ZXing.PDF417.Internal
         {
             int offset = leftToRight ? 1 : -1;
             Codeword codeword = null;
-            if (isValidBarcodeColumn(detectionResult, barcodeColumn - offset))
+            if (IsValidBarcodeColumn(detectionResult, barcodeColumn - offset))
             {
-                codeword = detectionResult.DetectionResultColumns[barcodeColumn - offset].Codewords[imageRow];
+                codeword = detectionResult.DetectionResultColumns[barcodeColumn - offset].GetCodeword(imageRow);
             }
             if (codeword != null)
             {
@@ -515,7 +515,7 @@ namespace ZXing.PDF417.Internal
             {
                 return leftToRight ? codeword.EndX : codeword.StartX;
             }
-            if (isValidBarcodeColumn(detectionResult, barcodeColumn - offset))
+            if (IsValidBarcodeColumn(detectionResult, barcodeColumn - offset))
             {
                 codeword = detectionResult.DetectionResultColumns[barcodeColumn - offset].GetNearestCodeword(imageRow);
             }
@@ -525,7 +525,7 @@ namespace ZXing.PDF417.Internal
             }
             int skippedColumns = 0;
             
-            while (isValidBarcodeColumn(detectionResult, barcodeColumn - offset))
+            while (IsValidBarcodeColumn(detectionResult, barcodeColumn - offset))
             {
                 barcodeColumn -= offset;
                 foreach (Codeword previousRowCodeword in detectionResult.DetectionResultColumns[barcodeColumn].Codewords)
@@ -863,19 +863,19 @@ namespace ZXing.PDF417.Internal
             StringBuilder formatter = new StringBuilder();
             for (int row = 0; row < barcodeMatrix.Length; row++)
             {
-                formatter.AppendFormat("Row %2d: ", row);
+                formatter.AppendFormat("Row {0,2}: ", row);
                 for (int column = 0; column < barcodeMatrix[row].Length; column++)
                 {
                     BarcodeValue barcodeValue = barcodeMatrix[row][column];
                     if (barcodeValue.GetConfidentValues().Length == 0)
                     {
-                        formatter.AppendFormat("        ", (Object[])null);
+                        formatter.Append("        ");
                     } else
                     {
-                        formatter.AppendFormat("%4d(%2d)", barcodeValue.GetConfidentValues()[0], barcodeValue.ConfidenceForValue(barcodeValue.GetConfidentValues()[0]));
+                        formatter.AppendFormat("{0,4}({0,3})", barcodeValue.GetConfidentValues()[0], barcodeValue.ConfidenceForValue(barcodeValue.GetConfidentValues()[0]));
                     }
                 }
-                formatter.AppendFormat("\n");
+                formatter.Append("\n");
             }
             return formatter.ToString();
         }

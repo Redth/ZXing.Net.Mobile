@@ -58,5 +58,6 @@ namespace ZXing.Common
             ByteSegments = byteSegments;
             ECLevel = ecLevel;
         }
+
     }
 }

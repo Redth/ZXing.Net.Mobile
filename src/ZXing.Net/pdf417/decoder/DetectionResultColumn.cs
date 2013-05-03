@@ -43,6 +43,7 @@ namespace ZXing.PDF417.Internal
 
         /// <summary>
         /// The Codewords the Box encodes for, offset by the Box minY.
+        /// Remember to Access this ONLY through GetCodeword(imageRow) if you're accessing it in that manner.
         /// </summary>
         /// <value>The codewords.</value>
         public Codeword[] Codewords { get; set; } // TODO convert this to a dictionary? Dictionary<imageRow, Codeword> ??
@@ -146,10 +147,10 @@ namespace ZXing.PDF417.Internal
             {
                 if (cw == null)
                 {
-                    builder.AppendFormat("%3d:    |   \n", row++);
+                    builder.AppendFormat("{0,3}:    |   \n", row++);
                 } else
                 {
-                    builder.AppendFormat("%3d: %3d|%3d\n", row++, cw.RowNumber, cw.Value);
+                    builder.AppendFormat("{0,3}: {1,3}|{2,3}\n", row++, cw.RowNumber, cw.Value);
                 }
             }
             return builder.ToString();

@@ -42,6 +42,7 @@ namespace ZXing.PDF417.Internal
         public DetectionResultRowIndicatorColumn(BoundingBox box, bool isLeft) : base (box)
         {
             this.IsLeft = isLeft;
+            this.Codewords = new Codeword[box.MaxY - box.MinY + 1];
         }
 
         /// <summary>
@@ -298,6 +299,9 @@ namespace ZXing.PDF417.Internal
             for (int row = 0; row < Codewords.Length; row++)
             {
                 var codeword = Codewords[row];
+                if (codeword == null)
+                    continue;
+
                 int indicatorValue = codeword.Value % 30;
                 int rowNumber = codeword.RowNumber;
 
@@ -348,7 +352,7 @@ namespace ZXing.PDF417.Internal
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResultRowIndicatorColumn"/>.</returns>
         public override string ToString()
         {
-            return (IsLeft ? "Is Left\n" : "Is Right\n") + base.ToString();
+            return "Is Left: " + IsLeft + " \n" + base.ToString();
         }
 
     }

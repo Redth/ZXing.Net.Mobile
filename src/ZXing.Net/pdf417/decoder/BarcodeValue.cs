@@ -56,6 +56,10 @@ namespace ZXing.PDF417.Internal
         /// <returns>an array of int, containing the values with the highest occurrence, or null, if no value was set.</returns>
         public int[] GetConfidentValues()
         {
+            if (confidence == null || confidence.Count == 0)
+            {
+                return new int[0];
+            }
             int max = (from pair in confidence select pair.Value).Max();
             return (from pair in confidence where pair.Value == max select pair.Key).ToArray();
         }

@@ -16,6 +16,7 @@
 using System;
 
 using ZXing.Common;
+using System.Text;
 
 namespace ZXing.PDF417.Internal
 {
@@ -329,6 +330,42 @@ namespace ZXing.PDF417.Internal
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResult"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResult"/>.</returns>
+        public override string ToString()
+        {
+            StringBuilder formatter = new StringBuilder();
+            DetectionResultColumn rowIndicatorColumn = DetectionResultColumns[0];
+            if (rowIndicatorColumn == null)
+            {
+                rowIndicatorColumn = DetectionResultColumns[ColumnCount + 1];
+            }
+            for (int codewordsRow = 0; codewordsRow < rowIndicatorColumn.Codewords.Length; codewordsRow++)
+            {
+                formatter.AppendFormat("CW {0,3}:", codewordsRow);
+                for (int barcodeColumn = 0; barcodeColumn < ColumnCount + 2; barcodeColumn++)
+                {
+                    if (DetectionResultColumns[barcodeColumn] == null)
+                    {
+                        formatter.Append("    |   ");
+                        continue;
+                    }
+                    Codeword codeword = DetectionResultColumns[barcodeColumn].Codewords[codewordsRow];
+                    if (codeword == null)
+                    {
+                        formatter.Append("    |   ");
+                        continue;
+                    }
+                    formatter.AppendFormat(" {0,3}|{1,3}", codeword.RowNumber, codeword.Value);
+                }
+                formatter.Append("\n");
+            }
+
+            return formatter.ToString();
         }
 
     }
