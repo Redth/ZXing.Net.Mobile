@@ -302,18 +302,16 @@ namespace ZXing.PDF417.Internal
         }
 
         /// <summary>
-        /// Creates the decoder result.
+        /// Adjusts the codeword count.
         /// </summary>
-        /// <returns>The decoder result.</returns>
         /// <param name="detectionResult">Detection result.</param>
-        private static DecoderResult CreateDecoderResult(DetectionResult detectionResult)
+        /// <param name="barcodeMatrix">Barcode matrix.</param>
+        private static void AdjustCodewordCount(DetectionResult detectionResult, BarcodeValue[][] barcodeMatrix)
         {
-            Log.WriteLine("Before createBarcodeMatrix\n" + detectionResult);
-            BarcodeValue[][] barcodeMatrix = CreateBarcodeMatrix(detectionResult);
-            Log.WriteLine("After createBarcodeMatrix\n" + detectionResult);
-            Log.WriteLine("BarcodeMatrix\n" + ToString(barcodeMatrix));
             int[] numberOfCodewords = barcodeMatrix[0][1].GetConfidentValues();
-            int calculatedNumberOfCodewords = detectionResult.ColumnCount * detectionResult.RowCount - GetNumberOfECCodeWords(detectionResult.ErrorCorrectionLevel);
+            int calculatedNumberOfCodewords = detectionResult.ColumnCount *
+                detectionResult.RowCount -
+                GetNumberOfECCodeWords(detectionResult.ErrorCorrectionLevel);
             if (numberOfCodewords.Length == 0)
             {
                 if (calculatedNumberOfCodewords < 1 || calculatedNumberOfCodewords > PDF417Common.MAX_CODEWORDS_IN_BARCODE)
@@ -324,21 +322,21 @@ namespace ZXing.PDF417.Internal
             } else if (numberOfCodewords[0] != calculatedNumberOfCodewords)
             {
                 // The calculated one is more reliable as it is derived from the row indicator columns
-                Log.WriteLine("numberOfCodewords didn't match calculatedNumberOfCodewords, using calculatedNumberOfCodewords");
                 barcodeMatrix[0][1].AddConfidenceToValue(calculatedNumberOfCodewords);
             }
-            return DetectRecursive(detectionResult, barcodeMatrix);
         }
 
         /// <summary>
-        /// Performs a recursive detection
+        /// Creates the decoder result.
         /// </summary>
-        /// <returns>Decoder Result.</returns>
+        /// <returns>The decoder result.</returns>
         /// <param name="detectionResult">Detection result.</param>
-        /// <param name="barcodeMatrix">Barcode matrix.</param>
-        private static DecoderResult DetectRecursive(DetectionResult detectionResult, BarcodeValue[][] barcodeMatrix)
+        private static DecoderResult CreateDecoderResult(DetectionResult detectionResult)
         {
-            ICollection<int> erasures = new List<int>();
+            BarcodeValue[][] barcodeMatrix = CreateBarcodeMatrix(detectionResult);
+            AdjustCodewordCount(detectionResult, barcodeMatrix);
+
+            List<int> erasures = new List<int>();
             int[] codewords = new int[detectionResult.RowCount * detectionResult.ColumnCount];
             List<int[]> ambiguousIndexValuesList = new List<int[]>();
             List<int> ambiguousIndexesList = new List<int>();
@@ -361,17 +359,58 @@ namespace ZXing.PDF417.Internal
                     }
                 }
             }
-            int[] erasureArray = erasures.ToArray(); 
-            int[] ambiguousIndexes = ambiguousIndexesList.ToArray();
             int[][] ambiguousIndexValues = new int[ambiguousIndexValuesList.Count][];
             for (int i = 0; i < ambiguousIndexValues.Length; i++)
             {
                 ambiguousIndexValues[i] = ambiguousIndexValuesList[i];
             }
-            int[] ambiguousIndexCount = new int[ambiguousIndexesList.Count];
-            DecoderResult decoderResult = null;
+            return CreateDecoderResultFromAmbiguousValues(detectionResult.ErrorCorrectionLevel, codewords,
+                                                          erasures.ToArray(), ambiguousIndexesList.ToArray(), ambiguousIndexValues);
+        }
 
-            while (true)
+        /**
+   * This method deals with the fact, that the decoding process doesn't always yield a single most likely value. The
+   * current error correction implementation doesn't deal with erasures very well, so it's better to provide a value
+   * for these ambiguous codewords instead of treating it as an erasure. The problem is that we don't know which of
+   * the ambiguous values to choose. We try decode using the first value, and if that fails, we use another of the
+   * ambiguous values and try to decode again. This usually only happens on very hard to read and decode barcodes,
+   * so decoding the normal barcodes is not affected by this. 
+   * @param ecLevel
+   * @param codewords
+   * @param erasureArray contains the indexes of erasures
+   * @param ambiguousIndexes array with the indexes that have more than one most likely value
+   * @param ambiguousIndexValues two dimensional array that contains the ambiguous values. The first dimension must
+   * be the same Length as the ambiguousIndexes array
+   * @return
+   * @throws FormatException
+   * @throws ChecksumException
+   */
+        /// <summary>
+        /// This method deals with the fact, that the decoding process doesn't always yield a single most likely value. The
+        /// current error correction implementation doesn't deal with erasures very well, so it's better to provide a value
+        /// for these ambiguous codewords instead of treating it as an erasure. The problem is that we don't know which of
+        /// the ambiguous values to choose. We try decode using the first value, and if that fails, we use another of the
+        /// ambiguous values and try to decode again. This usually only happens on very hard to read and decode barcodes,
+        /// so decoding the normal barcodes is not affected by this.
+        /// </summary>
+        /// <returns>The decoder result from ambiguous values.</returns>
+        /// <param name="ecLevel">Ec level.</param>
+        /// <param name="codewords">Codewords.</param>
+        /// <param name="erasureArray">contains the indexes of erasures.</param>
+        /// <param name="ambiguousIndexes">array with the indexes that have more than one most likely value.</param>
+        /// <param name="ambiguousIndexValues">two dimensional array that contains the ambiguous values. The first dimension must
+        /// be the same Length as the ambiguousIndexes array.</param>
+        /// <exception cref="Zxing.ReaderException"></exception>
+        private static DecoderResult CreateDecoderResultFromAmbiguousValues(int ecLevel,
+                                                                            int[] codewords,
+                                                                            int[] erasureArray,
+                                                                            int[] ambiguousIndexes,
+                                                                            int[][] ambiguousIndexValues)
+        {
+            int[] ambiguousIndexCount = new int[ambiguousIndexes.Length];
+            
+            int tries = 100;
+            while (tries-- > 0)
             {
                 for (int i = 0; i < ambiguousIndexCount.Length; i++)
                 {
@@ -379,9 +418,8 @@ namespace ZXing.PDF417.Internal
                 }
                 try
                 {
-                    decoderResult = DecodeCodewords(codewords, detectionResult.ErrorCorrectionLevel, erasureArray);
-                    break;
-                } catch
+                    return DecodeCodewords(codewords, ecLevel, erasureArray);
+                } catch (ReaderException ignored)
                 {
                     //
                 }
@@ -391,7 +429,7 @@ namespace ZXing.PDF417.Internal
                 }
                 for (int i = 0; i < ambiguousIndexCount.Length; i++)
                 {
-                    if (ambiguousIndexCount[i] < ambiguousIndexValuesList[i].Length - 1)
+                    if (ambiguousIndexCount[i] < ambiguousIndexValues[i].Length - 1)
                     {
                         ambiguousIndexCount[i]++;
                         break;
@@ -405,44 +443,7 @@ namespace ZXing.PDF417.Internal
                     }
                 }
             }
-
-            if (decoderResult.ErrorsCorrected > 0)
-            {
-                LogCorrectedOutput(detectionResult, barcodeMatrix, codewords);
-            }
-            return decoderResult;
-        }
-        
-        private static void LogCorrectedOutput(DetectionResult detectionResult,
-                                               BarcodeValue[][] barcodeMatrix,
-                                               int[] codewords)
-        {
-            StringBuilder differences = new StringBuilder();
-            differences.AppendFormat("{0}\n", "Corrected values");
-            StringBuilder formatter = new StringBuilder();
-            formatter.AppendFormat("{0}", "After error correction");
-            int row = -1;
-            for (int i = 0; i < codewords.Length; i++)
-            {
-                int column = i % detectionResult.ColumnCount;
-                if (column == 0)
-                {
-                    formatter.AppendFormat("\nRow {0,2}:         ", ++row);
-                }
-                formatter.AppendFormat("{0,4}    ", codewords[i]);
-                int[] barcodeValue = barcodeMatrix[row][column + 1].GetConfidentValues();
-                if (barcodeValue.Length == 0)
-                {
-                    differences.AppendFormat("barcode[{0,2}][{1,2}] was null, new value {2,3}\n", row, column + 1, codewords[i]);
-                } else if (barcodeValue[0] != codewords[i])
-                {
-                    differences.AppendFormat("barcode[{0,2}][{1,2}] was {2,3}, corrected value {3,3}\n", row, column + 1, barcodeValue[0],
-                                       codewords[i]);
-                }
-            }
-            formatter.AppendFormat("\n", "");
-            Log.WriteLine(differences.ToString());
-            Log.WriteLine(formatter.ToString());
+            throw ReaderException.Instance;
         }
 
         /// <summary>
