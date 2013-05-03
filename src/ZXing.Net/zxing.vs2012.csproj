@@ -9,15 +9,17 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>zxing</RootNamespace>
     <AssemblyName>zxing</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\Build\Debug\net4.5\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -29,9 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\Build\Release\net4.5\zxing.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
@@ -223,23 +222,6 @@
     <Compile Include="oned\UPCEANReader.cs" />
     <Compile Include="oned\UPCEANWriter.cs" />
     <Compile Include="oned\UPCEReader.cs" />
-    <Compile Include="pdf417\decoder\BitMatrixParser.cs" />
-    <Compile Include="pdf417\decoder\DecodedBitStreamParser.cs" />
-    <Compile Include="pdf417\decoder\Decoder.cs" />
-    <Compile Include="pdf417\decoder\ec\ErrorCorrection.cs" />
-    <Compile Include="pdf417\decoder\ec\ModulusGF.cs" />
-    <Compile Include="pdf417\decoder\ec\ModulusPoly.cs" />
-    <Compile Include="pdf417\detector\Detector.cs" />
-    <Compile Include="pdf417\encoder\BarcodeMatrix.cs" />
-    <Compile Include="pdf417\encoder\BarcodeRow.cs" />
-    <Compile Include="pdf417\encoder\Compaction.cs" />
-    <Compile Include="pdf417\encoder\Dimensions.cs" />
-    <Compile Include="pdf417\encoder\PDF417.cs" />
-    <Compile Include="pdf417\encoder\PDF417EncodingOptions.cs" />
-    <Compile Include="pdf417\encoder\PDF417ErrorCorrection.cs" />
-    <Compile Include="pdf417\encoder\PDF417HighLevelEncoder.cs" />
-    <Compile Include="pdf417\PDF417Reader.cs" />
-    <Compile Include="pdf417\PDF417Writer.cs" />
     <Compile Include="PlanarYUVLuminanceSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="qrcode\decoder\BitMatrixParser.cs" />
@@ -280,6 +262,34 @@
     <Compile Include="SupportClass.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="WriterException.cs" />
+    <Compile Include="pdf417\PDF417Common.cs" />
+    <Compile Include="pdf417\PDF417Reader.cs" />
+    <Compile Include="pdf417\PDF417ResultMetadata.cs" />
+    <Compile Include="pdf417\PDF417Writer.cs" />
+    <Compile Include="pdf417\decoder\BarcodeMetadata.cs" />
+    <Compile Include="pdf417\decoder\BarcodeValue.cs" />
+    <Compile Include="pdf417\decoder\BoundingBox.cs" />
+    <Compile Include="pdf417\decoder\Codeword.cs" />
+    <Compile Include="pdf417\decoder\DecodedBitStreamParser.cs" />
+    <Compile Include="pdf417\decoder\DetectionResult.cs" />
+    <Compile Include="pdf417\decoder\DetectionResultColumn.cs" />
+    <Compile Include="pdf417\decoder\DetectionResultRowIndicatorColumn.cs" />
+    <Compile Include="pdf417\decoder\PDF417CodewordDecoder.cs" />
+    <Compile Include="pdf417\decoder\PDF417ScanningDecoder.cs" />
+    <Compile Include="pdf417\decoder\ec\ErrorCorrection.cs" />
+    <Compile Include="pdf417\decoder\ec\ModulusGF.cs" />
+    <Compile Include="pdf417\decoder\ec\ModulusPoly.cs" />
+    <Compile Include="pdf417\detector\BitMatrixExtensions.cs" />
+    <Compile Include="pdf417\detector\Detector.cs" />
+    <Compile Include="pdf417\detector\PDF417DetectorResult.cs" />
+    <Compile Include="pdf417\encoder\BarcodeMatrix.cs" />
+    <Compile Include="pdf417\encoder\BarcodeRow.cs" />
+    <Compile Include="pdf417\encoder\Compaction.cs" />
+    <Compile Include="pdf417\encoder\Dimensions.cs" />
+    <Compile Include="pdf417\encoder\PDF417.cs" />
+    <Compile Include="pdf417\encoder\PDF417EncodingOptions.cs" />
+    <Compile Include="pdf417\encoder\PDF417ErrorCorrection.cs" />
+    <Compile Include="pdf417\encoder\PDF417HighLevelEncoder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Key\private.snk">
@@ -294,4 +304,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="pdf417\" />
+  </ItemGroup>
 </Project>

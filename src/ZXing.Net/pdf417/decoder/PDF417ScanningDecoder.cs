@@ -136,7 +136,7 @@ namespace ZXing.PDF417.Internal
                         }
                         startColumn = previousStartColumn;
                     }
-                    Codeword codeword = GetectCodeword(image, boundingBox.MinX, boundingBox.MaxX, leftToRight,
+                    Codeword codeword = DetectCodeword(image, boundingBox.MinX, boundingBox.MaxX, leftToRight,
                                                        startColumn, imageRow, minCodewordWidth, maxCodewordWidth);
                     if (codeword != null)
                     {
@@ -283,7 +283,7 @@ namespace ZXing.PDF417.Internal
                 for (int imageRow = (int) startPoint.Y; imageRow <= boundingBox.MaxY &&
                      imageRow >= boundingBox.MinY; imageRow += increment)
                 {
-                    Codeword codeword = GetectCodeword(image, 0, image.Width, leftToRight, startColumn, imageRow,
+                    Codeword codeword = DetectCodeword(image, 0, image.Width, leftToRight, startColumn, imageRow,
                                                        minCodewordWidth, maxCodewordWidth);
                     if (codeword != null)
                     {
@@ -559,7 +559,7 @@ namespace ZXing.PDF417.Internal
         /// <param name="imageRow">Image row.</param>
         /// <param name="minCodewordWidth">Minimum codeword width.</param>
         /// <param name="maxCodewordWidth">Max codeword width.</param>
-        private static Codeword GetectCodeword(BitMatrix image,
+        private static Codeword DetectCodeword(BitMatrix image,
                                                int minColumn,
                                                int maxColumn,
                                                bool leftToRight,

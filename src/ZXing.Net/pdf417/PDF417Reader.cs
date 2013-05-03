@@ -120,7 +120,8 @@ namespace ZXing.PDF417
                 if (decoderResult == null)
                 {
                     // See comments re: Exceptions above
-                    continue;
+                    // continue;
+                    throw ReaderException.Instance;
                 }
                 System.Diagnostics.Debug.WriteLine("Result " + points.ToString() + " > " + decoderResult.Text + " " + decoderResult.RawBytes);
                 Result result = new Result(decoderResult.Text, decoderResult.RawBytes, points, BarcodeFormat.PDF_417);

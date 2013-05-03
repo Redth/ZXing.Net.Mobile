@@ -141,19 +141,20 @@ namespace ZXing.PDF417.Internal
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResultColumn"/>.</returns>
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder();
-            int row = 0;
-            foreach (var cw in Codewords)
-            {
-                if (cw == null)
-                {
-                    builder.AppendFormat("{0,3}:    |   \n", row++);
-                } else
-                {
-                    builder.AppendFormat("{0,3}: {1,3}|{2,3}\n", row++, cw.RowNumber, cw.Value);
-                }
-            }
-            return builder.ToString();
+//            StringBuilder builder = new StringBuilder();
+//            int row = 0;
+//            foreach (var cw in Codewords)
+//            {
+//                if (cw == null)
+//                {
+//                    builder.AppendFormat("{0,3}:    |   \n", row++);
+//                } else
+//                {
+//                    builder.AppendFormat("{0,3}: {1,3}|{2,3}\n", row++, cw.RowNumber, cw.Value);
+//                }
+//            }
+//            return builder.ToString();
+            return "Valid Codewords: " + (from cw in Codewords where cw != null select cw).Count().ToString();
         }
     }
 }
