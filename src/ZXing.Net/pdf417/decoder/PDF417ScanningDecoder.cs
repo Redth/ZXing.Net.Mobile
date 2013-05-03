@@ -86,7 +86,8 @@ namespace ZXing.PDF417.Internal
                 {
                     // TODO Based on Owen's Comments in <see cref="ZXing.ReaderException"/>, this method has been modified to continue silently
                     // if a barcode was not decoded where it was detected instead of throwing a new exception object.
-                    return null;
+                    // return null;
+                    throw ReaderException.Instance;
                 }
                 if (i == 0 &&
                     (detectionResult.Box.MinY < boundingBox.MinY || detectionResult.Box.MaxY > boundingBox.MaxY))
@@ -248,11 +249,9 @@ namespace ZXing.PDF417.Internal
             BarcodeMetadata leftBarcodeMetadata = leftRowIndicatorColumn.GetBarcodeMetadata();
             BarcodeMetadata rightBarcodeMetadata = rightRowIndicatorColumn.GetBarcodeMetadata();
 
-            if (leftBarcodeMetadata == null ||
-                rightBarcodeMetadata == null || (
-                leftBarcodeMetadata.ColumnCount != rightBarcodeMetadata.ColumnCount &&
+            if (leftBarcodeMetadata.ColumnCount != rightBarcodeMetadata.ColumnCount &&
                 leftBarcodeMetadata.ErrorCorrectionLevel != rightBarcodeMetadata.ErrorCorrectionLevel &&
-                leftBarcodeMetadata.RowCount != rightBarcodeMetadata.RowCount))
+                leftBarcodeMetadata.RowCount != rightBarcodeMetadata.RowCount)
             {
                 return null;
             }
@@ -378,14 +377,14 @@ namespace ZXing.PDF417.Internal
                 {
                     codewords[ambiguousIndexes[i]] = ambiguousIndexValues[i][ambiguousIndexCount[i]];
                 }
-//                try
-//                {
-                decoderResult = DecodeCodewords(codewords, detectionResult.ErrorCorrectionLevel, erasureArray);
-                break;
-//                } catch
-//                {
-//                    //
-//                }
+                try
+                {
+                    decoderResult = DecodeCodewords(codewords, detectionResult.ErrorCorrectionLevel, erasureArray);
+                    break;
+                } catch
+                {
+                    //
+                }
                 if (ambiguousIndexCount.Length == 0)
                 {
                     throw ReaderException.Instance;
