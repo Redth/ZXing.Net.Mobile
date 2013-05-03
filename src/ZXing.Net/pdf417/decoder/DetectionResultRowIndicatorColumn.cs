@@ -260,32 +260,32 @@ namespace ZXing.PDF417.Internal
                 switch (codewordRowNumber % 3)
                 {
                     case 0:
-                        barcodeRowCountUpperPart.AddConfidenceToValue(rowIndicatorValue * 3 + 1);
+                        barcodeRowCountUpperPart.SetValue(rowIndicatorValue * 3 + 1);
                         break;
                     case 1:
-                        barcodeECLevel.AddConfidenceToValue(rowIndicatorValue / 3);
-                        barcodeRowCountLowerPart.AddConfidenceToValue(rowIndicatorValue % 3);
+                        barcodeECLevel.SetValue(rowIndicatorValue / 3);
+                        barcodeRowCountLowerPart.SetValue(rowIndicatorValue % 3);
                         break;
                     case 2:
-                        barcodeColumnCount.AddConfidenceToValue(rowIndicatorValue + 1);
+                        barcodeColumnCount.SetValue(rowIndicatorValue + 1);
                         break;
                 }
             }
             // Maybe we should check if we have ambiguous values?
-            if ((barcodeColumnCount.GetConfidentValues().Length == 0) ||
-                (barcodeRowCountUpperPart.GetConfidentValues().Length == 0) ||
-                (barcodeRowCountLowerPart.GetConfidentValues().Length == 0) ||
-                (barcodeECLevel.GetConfidentValues().Length == 0) ||
-                barcodeColumnCount.GetConfidentValues()[0] < 1 ||
-                barcodeRowCountUpperPart.GetConfidentValues()[0] + barcodeRowCountLowerPart.GetConfidentValues()[0] < PDF417Common.MIN_ROWS_IN_BARCODE ||
-                barcodeRowCountUpperPart.GetConfidentValues()[0] + barcodeRowCountLowerPart.GetConfidentValues()[0] > PDF417Common.MAX_ROWS_IN_BARCODE)
+            if ((barcodeColumnCount.GetValue().Length == 0) ||
+                (barcodeRowCountUpperPart.GetValue().Length == 0) ||
+                (barcodeRowCountLowerPart.GetValue().Length == 0) ||
+                (barcodeECLevel.GetValue().Length == 0) ||
+                barcodeColumnCount.GetValue()[0] < 1 ||
+                barcodeRowCountUpperPart.GetValue()[0] + barcodeRowCountLowerPart.GetValue()[0] < PDF417Common.MIN_ROWS_IN_BARCODE ||
+                barcodeRowCountUpperPart.GetValue()[0] + barcodeRowCountLowerPart.GetValue()[0] > PDF417Common.MAX_ROWS_IN_BARCODE)
             {
                 return null;
             }
-            BarcodeMetadata barcodeMetadata = new BarcodeMetadata(barcodeColumnCount.GetConfidentValues()[0],
-                                                                  barcodeRowCountUpperPart.GetConfidentValues()[0], 
-                                                                  barcodeRowCountLowerPart.GetConfidentValues()[0], 
-                                                                  barcodeECLevel.GetConfidentValues()[0]);
+            BarcodeMetadata barcodeMetadata = new BarcodeMetadata(barcodeColumnCount.GetValue()[0],
+                                                                  barcodeRowCountUpperPart.GetValue()[0], 
+                                                                  barcodeRowCountLowerPart.GetValue()[0], 
+                                                                  barcodeECLevel.GetValue()[0]);
             RemoveIncorrectCodewords(barcodeMetadata);
             return barcodeMetadata;
         }

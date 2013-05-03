@@ -308,7 +308,7 @@ namespace ZXing.PDF417.Internal
         /// <param name="barcodeMatrix">Barcode matrix.</param>
         private static void AdjustCodewordCount(DetectionResult detectionResult, BarcodeValue[][] barcodeMatrix)
         {
-            int[] numberOfCodewords = barcodeMatrix[0][1].GetConfidentValues();
+            int[] numberOfCodewords = barcodeMatrix[0][1].GetValue();
             int calculatedNumberOfCodewords = detectionResult.ColumnCount *
                 detectionResult.RowCount -
                 GetNumberOfECCodeWords(detectionResult.ErrorCorrectionLevel);
@@ -318,11 +318,11 @@ namespace ZXing.PDF417.Internal
                 {
                     throw ReaderException.Instance;
                 }
-                barcodeMatrix[0][1].AddConfidenceToValue(calculatedNumberOfCodewords);
+                barcodeMatrix[0][1].SetValue(calculatedNumberOfCodewords);
             } else if (numberOfCodewords[0] != calculatedNumberOfCodewords)
             {
                 // The calculated one is more reliable as it is derived from the row indicator columns
-                barcodeMatrix[0][1].AddConfidenceToValue(calculatedNumberOfCodewords);
+                barcodeMatrix[0][1].SetValue(calculatedNumberOfCodewords);
             }
         }
 
@@ -344,7 +344,7 @@ namespace ZXing.PDF417.Internal
             {
                 for (int column = 0; column < detectionResult.ColumnCount; column++)
                 {
-                    int[] values = barcodeMatrix[row][column + 1].GetConfidentValues();
+                    int[] values = barcodeMatrix[row][column + 1].GetValue();
                     int codewordIndex = row * detectionResult.ColumnCount + column;
                     if (values.Length == 0)
                     {
@@ -474,7 +474,7 @@ namespace ZXing.PDF417.Internal
                     {
                         continue;
                     }
-                    barcodeMatrix[codeword.RowNumber][column].AddConfidenceToValue(codeword.Value);
+                    barcodeMatrix[codeword.RowNumber][column].SetValue(codeword.Value);
                 }
             }
             return barcodeMatrix;
@@ -873,12 +873,12 @@ namespace ZXing.PDF417.Internal
                 for (int column = 0; column < barcodeMatrix[row].Length; column++)
                 {
                     BarcodeValue barcodeValue = barcodeMatrix[row][column];
-                    if (barcodeValue.GetConfidentValues().Length == 0)
+                    if (barcodeValue.GetValue().Length == 0)
                     {
                         formatter.Append("        ");
                     } else
                     {
-                        formatter.AppendFormat("{0,4}({0,3})", barcodeValue.GetConfidentValues()[0], barcodeValue.ConfidenceForValue(barcodeValue.GetConfidentValues()[0]));
+                        formatter.AppendFormat("{0,4}({0,3})", barcodeValue.GetValue()[0], barcodeValue.ConfidenceForValue(barcodeValue.GetValue()[0]));
                     }
                 }
                 formatter.Append("\n");
