@@ -90,8 +90,8 @@ namespace ZXing.PDF417.Internal
                 BottomLeft = new ResultPoint(0, BottomRight.Y);
             } else if (TopRight == null)
             {
-                TopRight = new ResultPoint(0, TopLeft.Y);
-                BottomRight = new ResultPoint(0, TopLeft.Y);
+                TopRight = new ResultPoint(Image.Width - 1, TopLeft.Y);
+                BottomRight = new ResultPoint(Image.Width - 1, TopLeft.Y);
             }
 
             MinX = (int)Math.Min(TopLeft.X, BottomLeft.X);

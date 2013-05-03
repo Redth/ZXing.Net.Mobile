@@ -878,7 +878,7 @@ namespace ZXing.PDF417.Internal
                         formatter.Append("        ");
                     } else
                     {
-                        formatter.AppendFormat("{0,4}({0,3})", barcodeValue.GetValue()[0], barcodeValue.ConfidenceForValue(barcodeValue.GetValue()[0]));
+                        formatter.AppendFormat("{0,4}({0,3})", barcodeValue.GetValue()[0], barcodeValue.GetConfidence(barcodeValue.GetValue()[0]));
                     }
                 }
                 formatter.Append("\n");

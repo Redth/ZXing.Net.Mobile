@@ -33,7 +33,7 @@ namespace ZXing.PDF417.Internal
     /// <author>Stephen Furlani (C# Port)</author>
     public sealed class BarcodeValue
     {
-        private readonly IDictionary<int, int> confidence = new Dictionary<int, int>();
+        private readonly IDictionary<int, int> values = new Dictionary<int, int>();
 
         /// <summary>
         /// Incremenets the Confidence for a given value. (Adds an occurance of a value)
@@ -42,12 +42,15 @@ namespace ZXing.PDF417.Internal
         /// <param name="value">Value.</param>
         public void SetValue(int barcodeValue)
         {
-            if (confidence.ContainsKey(barcodeValue))
+            // ints can't be null in C# - check for containmentship
+            if (values.ContainsKey(barcodeValue))
             {
-                confidence[barcodeValue]++;
+                int confidence = values[barcodeValue];
+                confidence ++;
+                values[barcodeValue] = confidence;
             } else
             {
-                confidence.Add(barcodeValue, 1);
+                values.Add(barcodeValue, 1);
             }
         }
 
@@ -65,7 +68,7 @@ namespace ZXing.PDF417.Internal
 //            return (from pair in confidence where pair.Value == max select pair.Key).ToArray();
             int maxConfidence = -1;
             List<int> result = new List<int>();
-            foreach (var entry in confidence)
+            foreach (var entry in values)
             {
                 if (entry.Value > maxConfidence)
                 {
@@ -84,9 +87,9 @@ namespace ZXing.PDF417.Internal
         /// Returns the confience value for a given barcode value
         /// </summary>
         /// <param name="barcodeValue">Barcode value.</param>
-        public int ConfidenceForValue(int barcodeValue)
+        public int GetConfidence(int barcodeValue)
         {
-            return confidence.ContainsKey(barcodeValue) ? confidence[barcodeValue] : 0;
+            return values.ContainsKey(barcodeValue) ? values[barcodeValue] : 0;
         }
 
     }
