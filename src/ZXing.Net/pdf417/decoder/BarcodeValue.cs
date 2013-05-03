@@ -36,10 +36,11 @@ namespace ZXing.PDF417.Internal
         private readonly IDictionary<int, int> confidence = new Dictionary<int, int>();
 
         /// <summary>
-        /// Incremenets the Confidence for a given value
+        /// Incremenets the Confidence for a given value. (Adds an occurance of a value)
+        ///
         /// </summary>
         /// <param name="value">Value.</param>
-        public void AddConfidenceToValue(int barcodeValue)
+        public void SetValue(int barcodeValue)
         {
             if (confidence.ContainsKey(barcodeValue))
             {
@@ -54,7 +55,7 @@ namespace ZXing.PDF417.Internal
         /// Determines the maximum occurrence of a set value and returns all values which were set with this occurrence.
         /// </summary>
         /// <returns>an array of int, containing the values with the highest occurrence, or null, if no value was set.</returns>
-        public int[] GetConfidentValues()
+        public int[] GetValue()
         {
 //            if (confidence == null || confidence.Count == 0)
 //            {
