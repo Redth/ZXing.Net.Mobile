@@ -247,10 +247,12 @@ namespace ZXing.PDF417.Internal
             }
             BarcodeMetadata leftBarcodeMetadata = leftRowIndicatorColumn.GetBarcodeMetadata();
             BarcodeMetadata rightBarcodeMetadata = rightRowIndicatorColumn.GetBarcodeMetadata();
-            
-            if (leftBarcodeMetadata.ColumnCount != rightBarcodeMetadata.ColumnCount &&
+
+            if (leftBarcodeMetadata == null ||
+                rightBarcodeMetadata == null || (
+                leftBarcodeMetadata.ColumnCount != rightBarcodeMetadata.ColumnCount &&
                 leftBarcodeMetadata.ErrorCorrectionLevel != rightBarcodeMetadata.ErrorCorrectionLevel &&
-                leftBarcodeMetadata.RowCount != rightBarcodeMetadata.RowCount)
+                leftBarcodeMetadata.RowCount != rightBarcodeMetadata.RowCount))
             {
                 return null;
             }
@@ -369,20 +371,21 @@ namespace ZXing.PDF417.Internal
             }
             int[] ambiguousIndexCount = new int[ambiguousIndexesList.Count];
             DecoderResult decoderResult = null;
+
             while (true)
             {
                 for (int i = 0; i < ambiguousIndexCount.Length; i++)
                 {
                     codewords[ambiguousIndexes[i]] = ambiguousIndexValues[i][ambiguousIndexCount[i]];
                 }
-                try
-                {
-                    decoderResult = DecodeCodewords(ref codewords, detectionResult.ErrorCorrectionLevel, erasureArray);
-                    break;
-                } catch (Exception ignored)
-                {
-                    //
-                }
+//                try
+//                {
+                decoderResult = DecodeCodewords(codewords, detectionResult.ErrorCorrectionLevel, erasureArray);
+                break;
+//                } catch
+//                {
+//                    //
+//                }
                 if (ambiguousIndexCount.Length == 0)
                 {
                     throw ReaderException.Instance;
@@ -403,6 +406,7 @@ namespace ZXing.PDF417.Internal
                     }
                 }
             }
+
             if (decoderResult.ErrorsCorrected > 0)
             {
                 LogCorrectedOutput(detectionResult, barcodeMatrix, codewords);
@@ -730,7 +734,7 @@ namespace ZXing.PDF417.Internal
         /// <param name="codewords">Codewords.</param>
         /// <param name="ecLevel">Ec level.</param>
         /// <param name="erasures">Erasures.</param>
-        private static DecoderResult DecodeCodewords(ref int[] codewords, int ecLevel, int[] erasures)
+        private static DecoderResult DecodeCodewords(int[] codewords, int ecLevel, int[] erasures)
         {
             if (codewords.Length == 0)
             {
@@ -742,11 +746,11 @@ namespace ZXing.PDF417.Internal
             
             int correctedErrorsCount = CorrectErrors(codewords, erasures, numECCodewords);
             Log.WriteLine("Corrected errors: " + correctedErrorsCount);
-            VerifyCodewordCount(ref codewords, numECCodewords);
+            VerifyCodewordCount(codewords, numECCodewords);
             
             // Decode the codewords
             DecoderResult decoderResult = DecodedBitStreamParser.Decode(codewords);
-            decoderResult.ErrorsCorrected = correctedErrorsCount;
+            decoderResult.ErrorsCorrected = (correctedErrorsCount >= 0) ? correctedErrorsCount : 0;
             decoderResult.Erasures = erasures.Length;
             return decoderResult;
         }
@@ -768,6 +772,8 @@ namespace ZXing.PDF417.Internal
             {
                 // Too many errors or EC Codewords is corrupted
                 throw ReaderException.Instance;
+                //return -1;
+
             }
             return errorCorrection.Decode(codewords, numECCodewords, erasures);
         }
@@ -777,7 +783,7 @@ namespace ZXing.PDF417.Internal
         /// </summary>
         /// <param name="codewords">Codewords.</param>
         /// <param name="numECCodewords">Number EC codewords.</param>
-        private static void VerifyCodewordCount(ref int[] codewords, int numECCodewords)
+        private static void VerifyCodewordCount(int[] codewords, int numECCodewords)
         {
             if (codewords.Length < 4)
             {

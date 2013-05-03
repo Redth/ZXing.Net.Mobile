@@ -82,12 +82,29 @@ namespace ZXing.PDF417.Internal.EC
             //syndrome = syndrome.multiply(knownErrors);
             
             ModulusPoly[] sigmaOmega = RunEuclideanAlgorithm(field.BuildMonomial(numECCodewords, 1), syndrome, numECCodewords);
+
+            if (sigmaOmega == null)
+            {
+                throw ReaderException.Instance;
+            }
+
             ModulusPoly sigma = sigmaOmega[0];
             ModulusPoly omega = sigmaOmega[1];
+
+            if (sigma == null || omega == null)
+            {
+                throw ReaderException.Instance;
+            }
 
             //sigma = sigma.multiply(knownErrors);
             
             int[] errorLocations = FindErrorLocations(sigma);
+
+            if (errorLocations == null)
+            {
+                throw ReaderException.Instance;
+            }
+
             int[] errorMagnitudes = FindErrorMagnitudes(omega, sigma, errorLocations);
             
             for (int i = 0; i < errorLocations.Length; i++)
@@ -96,6 +113,8 @@ namespace ZXing.PDF417.Internal.EC
                 if (position < 0)
                 {
                     throw ReaderException.Instance;
+                    // return -3; // don't throw
+
                 }
                 received[position] = field.Subtract(received[position], errorMagnitudes[i]);
             }
@@ -183,7 +202,8 @@ namespace ZXing.PDF417.Internal.EC
             }
             if (e != numErrors)
             {
-                return null;
+                // return null;
+                throw ReaderException.Instance;
             }
             return result;
         }

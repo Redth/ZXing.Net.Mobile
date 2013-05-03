@@ -9,12 +9,20 @@ using Android.Widget;
 using Android.OS;
 
 using ZXing.Mobile;
+using Android.Graphics;
+using ZXing;
+using ZXing.Common;
+using ZXing.PDF417;
+using Android.Graphics.Drawables;
+using System.IO;
 
 namespace MonoAppTest
 {
     [Activity (Label = "MonoAppTest", MainLauncher = true)]
     public class Activity1 : Activity
     {
+
+        bool first = true;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -26,13 +34,23 @@ namespace MonoAppTest
             // Get our button from the layout resource,
             // and attach an event to it
             Button button = FindViewById<Button>(Resource.Id.myButton);
-			
+
+            // Camera Test
             button.Click += delegate
             {
                 Scan();
             };
         }
 
+        protected override void OnPostResume()
+        {
+            base.OnPostResume();
+            if (first)
+            {
+                Scan();
+                first = false;
+            } 
+        }
 
         public void Scan()
         {
