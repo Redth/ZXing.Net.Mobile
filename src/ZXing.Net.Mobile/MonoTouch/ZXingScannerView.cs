@@ -151,7 +151,7 @@ namespace ZXing.Mobile
 			if (!string.IsNullOrEmpty (this.options.CharacterSet))
 				barcodeReader.CharacterSet = this.options.CharacterSet;
 			if (this.options.TryInverted.HasValue)
-				barcodeReader.TryHarder = this.options.TryInverted.Value;
+				barcodeReader.TryInverted = this.options.TryInverted.Value;
 
 			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
 			{
