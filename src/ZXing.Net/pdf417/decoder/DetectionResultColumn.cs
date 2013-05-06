@@ -54,7 +54,7 @@ namespace ZXing.PDF417.Internal
         /// <param name="box">The Bounding Box around the column (in the BitMatrix)</param>
         public DetectionResultColumn(BoundingBox box)
         {
-            this.Box = box;
+            this.Box = new BoundingBox(box);
             this.Codewords = new Codeword[Box.MaxY - Box.MinY + 1];
         }
 
@@ -92,7 +92,7 @@ namespace ZXing.PDF417.Internal
         /// Gets the codeword closest to the specified row in the image
         /// </summary>
         /// <param name="imageRow">Image row.</param>
-        public Codeword GetNearestCodeword(int imageRow)
+        public Codeword GetCodewordNearby(int imageRow)
         {
             Codeword codeword = GetCodeword(imageRow);
             if (codeword == null)
@@ -141,20 +141,20 @@ namespace ZXing.PDF417.Internal
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="ZXing.PDF417.Internal.DetectionResultColumn"/>.</returns>
         public override string ToString()
         {
-//            StringBuilder builder = new StringBuilder();
-//            int row = 0;
-//            foreach (var cw in Codewords)
-//            {
-//                if (cw == null)
-//                {
-//                    builder.AppendFormat("{0,3}:    |   \n", row++);
-//                } else
-//                {
-//                    builder.AppendFormat("{0,3}: {1,3}|{2,3}\n", row++, cw.RowNumber, cw.Value);
-//                }
-//            }
-//            return builder.ToString();
-            return "Valid Codewords: " + (from cw in Codewords where cw != null select cw).Count().ToString();
+            StringBuilder builder = new StringBuilder();
+            int row = 0;
+            foreach (var cw in Codewords)
+            {
+                if (cw == null)
+                {
+                    builder.AppendFormat("{0,3}:    |   \n", row++);
+                } else
+                {
+                    builder.AppendFormat("{0,3}: {1,3}|{2,3}\n", row++, cw.RowNumber, cw.Value);
+                }
+            }
+            return builder.ToString();
+            // return "Valid Codewords: " + (from cw in Codewords where cw != null select cw).Count().ToString();
         }
     }
 }

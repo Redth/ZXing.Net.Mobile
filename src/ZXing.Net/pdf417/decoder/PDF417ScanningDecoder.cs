@@ -457,7 +457,11 @@ namespace ZXing.PDF417.Internal
             BarcodeValue[][] barcodeMatrix = new BarcodeValue[detectionResult.RowCount][];
             for (int row = 0; row < barcodeMatrix.Length; row++)
             {
-                barcodeMatrix[row] = Enumerable.Repeat(new BarcodeValue(), detectionResult.ColumnCount + 2).ToArray();
+                barcodeMatrix[row] = new BarcodeValue[detectionResult.ColumnCount + 2];// Enumerable.Repeat(new BarcodeValue(), detectionResult.ColumnCount + 2).ToArray();
+                for (int col = 0; col < barcodeMatrix[row].Length; col++)
+                {
+                    barcodeMatrix[row][col] = new BarcodeValue();
+                }
             }
             
             int column = -1;
@@ -514,14 +518,14 @@ namespace ZXing.PDF417.Internal
             {
                 return leftToRight ? codeword.EndX : codeword.StartX;
             }
-            codeword = detectionResult.DetectionResultColumns[barcodeColumn].GetNearestCodeword(imageRow);
+            codeword = detectionResult.DetectionResultColumns[barcodeColumn].GetCodewordNearby(imageRow);
             if (codeword != null)
             {
                 return leftToRight ? codeword.EndX : codeword.StartX;
             }
             if (IsValidBarcodeColumn(detectionResult, barcodeColumn - offset))
             {
-                codeword = detectionResult.DetectionResultColumns[barcodeColumn - offset].GetNearestCodeword(imageRow);
+                codeword = detectionResult.DetectionResultColumns[barcodeColumn - offset].GetCodewordNearby(imageRow);
             }
             if (codeword != null)
             {
