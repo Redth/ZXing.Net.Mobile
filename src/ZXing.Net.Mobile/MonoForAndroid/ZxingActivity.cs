@@ -317,8 +317,14 @@ namespace ZXing.Mobile
 					barcodeReader.AutoRotate = true;
 				}
 
+				var started = DateTime.Now;
 				//Try and decode the result
 				var result = barcodeReader.Decode(img.GetYuvData(), img.Width, img.Height, RGBLuminanceSource.BitmapFormat.Unknown);
+
+				var ended = DateTime.Now - started;
+
+				Android.Util.Log.Debug("ZXing.Mobile", "Decode Time: " + ended.TotalMilliseconds + " ms (" + img.Width + " x " + img.Height + ")");
+
 
 				lastPreviewAnalysis = DateTime.Now;
 
