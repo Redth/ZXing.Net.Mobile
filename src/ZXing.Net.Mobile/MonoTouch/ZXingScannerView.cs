@@ -265,7 +265,7 @@ namespace ZXing.Mobile
 
 					//Focus at the point touched
 					device.FocusPointOfInterest = pointOfInterest;
-
+					device.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
 					device.UnlockForConfiguration();
 				}
 			}

@@ -123,11 +123,12 @@ namespace ZXing.Mobile
 
 					var pt = tapGestureRecognizer.LocationInView(overlayView);
 
-					scannerView.Focus(pt);
+					//scannerView.Focus(pt);
 
 					Console.WriteLine("OVERLAY TOUCH: " + pt.X + ", " + pt.Y);
 
 				});
+				tapGestureRecognizer.CancelsTouchesInView = false;
 				tapGestureRecognizer.NumberOfTapsRequired = 1;
 				tapGestureRecognizer.NumberOfTouchesRequired = 1;
 
