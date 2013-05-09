@@ -70,6 +70,7 @@
     <Compile Include="ResultMetadataType.cs" />
     <Compile Include="ResultPoint.cs" />
     <Compile Include="ResultPointCallback.cs" />
+    <Compile Include="RGBLuminanceSource.cs" />
     <Compile Include="SupportClass.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="WriterException.cs" />
@@ -280,7 +281,6 @@
     <Compile Include="silverlight\BigInteger.cs" />
     <Compile Include="silverlight\BrowsableAttribute.cs" />
     <Compile Include="silverlight\SerializableAttribute.cs" />
-    <Compile Include="xamarin\Bitmap.monotouch.cs" />
     <Compile Include="xamarin\Color.cs" />
     <Compile Include="xamarin\ColorConverter.cs" />
     <Compile Include="xamarin\ColorTranslator.cs" />

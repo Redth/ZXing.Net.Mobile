@@ -117,6 +117,23 @@ namespace ZXing.Mobile
 			
 			if (overlayView != null)
 			{
+				UITapGestureRecognizer tapGestureRecognizer = new UITapGestureRecognizer ();
+
+				tapGestureRecognizer.AddTarget (() => {
+
+					var pt = tapGestureRecognizer.LocationInView(overlayView);
+
+					//scannerView.Focus(pt);
+
+					Console.WriteLine("OVERLAY TOUCH: " + pt.X + ", " + pt.Y);
+
+				});
+				tapGestureRecognizer.CancelsTouchesInView = false;
+				tapGestureRecognizer.NumberOfTapsRequired = 1;
+				tapGestureRecognizer.NumberOfTouchesRequired = 1;
+
+				overlayView.AddGestureRecognizer (tapGestureRecognizer);
+
 				overlayView.Frame = new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 				
@@ -160,38 +177,6 @@ namespace ZXing.Mobile
 			//scannerView.Dispose();			
 			//scannerView = null;
 		}
-
-		/*public override void TouchesEnded (NSSet touches, UIEvent evt)
-		{
-			return;
-
-			if (touches == null || touches.Count <= 0)
-				return;
-
-			var touch = touches.AnyObject as UITouch;
-
-			//Get the device
-			var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
-
-			if (device == null || touch == null)
-				return;
-
-			//See if it supports focusing on a point
-			if (device.FocusPointOfInterestSupported && !device.AdjustingFocus)
-			{
-				NSError err = null;
-
-				//Lock device to config
-				if (device.LockForConfiguration(out err))
-				{
-					//Focus at the point touched
-					device.FocusPointOfInterest = touch.LocationInView(this.View);
-					device.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
-					device.UnlockForConfiguration();
-				}
-			}
-		}*/
-
 
 		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
 		{

@@ -10,7 +10,7 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanningOptions ()
 		{
 			this.PossibleFormats = new List<BarcodeFormat>();
-			this.AutoRotate = true;
+			//this.AutoRotate = true;
 			this.DelayBetweenAnalyzingFrames = 150;
 			this.InitialDelayBeforeAnalyzingFrames = 300;
 		}

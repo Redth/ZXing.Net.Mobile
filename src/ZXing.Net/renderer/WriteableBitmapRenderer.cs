@@ -170,17 +170,21 @@ namespace ZXing.Rendering
          // Copy data back
          using (var stream = System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeBufferExtensions.AsStream(bmp.PixelBuffer))
          {
-            for (int y = 0; y < height - emptyArea; y++)
+            for (int y = 0; y < matrix.Height - emptyArea; y++)
             {
                for (var pixelsizeHeight = 0; pixelsizeHeight < pixelsize; pixelsizeHeight++)
                {
-                  for (var x = 0; x < width; x++)
+                  for (var x = 0; x < matrix.Width; x++)
                   {
                      var color = matrix[x, y] ? foreground : background;
                      for (var pixelsizeWidth = 0; pixelsizeWidth < pixelsize; pixelsizeWidth++)
                      {
                         stream.Write(color, 0, 4);
                      }
+                  }
+                  for (var x = pixelsize * matrix.Width; x < width; x++)
+                  {
+                     stream.Write(background, 0, 4);
                   }
                }
             }
@@ -194,8 +198,8 @@ namespace ZXing.Rendering
          }
          bmp.Invalidate();
 #else
-         int foreground = Foreground.A << 24 | Foreground.B << 16 | Foreground.G << 8 | Foreground.R;
-         int background = Background.A << 24 | Background.B << 16 | Background.G << 8 | Background.R;
+         int foreground = Foreground.A << 24 | Foreground.R << 16 | Foreground.G << 8 | Foreground.B;
+         int background = Background.A << 24 | Background.R << 16 | Background.G << 8 | Background.B;
          var bmp = new WriteableBitmap(width, height);
          var pixels = bmp.Pixels;
          var index = 0;

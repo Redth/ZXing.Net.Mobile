@@ -85,15 +85,6 @@ namespace ZXing.Mobile
 				return false;
 			}
 
-			NSError err = null;
-			if (captureDevice.LockForConfiguration(out err))
-			{
-				captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
-				captureDevice.UnlockForConfiguration();
-			}
-			else
-				Console.WriteLine("Failed to Lock for Config: " + err.Description);
-
 			var input = AVCaptureDeviceInput.FromDevice (captureDevice);
 			if (input == null){
 				Console.WriteLine ("No input - this won't work on the simulator, try a physical device");
@@ -101,84 +92,7 @@ namespace ZXing.Mobile
 			}
 			else
 				session.AddInput (input);
-			
-			// create a VideoDataOutput and add it to the sesion
-			output = new AVCaptureVideoDataOutput () {
-				VideoSettings = new AVVideoSettings (CVPixelFormatType.CV32BGRA),
-			};
 
-			
-			// configure the output
-			queue = new MonoTouch.CoreFoundation.DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
-
-
-			var barcodeReader = new BarcodeReader(null, (img) => 	
-			{
-				using (var bmp = new Bitmap(img))
-				{
-					var src = new RGBLuminanceSource(bmp, bmp.Width, bmp.Height);
-
-					//Don't try and rotate properly if we're autorotating anyway
-					if (options.AutoRotate.HasValue && options.AutoRotate.Value)
-						return src;
-
-					switch (UIDevice.CurrentDevice.Orientation)
-					{
-						case UIDeviceOrientation.Portrait:
-							return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-						case UIDeviceOrientation.PortraitUpsideDown:
-							return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-						case UIDeviceOrientation.LandscapeLeft:
-							return src;
-						case UIDeviceOrientation.LandscapeRight:
-							return src;
-					}
-
-					return src;
-				}
-
-			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
-
-			if (this.options.TryHarder.HasValue)
-				barcodeReader.TryHarder = this.options.TryHarder.Value;
-			if (this.options.PureBarcode.HasValue)
-				barcodeReader.PureBarcode = this.options.PureBarcode.Value;
-			if (this.options.AutoRotate.HasValue)
-				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
-			if (!string.IsNullOrEmpty (this.options.CharacterSet))
-				barcodeReader.CharacterSet = this.options.CharacterSet;
-			if (this.options.TryInverted.HasValue)
-				barcodeReader.TryHarder = this.options.TryInverted.Value;
-
-			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
-			{
-				barcodeReader.PossibleFormats = new List<BarcodeFormat>();
-				
-				foreach (var pf in this.options.PossibleFormats)
-					barcodeReader.PossibleFormats.Add(pf);
-			}
-
-
-			outputRecorder = new OutputRecorder (this.options, img => 
-			{
-				try
-				{
-					var rs = barcodeReader.Decode(img);
-			
-					if (rs != null)
-						resultCallback(rs);
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine("DECODE FAILED: " + ex);
-				}
-			});
-
-			output.AlwaysDiscardsLateVideoFrames = true;
-			output.SetSampleBufferDelegate (outputRecorder, queue);
-
-			session.AddOutput (output);
-			session.StartRunning ();
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
@@ -196,7 +110,113 @@ namespace ZXing.Mobile
 
 			ResizePreview(UIApplication.SharedApplication.StatusBarOrientation);
 
+
+			session.StartRunning ();
+
+			Console.WriteLine ("RUNNING!!!");
+
+			// create a VideoDataOutput and add it to the sesion
+			output = new AVCaptureVideoDataOutput () {
+				//videoSettings
+				VideoSettings = new AVVideoSettings (CVPixelFormatType.CV32BGRA),
+			};
+
+			// configure the output
+			queue = new MonoTouch.CoreFoundation.DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
+
+			var barcodeReader = new BarcodeReader(null, (img) => 	
+			{
+				var src = new RGBLuminanceSource(img); //, bmp.Width, bmp.Height);
+
+				//Don't try and rotate properly if we're autorotating anyway
+				if (options.AutoRotate.HasValue && options.AutoRotate.Value)
+					return src;
+
+				switch (UIDevice.CurrentDevice.Orientation)
+				{
+					case UIDeviceOrientation.Portrait:
+						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
+					case UIDeviceOrientation.PortraitUpsideDown:
+						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
+					case UIDeviceOrientation.LandscapeLeft:
+						return src;
+					case UIDeviceOrientation.LandscapeRight:
+						return src;
+				}
+
+				return src;
+
+			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
+
+			if (this.options.TryHarder.HasValue)
+			{
+				Console.WriteLine("TRY_HARDER: " + this.options.TryHarder.Value);
+				barcodeReader.TryHarder = this.options.TryHarder.Value;
+			}
+			if (this.options.PureBarcode.HasValue)
+				barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+			if (this.options.AutoRotate.HasValue)
+			{
+				Console.WriteLine("AUTO_ROTATE: " + this.options.AutoRotate.Value);
+				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
+			}
+			if (!string.IsNullOrEmpty (this.options.CharacterSet))
+				barcodeReader.CharacterSet = this.options.CharacterSet;
+			if (this.options.TryInverted.HasValue)
+				barcodeReader.TryInverted = this.options.TryInverted.Value;
+
+			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+			{
+				barcodeReader.PossibleFormats = new List<BarcodeFormat>();
+				
+				foreach (var pf in this.options.PossibleFormats)
+					barcodeReader.PossibleFormats.Add(pf);
+			}
+
+			outputRecorder = new OutputRecorder (this.options, img => 
+			{
+				try
+				{
+					var started = DateTime.Now;
+					var rs = barcodeReader.Decode(img);
+					var total = DateTime.Now - started;
+
+					Console.WriteLine("Decode Time: " + total.TotalMilliseconds + " ms");
+
+					if (rs != null)
+						resultCallback(rs);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("DECODE FAILED: " + ex);
+				}
+			});
+
+			output.AlwaysDiscardsLateVideoFrames = true;
+			output.SetSampleBufferDelegate (outputRecorder, queue);
+
+
 			Console.WriteLine("SetupCamera Finished");
+
+			session.AddOutput (output);
+			//session.StartRunning ();
+
+
+			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
+			{
+				NSError err = null;
+				if (captureDevice.LockForConfiguration(out err))
+				{
+					captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+
+					if (captureDevice.FocusPointOfInterestSupported)
+						captureDevice.FocusPointOfInterest = new PointF(0.5f, 0.5f);
+
+					captureDevice.UnlockForConfiguration();
+				}
+				else
+					Console.WriteLine("Failed to Lock for Config: " + err.Description);
+			}
 
 			return true;
 		}
@@ -221,7 +241,36 @@ namespace ZXing.Mobile
 					break;
 			}
 		}
-	
+
+		public void Focus(PointF pointOfInterest)
+		{
+			//Get the device
+			if (AVMediaType.Video == null)
+				return;
+
+			var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+
+			if (device == null)
+				return;
+
+			//See if it supports focusing on a point
+			if (device.FocusPointOfInterestSupported && !device.AdjustingFocus)
+			{
+				NSError err = null;
+
+				//Lock device to config
+				if (device.LockForConfiguration(out err))
+				{
+					Console.WriteLine("Focusing at point: " + pointOfInterest.X + ", " + pointOfInterest.Y);
+
+					//Focus at the point touched
+					device.FocusPointOfInterest = pointOfInterest;
+					device.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					device.UnlockForConfiguration();
+				}
+			}
+		}
+
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
 		{
 			public OutputRecorder(MobileBarcodeScanningOptions options, Action<UIImage> handleImage) : base()
