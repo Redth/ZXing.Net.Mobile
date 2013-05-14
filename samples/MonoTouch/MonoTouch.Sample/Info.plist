@@ -16,5 +16,7 @@
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>ZXing Sample</string>
+	<key>MinimumOSVersion</key>
+	<string>5.0</string>
 </dict>
 </plist>
