@@ -74,7 +74,7 @@ namespace ZXing.Mobile
 				var evt = OnScanCompleted;
 				if (evt != null)
 					OnScanCompleted(result);
-			});
+			}, ScanningOptions);
 
 			SupportFragmentManager.BeginTransaction()
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
@@ -126,15 +126,15 @@ namespace ZXing.Mobile
 		{
 			scannerFragment.AutoFocus();
 		}
+
 		public void CancelScan ()
 		{
-
-
 			Finish ();
 			var evt = OnCanceled;
 			if (evt !=null)
 				evt();
 		}
+
 		public override bool OnKeyDown (Keycode keyCode, KeyEvent e)
 		{
 			switch (keyCode)

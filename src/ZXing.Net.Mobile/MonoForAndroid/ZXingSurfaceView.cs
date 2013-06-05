@@ -24,35 +24,22 @@ namespace ZXing.Mobile
 		private const int MIN_FRAME_HEIGHT = 240;
 		private const int MAX_FRAME_WIDTH = 600;
 		private const int MAX_FRAME_HEIGHT = 400;
-		
-		Size screenResolution = Size.Empty;
-		Size cameraResolution = Size.Empty;
-		
+	
 		System.Threading.CancellationTokenSource tokenSource;
-		//DateTime lastAutoFocus = DateTime.MinValue;
-		Activity activity;
 		ISurfaceHolder surface_holder;
 		Android.Hardware.Camera camera;
 		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> callback;
-		
-		//int width, height;
-		//MultiFormatReader reader;
-		//BarcodeReader reader;
-		
+
 		public ZXingSurfaceView (Activity activity, MobileBarcodeScanningOptions options, Action<ZXing.Result> callback)
 			: base (activity)
 		{
-			this.activity = activity;
+			//this.activity = activity;
 			this.callback = callback;
-			
-			screenResolution = new Size(this.activity.WindowManager.DefaultDisplay.Width, this.activity.WindowManager.DefaultDisplay.Height);
-			
 			this.options = options;
+
 			lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
-			
-			//this.reader = this.options.BuildMultiFormatReader();
-			
+
 			this.surface_holder = Holder;
 			this.surface_holder.AddCallback (this);
 			this.surface_holder.SetType (SurfaceType.PushBuffers);
@@ -112,19 +99,13 @@ namespace ZXing.Mobile
 				return;
 			
 			var parameters = camera.GetParameters ();
-			
-			//width = parameters.PreviewSize.Width;
-			//height = parameters.PreviewSize.Height;
-			//parameters.PreviewFormat = ImageFormatType.Rgb565;
-			//parameters.PreviewFrameRate = 15;
-			
 			parameters.PreviewFormat = ImageFormatType.Nv21;
 			
 			camera.SetParameters (parameters);
 			camera.SetDisplayOrientation (90);
 			camera.StartPreview ();
 			
-			cameraResolution = new Size(parameters.PreviewSize.Width, parameters.PreviewSize.Height);
+			//cameraResolution = new Size(parameters.PreviewSize.Width, parameters.PreviewSize.Height);
 			
 			AutoFocus();
 		}
@@ -154,20 +135,20 @@ namespace ZXing.Mobile
 					//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
 					
 					if (this.options.TryHarder.HasValue)
-						barcodeReader.TryHarder = this.options.TryHarder.Value;
+						barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
 					if (this.options.PureBarcode.HasValue)
-						barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+						barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
 					if (!string.IsNullOrEmpty (this.options.CharacterSet))
-						barcodeReader.CharacterSet = this.options.CharacterSet;
+						barcodeReader.Options.CharacterSet = this.options.CharacterSet;
 					if (this.options.TryInverted.HasValue)
 						barcodeReader.TryInverted = this.options.TryInverted.Value;
 					
 					if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
 					{
-						barcodeReader.PossibleFormats = new List<BarcodeFormat>();
+						barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
 						
 						foreach (var pf in this.options.PossibleFormats)
-							barcodeReader.PossibleFormats.Add(pf);
+							barcodeReader.Options.PossibleFormats.Add(pf);
 					}
 					
 					//Always autorotate on android
@@ -192,10 +173,8 @@ namespace ZXing.Mobile
 				Android.Util.Log.Debug("ZXing.Mobile", "No barcode Found");
 				// ignore this exception; it happens every time there is a failed scan
 				
-			} catch (Exception){
-				
+			} catch (Exception) {
 				// TODO: this one is unexpected.. log or otherwise handle it
-				
 				throw;
 			}
 		}
@@ -341,72 +320,7 @@ namespace ZXing.Mobile
 		{
 			canvas.DrawLine(a.X, a.Y, b.X, b.Y, paint);
 		}
-		
-		Rect framingRect = null;
-		Rect framingRectInPreview = null;
-		
-		public Rect GetFramingRect() 
-		{
-			if (framingRect == null) 
-			{
-				if (camera == null) 
-					return null;
-			}
-			
-			if (screenResolution == Size.Empty)
-				return null;
-			
-			int width = screenResolution.Width * 15 / 16;
-			if (width < MIN_FRAME_WIDTH)
-				width = MIN_FRAME_WIDTH;
-			else if (width > MAX_FRAME_WIDTH)
-				width = MAX_FRAME_WIDTH;
-			
-			int height = screenResolution.Height * 4/ 10;
-			if (height < MIN_FRAME_HEIGHT)
-				height = MIN_FRAME_HEIGHT;
-			else if (height > MAX_FRAME_HEIGHT)
-				height = MAX_FRAME_HEIGHT;
-			
-			int leftOffset = (screenResolution.Width - width) / 2;
-			int topOffset = (screenResolution.Height - height) / 2;
-			framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
-			
-			//Android.Util.Log.Debug("ZXING", "Framing Rect: X=" + framingRect.Left + " Y=" + framingRect.Top + " W=" + framingRect.Width() + " H=" + framingRect.Height());
-			return framingRect;
-		}
-		
-		public Rect GetFramingRectInPreview() 
-		{
-			if (framingRectInPreview == null)
-			{
-				var fr = GetFramingRect();
-				if (fr == null)
-					return null;
-				
-				var rect = new Rect(fr.Left, fr.Top, fr.Right, fr.Bottom);
-				
-				if (cameraResolution == Size.Empty || screenResolution == Size.Empty)
-					return null;
-				
-				framingRectInPreview = new Rect(rect.Left * cameraResolution.Width / screenResolution.Width,
-				                                rect.Top * cameraResolution.Height / screenResolution.Height,
-				                                rect.Right * cameraResolution.Width / screenResolution.Width,
-				                                rect.Bottom * cameraResolution.Height / screenResolution.Height);
-				
-				//rect.Left = rect.Left * cameraResolution.Width / screenResolution.Width;
-				//rect.Right = rect.Right * cameraResolution.Width / screenResolution.Width;
-				//rect.Top = rect.Top * cameraResolution.Height / screenResolution.Height;
-				//rect.Bottom = rect.Bottom * cameraResolution.Height / screenResolution.Height;
-				//framingRectInPreview = new Rectangle(rect.Left * cameraResolution.Width / screenResolution.Width,
-				
-			}
-			
-			//Android.Util.Log.Debug("ZXING", "Preview Framing Rect: X=" + framingRectInPreview.Left + " Y=" + framingRectInPreview.Top + " W=" + framingRectInPreview.Width() + " H=" + framingRectInPreview.Height());
-			
-			return framingRectInPreview;
-		}
-		
+
 		public Size FindBestPreviewSize(Android.Hardware.Camera.Parameters p, Size screenRes)
 		{
 			var max = p.SupportedPreviewSizes.Count;
@@ -415,9 +329,6 @@ namespace ZXing.Mobile
 			
 			return new Size(s.Width, s.Height);
 		}
-		
-		
-		
 	}
 }
 

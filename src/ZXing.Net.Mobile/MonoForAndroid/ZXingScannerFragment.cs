@@ -17,9 +17,11 @@ namespace ZXing.Mobile
 {
 	public class ZXingScannerFragment : Fragment
 	{
-		public ZXingScannerFragment(Action<ZXing.Result> scanResultCallback)
+		public ZXingScannerFragment(Action<ZXing.Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
 		{
 			this.callback = scanResultCallback;
+			this.ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
+			this.UseCustomView = false;
 		}
 
 		Action<ZXing.Result> callback;
@@ -30,23 +32,34 @@ namespace ZXing.Mobile
 
 			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
 
-			scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, callback);
-			frame.AddView(scanner, layoutParams);
+			if (this.Activity == null)
+				Console.WriteLine ("ACIVITY IS NULL");
+			else
+				Console.WriteLine ("ACTIVITY NOOOOOT NULL");
 
-
-			if (!UseCustomView)
+			try
 			{
-				zxingOverlay = new ZxingOverlayView (this.Activity);
-				zxingOverlay.TopText = TopText ?? "";
-				zxingOverlay.BottomText = BottomText ?? "";
+				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, callback);
+				frame.AddView(scanner, layoutParams);
 
-				frame.AddView (zxingOverlay, layoutParams);
+
+				if (!UseCustomView)
+				{
+					zxingOverlay = new ZxingOverlayView (this.Activity);
+					zxingOverlay.TopText = TopText ?? "";
+					zxingOverlay.BottomText = BottomText ?? "";
+
+					frame.AddView (zxingOverlay, layoutParams);
+				}
+				else if (CustomOverlayView != null)
+				{
+					frame.AddView(CustomOverlayView, layoutParams);
+				}
 			}
-			else if (CustomOverlayView != null)
+			catch (Exception ex)
 			{
-				frame.AddView(CustomOverlayView, layoutParams);
+				Console.WriteLine ("Create Surface View Failed: " + ex);
 			}
-
 			return frame;
 		}
 

@@ -30,12 +30,10 @@ namespace ZXing.Mobile
 		private Color resultColor;
 		private Color frameColor;
 		private Color laserColor;
-		private Color resultPointColor;
+		//private Color resultPointColor;
 		private int scannerAlpha;
 		private List<ZXing.ResultPoint> possibleResultPoints;
 		//private List<com.google.zxing.ResultPoint> lastPossibleResultPoints;
-
-		//private ZxingSurfaceView scanner;
 
 		public ZxingOverlayView(Context context) : base(context)
 		{
@@ -46,7 +44,7 @@ namespace ZXing.Mobile
 			resultColor = Color.Red; // resources.getColor(R.color.result_view);
 			frameColor = Color.Black; // resources.getColor(R.color.viewfinder_frame);
 			laserColor = Color.Red; //  resources.getColor(R.color.viewfinder_laser);
-			resultPointColor = Color.LightCoral; // resources.getColor(R.color.possible_result_points);
+			//resultPointColor = Color.LightCoral; // resources.getColor(R.color.possible_result_points);
 			scannerAlpha = 0;
 			possibleResultPoints = new List<ZXing.ResultPoint>(5);
 			//lastPossibleResultPoints = null;
@@ -55,44 +53,18 @@ namespace ZXing.Mobile
 			//scanner = scannerInstance;
 		}
 
-		Rect GetFramingRect()
+		Rect GetFramingRect(Canvas canvas)
 		{
-			var wm = this.Context.GetSystemService(Service.WindowService) as IWindowManager;
-			int width = wm.DefaultDisplay.Width * 15 / 16;
+			int width = canvas.Width * 15 / 16;
 
-			int height = wm.DefaultDisplay.Height * 4/ 10;
+			int height = canvas.Height * 4/ 10;
 
-			int leftOffset = (wm.DefaultDisplay.Width - width) / 2;
-			int topOffset = (wm.DefaultDisplay.Height - height) / 2;
+			int leftOffset = (canvas.Width - width) / 2;
+			int topOffset = (canvas.Height - height) / 2;
 			var framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
 
 			return framingRect;
 		}
-
-		/*Rect GetFramingRectInPreview() 
-		{
-			var fr = GetFramingRect();
-			if (fr == null)
-				return null;
-			
-			var rect = new Rect(fr.Left, fr.Top, fr.Right, fr.Bottom);
-				
-			if (cameraResolution == Size.Empty || screenResolution == Size.Empty)
-					return null;
-				
-			var framingRectInPreview = new Rect(rect.Left * cameraResolution.Width / screenResolution.Width,
-			                                rect.Top * cameraResolution.Height / screenResolution.Height,
-			                                rect.Right * cameraResolution.Width / screenResolution.Width,
-			                                rect.Bottom * cameraResolution.Height / screenResolution.Height);
-				
-			//rect.Left = rect.Left * cameraResolution.Width / screenResolution.Width;
-			//rect.Right = rect.Right * cameraResolution.Width / screenResolution.Width;
-			//rect.Top = rect.Top * cameraResolution.Height / screenResolution.Height;
-			//rect.Bottom = rect.Bottom * cameraResolution.Height / screenResolution.Height;
-			//framingRectInPreview = new Rectangle(rect.Left * cameraResolution.Width / screenResolution.Width,
-
-			return framingRectInPreview;
-		}*/
 
 		public string TopText { get;set; }
 		public string BottomText { get;set; }
@@ -102,7 +74,7 @@ namespace ZXing.Mobile
 			
 			var scale = this.Context.Resources.DisplayMetrics.Density;
 
-			var frame = GetFramingRect();
+			var frame = GetFramingRect(canvas);
 			if (frame == null)
 				return;
 
