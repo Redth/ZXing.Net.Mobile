@@ -31,6 +31,8 @@ using Windows.UI.Xaml.Media.Imaging;
 using System.Windows.Media.Imaging;
 #endif
 
+using ZXing.Common;
+
 namespace ZXing
 {
    /// <summary>
@@ -54,6 +56,7 @@ namespace ZXing
       /// <value>
       ///   <c>true</c> if [try harder]; otherwise, <c>false</c>.
       /// </value>
+      [Obsolete("Please use the Options.TryHarder property instead.")]
       bool TryHarder { get; set; }
 
       /// <summary>
@@ -63,6 +66,7 @@ namespace ZXing
       /// <value>
       ///   <c>true</c> if monochrome image of a barcode; otherwise, <c>false</c>.
       /// </value>
+      [Obsolete("Please use the Options.PureBarcode property instead.")]
       bool PureBarcode { get; set; }
 
       /// <summary>
@@ -71,6 +75,7 @@ namespace ZXing
       /// <value>
       /// The character set.
       /// </value>
+      [Obsolete("Please use the Options.CharacterSet property instead.")]
       string CharacterSet { get; set; }
 
       /// <summary>
@@ -80,7 +85,13 @@ namespace ZXing
       /// <value>
       /// The possible formats.
       /// </value>
+      [Obsolete("Please use the Options.PossibleFormats property instead.")]
       IList<BarcodeFormat> PossibleFormats { get; set; }
+
+      /// <summary>
+      /// Specifies some options which influence the decoding process
+      /// </summary>
+      DecodingOptions Options { get; set; }
 
       /// <summary>
       /// Decodes the specified barcode bitmap which is given by a generic byte array with the order RGB24.
@@ -93,6 +104,17 @@ namespace ZXing
       /// the result data or null
       /// </returns>
       Result[] DecodeMultiple(byte[] rawRGB, int width, int height, RGBLuminanceSource.BitmapFormat format);
+
+      /// <summary>
+      /// Tries to decode barcodes within an image which is given by a luminance source.
+      /// That method gives a chance to prepare a luminance source completely before calling
+      /// the time consuming decoding method. On the other hand there is a chance to create
+      /// a luminance source which is independent from external resources (like Bitmap objects)
+      /// and the decoding call can be made in a background thread.
+      /// </summary>
+      /// <param name="luminanceSource">The luminance source.</param>
+      /// <returns></returns>
+      Result[] DecodeMultiple(LuminanceSource luminanceSource);
 
 #if MONOTOUCH
       Result[] DecodeMultiple(MonoTouch.UIKit.UIImage barcodeImage);

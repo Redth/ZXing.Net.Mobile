@@ -95,10 +95,9 @@ namespace Tests.MonoTouch
 
 
 			var barcodeReader = new BarcodeReader(null, (brimg) => 			                                      {
-				
-				using (var bmp = new Bitmap(brimg))
-					return new RGBLuminanceSource(bmp, bmp.Width, bmp.Height);
-				
+
+				return new RGBLuminanceSource(uimg);
+
 			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
 
 			var r = barcodeReader.Decode(uimg);
