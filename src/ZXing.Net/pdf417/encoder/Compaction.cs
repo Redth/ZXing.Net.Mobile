@@ -25,14 +25,17 @@ namespace ZXing.PDF417.Internal
       /// 
       /// </summary>
       AUTO,
+
       /// <summary>
       /// 
       /// </summary>
       TEXT,
+
       /// <summary>
       /// 
       /// </summary>
       BYTE,
+
       /// <summary>
       /// 
       /// </summary>

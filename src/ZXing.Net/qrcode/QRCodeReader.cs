@@ -126,7 +126,6 @@ namespace ZXing.QrCode
       /// around it. This is a specialized method that works exceptionally fast in this special
       /// case.
       /// 
-      /// <seealso cref="ZXing.PDF417.PDF417Reader.extractPureBits(BitMatrix)" />
       /// <seealso cref="ZXing.Datamatrix.DataMatrixReader.extractPureBits(BitMatrix)" />
       /// </summary>
       private static BitMatrix extractPureBits(BitMatrix image)
@@ -146,6 +145,12 @@ namespace ZXing.QrCode
          int bottom = rightBottomBlack[1];
          int left = leftTopBlack[0];
          int right = rightBottomBlack[0];
+
+         // Sanity check!
+         if (left >= right || top >= bottom)
+         {
+            return null;
+         }
 
          if (bottom - top != right - left)
          {
@@ -172,6 +177,28 @@ namespace ZXing.QrCode
          int nudge = (int)(moduleSize / 2.0f);
          top += nudge;
          left += nudge;
+
+         // But careful that this does not sample off the edge
+         int nudgedTooFarRight = left + (int)((matrixWidth - 1) * moduleSize) - (right - 1);
+         if (nudgedTooFarRight > 0)
+         {
+            if (nudgedTooFarRight > nudge)
+            {
+               // Neither way fits; abort
+               return null;
+            }
+            left -= nudgedTooFarRight;
+         }
+         int nudgedTooFarDown = top + (int)((matrixHeight - 1) * moduleSize) - (bottom - 1);
+         if (nudgedTooFarDown > 0)
+         {
+            if (nudgedTooFarDown > nudge)
+            {
+               // Neither way fits; abort
+               return null;
+            }
+            top -= nudgedTooFarDown;
+         }
 
          // Now just read off the bits
          BitMatrix bits = new BitMatrix(matrixWidth, matrixHeight);
