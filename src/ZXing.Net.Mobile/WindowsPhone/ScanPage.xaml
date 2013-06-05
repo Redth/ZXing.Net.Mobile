@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:zxing="clr-namespace:ZXing.Mobile.WindowsPhone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
@@ -15,46 +16,9 @@
 
 	<!--LayoutRoot is the root grid where all page content is placed-->
 	<Grid x:Name="LayoutRoot" Background="Transparent">
-		
-		<Rectangle x:Name="_previewRect" 
-               Margin="0" 
-               Height="800" 
-               Width="600" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center">
-			<Rectangle.Fill>
-				<VideoBrush x:Name="_previewVideo">
-					<VideoBrush.RelativeTransform>
-						<CompositeTransform  
-                        x:Name="_previewTransform" CenterX=".5" CenterY=".5" />
-					</VideoBrush.RelativeTransform>
-				</VideoBrush>
-			</Rectangle.Fill>
-		</Rectangle>
-		
-        <Grid Visibility="Collapsed" Name="gridCustomOverlay">
+		<zxing:ZXingScannerControl Name="scannerControl">
             
-        </Grid>
-        
-        <Grid Name="gridDefaultOverlay">
-		<Rectangle VerticalAlignment="Top" Width="480" Height="240" Fill="Black" Opacity="0.3">    
-        </Rectangle>
-
-            <Border Height="240" Width="480" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                <TextBlock Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>       
-            </Border>
-        
-
-            <Rectangle VerticalAlignment="Center" Width="480" Height="4" Fill="Red" Opacity="0.5"></Rectangle>
-		<Line VerticalAlignment="Center" HorizontalAlignment="Stretch" Width="480" Height="4" Stroke="Red" StrokeThickness="4" Fill="Red"></Line>
-		
-		<Rectangle VerticalAlignment="Bottom" Width="480" Height="240" Fill="Black" Opacity="0.3"></Rectangle>
-
-            <Border Height="240" Width="480" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
-                <TextBlock Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
-            </Border>
-
-        </Grid>
+        </zxing:ZXingScannerControl>
     </Grid>
 
 	<!--Sample code showing usage of ApplicationBar-->

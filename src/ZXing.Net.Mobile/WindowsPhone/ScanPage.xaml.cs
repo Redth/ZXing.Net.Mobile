@@ -27,9 +27,7 @@ namespace ZXing.Mobile
         public static bool UseCustomOverlay { get; set; }
 
         public static Result LastScanResult { get; set; }
-
-		SimpleCameraReader _reader;
-
+        
         public static Action<Result> FinishedAction { get; set; }
 
         public static event Action<bool> OnRequestTorch;
@@ -41,13 +39,10 @@ namespace ZXing.Mobile
         public static bool RequestIsTorchOn()
         {
             var evt = OnRequestIsTorchOn;
-            if (evt != null)
-                return evt();
-            else
-                return false;
+            return evt != null && evt();
         }
 
-        public static void RequestTorch(bool on)
+	    public static void RequestTorch(bool on)
         {
             var evt = OnRequestTorch;
             if (evt != null)
@@ -81,125 +76,38 @@ namespace ZXing.Mobile
 		}
 
 		protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            this.topText.Text = TopText;
-            this.bottomText.Text = BottomText;
+		{
+		    scannerControl.TopText = TopText;
+		    scannerControl.BottomText = BottomText;
 
-            if (UseCustomOverlay && CustomOverlay != null)
-            {
-               this.gridCustomOverlay.Children.Add(CustomOverlay);
-    
-                this.gridCustomOverlay.Visibility = System.Windows.Visibility.Visible;
-                this.gridDefaultOverlay.Visibility = System.Windows.Visibility.Collapsed;
-            }
-            else
-            {
-                //this.gridCustomOverlay.Children.Clear();
-                this.gridCustomOverlay.Visibility = System.Windows.Visibility.Collapsed;
-                this.gridDefaultOverlay.Visibility = System.Windows.Visibility.Visible;
-            }
+            scannerControl.CustomOverlay = CustomOverlay;
+            scannerControl.UseCustomOverlay = UseCustomOverlay;
+            
+            OnRequestAutoFocus += () => scannerControl.AutoFocus();
+            OnRequestTorch += (on) => scannerControl.Torch(@on);
+		    OnRequestToggleTorch += () => scannerControl.ToggleTorch();
+		    OnRequestCancel += () => scannerControl.Cancel(); 
+            OnRequestIsTorchOn += () => scannerControl.IsTorchOn;
 
-            // Initialize a new instance of SimpleCameraReader with Auto-Focus mode on
-            _reader = new SimpleCameraReader(Scanner, ScanningOptions);
-			_reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
-
-            OnRequestAutoFocus += () =>
-            {
-                _reader.Camera.Focus();
-            };
-
-            OnRequestTorch += (on) =>
-            {
-                if (on)
-                    _reader.Camera.FlashMode = FlashMode.On;
-                else
-                    _reader.Camera.FlashMode = FlashMode.Auto;
-            };
-
-            OnRequestToggleTorch += () => {
-                if (_reader.Camera.FlashMode == FlashMode.On)
-                    _reader.Camera.FlashMode = FlashMode.Auto;
-                else
-                    _reader.Camera.FlashMode = FlashMode.On;
-            };
-
-            OnRequestCancel += () => {
-                LastScanResult = null;
-
-                _reader.Stop();
-
-                Finish(); 
-            };
-
-            OnRequestIsTorchOn += () => {
-                return _reader.Camera.FlashMode == FlashMode.On;
-            };
-            // We need to set the VideoBrush we're going to display the preview feed on
-            // IMPORTANT that it gets set before Camera initializes
-            //a   _previewVideo.SetSource((CaptureSource)_reader.Camera);
-
-	        //		_reader.ScanOnAutoFocus = false;
-			
-			_previewVideo.SetSource(_reader.Camera);
-
-			 
-            // The reader throws an event when a result is available 
-            _reader.DecodingCompleted += (o, r) => DisplayResult(r);
-
-            // The reader throws an event when the camera is initialized and ready to use
-            _reader.CameraInitialized += ReaderOnCameraInitialized;
-
+		    scannerControl.OnScanResult += HandleResult;
+            
             base.OnNavigatedTo(e);
-
-
         }
-
-        private void ReaderOnCameraInitialized(object sender, bool initialized)
-        {
-            // We dispatch (invoke) to avoid access exceptions
-            Dispatcher.BeginInvoke(() =>
-            {
-                _previewTransform.Rotation = _reader.CameraOrientation;
-            });
-
-            // We can set if Camera should flash or not when focused
-			_reader.FlashMode = Microsoft.Devices.FlashMode.Off;
-
-            // Starts the capturing process
-            _reader.Start();
-        }
-
+        
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            this.gridCustomOverlay.Children.Clear();
-
-            _reader.Stop();
-
+            scannerControl.OnScanResult -= HandleResult;
+            
             base.OnNavigatingFrom(e);
         }
 
-		bool successScan = false;
-
-        private void DisplayResult(Result result)
+        void HandleResult(ZXing.Result result)
         {
-			_reader.Stop();
+            LastScanResult = result;
 
-			successScan = true;
-
-            if (result != null)
-                LastScanResult = result;
-            else
-                LastScanResult = null;
-
-
-            Finish();
-        }
-
-        void Finish()
-        {
             var evt = FinishedAction;
             if (evt != null)
-                evt(LastScanResult);
+                evt(LastScanResult); 
         }
 	}
 }

@@ -43,6 +43,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.Devices.Sensors" />
     <Reference Include="Microsoft.Phone" />
+    <Reference Include="Microsoft.Phone.Interop" />
     <Reference Include="System.Threading.Tasks.WP71, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\System.Threading.Tasks.3.0.1\lib\sl4-wp71\System.Threading.Tasks.WP71.dll</HintPath>
@@ -67,12 +68,19 @@
     </Compile>
     <Compile Include="WindowsPhone\SimpleCameraReader.cs" />
     <Compile Include="WindowsPhone\MobileBarcodeScanner.cs" />
+    <Compile Include="WindowsPhone\ZXingScannerControl.xaml.cs">
+      <DependentUpon>ZXingScannerControl.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <Page Include="WindowsPhone\ScanPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WindowsPhone\ZXingScannerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
