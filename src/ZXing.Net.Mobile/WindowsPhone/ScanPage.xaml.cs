@@ -21,7 +21,7 @@ namespace ZXing.Mobile
 	{
         public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
         public static MobileBarcodeScannerBase Scanner { get; set; }
-        public static System.Windows.UIElement CustomOverlay { get; set; }
+        public static UIElement CustomOverlay { get; set; }
         public static string TopText { get; set; }
         public static string BottomText { get; set; }
         public static bool UseCustomOverlay { get; set; }
@@ -82,6 +82,8 @@ namespace ZXing.Mobile
 
             scannerControl.CustomOverlay = CustomOverlay;
             scannerControl.UseCustomOverlay = UseCustomOverlay;
+
+		    scannerControl.ScanningOptions = ScanningOptions;
             
             OnRequestAutoFocus += () => scannerControl.AutoFocus();
             OnRequestTorch += (on) => scannerControl.Torch(@on);
@@ -91,6 +93,8 @@ namespace ZXing.Mobile
 
 		    scannerControl.OnScanResult += HandleResult;
             
+            scannerControl.Start(ScanningOptions);
+
             base.OnNavigatedTo(e);
         }
         

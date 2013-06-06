@@ -37,8 +37,57 @@ namespace ZXing.Mobile
 
 		UIView layerView;
 
+
+		public bool UseCustomOverlay { get;set; }
+		public UIView CustomOverlay { get;set; }
+		public string TopText { get;set; }
+		public string BottomText { get;set; }
+		public string CancelButtonText { get;set; }
+		public string FlashButtonText { get;set; }
+
+		UIView overlayView = null;
+
+		void Setup(RectangleF frame)
+		{
+			if (overlayView != null)
+				overlayView.RemoveFromSuperview ();
+
+			if (UseCustomOverlay && CustomOverlay != null)
+				overlayView = CustomOverlay;
+			else
+				overlayView = new ZXingDefaultOverlayView(this.Frame,
+	                              TopText, BottomText, CancelButtonText, FlashButtonText,
+	                         	  () => { StopScanning(); resultCallback(null);	}, 
+									() => ToggleTorch());
+
+			if (overlayView != null)
+			{
+				UITapGestureRecognizer tapGestureRecognizer = new UITapGestureRecognizer ();
+
+				tapGestureRecognizer.AddTarget (() => {
+
+					var pt = tapGestureRecognizer.LocationInView(overlayView);
+
+					Focus(pt);
+		
+					Console.WriteLine("OVERLAY TOUCH: " + pt.X + ", " + pt.Y);
+
+				});
+				tapGestureRecognizer.CancelsTouchesInView = false;
+				tapGestureRecognizer.NumberOfTapsRequired = 1;
+				tapGestureRecognizer.NumberOfTouchesRequired = 1;
+
+				overlayView.AddGestureRecognizer (tapGestureRecognizer);
+
+				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
+				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+			}
+		}
+
 		public void StartScanning(Action<ZXing.Result> callback, MobileBarcodeScanningOptions options)
 		{
+			Setup (this.Frame);
+
 			this.options = options;
 			this.resultCallback = callback;
 
@@ -70,6 +119,71 @@ namespace ZXing.Mobile
 			stopped = true;
 		}
 				
+		
+		bool torch = false;
+
+		public bool IsTorchOn { get { return torch; } }
+
+		public void ToggleTorch()
+		{
+			try
+			{
+				NSError err;
+
+				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				device.LockForConfiguration(out err);
+
+				if (!torch)
+				{
+					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
+					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+				}
+				else
+				{
+					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
+					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+				}
+
+				device.UnlockForConfiguration();
+				device = null;
+
+				torch = !torch;
+			}
+			catch { }
+
+		}
+
+		public void Torch(bool on)
+		{
+			try
+			{
+				NSError err;
+
+				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				device.LockForConfiguration(out err);
+
+				if (on)
+				{
+					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
+					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+				}
+				else
+				{
+					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
+					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+				}
+
+				device.UnlockForConfiguration();
+				device = null;
+
+				torch = on;
+			}
+			catch { }
+
+		}
+
+
+
 		bool SetupCaptureSession ()
 		{
 			// configure the capture session for low resolution, change this if your code
@@ -110,6 +224,13 @@ namespace ZXing.Mobile
 
 			ResizePreview(UIApplication.SharedApplication.StatusBarOrientation);
 
+			if (overlayView != null)
+			{
+				this.AddSubview (overlayView);
+				this.BringSubviewToFront (overlayView);
+
+				//overlayView.LayoutSubviews ();
+			}
 
 			session.StartRunning ();
 
@@ -151,26 +272,26 @@ namespace ZXing.Mobile
 			if (this.options.TryHarder.HasValue)
 			{
 				Console.WriteLine("TRY_HARDER: " + this.options.TryHarder.Value);
-				barcodeReader.TryHarder = this.options.TryHarder.Value;
+				barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
 			}
 			if (this.options.PureBarcode.HasValue)
-				barcodeReader.PureBarcode = this.options.PureBarcode.Value;
+				barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
 			if (this.options.AutoRotate.HasValue)
 			{
 				Console.WriteLine("AUTO_ROTATE: " + this.options.AutoRotate.Value);
 				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
 			}
 			if (!string.IsNullOrEmpty (this.options.CharacterSet))
-				barcodeReader.CharacterSet = this.options.CharacterSet;
+				barcodeReader.Options.CharacterSet = this.options.CharacterSet;
 			if (this.options.TryInverted.HasValue)
 				barcodeReader.TryInverted = this.options.TryInverted.Value;
 
 			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
 			{
-				barcodeReader.PossibleFormats = new List<BarcodeFormat>();
+				barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
 				
 				foreach (var pf in this.options.PossibleFormats)
-					barcodeReader.PossibleFormats.Add(pf);
+					barcodeReader.Options.PossibleFormats.Add(pf);
 			}
 
 			outputRecorder = new OutputRecorder (this.options, img => 

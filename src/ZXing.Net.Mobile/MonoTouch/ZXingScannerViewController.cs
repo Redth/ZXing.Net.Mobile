@@ -19,7 +19,7 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }
 
-		UIView overlayView = null;
+		//UIView overlayView = null;
 		
 		public ZXingScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
 		{
@@ -32,67 +32,6 @@ namespace ZXing.Mobile
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 		}
 
-		bool torch = false;
-		
-		public bool IsTorchOn { get { return torch; } }
-		
-		public void ToggleTorch()
-		{
-			try
-			{
-				NSError err;
-				
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
-				device.LockForConfiguration(out err);
-				
-				if (!torch)
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
-				}
-				else
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
-				}
-
-				device.UnlockForConfiguration();
-				device = null;
-				
-				torch = !torch;
-			}
-			catch { }
-			
-		}
-		
-		public void Torch(bool on)
-		{
-			try
-			{
-				NSError err;
-				
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
-				device.LockForConfiguration(out err);
-				
-				if (on)
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
-				}
-				else
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
-				}
-
-				device.UnlockForConfiguration();
-				device = null;
-				
-				torch = on;
-			}
-			catch { }
-			
-		}
 
 		public void Cancel()
 		{
@@ -105,44 +44,33 @@ namespace ZXing.Mobile
 		{
 			scannerView = new ZXingScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
 			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-			
+			scannerView.UseCustomOverlay = this.Scanner.UseCustomOverlay;
+			scannerView.CustomOverlay = this.Scanner.CustomOverlay;
+			scannerView.TopText = this.Scanner.TopText;
+			scannerView.BottomText = this.Scanner.BottomText;
+			scannerView.CancelButtonText = this.Scanner.CancelButtonText;
+			scannerView.FlashButtonText = this.Scanner.FlashButtonText;
+
 			this.View.AddSubview(scannerView);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
-			
-			if (Scanner.UseCustomOverlay && Scanner.CustomOverlay != null)
-				overlayView = Scanner.CustomOverlay;
-			else
-				overlayView = new ZXingDefaultOverlayView(this.Scanner, new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height),
-				                                          () => Scanner.Cancel(), () => Scanner.ToggleTorch());
-			
-			if (overlayView != null)
-			{
-				UITapGestureRecognizer tapGestureRecognizer = new UITapGestureRecognizer ();
-
-				tapGestureRecognizer.AddTarget (() => {
-
-					var pt = tapGestureRecognizer.LocationInView(overlayView);
-
-					//scannerView.Focus(pt);
-
-					Console.WriteLine("OVERLAY TOUCH: " + pt.X + ", " + pt.Y);
-
-				});
-				tapGestureRecognizer.CancelsTouchesInView = false;
-				tapGestureRecognizer.NumberOfTapsRequired = 1;
-				tapGestureRecognizer.NumberOfTouchesRequired = 1;
-
-				overlayView.AddGestureRecognizer (tapGestureRecognizer);
-
-				overlayView.Frame = new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height);
-				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-				
-				this.View.AddSubview(overlayView);
-				this.View.BringSubviewToFront(overlayView);
-			}
 		}
 
+		public void Torch(bool on)
+		{
+			if (scannerView != null)
+				scannerView.Torch (on);
+		}
 
+		public void ToggleTorch()
+		{
+			if (scannerView != null)
+				scannerView.ToggleTorch ();
+		}
+
+		public bool IsTorchOn
+		{
+			get { return scannerView.IsTorchOn; }
+		}
 
 		public override void ViewDidAppear (bool animated)
 		{
@@ -182,7 +110,7 @@ namespace ZXing.Mobile
 		{
 			scannerView.ResizePreview(this.InterfaceOrientation);
 
-			overlayView.LayoutSubviews();
+			//overlayView.LayoutSubviews();
 		}		
 	}
 }

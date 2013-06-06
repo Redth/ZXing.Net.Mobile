@@ -119,16 +119,16 @@ namespace ZXing.Mobile
 		}
 
         public MobileBarcodeScanningOptions Options { get; set; }
-        public MobileBarcodeScannerBase Scanner { get; set; }
+        //public MobileBarcodeScannerBase Scanner { get; set; }
 
 		/// <summary>
 		/// Initializes the SimpleCameraReader
 		/// </summary>
 		/// <param name="scanOnAutoFocus">Sets whether the camera should scan on completed autofocus or on a timely fashion</param>
-		public SimpleCameraReader(MobileBarcodeScannerBase scanner, MobileBarcodeScanningOptions options)
+		public SimpleCameraReader(MobileBarcodeScanningOptions options)
 		{
-            this.Options = options;
-            this.Scanner = scanner;
+           this.Options = options ?? MobileBarcodeScanningOptions.Default;
+           // this.Scanner = scanner;
 
 			Initialize();
 		}
@@ -165,24 +165,36 @@ namespace ZXing.Mobile
 			// it will throw an Exception. 
 			try
 			{
-				if (ScanOnAutoFocus)
-				{
-					// Fired when Auto-Focus has completed => 
-					// start scanning the preview for codes
-					// and run a focus again (for
-					_photoCamera.AutoFocusCompleted += (o, arg) =>
-					{
-						if (doCancel)
-							return;
+			    if (ScanOnAutoFocus)
+			    {
+			        // Fired when Auto-Focus has completed => 
+			        // start scanning the preview for codes
+			        // and run a focus again (for
+			        _photoCamera.AutoFocusCompleted += (o, arg) =>
+			            {
+			                if (doCancel)
+			                    return;
 
-						uiDispatcher.BeginInvoke(ScanPreviewBuffer);
+			                try
+			                {
+			                    uiDispatcher.BeginInvoke(ScanPreviewBuffer);
 
-						if (_photoCamera != null)
-							_photoCamera.Focus();
-					};
+			                    if (_photoCamera != null)
+			                        _photoCamera.Focus();
+			                }
+			                catch (Exception)
+			                {
+			                }
+			            };
 
-					_photoCamera.Focus();
-				}
+			        try
+			        {
+			            _photoCamera.Focus();
+			        }
+			        catch
+			        {
+			        }
+			    }
 				else
 				{
 					// Invokes these method calls on the UI-thread

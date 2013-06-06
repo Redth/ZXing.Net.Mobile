@@ -11,15 +11,24 @@ namespace ZXing.Mobile
 {
 	public class ZXingDefaultOverlayView : UIView
 	{
-		MobileBarcodeScanner Scanner;
-
-		public ZXingDefaultOverlayView (MobileBarcodeScanner scanner, RectangleF frame, Action onCancel, Action onTorch) : base(frame)
+		public ZXingDefaultOverlayView (RectangleF frame, string topText, 
+		                                string bottomText, string cancelText, string flashText,
+		                                Action onCancel, Action onTorch) : base(frame)
 		{
+			this.cancelText = cancelText ?? "Cancel";
+			this.flashText = flashText ?? "Flash";
+			this.topText = topText ?? "";
+			this.bottomText = bottomText ?? "";
+
 			OnCancel = onCancel;
 			OnTorch = onTorch;
-			Scanner = scanner;
 			Initialize();
 		}
+
+		string cancelText;
+		string flashText;
+		string topText;
+		string bottomText;
 
 		Action OnCancel;
 		Action OnTorch;
@@ -71,7 +80,7 @@ namespace ZXing.Mobile
 			textTop = new UILabel () 
 			{
 				Frame = new RectangleF(0, this.Frame.Height *  0.10f, this.Frame.Width, 42),
-				Text = Scanner.TopText,
+				Text = topText,
 				Font = UIFont.SystemFontOfSize(13),
 				TextAlignment = UITextAlignment.Center,
 				TextColor = UIColor.White,
@@ -84,17 +93,15 @@ namespace ZXing.Mobile
 			textBottom = new UILabel () 
 			{
 				Frame = new RectangleF(0, this.Frame.Height *  0.825f - 32f, this.Frame.Width, 64),
-				Text = Scanner.BottomText,
+				Text = bottomText,
 				Font = UIFont.SystemFontOfSize(13),
 				TextAlignment = UITextAlignment.Center,
 				TextColor = UIColor.White,
 				Lines = 3,
 				BackgroundColor = UIColor.Clear
-				
 			};
 			
 			this.AddSubview (textBottom);
-
 
 			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
 
@@ -108,13 +115,13 @@ namespace ZXing.Mobile
 				var toolBar = new UIToolbar(new RectangleF(0, Frame.Height - 44, Frame.Width, 44));
 				
 				var buttons = new List<UIBarButtonItem>();
-				buttons.Add(new UIBarButtonItem(Scanner.CancelButtonText, UIBarButtonItemStyle.Done, 
+				buttons.Add(new UIBarButtonItem(cancelText, UIBarButtonItemStyle.Done, 
 				                                delegate {  OnCancel(); })); 
 				
 				if (hasTorch)
 				{
 					buttons.Add(new UIBarButtonItem(UIBarButtonSystemItem.FlexibleSpace));
-					buttons.Add(new UIBarButtonItem(Scanner.FlashButtonText, UIBarButtonItemStyle.Done,
+					buttons.Add(new UIBarButtonItem(flashText, UIBarButtonItemStyle.Done,
 					                                delegate { OnTorch(); }));
 				}
 				
@@ -124,9 +131,6 @@ namespace ZXing.Mobile
 				toolBar.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleTopMargin;
 				Add(toolBar);
 			});	
-			
-
-
 		}
 
 		public override void LayoutSubviews ()

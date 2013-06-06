@@ -9,19 +9,26 @@ using Microsoft.Devices;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 
-namespace ZXing.Mobile.WindowsPhone
+namespace ZXing.Mobile
 {
     public partial class ZXingScannerControl : UserControl, IDisposable
     {
-        public ZXingScannerControl()
+        public ZXingScannerControl() : base()
         {
             InitializeComponent();
+            
+        }
+
+        public void Start(MobileBarcodeScanningOptions options = null)
+        {
+            ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
             this.topText.Text = TopText;
             this.bottomText.Text = BottomText;
 
             if (UseCustomOverlay && CustomOverlay != null)
             {
+                gridCustomOverlay.Children.Clear();
                 gridCustomOverlay.Children.Add(CustomOverlay);
 
                 gridCustomOverlay.Visibility = Visibility.Visible;
@@ -34,30 +41,33 @@ namespace ZXing.Mobile.WindowsPhone
             }
 
             // Initialize a new instance of SimpleCameraReader with Auto-Focus mode on
-            _reader = new SimpleCameraReader(Scanner, ScanningOptions);
-            _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
-            
-            // We need to set the VideoBrush we're going to display the preview feed on
-            // IMPORTANT that it gets set before Camera initializes
-            _previewVideo.SetSource(_reader.Camera);
+            if (_reader == null)
+            {
+                _reader = new SimpleCameraReader(options);
+                _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
 
-            // The reader throws an event when a result is available 
-            _reader.DecodingCompleted += (o, r) => DisplayResult(r);
+                // We need to set the VideoBrush we're going to display the preview feed on
+                // IMPORTANT that it gets set before Camera initializes
+                _previewVideo.SetSource(_reader.Camera);
 
-            // The reader throws an event when the camera is initialized and ready to use
-            _reader.CameraInitialized += ReaderOnCameraInitialized;
+                // The reader throws an event when a result is available 
+                _reader.DecodingCompleted += (o, r) => DisplayResult(r);
+
+                // The reader throws an event when the camera is initialized and ready to use
+                _reader.CameraInitialized += ReaderOnCameraInitialized;
+            }
         }
 
         public MobileBarcodeScanningOptions ScanningOptions { get; set; }
         public MobileBarcodeScannerBase Scanner { get; set; }
-        public System.Windows.UIElement CustomOverlay { get; set; }
+        public UIElement CustomOverlay { get; set; }
         public string TopText { get; set; }
         public string BottomText { get; set; }
         public bool UseCustomOverlay { get; set; }
 
         public Result LastScanResult { get; set; }
 
-        readonly SimpleCameraReader _reader;
+        SimpleCameraReader _reader;
 
         public event Action<ZXing.Result> OnScanResult;
         
@@ -98,7 +108,7 @@ namespace ZXing.Mobile.WindowsPhone
             Dispatcher.BeginInvoke(() => _previewTransform.Rotation = _reader.CameraOrientation);
 
             // We can set if Camera should flash or not when focused
-			_reader.FlashMode = Microsoft.Devices.FlashMode.Off;
+			_reader.FlashMode = FlashMode.Off;
 
             // Starts the capturing process
             _reader.Start();
@@ -112,7 +122,7 @@ namespace ZXing.Mobile.WindowsPhone
             if (evt != null)
                 evt(result);
         }
-        
+
         public void Dispose()
         {
             this.gridCustomOverlay.Children.Clear();
