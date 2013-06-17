@@ -78,6 +78,8 @@ namespace ZXing.Mobile
 				this.Finish();
 
 			}, ScanningOptions);
+			scannerFragment.CustomOverlayView = CustomOverlayView;
+			scannerFragment.UseCustomView = UseCustomView;
 
 			SupportFragmentManager.BeginTransaction()
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")

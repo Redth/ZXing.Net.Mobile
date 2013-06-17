@@ -51,31 +51,35 @@ namespace ZXing.Mobile
 		{
 			try 
 			{
-				#if __ANDROID_9__
-				
-				var numCameras = Android.Hardware.Camera.NumberOfCameras;
-				var camInfo = new Android.Hardware.Camera.CameraInfo();
-				var found = false;
-				
-				for (int i = 0; i < numCameras; i++)
+				var version = Android.OS.Build.VERSION.SdkInt;
+
+				if (version >= BuildVersionCodes.Gingerbread)
 				{
-					Android.Hardware.Camera.GetCameraInfo(i, camInfo);
-					if (camInfo.Facing == CameraFacing.Back)
+					var numCameras = Android.Hardware.Camera.NumberOfCameras;
+					var camInfo = new Android.Hardware.Camera.CameraInfo();
+					var found = false;
+					
+					for (int i = 0; i < numCameras; i++)
 					{
-						camera = Android.Hardware.Camera.Open(i);
-						found = true;
-						break;
+						Android.Hardware.Camera.GetCameraInfo(i, camInfo);
+						if (camInfo.Facing == CameraFacing.Back)
+						{
+							camera = Android.Hardware.Camera.Open(i);
+							found = true;
+							break;
+						}
+					}
+					
+					if (!found)
+					{
+						Android.Util.Log.Debug("ZXing.Net.Mobile", "Finding rear camera failed, opening camera 0...");
+						camera = Android.Hardware.Camera.Open(0);
 					}
 				}
-				
-				if (!found)
+				else
 				{
-					Android.Util.Log.Debug("ZXing.Net.Mobile", "Finding rear camera failed, opening camera 0...");
-					camera = Android.Hardware.Camera.Open(0);
+					camera = Android.Hardware.Camera.Open();
 				}
-				#else
-				camera = Android.Hardware.Camera.Open();
-				#endif
 				if (camera == null)
 					Android.Util.Log.Debug("ZXing.Net.Mobile", "Camera is null :(");
 				
