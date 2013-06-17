@@ -31,12 +31,7 @@ namespace ZXing.Mobile
 			var frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, null);
 
 			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
-
-			if (this.Activity == null)
-				Console.WriteLine ("ACIVITY IS NULL");
-			else
-				Console.WriteLine ("ACTIVITY NOOOOOT NULL");
-
+							
 			try
 			{
 				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, callback);
@@ -65,6 +60,8 @@ namespace ZXing.Mobile
 
 		public override void OnPause ()
 		{
+			base.OnPause ();
+
 			scanner.ShutdownCamera();
 		}
 
@@ -87,6 +84,10 @@ namespace ZXing.Mobile
 			this.scanner.AutoFocus();
 		}
 
+		public void Shutdown()
+		{
+			scanner.ShutdownCamera ();
+		}
 	}
 }
 

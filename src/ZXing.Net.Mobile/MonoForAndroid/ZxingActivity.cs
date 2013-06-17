@@ -74,6 +74,9 @@ namespace ZXing.Mobile
 				var evt = OnScanCompleted;
 				if (evt != null)
 					OnScanCompleted(result);
+
+				this.Finish();
+
 			}, ScanningOptions);
 
 			SupportFragmentManager.BeginTransaction()
@@ -147,15 +150,6 @@ namespace ZXing.Mobile
 			}
 
 			return base.OnKeyDown (keyCode, e);
-		}
-
-		public virtual void OnScan (ZXing.Result result)
-		{
-			var evt = OnScanCompleted;
-			if (evt != null)
-				evt(result);
-
-			this.Finish();
 		}
 	}
 
