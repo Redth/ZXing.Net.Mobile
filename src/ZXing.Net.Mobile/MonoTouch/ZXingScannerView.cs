@@ -1,17 +1,18 @@
 using System;
-using MonoTouch.Foundation;
-using MonoTouch.CoreFoundation;
-using MonoTouch.UIKit;
-using MonoTouch.AVFoundation;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
+using MonoTouch.AVFoundation;
+using MonoTouch.CoreFoundation;
+using MonoTouch.CoreGraphics;
 using MonoTouch.CoreMedia;
 using MonoTouch.CoreVideo;
-using MonoTouch.CoreGraphics;
-using ZXing.Mobile;
+using MonoTouch.Foundation;
+using MonoTouch.ObjCRuntime;
+using MonoTouch.UIKit;
 using ZXing.Common;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
+using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
@@ -211,7 +212,9 @@ namespace ZXing.Mobile
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
 			//Framerate set here (15 fps)
-			previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+			if (previewLayer.RespondsToSelector(new Selector("connection")))
+				previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
 			previewLayer.Frame = this.Frame;
 			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
@@ -346,20 +349,23 @@ namespace ZXing.Mobile
 		{
 			previewLayer.Frame = this.Frame;
 
-			switch (orientation)
+			if (previewLayer.RespondsToSelector(new Selector("connection")))
 			{
-				case UIInterfaceOrientation.LandscapeLeft:
-					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeLeft;
-					break;
-				case UIInterfaceOrientation.LandscapeRight:
-					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeRight;
-					break;
-				case UIInterfaceOrientation.Portrait:
-					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
-					break;
-				case UIInterfaceOrientation.PortraitUpsideDown:
-					previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.PortraitUpsideDown;
-					break;
+				switch (orientation)
+				{
+					case UIInterfaceOrientation.LandscapeLeft:
+						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeLeft;
+						break;
+					case UIInterfaceOrientation.LandscapeRight:
+						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeRight;
+						break;
+					case UIInterfaceOrientation.Portrait:
+						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
+						break;
+					case UIInterfaceOrientation.PortraitUpsideDown:
+						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.PortraitUpsideDown;
+						break;
+				}
 			}
 		}
 
