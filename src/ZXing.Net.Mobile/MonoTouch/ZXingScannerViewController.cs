@@ -94,6 +94,12 @@ namespace ZXing.Mobile
 			}, this.ScanningOptions);
 		}
 
+		/*public override void ViewDidDisappear (bool animated)
+		{
+			if (scannerView != null)
+				scannerView.StopScanning();
+		}*/
+
 		public override void ViewWillDisappear(bool animated)
 		{
 			UIApplication.SharedApplication.SetStatusBarStyle(originalStatusBarStyle, false);
