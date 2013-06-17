@@ -184,7 +184,7 @@ namespace ZXing.Aztec.Internal
          for (int index = 0; index < text.Length; index++)
          {
             int pairCode;
-            int nextChar = index + 1 < text.Length ? text[index + 1] : 0;
+            int nextChar = index + 1 < text.Length ? (int)text[index + 1] : 0;
             switch (text[index])
             {
                case (byte)'\r':
