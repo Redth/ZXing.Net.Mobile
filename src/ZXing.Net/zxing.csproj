@@ -115,7 +115,12 @@
     <Compile Include="aztec\AztecWriter.cs" />
     <Compile Include="aztec\encoder\AztecCode.cs" />
     <Compile Include="aztec\encoder\AztecEncodingOptions.cs" />
+    <Compile Include="aztec\encoder\BinaryShiftToken.cs" />
     <Compile Include="aztec\encoder\Encoder.cs" />
+    <Compile Include="aztec\encoder\HighLevelEncoder.cs" />
+    <Compile Include="aztec\encoder\SimpleToken.cs" />
+    <Compile Include="aztec\encoder\State.cs" />
+    <Compile Include="aztec\encoder\Token.cs" />
     <Compile Include="BarcodeFormat.cs" />
     <Compile Include="BarcodeReader.cs" />
     <Compile Include="BarcodeReaderGeneric.cs" />
@@ -219,6 +224,7 @@
     <Compile Include="IBarcodeReader.cs" />
     <Compile Include="IBarcodeReaderGeneric.cs" />
     <Compile Include="InvertedLuminanceSource.cs" />
+    <Compile Include="oned\Code128EncodingOptions.cs" />
     <Compile Include="oned\MSIReader.cs" />
     <Compile Include="oned\MSIWriter.cs" />
     <Compile Include="oned\PlesseyWriter.cs" />
@@ -237,6 +243,7 @@
     <Compile Include="pdf417\encoder\PDF417EncodingOptions.cs" />
     <Compile Include="pdf417\PDF417Common.cs" />
     <Compile Include="pdf417\PDF417ResultMetadata.cs" />
+    <Compile Include="qrcode\decoder\QRCodeDecoderMetaData.cs" />
     <Compile Include="qrcode\encoder\QrCodeEncodingOptions.cs" />
     <Compile Include="renderer\BitmapRenderer.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />

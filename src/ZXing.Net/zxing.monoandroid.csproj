@@ -12,7 +12,6 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AssemblyName>zxing.monoandroid</AssemblyName>
-    <TargetFrameworkVersion>v2.3</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -32,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <DefineConstants>MONOANDROID</DefineConstants>
     <DocumentationFile>..\..\Build\Release\monodroid\zxing.monoandroid.XML</DocumentationFile>
@@ -54,7 +54,12 @@
     <Compile Include="aztec\detector\Detector.cs" />
     <Compile Include="aztec\encoder\AztecCode.cs" />
     <Compile Include="aztec\encoder\AztecEncodingOptions.cs" />
+    <Compile Include="aztec\encoder\BinaryShiftToken.cs" />
     <Compile Include="aztec\encoder\Encoder.cs" />
+    <Compile Include="aztec\encoder\HighLevelEncoder.cs" />
+    <Compile Include="aztec\encoder\SimpleToken.cs" />
+    <Compile Include="aztec\encoder\State.cs" />
+    <Compile Include="aztec\encoder\Token.cs" />
     <Compile Include="BarcodeFormat.cs" />
     <Compile Include="BarcodeReader.cs" />
     <Compile Include="BarcodeReaderGeneric.cs" />
@@ -174,6 +179,7 @@
     <Compile Include="NotFoundException.cs" />
     <Compile Include="oned\CodaBarReader.cs" />
     <Compile Include="oned\CodaBarWriter.cs" />
+    <Compile Include="oned\Code128EncodingOptions.cs" />
     <Compile Include="oned\Code128Reader.cs" />
     <Compile Include="oned\Code128Writer.cs" />
     <Compile Include="oned\Code39Reader.cs" />
@@ -267,6 +273,7 @@
     <Compile Include="qrcode\decoder\ErrorCorrectionLevel.cs" />
     <Compile Include="qrcode\decoder\FormatInformation.cs" />
     <Compile Include="qrcode\decoder\Mode.cs" />
+    <Compile Include="qrcode\decoder\QRCodeDecoderMetaData.cs" />
     <Compile Include="qrcode\decoder\Version.cs" />
     <Compile Include="qrcode\detector\AlignmentPattern.cs" />
     <Compile Include="qrcode\detector\AlignmentPatternFinder.cs" />
