@@ -7,7 +7,8 @@ The simplest example of using ZXing.Net.Mobile looks something like this:
 
 ```csharp  
 buttonScan.Click += (sender, e) => {
-
+	
+	//NOTE: On Android you MUST pass a Context into the Constructor!
 	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 	scanner.Scan().ContinueWith(t => {   
    		if (t.Result != null)
@@ -16,6 +17,9 @@ buttonScan.Click += (sender, e) => {
 
 };
 ```
+
+### Alpha / Beta Channels
+Please note that this component was built against the **Stable Channel**.  In the past the component was compiled for the Alpha / Beta channels.  If you are working in the Alpha or Beta channel, you may need to go to the GitHub Repository and download the source and compile it manually for the Alpha or Beta.
 
 ###Custom Overlays
 By default, ZXing.Net.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
@@ -50,10 +54,20 @@ var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 scanner.Scan(options).ContinueWith(t => { //Handle results });
 ```
 
+###Using the ZXingScanner View / Fragment / Control
+On each platform, the ZXing scanner has been implemented as a reusable component (view, fragment, or control), and it is possible to use the reusable component directly without using the MobileBarcodeScanner class at all.  On each platform, the instance of the view/fragment/control contains the necessary properties and methods required to control your scanner.  By default, the default overlay is automatically used, unless you set the CustomOverlay property as well as the UseCustomOverlay property on the instance of the view/fragment/control.  You can use methods such as ToggleTorch() or StopScanning() on the view/fragment/control, however you are responsible for calling StartScanning(...) with a callback and an instance of MobileBarcodeScanningOptions when you are ready for the view's scanning to begin.  You are also responsible for stopping scanning if you want to cancel at any point.
+
+The view/fragment/control classes for each platform are:
+
+ - iOS: ZXingScannerView (UIView) - See ZXingScannerViewController.cs View Controller for an example of how to use this view
+ - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
+ - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
+
+
 ###Important Additional Notes
 
 - Scanning will crash the iOS Simulator.  Currently scanning only works on devices in Xamarin.iOS
-
+- On Android, you must pass a Context into the MobileBarcodeScanner constructor!
 
 ###License
 Apache ZXing.Net.Mobile Copyright 2012 The Apache Software Foundation
