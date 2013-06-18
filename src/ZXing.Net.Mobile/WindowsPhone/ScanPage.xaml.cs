@@ -112,6 +112,9 @@ namespace ZXing.Mobile
             var evt = FinishedAction;
             if (evt != null)
                 evt(LastScanResult); 
+
+            if (NavigationService.CanGoBack)
+                NavigationService.GoBack();
         }
 	}
 }

@@ -38,7 +38,6 @@ namespace ZXing.Mobile
 		private TimeSpan _scanInterval;
 
         bool doCancel = false;
-		private bool _scanOnAutoFocus;
 		private bool _initialized;
 
 		private VideoBrush _surface;
@@ -86,18 +85,6 @@ namespace ZXing.Mobile
 			}
 		}
 
-		
-
-		/// <summary>
-		/// Sets whether the camera should scan when autofocused
-		/// or on a timely fashion
-		/// </summary>
-		public bool ScanOnAutoFocus
-		{
-			get;
-			set;
-		}
-
 		/// <summary>
 		/// Get or set whether the camera should flash on auto-focus or not
 		/// </summary>
@@ -135,7 +122,7 @@ namespace ZXing.Mobile
 
 		private void Initialize()
 		{
-            ScanOnAutoFocus = true; // scanOnAutoFocus;
+            //ScanOnAutoFocus = true; // scanOnAutoFocus;
 
 			// Gets the Dispatcher for the current application so we can invoke the UI-Thread to get
 			// preview-image and fire our timer events
@@ -164,60 +151,52 @@ namespace ZXing.Mobile
 			// At this point if application exits etc. without proper stopping of camera
 			// it will throw an Exception. 
 			try
-			{
-			    if (ScanOnAutoFocus)
-			    {
-			        // Fired when Auto-Focus has completed => 
-			        // start scanning the preview for codes
-			        // and run a focus again (for
-			        _photoCamera.AutoFocusCompleted += (o, arg) =>
-			            {
-			                if (doCancel)
-			                    return;
-
-			                try
-			                {
-			                    uiDispatcher.BeginInvoke(ScanPreviewBuffer);
-
-			                    if (_photoCamera != null)
-			                        _photoCamera.Focus();
-			                }
-			                catch (Exception)
-			                {
-			                }
-			            };
-
-			        try
-			        {
-			            _photoCamera.Focus();
-			        }
-			        catch
-			        {
-			        }
-			    }
-				else
+			{   
+				// Invokes these method calls on the UI-thread
+				uiDispatcher.BeginInvoke(() =>
 				{
-					// Invokes these method calls on the UI-thread
-					uiDispatcher.BeginInvoke(() =>
+					_timer = new DispatcherTimer();
+					_timer.Interval = _scanInterval;
+					_timer.Tick += (o, arg) => ScanPreviewBuffer();
+
+					CameraButtons.ShutterKeyHalfPressed += (o, arg) =>
 					{
-						_timer = new DispatcherTimer();
-						_timer.Interval = _scanInterval;
-						_timer.Tick += (o, arg) => ScanPreviewBuffer();
+						_photoCamera.Focus();
+					};
 
-						CameraButtons.ShutterKeyHalfPressed += (o, arg) =>
-						{
-							_photoCamera.Focus();
-						};
-
-						_timer.Start();
-					});
-				}
+					_timer.Start();
+				});
+				
 			}
 			catch (Exception)
 			{
 				// Do nothing
 			}
+
+            _photoCamera.Focus();
 		}
+
+        public void Focus()
+        {
+            try
+            {
+                if (_photoCamera.IsFocusSupported)
+                    _photoCamera.Focus();
+            }
+            catch { }
+        }
+
+        public void Focus(Point point)
+        {
+            try
+            {
+                if (_photoCamera.IsFocusAtPointSupported)
+                    _photoCamera.FocusAtPoint(point.X, point.Y);
+                else if (_photoCamera.IsFocusSupported)
+                    _photoCamera.Focus();
+            }
+            catch { }
+        }
 
 		/// <summary>
 		/// Stops the camera and capture process
