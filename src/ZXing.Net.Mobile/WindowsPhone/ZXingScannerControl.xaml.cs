@@ -16,11 +16,11 @@ namespace ZXing.Mobile
         public ZXingScannerControl() : base()
         {
             InitializeComponent();
-            
         }
 
-        public void Start(MobileBarcodeScanningOptions options = null)
+        public void StartScanning(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
         {
+            ScanCallback = scanCallback;
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
             this.topText.Text = TopText;
@@ -58,6 +58,7 @@ namespace ZXing.Mobile
             }
         }
 
+        public Action<Result> ScanCallback { get; set; }
         public MobileBarcodeScanningOptions ScanningOptions { get; set; }
         public MobileBarcodeScannerBase Scanner { get; set; }
         public UIElement CustomOverlay { get; set; }
@@ -68,8 +69,6 @@ namespace ZXing.Mobile
         public Result LastScanResult { get; set; }
 
         SimpleCameraReader _reader;
-
-        public event Action<ZXing.Result> OnScanResult;
         
         public bool IsTorchOn
         {
@@ -91,15 +90,19 @@ namespace ZXing.Mobile
             _reader.Camera.Focus();
         }
 
+        public void StopScanning()
+        {
+            _reader.Stop();
+        }
+
         public void Cancel()
         {
             LastScanResult = null;
 
             _reader.Stop();
 
-            var evt = OnScanResult;
-            if (evt != null)
-                evt(null);
+            if (ScanCallback != null)
+                ScanCallback(null);
         }
         
         private void ReaderOnCameraInitialized(object sender, bool initialized)
@@ -118,9 +121,8 @@ namespace ZXing.Mobile
         {
 			_reader.Stop();
 
-            var evt = OnScanResult;
-            if (evt != null)
-                evt(result);
+            if (ScanCallback != null)
+                ScanCallback(result);
         }
 
         public void Dispose()

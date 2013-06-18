@@ -73,6 +73,7 @@ namespace ZXing.Mobile
 		public ScanPage()
 		{
 			InitializeComponent();
+		    isNewInstance = true;
 		}
 
 		protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -90,21 +91,26 @@ namespace ZXing.Mobile
 		    OnRequestToggleTorch += () => scannerControl.ToggleTorch();
 		    OnRequestCancel += () => scannerControl.Cancel(); 
             OnRequestIsTorchOn += () => scannerControl.IsTorchOn;
-
-		    scannerControl.OnScanResult += HandleResult;
             
-            scannerControl.Start(ScanningOptions);
+            scannerControl.StartScanning(HandleResult, ScanningOptions);
+
+            if (!isNewInstance && NavigationService.CanGoBack)
+                NavigationService.GoBack();
+            
+            isNewInstance = false;
 
             base.OnNavigatedTo(e);
         }
-        
+
+	    private bool isNewInstance = false;
+	    
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            scannerControl.OnScanResult -= HandleResult;
-            
+            scannerControl.StopScanning();
+
             base.OnNavigatingFrom(e);
         }
-
+        
         void HandleResult(ZXing.Result result)
         {
             LastScanResult = result;
