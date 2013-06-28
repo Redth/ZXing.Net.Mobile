@@ -105,6 +105,8 @@ namespace ZXing.Mobile
 
 				}
 			});
+
+			stopped = false;
 		}
 
 		public void StopScanning()
