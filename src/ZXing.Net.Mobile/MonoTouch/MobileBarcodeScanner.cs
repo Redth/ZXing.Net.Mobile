@@ -50,11 +50,13 @@ namespace ZXing.Mobile
 
 							viewController.InvokeOnMainThread(() => {
 								viewController.Cancel();
-								viewController.DismissViewController(true, null);
-							});
+								viewController.DismissViewController(true, () => {
 
-							result = barcodeResult;
-							scanResultResetEvent.Set();
+									result = barcodeResult;
+									scanResultResetEvent.Set();
+
+								});
+							});
 						};
 
 						appController.PresentViewController(viewController, true, null);
