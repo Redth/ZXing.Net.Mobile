@@ -34,22 +34,22 @@ namespace ZXing.Mobile
 		{
 			var reader = new BarcodeReader ();
 			if (this.TryHarder.HasValue)
-				reader.TryHarder = this.TryHarder.Value;
+				reader.Options.TryHarder = this.TryHarder.Value;
 			if (this.PureBarcode.HasValue)
-				reader.PureBarcode = this.PureBarcode.Value;
+				reader.Options.PureBarcode = this.PureBarcode.Value;
 			if (this.AutoRotate.HasValue)
 				reader.AutoRotate = this.AutoRotate.Value;
 			if (!string.IsNullOrEmpty (this.CharacterSet))
-				reader.CharacterSet = this.CharacterSet;
+				reader.Options.CharacterSet = this.CharacterSet;
 			if (this.TryInverted.HasValue)
 				reader.TryInverted = this.TryInverted.Value;
 
 			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
 			{
-				reader.PossibleFormats = new List<BarcodeFormat>();
+				reader.Options.PossibleFormats = new List<BarcodeFormat>();
 
 				foreach (var pf in this.PossibleFormats)
-					reader.PossibleFormats.Add(pf);
+					reader.Options.PossibleFormats.Add(pf);
 			}
 
 			return reader;

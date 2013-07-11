@@ -41,6 +41,7 @@ namespace ZXing.Mobile
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
 
 		void Setup(RectangleF frame)
 		{
@@ -200,6 +201,9 @@ namespace ZXing.Mobile
 
 			outputRecorder = new OutputRecorder (ScanningOptions, img => 
 			{
+				if (!IsAnalyzing)
+					return;
+
 				try
 				{
 					var started = DateTime.Now;
@@ -393,7 +397,7 @@ namespace ZXing.Mobile
 
 			Setup (this.Frame);
 
-			ScanningOptions = options;
+			this.options = options;
 			this.resultCallback = callback;
 
 			Console.WriteLine("StartScanning");
@@ -475,7 +479,7 @@ namespace ZXing.Mobile
 
 		public void AutoFocus ()
 		{
-
+			//Doesn't do much on iOS :(
 		}
 
 		public string TopText { get;set; }
@@ -484,7 +488,7 @@ namespace ZXing.Mobile
 
 		public UIView CustomOverlayView { get; set; }
 		public bool UseCustomOverlayView { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get; private set; }
+		public MobileBarcodeScanningOptions ScanningOptions { get { return options; } }
 		public bool IsAnalyzing { get { return analyzing; } }
 		public bool IsTorchOn { get { return torch; } }
 		#endregion

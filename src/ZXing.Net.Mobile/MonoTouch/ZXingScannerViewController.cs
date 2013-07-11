@@ -44,8 +44,8 @@ namespace ZXing.Mobile
 		{
 			scannerView = new ZXingScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
 			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-			scannerView.UseCustomOverlay = this.Scanner.UseCustomOverlay;
-			scannerView.CustomOverlay = this.Scanner.CustomOverlay;
+			scannerView.UseCustomOverlayView = this.Scanner.UseCustomOverlay;
+			scannerView.CustomOverlayView = this.Scanner.CustomOverlay;
 			scannerView.TopText = this.Scanner.TopText;
 			scannerView.BottomText = this.Scanner.BottomText;
 			scannerView.CancelButtonText = this.Scanner.CancelButtonText;
@@ -58,7 +58,7 @@ namespace ZXing.Mobile
 		public void Torch(bool on)
 		{
 			if (scannerView != null)
-				scannerView.Torch (on);
+				scannerView.SetTorch (on);
 		}
 
 		public void ToggleTorch()
@@ -80,7 +80,7 @@ namespace ZXing.Mobile
 
 			Console.WriteLine("Starting to scan...");
 
-			scannerView.StartScanning(result => {
+			scannerView.StartScanning(this.ScanningOptions, result => {
 
 				Console.WriteLine("Stopping scan...");
 
@@ -91,7 +91,7 @@ namespace ZXing.Mobile
 					evt(result);
 				
 				
-			}, this.ScanningOptions);
+			});
 		}
 
 		public override void ViewDidDisappear (bool animated)
