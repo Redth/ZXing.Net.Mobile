@@ -198,7 +198,7 @@ namespace ZXing.Mobile
 		
 		public void OnAutoFocus (bool success, Android.Hardware.Camera camera)
 		{
-			//Android.Util.Log.Debug("ZXing.Mobile", "AutoFocused");
+			Android.Util.Log.Debug("ZXing.Mobile", "AutoFocused");
 			
 			System.Threading.Tasks.Task.Factory.StartNew(() => 
 			                                             {
@@ -230,7 +230,7 @@ namespace ZXing.Mobile
 			{
 				if (!tokenSource.IsCancellationRequested)
 				{
-					//Android.Util.Log.Debug("ZXING", "AutoFocus Requested");
+					Android.Util.Log.Debug("ZXING", "AutoFocus Requested");
 					camera.AutoFocus(this);
 				}
 			}
