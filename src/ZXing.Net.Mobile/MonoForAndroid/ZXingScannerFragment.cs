@@ -1,12 +1,6 @@
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Android.Support.V4.App;
@@ -15,16 +9,22 @@ namespace ZXing.Mobile
 {
 	public class ZXingScannerFragment : Fragment
 	{
-		public ZXingScannerFragment(Action<ZXing.Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
+	    public ZXingScannerFragment() 
+        {
+            ScanningOptions = MobileBarcodeScanningOptions.Default;
+            UseCustomView = false;
+	    }
+
+		public ZXingScannerFragment(Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
 		{
-			this.callback = scanResultCallback;
-			this.ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
-			this.UseCustomView = false;
+            Callback = scanResultCallback;
+			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
+			UseCustomView = false;
 		}
 
-		Action<ZXing.Result> callback;
+	    public Action<Result> Callback { get; set; }
 
-		public override View OnCreateView (LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
+	    public override View OnCreateView (LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
 		{
 			var frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, null);
 
@@ -32,7 +32,7 @@ namespace ZXing.Mobile
 							
 			try
 			{
-				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, callback);
+				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, Callback);
 				frame.AddView(scanner, layoutParams);
 
 
