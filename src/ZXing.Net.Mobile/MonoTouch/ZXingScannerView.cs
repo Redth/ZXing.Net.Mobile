@@ -16,7 +16,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-	public class ZXingScannerView : UIView
+	public class ZXingScannerView : UIView, IZXingScanner<UIView>
 	{
 		public ZXingScannerView(IntPtr handle) : base(handle)
 		{
@@ -31,30 +31,24 @@ namespace ZXing.Mobile
 		AVCaptureVideoDataOutput output;
 		OutputRecorder outputRecorder;
 		DispatchQueue queue;
-		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = false;
 		//BarcodeReader barcodeReader;
 
 		UIView layerView;
+		UIView overlayView = null;
 
-
-		public bool UseCustomOverlay { get;set; }
-		public UIView CustomOverlay { get;set; }
-		public string TopText { get;set; }
-		public string BottomText { get;set; }
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
-		UIView overlayView = null;
 
 		void Setup(RectangleF frame)
 		{
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview ();
 
-			if (UseCustomOverlay && CustomOverlay != null)
-				overlayView = CustomOverlay;
+			if (UseCustomOverlayView && CustomOverlayView != null)
+				overlayView = CustomOverlayView;
 			else
 				overlayView = new ZXingDefaultOverlayView(this.Frame,
 	                              TopText, BottomText, CancelButtonText, FlashButtonText,
@@ -84,106 +78,11 @@ namespace ZXing.Mobile
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			}
 		}
-
-		public void StartScanning(Action<ZXing.Result> callback, MobileBarcodeScanningOptions options)
-		{
-			Setup (this.Frame);
-
-			this.options = options;
-			this.resultCallback = callback;
-
-			Console.WriteLine("StartScanning");
-
-			this.InvokeOnMainThread(() => {
-				if (!SetupCaptureSession())
-				{
-					//Setup 'simulated' view:
-					Console.WriteLine("Capture Session FAILED");
-					var simView = new UIView(this.Frame);
-					simView.BackgroundColor = UIColor.LightGray;
-					this.AddSubview(simView);
-
-				}
-			});
-
-			stopped = false;
-		}
-
-		public void StopScanning()
-		{
-			if (stopped)
-				return;
-
-			Console.WriteLine("Stopping...");
-
-			outputRecorder.CancelTokenSource.Cancel();
-			session.StopRunning();
-
-			stopped = true;
-		}
-				
+					
 		
 		bool torch = false;
-
-		public bool IsTorchOn { get { return torch; } }
-
-		public void ToggleTorch()
-		{
-			try
-			{
-				NSError err;
-
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
-				device.LockForConfiguration(out err);
-
-				if (!torch)
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
-				}
-				else
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
-				}
-
-				device.UnlockForConfiguration();
-				device = null;
-
-				torch = !torch;
-			}
-			catch { }
-
-		}
-
-		public void Torch(bool on)
-		{
-			try
-			{
-				NSError err;
-
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
-				device.LockForConfiguration(out err);
-
-				if (on)
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
-				}
-				else
-				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
-				}
-
-				device.UnlockForConfiguration();
-				device = null;
-
-				torch = on;
-			}
-			catch { }
-
-		}
+		bool analyzing = true;
+	
 
 
 
@@ -255,7 +154,7 @@ namespace ZXing.Mobile
 				var src = new RGBLuminanceSource(img); //, bmp.Width, bmp.Height);
 
 				//Don't try and rotate properly if we're autorotating anyway
-				if (options.AutoRotate.HasValue && options.AutoRotate.Value)
+				if (ScanningOptions.AutoRotate.HasValue && ScanningOptions.AutoRotate.Value)
 					return src;
 
 				switch (UIDevice.CurrentDevice.Orientation)
@@ -274,32 +173,32 @@ namespace ZXing.Mobile
 
 			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
 
-			if (this.options.TryHarder.HasValue)
+			if (ScanningOptions.TryHarder.HasValue)
 			{
-				Console.WriteLine("TRY_HARDER: " + this.options.TryHarder.Value);
-				barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
+				Console.WriteLine("TRY_HARDER: " + ScanningOptions.TryHarder.Value);
+				barcodeReader.Options.TryHarder = ScanningOptions.TryHarder.Value;
 			}
-			if (this.options.PureBarcode.HasValue)
-				barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
-			if (this.options.AutoRotate.HasValue)
+			if (ScanningOptions.PureBarcode.HasValue)
+				barcodeReader.Options.PureBarcode = ScanningOptions.PureBarcode.Value;
+			if (ScanningOptions.AutoRotate.HasValue)
 			{
-				Console.WriteLine("AUTO_ROTATE: " + this.options.AutoRotate.Value);
-				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
+				Console.WriteLine("AUTO_ROTATE: " + ScanningOptions.AutoRotate.Value);
+				barcodeReader.AutoRotate = ScanningOptions.AutoRotate.Value;
 			}
-			if (!string.IsNullOrEmpty (this.options.CharacterSet))
-				barcodeReader.Options.CharacterSet = this.options.CharacterSet;
-			if (this.options.TryInverted.HasValue)
-				barcodeReader.TryInverted = this.options.TryInverted.Value;
+			if (!string.IsNullOrEmpty (ScanningOptions.CharacterSet))
+				barcodeReader.Options.CharacterSet = ScanningOptions.CharacterSet;
+			if (ScanningOptions.TryInverted.HasValue)
+				barcodeReader.TryInverted = ScanningOptions.TryInverted.Value;
 
-			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+			if (ScanningOptions.PossibleFormats != null && ScanningOptions.PossibleFormats.Count > 0)
 			{
 				barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
 				
-				foreach (var pf in this.options.PossibleFormats)
+				foreach (var pf in ScanningOptions.PossibleFormats)
 					barcodeReader.Options.PossibleFormats.Add(pf);
 			}
 
-			outputRecorder = new OutputRecorder (this.options, img => 
+			outputRecorder = new OutputRecorder (ScanningOptions, img => 
 			{
 				try
 				{
@@ -483,6 +382,112 @@ namespace ZXing.Mobile
 			}
 		}
 	
+		#region IZXingScanner implementation
+		public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
+		{
+			if (!analyzing)
+				analyzing = true;
+
+			if (!stopped)
+				return;
+
+			Setup (this.Frame);
+
+			ScanningOptions = options;
+			this.resultCallback = callback;
+
+			Console.WriteLine("StartScanning");
+
+			this.InvokeOnMainThread(() => {
+				if (!SetupCaptureSession())
+				{
+					//Setup 'simulated' view:
+					Console.WriteLine("Capture Session FAILED");
+					var simView = new UIView(this.Frame);
+					simView.BackgroundColor = UIColor.LightGray;
+					this.AddSubview(simView);
+
+				}
+			});
+
+			stopped = false;
+		}
+		public void StartScanning (Action<Result> callback)
+		{
+			StartScanning (new MobileBarcodeScanningOptions (), callback);
+		}
+
+		public void StopScanning()
+		{
+			if (stopped)
+				return;
+
+			Console.WriteLine("Stopping...");
+
+			outputRecorder.CancelTokenSource.Cancel();
+			session.StopRunning();
+
+			stopped = true;
+		}
+
+		public void PauseAnalysis ()
+		{
+			analyzing = false;
+		}
+
+		public void ResumeAnalysis ()
+		{
+			analyzing = true;
+		}
+
+		public void SetTorch (bool on)
+		{
+			try
+			{
+				NSError err;
+
+				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				device.LockForConfiguration(out err);
+
+				if (on)
+				{
+					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
+					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+				}
+				else
+				{
+					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
+					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+				}
+
+				device.UnlockForConfiguration();
+				device = null;
+
+				torch = on;
+			}
+			catch { }
+		}
+
+		public void ToggleTorch()
+		{
+			SetTorch(!IsTorchOn);
+		}
+
+		public void AutoFocus ()
+		{
+
+		}
+
+		public string TopText { get;set; }
+		public string BottomText { get;set; }
+
+
+		public UIView CustomOverlayView { get; set; }
+		public bool UseCustomOverlayView { get; set; }
+		public MobileBarcodeScanningOptions ScanningOptions { get; private set; }
+		public bool IsAnalyzing { get { return analyzing; } }
+		public bool IsTorchOn { get { return torch; } }
+		#endregion
 	}
 }
 

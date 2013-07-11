@@ -4,6 +4,28 @@ using ZXing;
 
 namespace ZXing.Mobile
 {
+	public interface IZXingScanner<TOverlayViewType>
+	{
+		void StartScanning (MobileBarcodeScanningOptions options, Action<ZXing.Result> callback);
+		void StartScanning (Action<ZXing.Result> callback);
+		void StopScanning();
+
+		void PauseAnalysis();
+		void ResumeAnalysis();
+
+		TOverlayViewType CustomOverlayView { get;set; }
+		bool UseCustomOverlayView { get; set; }
+		MobileBarcodeScanningOptions ScanningOptions { get; }
+		string TopText { get;set; }
+		string BottomText { get;set; }
+
+		bool IsTorchOn { get; }
+		bool IsAnalyzing { get; }
+
+		void SetTorch (bool on);
+		void ToggleTorch();
+		void AutoFocus ();
+	}
 
 	public interface IMobileBarcodeScanner
 	{
