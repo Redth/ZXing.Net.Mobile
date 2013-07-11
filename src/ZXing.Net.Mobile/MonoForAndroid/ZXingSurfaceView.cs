@@ -46,8 +46,20 @@ namespace ZXing.Mobile
 			
 			this.tokenSource = new System.Threading.CancellationTokenSource();
 		}
-		
-		public void SurfaceCreated (ISurfaceHolder holder)
+
+	    protected ZXingSurfaceView(IntPtr javaReference, JniHandleOwnership transfer) 
+            : base(javaReference, transfer) 
+        {
+            lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
+
+            this.surface_holder = Holder;
+            this.surface_holder.AddCallback(this);
+            this.surface_holder.SetType(SurfaceType.PushBuffers);
+
+            this.tokenSource = new System.Threading.CancellationTokenSource();
+	    }
+
+	    public void SurfaceCreated (ISurfaceHolder holder)
 		{
 			try 
 			{
@@ -186,7 +198,7 @@ namespace ZXing.Mobile
 		
 		public void OnAutoFocus (bool success, Android.Hardware.Camera camera)
 		{
-			Android.Util.Log.Debug("ZXing.Mobile", "AutoFocused");
+			//Android.Util.Log.Debug("ZXing.Mobile", "AutoFocused");
 			
 			System.Threading.Tasks.Task.Factory.StartNew(() => 
 			                                             {
@@ -218,7 +230,7 @@ namespace ZXing.Mobile
 			{
 				if (!tokenSource.IsCancellationRequested)
 				{
-					Android.Util.Log.Debug("ZXING", "AutoFocus Requested");
+					//Android.Util.Log.Debug("ZXING", "AutoFocus Requested");
 					camera.AutoFocus(this);
 				}
 			}
