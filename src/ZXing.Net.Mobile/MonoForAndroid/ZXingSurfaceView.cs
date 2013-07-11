@@ -46,8 +46,20 @@ namespace ZXing.Mobile
 			
 			this.tokenSource = new System.Threading.CancellationTokenSource();
 		}
-		
-		public void SurfaceCreated (ISurfaceHolder holder)
+
+	    protected ZXingSurfaceView(IntPtr javaReference, JniHandleOwnership transfer) 
+            : base(javaReference, transfer) 
+        {
+            lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
+
+            this.surface_holder = Holder;
+            this.surface_holder.AddCallback(this);
+            this.surface_holder.SetType(SurfaceType.PushBuffers);
+
+            this.tokenSource = new System.Threading.CancellationTokenSource();
+	    }
+
+	    public void SurfaceCreated (ISurfaceHolder holder)
 		{
 			try 
 			{
