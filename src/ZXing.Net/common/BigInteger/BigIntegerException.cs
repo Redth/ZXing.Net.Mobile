@@ -1,12 +1,11 @@
 ﻿using System;
-using ZXing;
 
 namespace BigIntegerLibrary
 {
    /// <summary>
    /// BigInteger-related exception class.
    /// </summary>
-   [Serializable]
+   [ZXing.Serializable]
    public sealed class BigIntegerException : Exception
    {
       /// <summary>
