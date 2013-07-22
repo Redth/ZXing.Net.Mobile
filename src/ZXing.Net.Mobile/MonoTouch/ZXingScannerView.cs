@@ -26,6 +26,10 @@ namespace ZXing.Mobile
 		{
 		}
 
+        public ZXingScannerView()
+        {
+        }
+
 		AVCaptureSession session;
 		AVCaptureVideoPreviewLayer previewLayer;
 		AVCaptureVideoDataOutput output;
