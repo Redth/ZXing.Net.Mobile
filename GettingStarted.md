@@ -10,11 +10,10 @@ buttonScan.Click += (sender, e) => {
 	
 	//NOTE: On Android you MUST pass a Context into the Constructor!
 	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-	scanner.Scan().ContinueWith(t => {   
-   		if (t.Result != null)
-    		Console.WriteLine("Scanned Barcode: " + t.Result.Text);
-	});
+	var result = await scanner.Scan();
 
+	if (result != null)
+    	Console.WriteLine("Scanned Barcode: " + result.Text);
 };
 ```
 
@@ -30,7 +29,8 @@ If you want to customize the overlay, you must create your own View for each pla
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 scanner.UseCustomOverlay = true;
 scanner.CustomOverlay = myCustomOverlayInstance;
-scanner.Scan().ContinueWith(t => { //Handle Result });
+var result = await scanner.Scan();
+//Handle result
 ```
 
 Keep in mind that when using a Custom Overlay, you are responsible for the entire overlay (you cannot mix and match custom elements with the default overlay).  The *ZxingScanner* instance has a *CustomOverlay* property, however on each platform this property is of a different type:
@@ -51,7 +51,8 @@ options.PossibleFormats = new List<ZXing.BarcodeFormat>() {
 };
 
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-scanner.Scan(options).ContinueWith(t => { //Handle results });
+var result = await scanner.Scan(options);
+//Handle result
 ```
 
 ###Using the ZXingScanner View / Fragment / Control

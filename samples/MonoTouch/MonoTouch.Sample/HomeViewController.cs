@@ -33,7 +33,7 @@ namespace ZXing.MonoTouch.Sample
 			buttonDefaultScan = new UIButton(UIButtonType.RoundedRect);
 			buttonDefaultScan.Frame = new RectangleF(20, 80, 280, 40);
 			buttonDefaultScan.SetTitle("Scan with Default View", UIControlState.Normal);
-			buttonDefaultScan.TouchUpInside += (sender, e) => 
+			buttonDefaultScan.TouchUpInside += async (sender, e) => 
 			{
 				//Tell our scanner to use the default overlay
 				scanner.UseCustomOverlay = false;
@@ -42,18 +42,15 @@ namespace ZXing.MonoTouch.Sample
 				scanner.BottomText = "Barcode will automatically scan";
 
 				//Start scanning
-				scanner.Scan ().ContinueWith((t) => 
-				                             {
-					//Our scanning finished callback
-					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
-						HandleScanResult(t.Result);
-				});
+				var result = await scanner.Scan ();
+
+				HandleScanResult(result);
 			};
 
 			buttonCustomScan = new UIButton(UIButtonType.RoundedRect);
 			buttonCustomScan.Frame = new RectangleF(20, 20, 280, 40);
 			buttonCustomScan.SetTitle("Scan with Custom View", UIControlState.Normal);
-			buttonCustomScan.TouchUpInside += (sender, e) =>
+			buttonCustomScan.TouchUpInside += async (sender, e) =>
 			{
 				//Create an instance of our custom overlay
 				customOverlay = new CustomOverlayView();
@@ -69,12 +66,9 @@ namespace ZXing.MonoTouch.Sample
 				scanner.UseCustomOverlay = true;
 				scanner.CustomOverlay = customOverlay;
 
-				scanner.Scan ().ContinueWith((t) => 
-				{
-					//Our scanning finished callback
-					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
-						HandleScanResult(t.Result);
-				});
+				var result = await scanner.Scan ();
+				
+				HandleScanResult(result);
 			};
 
 			this.View.AddSubview(buttonDefaultScan);

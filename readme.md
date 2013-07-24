@@ -14,10 +14,11 @@ buttonScan.Click += (sender, e) => {
 
   //NOTE: On Android, you MUST pass a Context into the Constructor!
 	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
-	scanner.Scan().ContinueWith(t => {   
-   		if (t.Result != null)
-    		Console.WriteLine("Scanned Barcode: " + t.Result.Text);
-	});
+
+  var result = await scanner.Scan();
+
+	if (result != null)
+    Console.WriteLine("Scanned Barcode: " + result.Text);
 
 };
 ```
@@ -30,6 +31,11 @@ buttonScan.Click += (sender, e) => {
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
 ###Changes
+ - v1.3.6
+   - Built for Xamarin 3.0 with async/await support
+   - iOS: Added PauseScanning and ResumeScanning options
+   - iOS: Added empty ctor to ZXingScannerView
+
  - v1.3.5
    - Views for each Platform - Encapsulates scanner functionality in a reusable view
     - iOS: ZXingScannerView as a UIView
@@ -71,7 +77,8 @@ If you want to customize the overlay, you must create your own View for each pla
 var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 scanner.UseCustomOverlay = true;
 scanner.CustomOverlay = myCustomOverlayInstance;
-scanner.Scan().ContinueWith(t => { //Handle Result });
+var result = await scanner.Scan();
+//Handle result
 ```
 
 Keep in mind that when using a Custom Overlay, you are responsible for the entire overlay (you cannot mix and match custom elements with the default overlay).  The *ZxingScanner* instance has a *CustomOverlay* property, however on each platform this property is of a different type:
@@ -93,7 +100,8 @@ options.PossibleFormats = new List<ZXing.BarcodeFormat>() {
 
 //NOTE: On Android you MUST pass a Context into the Constructor!
 var scanner = new ZXing.Mobile.MobileBarcodeScanner(); 
-scanner.Scan(options).ContinueWith(t => { //Handle results });
+var result = await scanner.Scan(options);
+//Handle result
 ````
 
 ###Samples

@@ -28,7 +28,7 @@ namespace ZxingSharp.MonoForAndroid.Sample
 			scanner = new MobileBarcodeScanner(this);
 
 			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
-			buttonScanDefaultView.Click += delegate {
+			buttonScanDefaultView.Click += async delegate {
 				
 				//Tell our scanner to use the default overlay
 				scanner.UseCustomOverlay = false;
@@ -38,17 +38,16 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.BottomText = "Wait for the barcode to automatically scan!";
 
 				//Start scanning
-				scanner.Scan().ContinueWith((t) => {
-					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
-						HandleScanResult(t.Result);
-				});
+				var result = await scanner.Scan();
+
+				HandleScanResult(result);
 			};
 
 			Button flashButton;
 			View zxingOverlay;
 
 			buttonScanCustomView = this.FindViewById<Button>(Resource.Id.buttonScanCustomView);
-			buttonScanCustomView.Click += delegate {
+			buttonScanCustomView.Click += async delegate {
 
 				//Tell our scanner we want to use a custom overlay instead of the default
 				scanner.UseCustomOverlay = true;
@@ -64,10 +63,9 @@ namespace ZxingSharp.MonoForAndroid.Sample
 				scanner.CustomOverlay = zxingOverlay;
 
 				//Start scanning!
-				scanner.Scan().ContinueWith((t) => {
-					if (t.Status == System.Threading.Tasks.TaskStatus.RanToCompletion)
-						HandleScanResult(t.Result);
-				});
+				var result = await scanner.Scan();
+
+				HandleScanResult(result);
 			};
 		}
 

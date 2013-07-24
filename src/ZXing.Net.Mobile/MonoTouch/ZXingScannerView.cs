@@ -18,6 +18,10 @@ namespace ZXing.Mobile
 {
 	public class ZXingScannerView : UIView, IZXingScanner<UIView>
 	{
+		public ZXingScannerView()
+		{
+		}
+
 		public ZXingScannerView(IntPtr handle) : base(handle)
 		{
 		}
@@ -428,8 +432,11 @@ namespace ZXing.Mobile
 
 			Console.WriteLine("Stopping...");
 
-			outputRecorder.CancelTokenSource.Cancel();
-			session.StopRunning();
+			if (outputRecorder != null)
+				outputRecorder.CancelTokenSource.Cancel();
+	
+			if (session.Running)
+				session.StopRunning();
 
 			stopped = true;
 		}

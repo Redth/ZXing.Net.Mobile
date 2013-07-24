@@ -38,10 +38,9 @@ namespace ZxingSharp.WindowsPhone.Sample
             scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
             
             //Start scanning
-            scanner.Scan().ContinueWith((t) =>
+            scanner.Scan().ContinueWith(t =>
             {
-                //Scanning finished callback
-                if (t.Status == TaskStatus.RanToCompletion)                   
+                if (t.Result != null)
                     HandleScanResult(t.Result);
             });
         }
@@ -71,10 +70,9 @@ namespace ZxingSharp.WindowsPhone.Sample
             scanner.UseCustomOverlay = true;
 
             //Start scanning
-            scanner.Scan().ContinueWith((t) =>
+            scanner.Scan().ContinueWith(t =>
             {
-                //Scanning finished callback
-                if (t.Status == TaskStatus.RanToCompletion)
+                if (t.Result != null)
                     HandleScanResult(t.Result);
             });
         }
