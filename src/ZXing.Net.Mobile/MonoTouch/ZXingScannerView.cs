@@ -162,15 +162,15 @@ namespace ZXing.Mobile
 				if (ScanningOptions.AutoRotate.HasValue && ScanningOptions.AutoRotate.Value)
 					return src;
 
-				switch (UIDevice.CurrentDevice.Orientation)
+				switch (UIApplication.SharedApplication.StatusBarOrientation)
 				{
-					case UIDeviceOrientation.Portrait:
+					case UIInterfaceOrientation.Portrait:
 						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-					case UIDeviceOrientation.PortraitUpsideDown:
+					case UIInterfaceOrientation.PortraitUpsideDown:
 						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-					case UIDeviceOrientation.LandscapeLeft:
+					case UIInterfaceOrientation.LandscapeLeft:
 						return src;
-					case UIDeviceOrientation.LandscapeRight:
+					case UIInterfaceOrientation.LandscapeRight:
 						return src;
 				}
 
