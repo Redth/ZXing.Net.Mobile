@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoTouch.AVFoundation;
 using MonoTouch.CoreFoundation;
 using MonoTouch.CoreGraphics;
@@ -11,18 +10,18 @@ using MonoTouch.CoreVideo;
 using MonoTouch.Foundation;
 using MonoTouch.ObjCRuntime;
 using MonoTouch.UIKit;
-using ZXing.Common;
-using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
 	public class ZXingScannerView : UIView
 	{
-		public ZXingScannerView(IntPtr handle) : base(handle)
+		public ZXingScannerView(IntPtr handle) 
+            : base(handle)
 		{
 		}
 
-		public ZXingScannerView (RectangleF frame) : base(frame)
+		public ZXingScannerView (RectangleF frame) 
+            : base(frame)
 		{
 		}
 
@@ -30,18 +29,18 @@ namespace ZXing.Mobile
         {
         }
 
-		AVCaptureSession session;
-		AVCaptureVideoPreviewLayer previewLayer;
-		AVCaptureVideoDataOutput output;
-		OutputRecorder outputRecorder;
-		DispatchQueue queue;
-		MobileBarcodeScanningOptions options;
-		Action<ZXing.Result> resultCallback;
-		volatile bool stopped = false;
+		AVCaptureSession _session;
+		AVCaptureVideoPreviewLayer _previewLayer;
+		AVCaptureVideoDataOutput _output;
+		OutputRecorder _outputRecorder;
+		DispatchQueue _queue;
+		MobileBarcodeScanningOptions _options;
+		Action<Result> _resultCallback;
+		volatile bool _stopped;
 		//BarcodeReader barcodeReader;
 
-		UIView layerView;
-
+		UIView _layerView;
+        UIView _overlayView;
 
 		public bool UseCustomOverlay { get;set; }
 		public UIView CustomOverlay { get;set; }
@@ -50,22 +49,24 @@ namespace ZXing.Mobile
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
-		UIView overlayView = null;
-
-		void Setup(RectangleF frame)
+		void Setup()
 		{
-			if (overlayView != null)
-				overlayView.RemoveFromSuperview ();
+			if (_overlayView != null)
+				_overlayView.RemoveFromSuperview ();
 
-			if (UseCustomOverlay && CustomOverlay != null)
-				overlayView = CustomOverlay;
-			else
-				overlayView = new ZXingDefaultOverlayView(this.Frame,
-	                              TopText, BottomText, CancelButtonText, FlashButtonText,
-	                         	  () => { StopScanning(); resultCallback(null);	}, 
-									() => ToggleTorch());
+		    if (UseCustomOverlay && CustomOverlay != null)
+		        _overlayView = CustomOverlay;
+		    else
+		        _overlayView = new ZXingDefaultOverlayView(Frame,
+		                                                   TopText, BottomText, CancelButtonText, FlashButtonText,
+		                                                   () =>
+		                                                   {
+		                                                       StopScanning();
+		                                                       _resultCallback(null);
+		                                                   },
+		                                                   ToggleTorch);
 
-			if (overlayView != null)
+			if (_overlayView != null)
 			{
 				/*UITapGestureRecognizer tapGestureRecognizer = new UITapGestureRecognizer ();
 
@@ -84,52 +85,58 @@ namespace ZXing.Mobile
 
 				overlayView.AddGestureRecognizer (tapGestureRecognizer);*/
 
-				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
-				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+                _overlayView.Frame = new RectangleF(0, 0, Frame.Width, Frame.Height);
+                _overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			}
 		}
 
-		public void StartScanning(Action<ZXing.Result> callback, MobileBarcodeScanningOptions options)
+		public void StartScanning(Action<Result> callback, MobileBarcodeScanningOptions options)
 		{
-			Setup (this.Frame);
+			Setup();
 
-			this.options = options;
-			this.resultCallback = callback;
+			_options = options;
+			_resultCallback = callback;
 
 			Console.WriteLine("StartScanning");
 
-			this.InvokeOnMainThread(() => {
+			InvokeOnMainThread(() => {
 				if (!SetupCaptureSession())
 				{
 					//Setup 'simulated' view:
 					Console.WriteLine("Capture Session FAILED");
-					var simView = new UIView(this.Frame);
-					simView.BackgroundColor = UIColor.LightGray;
-					this.AddSubview(simView);
-
+					var simView = new UIView()
+					{
+                        Frame = new RectangleF(0, 0, Frame.Width, Frame.Height),
+					    BackgroundColor = UIColor.LightGray,
+					    AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
+					};
+				    AddSubview(simView);
 				}
 			});
 
-			stopped = false;
+			_stopped = false;
 		}
 
 		public void StopScanning()
 		{
-			if (stopped)
+			if (_stopped)
 				return;
 
 			Console.WriteLine("Stopping...");
 
-			outputRecorder.CancelTokenSource.Cancel();
-			session.StopRunning();
+            if (_outputRecorder != null)
+			    _outputRecorder.CancelTokenSource.Cancel();
 
-			stopped = true;
+            if (_session.Running)
+			    _session.StopRunning();
+
+			_stopped = true;
 		}
 				
 		
-		bool torch = false;
+		bool _torch;
 
-		public bool IsTorchOn { get { return torch; } }
+		public bool IsTorchOn { get { return _torch; } }
 
 		public void ToggleTorch()
 		{
@@ -137,24 +144,24 @@ namespace ZXing.Mobile
 			{
 				NSError err;
 
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
 				device.LockForConfiguration(out err);
 
-				if (!torch)
+				if (!_torch)
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+					device.TorchMode = AVCaptureTorchMode.On;
+					device.FlashMode = AVCaptureFlashMode.On;
 				}
 				else
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+					device.TorchMode = AVCaptureTorchMode.Off;
+					device.FlashMode = AVCaptureFlashMode.Off;
 				}
 
 				device.UnlockForConfiguration();
 				device = null;
 
-				torch = !torch;
+				_torch = !_torch;
 			}
 			catch { }
 
@@ -166,24 +173,24 @@ namespace ZXing.Mobile
 			{
 				NSError err;
 
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
 				device.LockForConfiguration(out err);
 
 				if (on)
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+					device.TorchMode = AVCaptureTorchMode.On;
+					device.FlashMode = AVCaptureFlashMode.On;
 				}
 				else
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+					device.TorchMode = AVCaptureTorchMode.Off;
+					device.FlashMode = AVCaptureFlashMode.Off;
 				}
 
 				device.UnlockForConfiguration();
 				device = null;
 
-				torch = on;
+				_torch = on;
 			}
 			catch { }
 
@@ -195,7 +202,7 @@ namespace ZXing.Mobile
 		{
 			// configure the capture session for low resolution, change this if your code
 			// can cope with more data or volume
-			session = new AVCaptureSession () {
+			_session = new AVCaptureSession () {
 				SessionPreset = AVCaptureSession.Preset640x480
 			};
 			
@@ -211,55 +218,55 @@ namespace ZXing.Mobile
 				Console.WriteLine ("No input - this won't work on the simulator, try a physical device");
 				return false;
 			}
-			else
-				session.AddInput (input);
+		    
+            _session.AddInput (input);
 
 
-			previewLayer = new AVCaptureVideoPreviewLayer(session);
+		    _previewLayer = new AVCaptureVideoPreviewLayer(_session);
 
 			//Framerate set here (15 fps)
-			if (previewLayer.RespondsToSelector(new Selector("connection")))
-				previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+			if (_previewLayer.RespondsToSelector(new Selector("connection")))
+				_previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
 
-			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
-			previewLayer.Frame = this.Frame;
-			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
+			_previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
+			//previewLayer.Frame = this.Frame;
+			_previewLayer.Position = new PointF(Layer.Bounds.Width / 2, (Layer.Bounds.Height / 2));
 
-			layerView = new UIView(this.Frame);
-			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-			layerView.Layer.AddSublayer(previewLayer);
+			_layerView = new UIView(Frame);
+			//layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+			_layerView.Layer.AddSublayer(_previewLayer);
 
-			this.AddSubview(layerView);
+			AddSubview(_layerView);
 
 			ResizePreview(UIApplication.SharedApplication.StatusBarOrientation);
 
-			if (overlayView != null)
+			if (_overlayView != null)
 			{
-				this.AddSubview (overlayView);
-				this.BringSubviewToFront (overlayView);
+				AddSubview (_overlayView);
+				BringSubviewToFront (_overlayView);
 
 				//overlayView.LayoutSubviews ();
 			}
 
-			session.StartRunning ();
+			_session.StartRunning ();
 
 			Console.WriteLine ("RUNNING!!!");
 
 			// create a VideoDataOutput and add it to the sesion
-			output = new AVCaptureVideoDataOutput () {
+			_output = new AVCaptureVideoDataOutput () {
 				//videoSettings
 				VideoSettings = new AVVideoSettings (CVPixelFormatType.CV32BGRA),
 			};
 
 			// configure the output
-			queue = new MonoTouch.CoreFoundation.DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
+			_queue = new DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
 
 			var barcodeReader = new BarcodeReader(null, (img) => 	
 			{
 				var src = new RGBLuminanceSource(img); //, bmp.Width, bmp.Height);
 
 				//Don't try and rotate properly if we're autorotating anyway
-				if (options.AutoRotate.HasValue && options.AutoRotate.Value)
+				if (_options.AutoRotate.HasValue && _options.AutoRotate.Value)
 					return src;
 
 				switch (UIDevice.CurrentDevice.Orientation)
@@ -278,32 +285,32 @@ namespace ZXing.Mobile
 
 			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
 
-			if (this.options.TryHarder.HasValue)
+			if (_options.TryHarder.HasValue)
 			{
-				Console.WriteLine("TRY_HARDER: " + this.options.TryHarder.Value);
-				barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
+				Console.WriteLine("TRY_HARDER: " + _options.TryHarder.Value);
+				barcodeReader.Options.TryHarder = _options.TryHarder.Value;
 			}
-			if (this.options.PureBarcode.HasValue)
-				barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
-			if (this.options.AutoRotate.HasValue)
+			if (_options.PureBarcode.HasValue)
+				barcodeReader.Options.PureBarcode = _options.PureBarcode.Value;
+			if (_options.AutoRotate.HasValue)
 			{
-				Console.WriteLine("AUTO_ROTATE: " + this.options.AutoRotate.Value);
-				barcodeReader.AutoRotate = this.options.AutoRotate.Value;
+				Console.WriteLine("AUTO_ROTATE: " + _options.AutoRotate.Value);
+				barcodeReader.AutoRotate = _options.AutoRotate.Value;
 			}
-			if (!string.IsNullOrEmpty (this.options.CharacterSet))
-				barcodeReader.Options.CharacterSet = this.options.CharacterSet;
-			if (this.options.TryInverted.HasValue)
-				barcodeReader.TryInverted = this.options.TryInverted.Value;
+			if (!string.IsNullOrEmpty (_options.CharacterSet))
+				barcodeReader.Options.CharacterSet = _options.CharacterSet;
+			if (_options.TryInverted.HasValue)
+				barcodeReader.TryInverted = _options.TryInverted.Value;
 
-			if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+			if (_options.PossibleFormats != null && _options.PossibleFormats.Count > 0)
 			{
 				barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
 				
-				foreach (var pf in this.options.PossibleFormats)
+				foreach (var pf in _options.PossibleFormats)
 					barcodeReader.Options.PossibleFormats.Add(pf);
 			}
 
-			outputRecorder = new OutputRecorder (this.options, img => 
+			_outputRecorder = new OutputRecorder (_options, img => 
 			{
 				try
 				{
@@ -314,7 +321,7 @@ namespace ZXing.Mobile
 					Console.WriteLine("Decode Time: " + total.TotalMilliseconds + " ms");
 
 					if (rs != null)
-						resultCallback(rs);
+						_resultCallback(rs);
 				}
 				catch (Exception ex)
 				{
@@ -322,19 +329,19 @@ namespace ZXing.Mobile
 				}
 			});
 
-			output.AlwaysDiscardsLateVideoFrames = true;
-			output.SetSampleBufferDelegate (outputRecorder, queue);
+			_output.AlwaysDiscardsLateVideoFrames = true;
+			_output.SetSampleBufferDelegate (_outputRecorder, _queue);
 
 
 			Console.WriteLine("SetupCamera Finished");
 
-			session.AddOutput (output);
+			_session.AddOutput (_output);
 			//session.StartRunning ();
 
 
 			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
 			{
-				NSError err = null;
+				NSError err;
 				if (captureDevice.LockForConfiguration(out err))
 				{
 					captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
@@ -353,23 +360,23 @@ namespace ZXing.Mobile
 
 		public void ResizePreview (UIInterfaceOrientation orientation)
 		{
-			previewLayer.Frame = this.Frame;
+			_previewLayer.Frame = Frame;
 
-			if (previewLayer.RespondsToSelector(new Selector("connection")))
+			if (_previewLayer.RespondsToSelector(new Selector("connection")))
 			{
 				switch (orientation)
 				{
 					case UIInterfaceOrientation.LandscapeLeft:
-						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeLeft;
+						_previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeLeft;
 						break;
 					case UIInterfaceOrientation.LandscapeRight:
-						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeRight;
+						_previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.LandscapeRight;
 						break;
 					case UIInterfaceOrientation.Portrait:
-						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
+						_previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
 						break;
 					case UIInterfaceOrientation.PortraitUpsideDown:
-						previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.PortraitUpsideDown;
+						_previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.PortraitUpsideDown;
 						break;
 				}
 			}
@@ -389,7 +396,7 @@ namespace ZXing.Mobile
 			//See if it supports focusing on a point
 			if (device.FocusPointOfInterestSupported && !device.AdjustingFocus)
 			{
-				NSError err = null;
+				NSError err;
 
 				//Lock device to config
 				if (device.LockForConfiguration(out err))
@@ -406,17 +413,17 @@ namespace ZXing.Mobile
 
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
 		{
-			public OutputRecorder(MobileBarcodeScanningOptions options, Action<UIImage> handleImage) : base()
+			public OutputRecorder(MobileBarcodeScanningOptions options, Action<UIImage> handleImage)
 			{
-				HandleImage = handleImage;
-				this.options = options;
+				_handleImage = handleImage;
+				_options = options;
 			}
 
-			MobileBarcodeScanningOptions options;
-			Action<UIImage> HandleImage;
+		    readonly MobileBarcodeScanningOptions _options;
+		    readonly Action<UIImage> _handleImage;
 
-			DateTime lastAnalysis = DateTime.MinValue;
-			volatile bool working = false;
+			DateTime _lastAnalysis = DateTime.MinValue;
+			volatile bool _working;
 
 			[Export ("captureOutput:didDropSampleBuffer:fromConnection:")]
 			public void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
@@ -429,19 +436,19 @@ namespace ZXing.Mobile
 
 			public override void DidOutputSampleBuffer (AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
-				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames || working
+				if ((DateTime.UtcNow - _lastAnalysis).TotalMilliseconds < _options.DelayBetweenAnalyzingFrames || _working
 				    || CancelTokenSource.IsCancellationRequested)
 					return;
 
-				working = true;
+				_working = true;
 				//Console.WriteLine("SAMPLE");
 
-				lastAnalysis = DateTime.UtcNow;
+				_lastAnalysis = DateTime.UtcNow;
 
 				try 
 				{
 					using (var image = ImageFromSampleBuffer (sampleBuffer))
-						HandleImage(image);
+						_handleImage(image);
 					
 					//
 					// Although this looks innocent "Oh, he is just optimizing this case away"
@@ -454,10 +461,10 @@ namespace ZXing.Mobile
 					Console.WriteLine (e);
 				}
 
-				working = false;
+				_working = false;
 			}
-			
-			UIImage ImageFromSampleBuffer (CMSampleBuffer sampleBuffer)
+
+		    static UIImage ImageFromSampleBuffer (CMSampleBuffer sampleBuffer)
 			{
 				UIImage img = null;
 
@@ -465,22 +472,26 @@ namespace ZXing.Mobile
 				using (var pixelBuffer = sampleBuffer.GetImageBuffer () as CVPixelBuffer)
 				{
 					// Lock the base address
-					pixelBuffer.Lock (0);
-					// Get the number of bytes per row for the pixel buffer
-					var baseAddress = pixelBuffer.BaseAddress;
-					int bytesPerRow = pixelBuffer.BytesPerRow;
-					int width = pixelBuffer.Width;
-					int height = pixelBuffer.Height;
-					var flags = CGBitmapFlags.PremultipliedFirst | CGBitmapFlags.ByteOrder32Little;
-					// Create a CGImage on the RGB colorspace from the configured parameter above
-					using (var cs = CGColorSpace.CreateDeviceRGB ())
-					using (var context = new CGBitmapContext (baseAddress,width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
-					using (var cgImage = context.ToImage ())
-					{
-						pixelBuffer.Unlock (0);
+				    if (pixelBuffer != null)
+				    {
+				        pixelBuffer.Lock (0);
+				        // Get the number of bytes per row for the pixel buffer
+				        var baseAddress = pixelBuffer.BaseAddress;
+				        var bytesPerRow = pixelBuffer.BytesPerRow;
+				        var width = pixelBuffer.Width;
+				        var height = pixelBuffer.Height;
+				    
+				        const CGBitmapFlags flags = CGBitmapFlags.PremultipliedFirst | CGBitmapFlags.ByteOrder32Little;
+					    // Create a CGImage on the RGB colorspace from the configured parameter above
+					    using (var cs = CGColorSpace.CreateDeviceRGB ())
+					    using (var context = new CGBitmapContext (baseAddress,width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
+					    using (var cgImage = context.ToImage ())
+					    {
+						    pixelBuffer.Unlock (0);
 
-						img = UIImage.FromImage (cgImage);
-					}
+						    img = UIImage.FromImage (cgImage);
+					    }
+                    }
 				}
 
 				return img;
