@@ -12,7 +12,6 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AssemblyName>zxing.monoandroid</AssemblyName>
-    <TargetFrameworkVersion>v2.3</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -145,6 +144,7 @@
     <Compile Include="datamatrix\encoder\DataMatrixSymbolInfo144.cs" />
     <Compile Include="datamatrix\encoder\DefaultPlacement.cs" />
     <Compile Include="datamatrix\encoder\EdifactEncoder.cs" />
+    <Compile Include="datamatrix\encoder\Encodation.cs" />
     <Compile Include="datamatrix\encoder\Encoder.cs" />
     <Compile Include="datamatrix\encoder\EncoderContext.cs" />
     <Compile Include="datamatrix\encoder\ErrorCorrection.cs" />
