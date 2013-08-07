@@ -80,8 +80,8 @@ namespace ZXing.Mobile
 			}, ScanningOptions);
 			scannerFragment.CustomOverlayView = CustomOverlayView;
 			scannerFragment.UseCustomView = UseCustomView;
-			scannerFragment.TopText = "Hold camera up to barcode to scan";
-			scannerFragment.BottomText = "Barcode will automatically scan";
+			scannerFragment.TopText = TopText;
+			scannerFragment.BottomText = BottomText;
 
 			SupportFragmentManager.BeginTransaction()
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
