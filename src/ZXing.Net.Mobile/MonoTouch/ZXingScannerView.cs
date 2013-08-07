@@ -36,7 +36,7 @@ namespace ZXing.Mobile
 		OutputRecorder outputRecorder;
 		DispatchQueue queue;
 		Action<ZXing.Result> resultCallback;
-		volatile bool stopped = false;
+		volatile bool stopped = true;
 		//BarcodeReader barcodeReader;
 
 		UIView layerView;
@@ -81,6 +81,8 @@ namespace ZXing.Mobile
 
 				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+
+
 			}
 		}
 					
@@ -88,8 +90,6 @@ namespace ZXing.Mobile
 		bool torch = false;
 		bool analyzing = true;
 	
-
-
 
 		bool SetupCaptureSession ()
 		{
@@ -103,12 +103,22 @@ namespace ZXing.Mobile
 			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType (AVMediaType.Video);
 			if (captureDevice == null){
 				Console.WriteLine ("No captureDevice - this won't work on the simulator, try a physical device");
+				if (overlayView != null)
+				{
+					this.AddSubview (overlayView);
+					this.BringSubviewToFront (overlayView);
+				}
 				return false;
 			}
 
 			var input = AVCaptureDeviceInput.FromDevice (captureDevice);
 			if (input == null){
 				Console.WriteLine ("No input - this won't work on the simulator, try a physical device");
+				if (overlayView != null)
+				{
+					this.AddSubview (overlayView);
+					this.BringSubviewToFront (overlayView);
+				}				
 				return false;
 			}
 			else
@@ -257,11 +267,24 @@ namespace ZXing.Mobile
 			return true;
 		}
 
+		public void DidRotate(UIInterfaceOrientation orientation)
+		{
+			ResizePreview (orientation);
+
+			this.LayoutSubviews ();
+
+			//			if (overlayView != null)
+			//	overlayView.LayoutSubviews ();
+		}
+
 		public void ResizePreview (UIInterfaceOrientation orientation)
 		{
+			if (previewLayer == null)
+				return;
+
 			previewLayer.Frame = this.Frame;
 
-			if (previewLayer.RespondsToSelector(new Selector("connection")))
+			if (previewLayer.RespondsToSelector (new Selector ("connection")))
 			{
 				switch (orientation)
 				{
@@ -414,9 +437,15 @@ namespace ZXing.Mobile
 				{
 					//Setup 'simulated' view:
 					Console.WriteLine("Capture Session FAILED");
+
+				}
+
+				if (Runtime.Arch == Arch.SIMULATOR)
+				{
 					var simView = new UIView(this.Frame);
 					simView.BackgroundColor = UIColor.LightGray;
-					this.AddSubview(simView);
+					simView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+					this.InsertSubview(simView, 0);
 
 				}
 			});

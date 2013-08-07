@@ -37,6 +37,7 @@ namespace ZXing.Mobile
 		UIView bottomBg;
 		UILabel textTop;
 		UILabel textBottom;
+		UIView redLine;
 
 		private void Initialize ()
 		{   
@@ -55,20 +56,20 @@ namespace ZXing.Mobile
 			//Setup Overlay
 			var overlaySize = new SizeF (this.Frame.Width, this.Frame.Height - 44);
 			
-			topBg = new UIView (new RectangleF (0, 0, this.Frame.Width, (overlaySize.Height - picFrame.Height) / 2));
-			topBg.Frame = new RectangleF (0, 0, this.Frame.Width, this.Frame.Height * 0.30f);
+			topBg = new UIView (new RectangleF (0, 0, overlaySize.Width, (overlaySize.Height - picFrame.Height) / 2));
+			topBg.Frame = new RectangleF (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
 			topBg.BackgroundColor = UIColor.Black;
 			topBg.Alpha = 0.6f;
 			topBg.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin;
 			
-			bottomBg = new UIView (new RectangleF (0, topBg.Frame.Height + picFrame.Height, this.Frame.Width, topBg.Frame.Height));
-			bottomBg.Frame = new RectangleF (0, this.Frame.Height * 0.70f, this.Frame.Width, this.Frame.Height * 0.30f);
+			bottomBg = new UIView (new RectangleF (0, topBg.Frame.Height + picFrame.Height, overlaySize.Width, topBg.Frame.Height));
+			bottomBg.Frame = new RectangleF (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
 			bottomBg.BackgroundColor = UIColor.Black;
 			bottomBg.Alpha = 0.6f;
 			bottomBg.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleTopMargin;
 
 			
-			var redLine = new UIView (new RectangleF (0, this.Frame.Height * 0.5f - 2.0f, this.Frame.Width, 4.0f));
+			redLine = new UIView (new RectangleF (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f));
 			redLine.BackgroundColor = UIColor.Red;
 			redLine.Alpha = 0.4f;
 			redLine.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin | UIViewAutoresizing.FlexibleTopMargin;
@@ -76,31 +77,44 @@ namespace ZXing.Mobile
 			this.AddSubview (redLine);
 			this.AddSubview (topBg);
 			this.AddSubview (bottomBg);
-			
+
+			var topTextLines = 1;
+
+			if (!string.IsNullOrEmpty(topText))
+				topTextLines = topText.Split ('\n').Length;
+
+			var botTextLines = 1;
+
+			if (!string.IsNullOrEmpty(bottomText))
+				botTextLines = bottomText.Split ('\n').Length;
+
+
 			textTop = new UILabel () 
 			{
-				Frame = new RectangleF(0, this.Frame.Height *  0.10f, this.Frame.Width, 42),
+				Frame = topBg.Frame,
 				Text = topText,
 				Font = UIFont.SystemFontOfSize(13),
 				TextAlignment = UITextAlignment.Center,
 				TextColor = UIColor.White,
-				Lines = 2,
+				Lines = 0,
 				BackgroundColor = UIColor.Clear
 			};
-			
+
+			textTop.SizeToFit ();
 			this.AddSubview (textTop);
-			
+
 			textBottom = new UILabel () 
 			{
-				Frame = new RectangleF(0, this.Frame.Height *  0.825f - 32f, this.Frame.Width, 64),
+				Frame = bottomBg.Frame,
 				Text = bottomText,
 				Font = UIFont.SystemFontOfSize(13),
 				TextAlignment = UITextAlignment.Center,
 				TextColor = UIColor.White,
-				Lines = 3,
+				Lines = 0,
 				BackgroundColor = UIColor.Clear
 			};
-			
+
+			textBottom.SizeToFit ();
 			this.AddSubview (textBottom);
 
 			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
@@ -137,11 +151,15 @@ namespace ZXing.Mobile
 		{
 			base.LayoutSubviews ();
 
-			topBg.Frame = new RectangleF (0, 0, this.Frame.Width, this.Frame.Height * 0.30f);
-			bottomBg.Frame = new RectangleF (0, this.Frame.Height * 0.70f, this.Frame.Width, this.Frame.Height * 0.30f);
+			var overlaySize = new SizeF (this.Frame.Width, this.Frame.Height - 44);
 
-			textTop.Frame = new RectangleF(0, this.Frame.Height *  0.10f, this.Frame.Width, 42);
-			textBottom.Frame = new RectangleF(0, this.Frame.Height *  0.825f - 32f, this.Frame.Width, 64);
+			topBg.Frame = new RectangleF (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
+			bottomBg.Frame = new RectangleF (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
+
+			textTop.Frame = topBg.Frame;//  new RectangleF(0, overlaySize.Height *  0.10f, overlaySize.Width, 42);
+			textBottom.Frame = bottomBg.Frame; // new RectangleF(0, overlaySize.Height *  0.825f - 32f, overlaySize.Width, 64);
+
+			redLine.Frame = new RectangleF (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f);
 		}
 
 	}

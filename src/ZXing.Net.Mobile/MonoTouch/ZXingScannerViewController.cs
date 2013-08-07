@@ -114,10 +114,26 @@ namespace ZXing.Mobile
 
 		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
 		{
-			scannerView.ResizePreview(this.InterfaceOrientation);
+			scannerView.DidRotate (this.InterfaceOrientation);
 
 			//overlayView.LayoutSubviews();
-		}		
+		}	
+		public override bool ShouldAutorotate ()
+		{
+			return true;
+		}
+
+		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
+		{
+			return UIInterfaceOrientationMask.All;
+		}
+
+		[Obsolete ("Deprecated in iOS6. Replace it with both GetSupportedInterfaceOrientations and PreferredInterfaceOrientationForPresentation")]
+		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
+		{
+			return true;
+		}
+
 	}
 }
 

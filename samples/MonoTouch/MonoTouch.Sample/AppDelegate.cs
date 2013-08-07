@@ -36,7 +36,7 @@ namespace ZXing.MonoTouch.Sample
 			navController = new UINavigationController(homeViewController);
 
 			window.RootViewController = navController;
-			window.AddSubview(navController.View);
+			//window.AddSubview(navController.View);
 
 			// make the window visible
 			window.MakeKeyAndVisible ();
