@@ -162,7 +162,10 @@ namespace ZXing.Mobile
 				if (ScanningOptions.AutoRotate.HasValue && ScanningOptions.AutoRotate.Value)
 					return src;
 
-				switch (UIApplication.SharedApplication.StatusBarOrientation)
+				var tmpInterfaceOrientation = UIInterfaceOrientation.Portrait;
+				InvokeOnMainThread(() => tmpInterfaceOrientation = UIApplication.SharedApplication.StatusBarOrientation);
+
+				switch (tmpInterfaceOrientation)
 				{
 					case UIInterfaceOrientation.Portrait:
 						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
