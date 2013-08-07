@@ -5,7 +5,7 @@ namespace BigIntegerLibrary
    /// <summary>
    /// BigInteger-related exception class.
    /// </summary>
-   [ZXing.Serializable]
+   [Serializable]
    public sealed class BigIntegerException : Exception
    {
       /// <summary>
