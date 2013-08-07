@@ -19,7 +19,7 @@ using Android.Support.V4.App;
 
 namespace ZXing.Mobile
 {
-	[Activity (Label = "Scanner", ScreenOrientation=ScreenOrientation.Portrait)] //, ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)] // ScreenOrientation = ScreenOrientation.Portrait)]
+	[Activity (Label = "Scanner", ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden|ConfigChanges.ScreenLayout)]
 	public class ZxingActivity : FragmentActivity 
 	{
 		public static event Action<ZXing.Result> OnScanCompleted;
@@ -80,6 +80,8 @@ namespace ZXing.Mobile
 			}, ScanningOptions);
 			scannerFragment.CustomOverlayView = CustomOverlayView;
 			scannerFragment.UseCustomView = UseCustomView;
+			scannerFragment.TopText = "Hold camera up to barcode to scan";
+			scannerFragment.BottomText = "Barcode will automatically scan";
 
 			SupportFragmentManager.BeginTransaction()
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
