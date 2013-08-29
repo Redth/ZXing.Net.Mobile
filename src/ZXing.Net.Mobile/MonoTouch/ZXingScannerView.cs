@@ -55,10 +55,9 @@ namespace ZXing.Mobile
 			if (UseCustomOverlayView && CustomOverlayView != null)
 				overlayView = CustomOverlayView;
 			else
-				overlayView = new ZXingDefaultOverlayView(this.Frame,
-	                              TopText, BottomText, CancelButtonText, FlashButtonText,
-	                         	  () => { StopScanning(); resultCallback(null);	}, 
-									() => ToggleTorch());
+				overlayView = new ZXingDefaultOverlayView (this.Frame,
+				                                          TopText, BottomText, CancelButtonText, FlashButtonText,
+				                                          () => { StopScanning (); resultCallback (null); }, ToggleTorch);
 
 			if (overlayView != null)
 			{
