@@ -18,13 +18,10 @@ using System;
 
 namespace ZXing.Common
 {
-   /// <summary> <p>A simple, fast array of bits, represented compactly by an array of ints internally.</p>
-   /// 
+   /// <summary>
+   /// A simple, fast array of bits, represented compactly by an array of ints internally.
    /// </summary>
-   /// <author>  Sean Owen
-   /// </author>
-   /// <author>www.Redivivus.in (suraj.supekar@redivivus.in) - Ported from ZXING Java Source 
-   /// </author>
+   /// <author>Sean Owen</author>
    public sealed class BitArray
    {
       private int[] bits;
@@ -373,14 +370,36 @@ namespace ZXing.Common
       /// <summary> Reverses all bits in the array.</summary>
       public void reverse()
       {
-         int[] newBits = new int[bits.Length];
-         int size = this.size;
-         for (int i = 0; i < size; i++)
+         var newBits = new int[bits.Length];
+         // reverse all int's first
+         var len = ((size - 1) >> 5);
+         var oldBitsLen = len + 1;
+         for (var i = 0; i < oldBitsLen; i++)
          {
-            if (this[size - i - 1])
+            var x = (long)bits[i];
+            x = ((x >>  1) & 0x55555555u) | ((x & 0x55555555u) <<  1);
+            x = ((x >>  2) & 0x33333333u) | ((x & 0x33333333u) <<  2);
+            x = ((x >>  4) & 0x0f0f0f0fu) | ((x & 0x0f0f0f0fu) <<  4);
+            x = ((x >>  8) & 0x00ff00ffu) | ((x & 0x00ff00ffu) <<  8);
+            x = ((x >> 16) & 0x0000ffffu) | ((x & 0x0000ffffu) << 16);
+            newBits[len - i] = (int)x;
+         }
+         // now correct the int's if the bit size isn't a multiple of 32
+         if (size != oldBitsLen * 32)
+         {
+            var leftOffset = oldBitsLen * 32 - size;
+            var mask = 1;
+            for (var i = 0; i < 31 - leftOffset; i++)
+               mask = (mask << 1) | 1;
+            var currentInt = (newBits[0] >> leftOffset) & mask;
+            for (var i = 1; i < oldBitsLen; i++)
             {
-               newBits[i >> 5] |= 1 << (i & 0x1F);
+               var nextInt = newBits[i];
+               currentInt |= nextInt << (32 - leftOffset);
+               newBits[i - 1] = currentInt;
+               currentInt = (nextInt >> leftOffset) & mask;
             }
+            newBits[oldBitsLen - 1] = currentInt;
          }
          bits = newBits;
       }
