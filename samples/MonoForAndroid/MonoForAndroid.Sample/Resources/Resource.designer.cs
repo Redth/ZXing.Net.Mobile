@@ -26,9 +26,9 @@ namespace ZxingSharp.MonoForAndroid.Sample
 		
 		public static void UpdateIdValues()
 		{
-			ZXing.Mobile.Resource.Id.contentFrame = ZxingSharp.MonoForAndroid.Sample.Resource.Id.contentFrame;
-			ZXing.Mobile.Resource.Layout.zxingscanneractivitylayout = ZxingSharp.MonoForAndroid.Sample.Resource.Layout.zxingscanneractivitylayout;
-			ZXing.Mobile.Resource.Layout.zxingscannerfragmentlayout = ZxingSharp.MonoForAndroid.Sample.Resource.Layout.zxingscannerfragmentlayout;
+			global::ZXing.Mobile.Resource.Id.contentFrame = global::ZxingSharp.MonoForAndroid.Sample.Resource.Id.contentFrame;
+			global::ZXing.Mobile.Resource.Layout.zxingscanneractivitylayout = global::ZxingSharp.MonoForAndroid.Sample.Resource.Layout.zxingscanneractivitylayout;
+			global::ZXing.Mobile.Resource.Layout.zxingscannerfragmentlayout = global::ZxingSharp.MonoForAndroid.Sample.Resource.Layout.zxingscannerfragmentlayout;
 		}
 		
 		public partial class Attribute

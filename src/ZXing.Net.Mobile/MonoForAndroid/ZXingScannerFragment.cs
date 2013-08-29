@@ -23,13 +23,21 @@ namespace ZXing.Mobile
 		}
 
 	    public Action<Result> Callback { get; set; }
+		FrameLayout frame;
 
 	    public override View OnCreateView (LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
 		{
-			var frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, null);
+			frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, null);
+
+			return frame;
+		}
+
+		public override void OnResume ()
+		{
+			base.OnResume ();
 
 			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
-							
+
 			try
 			{
 				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, Callback);
@@ -53,7 +61,6 @@ namespace ZXing.Mobile
 			{
 				Console.WriteLine ("Create Surface View Failed: " + ex);
 			}
-			return frame;
 		}
 
 		public override void OnPause ()
@@ -61,6 +68,8 @@ namespace ZXing.Mobile
 			base.OnPause ();
 
 			scanner.ShutdownCamera();
+
+			frame.RemoveView (scanner);
 		}
 
 		public View CustomOverlayView { get;set; }
