@@ -114,7 +114,8 @@ namespace ZXing.Mobile
 
 		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
 		{
-			scannerView.DidRotate (this.InterfaceOrientation);
+			if (scannerView != null)
+				scannerView.DidRotate (this.InterfaceOrientation);
 
 			//overlayView.LayoutSubviews();
 		}	
