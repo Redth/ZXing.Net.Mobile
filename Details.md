@@ -3,6 +3,10 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 GitHub Project: https://github.com/Redth/ZXing.Net.Mobile
 
 ### Changes
+ - v1.3.7
+   - Android: Fixed scanner camera freezing after phone is locked
+   - iOS: Fixed possible NullReferenceException in ZXingViewController
+   
  - v1.3.6
    - Built for Xamarin 3.0 with async/await support
    - iOS: Added PauseScanning and ResumeScanning options
