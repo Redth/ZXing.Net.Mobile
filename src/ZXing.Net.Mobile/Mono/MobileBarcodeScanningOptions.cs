@@ -21,6 +21,7 @@ namespace ZXing.Mobile
 		public bool? AutoRotate { get;set; }
 		public string CharacterSet { get;set; }
 		public bool? TryInverted { get;set; }
+		public bool? UseFrontCameraIfAvailable { get; set; }
 
 		public int DelayBetweenAnalyzingFrames { get;set;}
 		public int InitialDelayBeforeAnalyzingFrames { get;set; }

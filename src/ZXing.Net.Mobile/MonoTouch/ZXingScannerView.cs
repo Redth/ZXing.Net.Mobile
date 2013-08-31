@@ -99,7 +99,20 @@ namespace ZXing.Mobile
 			};
 			
 			// create a device input and attach it to the session
-			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType (AVMediaType.Video);
+//			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType (AVMediaType.Video);
+			AVCaptureDevice captureDevice = null;
+			var devices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
+			foreach (var device in devices)
+			{
+				captureDevice = device;
+				if (options.UseFrontCameraIfAvailable.HasValue &&
+				    options.UseFrontCameraIfAvailable.Value &&
+				    device.Position == AVCaptureDevicePosition.Front)
+
+					break; //Front camera successfully set
+				else if (device.Position = AVCaptureDevicePosition.Back && (!options.UseFrontCameraIfAvailable.HasValue || !options.UseFrontCameraIfAvailable.Value))
+					break; //Back camera succesfully set
+			}
 			if (captureDevice == null){
 				Console.WriteLine ("No captureDevice - this won't work on the simulator, try a physical device");
 				if (overlayView != null)
