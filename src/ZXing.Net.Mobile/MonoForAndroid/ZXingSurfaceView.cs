@@ -28,13 +28,15 @@ namespace ZXing.Mobile
 		System.Threading.CancellationTokenSource tokenSource;
 		ISurfaceHolder surface_holder;
 		Android.Hardware.Camera camera;
+		//Android.Hardware.Camera.CameraInfo cameraInfo;
 		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> callback;
+		Activity activity;
 
 		public ZXingSurfaceView (Activity activity, MobileBarcodeScanningOptions options, Action<ZXing.Result> callback)
 			: base (activity)
 		{
-			//this.activity = activity;
+			this.activity = activity;
 			this.callback = callback;
 			this.options = options;
 
@@ -118,7 +120,10 @@ namespace ZXing.Mobile
 			parameters.PreviewFormat = ImageFormatType.Nv21;
 			
 			camera.SetParameters (parameters);
-			camera.SetDisplayOrientation (90);
+
+			SetCameraDisplayOrientation (activity);
+//			camera.SetDisplayOrientation (90);
+
 			camera.StartPreview ();
 			
 			//cameraResolution = new Size(parameters.PreviewSize.Width, parameters.PreviewSize.Height);
@@ -275,6 +280,28 @@ namespace ZXing.Mobile
 			{
 				p.FlashMode = flashMode;
 				camera.SetParameters(p);
+			}
+		}
+
+		public void SetCameraDisplayOrientation(Activity context) 
+		{
+			var rotation = context.WindowManager.DefaultDisplay.Rotation;
+			var degrees = 0;
+
+			if (rotation == SurfaceOrientation.Rotation0)
+				degrees = 90;
+			else if (rotation == SurfaceOrientation.Rotation90)
+				degrees = 0;
+			else if (rotation == SurfaceOrientation.Rotation180)
+				degrees = 270;
+			else if (rotation == SurfaceOrientation.Rotation270)
+				degrees = 180;
+
+			Android.Util.Log.Debug ("ZXING", "Changing Camera Orientation to: " + degrees);
+
+			try { camera.SetDisplayOrientation (degrees); }
+			catch (Exception ex) {
+				Android.Util.Log.Error ("ZXING", ex.ToString ());
 			}
 		}
 		

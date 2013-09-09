@@ -37,10 +37,12 @@ namespace ZXing.Mobile
 			base.OnResume ();
 
 			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
+			layoutParams.Weight = 1;
 
 			try
 			{
 				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, Callback);
+
 				frame.AddView(scanner, layoutParams);
 
 
