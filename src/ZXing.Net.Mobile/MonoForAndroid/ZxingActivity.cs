@@ -67,7 +67,7 @@ namespace ZXing.Mobile
 			this.Window.AddFlags (WindowManagerFlags.Fullscreen); //to show
 			this.Window.AddFlags (WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
 
-			if (!ScanningOptions.AutoRotate)
+			if (ScanningOptions.AutoRotate.HasValue && !ScanningOptions.AutoRotate.Value)
 				RequestedOrientation = ScreenOrientation.Nosensor;
 
 			SetContentView(Resource.Layout.zxingscanneractivitylayout);

@@ -121,7 +121,7 @@ namespace ZXing.Mobile
 			
 			camera.SetParameters (parameters);
 
-			SetCameraDisplayOrientation (activity);
+			SetCameraDisplayOrientation (this.activity);
 //			camera.SetDisplayOrientation (90);
 
 			camera.StartPreview ();
