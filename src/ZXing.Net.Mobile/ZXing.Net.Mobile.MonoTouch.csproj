@@ -73,6 +73,9 @@
     <Compile Include="MonoTouch\ZXingScannerView.cs" />
     <Compile Include="MonoTouch\ZXingScannerViewController.cs" />
     <Compile Include="MonoTouch\ZXingDefaultOverlayView.cs" />
+    <Compile Include="MonoTouch\AVCaptureScannerView.cs" />
+    <Compile Include="MonoTouch\AVCaptureScannerViewController.cs" />
+    <Compile Include="MonoTouch\IScannerViewController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MonoTouch\" />

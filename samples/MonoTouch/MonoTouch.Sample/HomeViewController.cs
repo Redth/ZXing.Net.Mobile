@@ -16,16 +16,28 @@ namespace ZXing.MonoTouch.Sample
 	{
 		UIButton buttonCustomScan;
 		UIButton buttonDefaultScan;
+		UIButton buttonAVCaptureScan;
 
 		public HomeViewController () : base()
 		{
+			Version sv = new Version (0, 0, 0);
+			Version.TryParse (UIDevice.CurrentDevice.SystemVersion, out sv);
+
+			is7orgreater = sv.Major >= 7;
 		}
 
 		MobileBarcodeScanner scanner;
 		CustomOverlayView customOverlay;
 	
+		bool is7orgreater = false;
+
 		public override void ViewDidLoad ()
 		{
+			if (is7orgreater)
+				EdgesForExtendedLayout = UIRectEdge.None;
+	
+			NavigationItem.Title = "ZXing.Net.Mobile";
+
 			//Create a new instance of our scanner
 			scanner = new MobileBarcodeScanner(this.NavigationController);
 
@@ -71,8 +83,31 @@ namespace ZXing.MonoTouch.Sample
 				HandleScanResult(result);
 			};
 
-			this.View.AddSubview(buttonDefaultScan);
-			this.View.AddSubview(buttonCustomScan);
+			if (is7orgreater)
+			{
+				buttonAVCaptureScan = new UIButton (UIButtonType.RoundedRect);
+				buttonAVCaptureScan.Frame = new RectangleF (20, 140, 280, 40);
+				buttonAVCaptureScan.SetTitle ("Scan with AVCapture Engine", UIControlState.Normal);
+				buttonAVCaptureScan.TouchUpInside += async (sender, e) =>
+				{
+					//Tell our scanner to use the default overlay
+					scanner.UseCustomOverlay = false;
+					//We can customize the top and bottom text of the default overlay
+					scanner.TopText = "Hold camera up to barcode to scan";
+					scanner.BottomText = "Barcode will automatically scan";
+
+					//Start scanning
+					var result = await scanner.Scan (true);
+
+					HandleScanResult (result);
+				};
+			}
+
+			this.View.AddSubview (buttonDefaultScan);
+			this.View.AddSubview (buttonCustomScan);
+
+			if (is7orgreater)
+				this.View.AddSubview (buttonAVCaptureScan);
 		}
 
 

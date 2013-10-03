@@ -10,9 +10,9 @@ using MonoTouch.AVFoundation;
 
 namespace ZXing.Mobile
 {	
-	public class ZXingScannerViewController : UIViewController, IScannerViewController
+	public class AVCaptureScannerViewController : UIViewController, IScannerViewController
 	{
-		ZXingScannerView scannerView;
+		AVCaptureScannerView scannerView;
 
 		public event Action<ZXing.Result> OnScannedResult;
 
@@ -20,8 +20,8 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanner Scanner { get;set; }
 
 		//UIView overlayView = null;
-		
-		public ZXingScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
+
+		public AVCaptureScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
 		{
 			this.ScanningOptions = options;
 			this.Scanner = scanner;
@@ -37,7 +37,6 @@ namespace ZXing.Mobile
 			return this;
 		}
 
-
 		public void Cancel()
 		{
 			this.InvokeOnMainThread(() => scannerView.StopScanning());
@@ -47,7 +46,7 @@ namespace ZXing.Mobile
 
 		public override void ViewDidLoad ()
 		{
-			scannerView = new ZXingScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
+			scannerView = new AVCaptureScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
 			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			scannerView.UseCustomOverlayView = this.Scanner.UseCustomOverlay;
 			scannerView.CustomOverlayView = this.Scanner.CustomOverlay;
@@ -80,7 +79,7 @@ namespace ZXing.Mobile
 		public override void ViewDidAppear (bool animated)
 		{
 			originalStatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
-			
+
 			UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
 
 			Console.WriteLine("Starting to scan...");
@@ -94,8 +93,8 @@ namespace ZXing.Mobile
 				var evt = this.OnScannedResult;
 				if (evt != null)
 					evt(result);
-				
-				
+
+
 			});
 		}
 
@@ -108,7 +107,7 @@ namespace ZXing.Mobile
 		public override void ViewWillDisappear(bool animated)
 		{
 			UIApplication.SharedApplication.SetStatusBarStyle(originalStatusBarStyle, false);
-			
+
 			//if (scannerView != null)
 			//	scannerView.StopScanning();
 
@@ -133,13 +132,6 @@ namespace ZXing.Mobile
 		{
 			return UIInterfaceOrientationMask.All;
 		}
-
-		[Obsolete ("Deprecated in iOS6. Replace it with both GetSupportedInterfaceOrientations and PreferredInterfaceOrientationForPresentation")]
-		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
-		{
-			return true;
-		}
-
 	}
 }
 
