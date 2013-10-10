@@ -479,6 +479,22 @@ namespace ZXing.Mobile
 			if (outputRecorder != null)
 				outputRecorder.CancelTokenSource.Cancel();
 	
+			//Try removing all existing outputs prior to closing the session
+			try
+			{
+				while (session.Outputs.Length > 0)
+					session.RemoveOutput (session.Outputs [0]);
+			}
+			catch { }
+
+			//Try to remove all existing inputs prior to closing the session
+			try
+			{
+				while (session.Inputs.Length > 0)
+					session.RemoveInput (session.Inputs [0]);
+			}
+			catch { }
+
 			if (session.Running)
 				session.StopRunning();
 
