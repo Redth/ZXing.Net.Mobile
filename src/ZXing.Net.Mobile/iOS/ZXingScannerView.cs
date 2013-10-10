@@ -55,7 +55,7 @@ namespace ZXing.Mobile
 			if (UseCustomOverlayView && CustomOverlayView != null)
 				overlayView = CustomOverlayView;
 			else
-				overlayView = new ZXingDefaultOverlayView (this.Frame,
+				overlayView = new ZXingDefaultOverlayView (new RectangleF(0, 0, this.Frame.Width, this.Frame.Height),
 				                                          TopText, BottomText, CancelButtonText, FlashButtonText,
 				                                          () => { StopScanning (); resultCallback (null); }, ToggleTorch);
 
@@ -80,8 +80,6 @@ namespace ZXing.Mobile
 
 				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-
-
 			}
 		}
 					
@@ -144,10 +142,10 @@ namespace ZXing.Mobile
 				previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
 
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
-			previewLayer.Frame = this.Frame;
+			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
 			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
 
-			layerView = new UIView(this.Frame);
+			layerView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
 			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			layerView.Layer.AddSublayer(previewLayer);
 
@@ -294,7 +292,7 @@ namespace ZXing.Mobile
 			if (previewLayer == null)
 				return;
 
-			previewLayer.Frame = this.Frame;
+			previewLayer.Frame = new RectangleF (0, 0, this.Frame.Width, this.Frame.Height);
 
 			if (previewLayer.RespondsToSelector (new Selector ("connection")))
 			{

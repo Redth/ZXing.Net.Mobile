@@ -57,7 +57,7 @@ namespace ZXing.Mobile
 			scannerView.FlashButtonText = this.Scanner.FlashButtonText;
 
 			this.View.AddSubview(scannerView);
-			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth;
+			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 		}
 
 		public void Torch(bool on)
