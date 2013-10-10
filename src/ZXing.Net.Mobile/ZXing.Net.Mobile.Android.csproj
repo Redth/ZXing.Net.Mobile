@@ -30,7 +30,6 @@
     <OutputPath>..\..\Build\Release\monodroid\</OutputPath>
     <WarningLevel>4</WarningLevel>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
-    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <DefineConstants>MONODROID</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
@@ -42,15 +41,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="MonoForAndroid\ZxingActivity.cs" />
-    <Compile Include="MonoForAndroid\ZxingOverlayView.cs" />
-    <Compile Include="MonoForAndroid\ZxingScanner.cs" />
-    <Compile Include="Mono\IMobileBarcodeScanner.cs" />
-    <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
-    <Compile Include="MonoForAndroid\ZXingScannerFragment.cs" />
-    <Compile Include="MonoForAndroid\ZXingSurfaceView.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
+    <Compile Include="Android\ZxingActivity.cs" />
+    <Compile Include="Android\ZxingOverlayView.cs" />
+    <Compile Include="Android\ZxingScanner.cs" />
+    <Compile Include="Android\ZXingScannerFragment.cs" />
+    <Compile Include="Android\ZXingSurfaceView.cs" />
+    <Compile Include="Common\IMobileBarcodeScanner.cs" />
+    <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -64,6 +63,7 @@
     <Folder Include="Resources\layout\" />
     <Folder Include="Resources\drawable\" />
     <Folder Include="Resources\values\" />
+    <Folder Include="Common\" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\zxingscanneractivitylayout.axml" />

@@ -10,7 +10,7 @@ using ZXing;
 using ZXing.Mobile;
 
 
-namespace ZXing.MonoTouch.Sample
+namespace Sample.iOS
 {
 	public class HomeViewController : UIViewController
 	{

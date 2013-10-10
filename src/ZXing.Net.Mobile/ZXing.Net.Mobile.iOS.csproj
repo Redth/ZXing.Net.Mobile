@@ -8,7 +8,7 @@
     <ProjectGuid>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</ProjectGuid>
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>ZxingSharp</RootNamespace>
+    <RootNamespace>ZXing.Mobile</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>True</DebugSymbols>
@@ -64,22 +64,22 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Mono\IMobileBarcodeScanner.cs" />
-    <Compile Include="Mono\MobileBarcodeScanningOptions.cs" />
-    <Compile Include="MonoTouch\MobileBarcodeScanner.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs">
       <Link>AssemblyVersionInfo.cs</Link>
     </Compile>
-    <Compile Include="MonoTouch\ZXingScannerView.cs" />
-    <Compile Include="MonoTouch\ZXingScannerViewController.cs" />
-    <Compile Include="MonoTouch\ZXingDefaultOverlayView.cs" />
-    <Compile Include="MonoTouch\AVCaptureScannerView.cs" />
-    <Compile Include="MonoTouch\AVCaptureScannerViewController.cs" />
-    <Compile Include="MonoTouch\IScannerViewController.cs" />
+    <Compile Include="iOS\MobileBarcodeScanner.cs" />
+    <Compile Include="iOS\ZXingScannerView.cs" />
+    <Compile Include="iOS\ZXingScannerViewController.cs" />
+    <Compile Include="iOS\ZXingDefaultOverlayView.cs" />
+    <Compile Include="iOS\AVCaptureScannerView.cs" />
+    <Compile Include="iOS\AVCaptureScannerViewController.cs" />
+    <Compile Include="iOS\IScannerViewController.cs" />
+    <Compile Include="Common\IMobileBarcodeScanner.cs" />
+    <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MonoTouch\" />
-    <Folder Include="Mono\" />
+    <Folder Include="iOS\" />
+    <Folder Include="Common\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZXing.Net\zxing.monotouch.csproj">

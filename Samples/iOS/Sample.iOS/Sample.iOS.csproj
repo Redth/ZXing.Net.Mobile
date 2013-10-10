@@ -8,7 +8,7 @@
     <ProjectGuid>{2A305540-C079-4588-B1E3-064174257DCA}</ProjectGuid>
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ZXing.MonoTouch.Sample</RootNamespace>
+    <RootNamespace>Sample.iOS</RootNamespace>
     <AssemblyName>ZxingSharpMonoTouchSample</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
@@ -44,9 +44,12 @@
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
-    <IpaPackageName />
-    <CrashReportingApiKey />
-    <MtouchI18n />
+    <IpaPackageName>
+    </IpaPackageName>
+    <CrashReportingApiKey>
+    </CrashReportingApiKey>
+    <MtouchI18n>
+    </MtouchI18n>
     <MtouchArch>ARMv7</MtouchArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
@@ -67,7 +70,8 @@
     <ConsolePause>False</ConsolePause>
     <BuildIpa>True</BuildIpa>
     <CodesignKey>iPhone Distribution</CodesignKey>
-    <MtouchI18n />
+    <MtouchI18n>
+    </MtouchI18n>
     <MtouchArch>ARMv7</MtouchArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
@@ -100,9 +104,9 @@
       <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
       <Name>zxing.monotouch</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.MonoTouch.csproj">
+    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.iOS.csproj">
       <Project>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</Project>
-      <Name>ZXing.Net.Mobile.MonoTouch</Name>
+      <Name>ZXing.Net.Mobile.iOS</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

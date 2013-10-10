@@ -8,7 +8,7 @@
     <ProjectGuid>{660D9346-D70B-4C54-8402-E5F6DF48E9AC}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>ZxingSharp.MonoForAndroid.Sample</RootNamespace>
+    <RootNamespace>Sample.Android</RootNamespace>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AndroidResgenClass>Resource</AndroidResgenClass>
@@ -39,8 +39,7 @@
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <ConsolePause>False</ConsolePause>
     <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
-    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
-    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -66,13 +65,13 @@
     <AndroidResource Include="Resources\layout\ZxingOverlay.axml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.MonoForAndroid.csproj">
-      <Project>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</Project>
-      <Name>ZXing.Net.Mobile.MonoForAndroid</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monoandroid.csproj">
       <Project>{8971B59D-78F1-49BA-808D-CBADB37F571F}</Project>
       <Name>zxing.monoandroid</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.Android.csproj">
+      <Project>{D72228AC-C356-4E1A-B56F-91C9A25F7286}</Project>
+      <Name>ZXing.Net.Mobile.Android</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />

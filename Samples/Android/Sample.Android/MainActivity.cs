@@ -7,7 +7,7 @@ using Android.OS;
 using ZXing;
 using ZXing.Mobile;
 
-namespace ZxingSharp.MonoForAndroid.Sample
+namespace Sample.Android
 {
 	[Activity (Label = "ZXing.Mobile", MainLauncher = true, ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)]
 	public class Activity1 : Activity
