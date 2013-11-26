@@ -61,14 +61,29 @@ On each platform, the ZXing scanner has been implemented as a reusable component
 The view/fragment/control classes for each platform are:
 
  - iOS: ZXingScannerView (UIView) - See ZXingScannerViewController.cs View Controller for an example of how to use this view
+ - iOS: AVCaptureScannerView (UIView) - This is API equivalent to ZXingScannerView, but uses Apple's AVCaptureSession Metadata engine to scan the barcodes instead of ZXing.Net.  See AVCaptureScannerViewController.cs View Controller for an example of how to use this view
  - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
  - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
 
 
-###Important Additional Notes
+###Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
+In iOS7, Apple added some API's to allow for scanning of barcodes in an AVCaptureSession.  The latest version of ZXing.Net.Mobile gives you the option of using this instead of the ZXing scanning engine.  You can use the `AVCaptureScannerView` or the `AVCaptureScannerViewController` classes directly just the same as you would use their ZXing* equivalents.  Or, in your `MobileBarcodeScanner`, there is now an overload to use the AV Capture Engine:
 
-- Scanning will crash the iOS Simulator.  Currently scanning only works on devices in Xamarin.iOS
-- On Android, you must pass a Context into the MobileBarcodeScanner constructor!
+```csharp
+//Scan(MobileBarcodeScanningOptions options, bool useAVCaptureEngine)
+scanner.Scan(options, true);
+```
+In the MobileBarcodeScanner, even if you specify to use the AVCaptureSession scanning, it will gracefully degrade to using ZXing if the device doesn't support this (eg: if it's not iOS7 or newer), or if you specify a barcode format in your scanning options which the AVCaptureSession does not support for detection.  The AVCaptureSession can only decode the following barcodes:
+
+- Aztec
+- Code 128
+- Code 39
+- Code 93
+- EAN13
+- EAN8
+- PDF417
+- QR
+- UPC-E
 
 ###License
 Apache ZXing.Net.Mobile Copyright 2012 The Apache Software Foundation

@@ -2,9 +2,7 @@
 
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/zxing.net.mobile_128x128.png)
 
-ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  
-
-*NOTE*: ZXing.Net.Mobile is still quite BETA!  Your mileage may vary!
+ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
 
 ### Usage
 The simplest example of using ZXing.Net.Mobile looks something like this:
@@ -31,6 +29,17 @@ buttonScan.Click += (sender, e) => {
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
 ###Changes
+ - v1.4.0
+   - iOS: Added iOS7's built in AVCaptureSession MetadataObject barcode scanning as an option
+   - iOS: Fixed Offset of overlay and preview layers when a non-zero based offset was specified
+   - iOS: Added code to remove session inputs/outputs to improve performance between scans
+   - iOS: Front Camera now possible on iOS
+   - Android: Fixed rotation
+   - Windows Phone: Added Windows Phone 8 samples and builds
+   - Windows Phone: Dropped explicit support for WP7x (code is still there, but no binaries shipped)
+   - Updated ZXing.NET version used
+   - General performance enhancements and bug fixes
+   
  - v1.3.6
    - Built for Xamarin 3.0 with async/await support
    - iOS: Added PauseScanning and ResumeScanning options
@@ -59,15 +68,6 @@ buttonScan.Click += (sender, e) => {
    - Fixed Android scanning very slowly
    - Added to MobileBarcodeScanningOptions: IntervalBetweenAnalyzingFrames to configure how 'fast' frames from the live scanner view are analyzed in an attempt to decode barcodes 
    
-###Thanks
-ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put together (including my own).  So naturally, I'd like to thank everyone who's helped out in any way.  Those of you I know have helped I'm listing here, but anyone else that was involved, please let me know!
-
-- ZXing Project and those responsible for porting it to C#
-- John Carruthers - https://github.com/JohnACarruthers/zxing.MonoTouch
-- Martin Bowling - https://github.com/martinbowling
-- Alex Corrado - https://github.com/chkn/zxing.MonoTouch
-- ZXing.Net Project - http://zxingnet.codeplex.com - HUGE effort here to port ZXing to .NET
-
 ### Android Versions
 The component should work on Android 2.2 or higher.  In Xamarin.Android there are 3 places in the project settings relating to Android version.  YOU ***MUST*** set the Project Options -> Build -> General -> Target Framework to ***2.3*** or higher.  If you still want to use 2.2, you can set the Project Options -> Build -> Android Application -> Minimum Android version to 2.2, but be sure to set the Target Android version in this section to 2.3 or higher.
 
@@ -116,8 +116,39 @@ On each platform, the ZXing scanner has been implemented as a reusable component
 The view/fragment/control classes for each platform are:
 
  - iOS: ZXingScannerView (UIView) - See ZXingScannerViewController.cs View Controller for an example of how to use this view
+ - iOS: AVCaptureScannerView (UIView) - This is API equivalent to ZXingScannerView, but uses Apple's AVCaptureSession Metadata engine to scan the barcodes instead of ZXing.Net.  See AVCaptureScannerViewController.cs View Controller for an example of how to use this view
  - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
  - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
+
+###Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
+In iOS7, Apple added some API's to allow for scanning of barcodes in an AVCaptureSession.  The latest version of ZXing.Net.Mobile gives you the option of using this instead of the ZXing scanning engine.  You can use the `AVCaptureScannerView` or the `AVCaptureScannerViewController` classes directly just the same as you would use their ZXing* equivalents.  Or, in your `MobileBarcodeScanner`, there is now an overload to use the AV Capture Engine:
+
+```csharp
+//Scan(MobileBarcodeScanningOptions options, bool useAVCaptureEngine)
+scanner.Scan(options, true);
+```
+In the MobileBarcodeScanner, even if you specify to use the AVCaptureSession scanning, it will gracefully degrade to using ZXing if the device doesn't support this (eg: if it's not iOS7 or newer), or if you specify a barcode format in your scanning options which the AVCaptureSession does not support for detection.  The AVCaptureSession can only decode the following barcodes:
+
+- Aztec
+- Code 128
+- Code 39
+- Code 93
+- EAN13
+- EAN8
+- PDF417
+- QR
+- UPC-E
+
+
+###Thanks
+ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put together (including my own).  So naturally, I'd like to thank everyone who's helped out in any way.  Those of you I know have helped I'm listing here, but anyone else that was involved, please let me know!
+
+- ZXing Project and those responsible for porting it to C#
+- John Carruthers - https://github.com/JohnACarruthers/zxing.MonoTouch
+- Martin Bowling - https://github.com/martinbowling
+- Alex Corrado - https://github.com/chkn/zxing.MonoTouch
+- ZXing.Net Project - http://zxingnet.codeplex.com - HUGE effort here to port ZXing to .NET
+
 
 
 ###License

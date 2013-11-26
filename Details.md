@@ -3,6 +3,17 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 GitHub Project: https://github.com/Redth/ZXing.Net.Mobile
 
 ### Changes
+ - v1.4.0
+   - iOS: Added iOS7's built in AVCaptureSession MetadataObject barcode scanning as an option
+   - iOS: Fixed Offset of overlay and preview layers when a non-zero based offset was specified
+   - iOS: Added code to remove session inputs/outputs to improve performance between scans
+   - iOS: Front Camera now possible on iOS
+   - Android: Fixed rotation
+   - Windows Phone: Added Windows Phone 8 samples and builds
+   - Windows Phone: Dropped explicit support for WP7x (code is still there, but no binaries shipped)
+   - Updated ZXing.NET version used
+   - General performance enhancements and bug fixes
+   
  - v1.3.7
    - Android: Fixed scanner camera freezing after phone is locked
    - iOS: Fixed possible NullReferenceException in ZXingViewController
@@ -103,3 +114,24 @@ The view/fragment/control classes for each platform are:
  - iOS: ZXingScannerView (UIView) - See ZXingScannerViewController.cs View Controller for an example of how to use this view
  - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
  - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
+
+
+###Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
+In iOS7, Apple added some API's to allow for scanning of barcodes in an AVCaptureSession.  The latest version of ZXing.Net.Mobile gives you the option of using this instead of the ZXing scanning engine.  You can use the `AVCaptureScannerView` or the `AVCaptureScannerViewController` classes directly just the same as you would use their ZXing* equivalents.  Or, in your `MobileBarcodeScanner`, there is now an overload to use the AV Capture Engine:
+
+```csharp
+//Scan(MobileBarcodeScanningOptions options, bool useAVCaptureEngine)
+scanner.Scan(options, true);
+```
+In the MobileBarcodeScanner, even if you specify to use the AVCaptureSession scanning, it will gracefully degrade to using ZXing if the device doesn't support this (eg: if it's not iOS7 or newer), or if you specify a barcode format in your scanning options which the AVCaptureSession does not support for detection.  The AVCaptureSession can only decode the following barcodes:
+
+- Aztec
+- Code 128
+- Code 39
+- Code 93
+- EAN13
+- EAN8
+- PDF417
+- QR
+- UPC-E
+
