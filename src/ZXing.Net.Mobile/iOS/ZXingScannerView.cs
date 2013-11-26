@@ -370,7 +370,15 @@ namespace ZXing.Mobile
 			{
 				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames || working
 				    || CancelTokenSource.IsCancellationRequested)
+				{
+					if (sampleBuffer != null)
+					{
+						sampleBuffer.Dispose ();
+						sampleBuffer = null;
+					}
 					return;
+				}
+
 
 				working = true;
 				//Console.WriteLine("SAMPLE");
@@ -389,6 +397,8 @@ namespace ZXing.Mobile
 					// delivering frames. 
 					//	
 					sampleBuffer.Dispose ();
+					sampleBuffer = null;
+
 				} catch (Exception e){
 					Console.WriteLine (e);
 				}
