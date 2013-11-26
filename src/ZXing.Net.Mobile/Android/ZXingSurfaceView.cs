@@ -285,18 +285,58 @@ namespace ZXing.Mobile
 
 		public void SetCameraDisplayOrientation(Activity context) 
 		{
-			var rotation = context.WindowManager.DefaultDisplay.Rotation;
 			var degrees = 0;
 
-			if (rotation == SurfaceOrientation.Rotation0)
-				degrees = 90;
-			else if (rotation == SurfaceOrientation.Rotation90)
-				degrees = 0;
-			else if (rotation == SurfaceOrientation.Rotation180)
-				degrees = 270;
-			else if (rotation == SurfaceOrientation.Rotation270)
-				degrees = 180;
+			var display = context.WindowManager.DefaultDisplay;
 
+			var rotation = display.Rotation;
+
+			var displayMetrics = new Android.Util.DisplayMetrics ();
+
+			display.GetMetrics (displayMetrics);
+
+			int width = displayMetrics.WidthPixels;
+			int height = displayMetrics.HeightPixels;
+
+			if((rotation == SurfaceOrientation.Rotation0 || rotation == SurfaceOrientation.Rotation180) && height > width ||
+				(rotation == SurfaceOrientation.Rotation90 || rotation == SurfaceOrientation.Rotation270) && width > height)
+			{
+				switch(rotation)
+				{
+					case SurfaceOrientation.Rotation0:
+						degrees = 90;
+						break;
+					case SurfaceOrientation.Rotation90:
+						degrees = 0;
+						break;
+					case SurfaceOrientation.Rotation180:
+						degrees = 270;
+						break;
+					case SurfaceOrientation.Rotation270:
+						degrees = 180;
+						break;
+				}
+			}
+			//Natural orientation is landscape or square
+			else
+			{
+				switch(rotation)
+				{
+					case SurfaceOrientation.Rotation0:
+						degrees = 0;
+						break;
+					case SurfaceOrientation.Rotation90:
+						degrees = 270;
+						break;
+					case SurfaceOrientation.Rotation180:
+						degrees = 180;
+						break;
+					case SurfaceOrientation.Rotation270:
+						degrees = 90; 
+						break;
+				}
+			}
+		
 			Android.Util.Log.Debug ("ZXING", "Changing Camera Orientation to: " + degrees);
 
 			try { camera.SetDisplayOrientation (degrees); }
