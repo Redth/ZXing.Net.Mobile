@@ -3,6 +3,10 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 GitHub Project: https://github.com/Redth/ZXing.Net.Mobile
 
 ### Changes
+ - v1.4.1
+ 	- iOS: Fixed multiple scanner launches causing Scanning to no longer work
+ 	- Android: Fixed rotation on some tablets showing incorrectly
+ 	
  - v1.4.0
    - iOS: Added iOS7's built in AVCaptureSession MetadataObject barcode scanning as an option
    - iOS: Fixed Offset of overlay and preview layers when a non-zero based offset was specified

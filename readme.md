@@ -29,6 +29,10 @@ buttonScan.Click += (sender, e) => {
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
 ###Changes
+ - v1.4.1
+ 	- iOS: Fixed multiple scanner launches causing Scanning to no longer work
+ 	- Android: Fixed rotation on some tablets showing incorrectly
+ 	
  - v1.4.0
    - iOS: Added iOS7's built in AVCaptureSession MetadataObject barcode scanning as an option
    - iOS: Fixed Offset of overlay and preview layers when a non-zero based offset was specified
