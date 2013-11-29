@@ -100,7 +100,9 @@ namespace ZXing.Mobile
 				
 				//camera = Android.Hardware.Camera.Open ();
 				camera.SetPreviewDisplay (holder);
-				camera.SetPreviewCallback (this);
+				//camera.SetPreviewCallback (this);
+				camera.SetOneShotPreviewCallback(this);
+
 				
 			} catch (Exception ex) {
 				ShutdownCamera ();
@@ -141,9 +143,6 @@ namespace ZXing.Mobile
 		
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
-			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
-				return;
-			
 			try 
 			{
 				var cameraParameters = camera.GetParameters();
@@ -181,23 +180,21 @@ namespace ZXing.Mobile
 				
 				lastPreviewAnalysis = DateTime.Now;
 				
-				if (result == null || string.IsNullOrEmpty (result.Text))
+				if (result != null && !string.IsNullOrEmpty (result.Text))
+				{
+					Android.Util.Log.Debug("ZXing.Mobile", "Barcode Found: " + result.Text);
+
+					ShutdownCamera();
+
+					callback(result);
+
 					return;
-				
-				Android.Util.Log.Debug("ZXing.Mobile", "Barcode Found: " + result.Text);
-				
-				ShutdownCamera();
+				}
+			} 
+			catch (ReaderException) {	Android.Util.Log.Debug("ZXing.Mobile", "No barcode Found"); } 
+			catch (Exception) { throw; }
 
-				callback(result);
-
-			} catch (ReaderException) {
-				Android.Util.Log.Debug("ZXing.Mobile", "No barcode Found");
-				// ignore this exception; it happens every time there is a failed scan
-				
-			} catch (Exception) {
-				// TODO: this one is unexpected.. log or otherwise handle it
-				throw;
-			}
+			camera.SetOneShotPreviewCallback (this);
 		}
 		
 		
