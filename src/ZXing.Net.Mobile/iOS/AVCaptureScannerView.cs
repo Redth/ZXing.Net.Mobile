@@ -50,7 +50,7 @@ namespace ZXing.Mobile
 
 		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
 
-		void Setup(RectangleF frame)
+		void Setup()
 		{
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview ();
@@ -334,7 +334,7 @@ namespace ZXing.Mobile
 			if (!stopped)
 				return;
 
-			Setup (this.Frame);
+			Setup ();
 
 			this.options = options;
 			this.resultCallback = callback;
