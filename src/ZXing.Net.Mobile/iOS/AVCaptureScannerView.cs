@@ -195,8 +195,13 @@ namespace ZXing.Mobile
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
 			//Framerate set here (15 fps)
-			if (previewLayer.RespondsToSelector(new Selector("connection")))
-				previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+            if (previewLayer.RespondsToSelector(new Selector("connection")))
+            {
+                if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
+                    captureDevice.ActiveVideoMinFrameDuration = new CMTime(1, 10);
+                else
+                    previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+            }
 
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
 			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
