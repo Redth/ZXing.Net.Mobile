@@ -464,7 +464,7 @@ namespace ZXing.Mobile
 
 				if (Runtime.Arch == Arch.SIMULATOR)
 				{
-					var simView = new UIView(this.Frame);
+					var simView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
 					simView.BackgroundColor = UIColor.LightGray;
 					simView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 					this.InsertSubview(simView, 0);
