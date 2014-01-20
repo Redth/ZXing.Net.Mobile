@@ -18,6 +18,9 @@ namespace ZXing.Mobile
 {
 	public class ZXingScannerView : UIView, IZXingScanner<UIView>
 	{
+		public delegate void ScannerSetupCompleteDelegate();
+		public event ScannerSetupCompleteDelegate OnScannerSetupComplete;
+
 		public ZXingScannerView()
 		{
 		}
@@ -42,6 +45,7 @@ namespace ZXing.Mobile
 		UIView layerView;
 		UIView overlayView = null;
 
+
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
@@ -49,6 +53,8 @@ namespace ZXing.Mobile
 
 		void Setup(RectangleF frame)
 		{
+			var started = DateTime.UtcNow;
+
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview ();
 
@@ -81,6 +87,9 @@ namespace ZXing.Mobile
 				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			}
+
+			var total = DateTime.UtcNow - started;
+			Console.WriteLine ("ZXingScannerView.Setup() took {0} ms.", total.TotalMilliseconds);
 		}
 					
 		
@@ -90,6 +99,8 @@ namespace ZXing.Mobile
 
 		bool SetupCaptureSession ()
 		{
+			var started = DateTime.UtcNow;
+
 			// configure the capture session for low resolution, change this if your code
 			// can cope with more data or volume
 			session = new AVCaptureSession () {
@@ -135,13 +146,36 @@ namespace ZXing.Mobile
 				session.AddInput (input);
 
 
+			var startedAVPreviewLayerAlloc = DateTime.UtcNow;
+
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
+			var totalAVPreviewLayerAlloc = DateTime.UtcNow - startedAVPreviewLayerAlloc;
+
+			Console.WriteLine ("PERF: Alloc AVCaptureVideoPreviewLayer took {0} ms.", totalAVPreviewLayerAlloc.TotalMilliseconds);
+
+
 			//Framerate set here (15 fps)
-            if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
-                captureDevice.ActiveVideoMinFrameDuration = new CMTime(1, 10);
+			if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
+			{
+				var perf1 = PerformanceCounter.Start ();
+
+				NSError lockForConfigErr = null;
+
+				captureDevice.LockForConfiguration (out lockForConfigErr);
+				if (lockForConfigErr == null)
+				{
+					captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
+					captureDevice.UnlockForConfiguration ();
+				}
+
+				PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
+			}
             else
                 previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+
+
+			var perf2 = PerformanceCounter.Start ();
 
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
 			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
@@ -163,9 +197,15 @@ namespace ZXing.Mobile
 				//overlayView.LayoutSubviews ();
 			}
 
+			PerformanceCounter.Stop (perf2, "PERF: Setting up layers took {0} ms");
+
+			var perf3 = PerformanceCounter.Start ();
+
 			session.StartRunning ();
 
-			Console.WriteLine ("RUNNING!!!");
+			PerformanceCounter.Stop (perf3, "PERF: session.StartRunning() took {0} ms");
+
+			var perf4 = PerformanceCounter.Start ();
 
 			// create a VideoDataOutput and add it to the sesion
 			output = new AVCaptureVideoDataOutput () {
@@ -235,11 +275,14 @@ namespace ZXing.Mobile
 
 				try
 				{
-					var started = DateTime.Now;
-					var rs = barcodeReader.Decode(img);
-					var total = DateTime.Now - started;
+					var sw = new System.Diagnostics.Stopwatch();
+					sw.Start();
 
-					Console.WriteLine("Decode Time: " + total.TotalMilliseconds + " ms");
+					var rs = barcodeReader.Decode(img);
+
+					sw.Stop();
+
+					Console.WriteLine("Decode Time: {0} ms", sw.ElapsedMilliseconds);
 
 					if (rs != null)
 						resultCallback(rs);
@@ -253,8 +296,7 @@ namespace ZXing.Mobile
 			output.AlwaysDiscardsLateVideoFrames = true;
 			output.SetSampleBufferDelegate (outputRecorder, queue);
 
-
-			Console.WriteLine("SetupCamera Finished");
+			PerformanceCounter.Stop(perf4, "PERF: SetupCamera Finished.  Took {0} ms.");
 
 			session.AddOutput (output);
 			//session.StartRunning ();
@@ -262,6 +304,8 @@ namespace ZXing.Mobile
 
 			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
 			{
+				var perf5 = PerformanceCounter.Start ();
+
 				NSError err = null;
 				if (captureDevice.LockForConfiguration(out err))
 				{
@@ -274,6 +318,8 @@ namespace ZXing.Mobile
 				}
 				else
 					Console.WriteLine("Failed to Lock for Config: " + err.Description);
+
+				PerformanceCounter.Stop (perf5, "PERF: Setup Focus in {0} ms.");
 			}
 
 			return true;
@@ -441,11 +487,10 @@ namespace ZXing.Mobile
 		#region IZXingScanner implementation
 		public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
 		{
-			if (!analyzing)
-				analyzing = true;
-
 			if (!stopped)
 				return;
+
+			var perf = PerformanceCounter.Start ();
 
 			Setup (this.Frame);
 
@@ -472,7 +517,14 @@ namespace ZXing.Mobile
 				}
 			});
 
-			stopped = false;
+			if (!analyzing)
+				analyzing = true;
+
+			PerformanceCounter.Stop(perf, "PERF: StartScanning() Took {0} ms.");
+
+			var evt = this.OnScannerSetupComplete;
+			if (evt != null)
+				evt ();
 		}
 		public void StartScanning (Action<Result> callback)
 		{

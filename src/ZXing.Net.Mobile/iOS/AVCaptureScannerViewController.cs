@@ -19,7 +19,8 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }
 
-		//UIView overlayView = null;
+		UIActivityIndicatorView loadingView;
+		UIView loadingBg;
 
 		public AVCaptureScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
 		{
@@ -46,6 +47,17 @@ namespace ZXing.Mobile
 
 		public override void ViewDidLoad ()
 		{
+			loadingBg = new UIView (this.View.Frame) { BackgroundColor = UIColor.Black };
+			loadingView = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.WhiteLarge);
+			loadingView.Frame = new RectangleF ((this.View.Frame.Width - loadingView.Frame.Width) / 2, 
+				(this.View.Frame.Height - loadingView.Frame.Height) / 2,
+				loadingView.Frame.Width, 
+				loadingView.Frame.Height);
+			
+			loadingBg.AddSubview (loadingView);
+			View.AddSubview (loadingBg);
+			loadingView.StartAnimating ();
+
 			scannerView = new AVCaptureScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
 			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			scannerView.UseCustomOverlayView = this.Scanner.UseCustomOverlay;
@@ -80,8 +92,11 @@ namespace ZXing.Mobile
 		{
 			originalStatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
 
-            if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
-                UIApplication.SharedApplication.StatusBarStyle = UIStatusBarStyle.Default;
+			if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
+			{
+				UIApplication.SharedApplication.StatusBarStyle = UIStatusBarStyle.Default;
+				SetNeedsStatusBarAppearanceUpdate ();
+			}
             else
                 UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
 
@@ -134,6 +149,30 @@ namespace ZXing.Mobile
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
 		{
 			return UIInterfaceOrientationMask.All;
+		}
+
+		void HandleOnScannerSetupComplete ()
+		{
+			BeginInvokeOnMainThread (() =>
+			{
+				if (loadingView != null && loadingBg != null && loadingView.IsAnimating)
+				{
+					loadingView.StopAnimating ();
+
+					UIView.BeginAnimations("zoomout");
+
+					UIView.SetAnimationDuration(2.0f);
+					UIView.SetAnimationCurve(UIViewAnimationCurve.EaseOut);
+
+					loadingBg.Transform = MonoTouch.CoreGraphics.CGAffineTransform.MakeScale(2.0f, 2.0f);
+					loadingBg.Alpha = 0.0f;
+
+					UIView.CommitAnimations();
+
+
+					loadingBg.RemoveFromSuperview();
+				}
+			});
 		}
 	}
 }

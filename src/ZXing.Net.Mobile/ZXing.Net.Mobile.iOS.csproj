@@ -76,6 +76,7 @@
     <Compile Include="iOS\IScannerViewController.cs" />
     <Compile Include="Common\IMobileBarcodeScanner.cs" />
     <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
+    <Compile Include="Common\Performance.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="iOS\" />
