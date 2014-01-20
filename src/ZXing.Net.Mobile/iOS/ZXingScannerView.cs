@@ -138,8 +138,10 @@ namespace ZXing.Mobile
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
 			//Framerate set here (15 fps)
-			if (previewLayer.RespondsToSelector(new Selector("connection")))
-				previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+            if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
+                captureDevice.ActiveVideoMinFrameDuration = new CMTime(1, 10);
+            else
+                previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
 
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
 			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
@@ -462,7 +464,7 @@ namespace ZXing.Mobile
 
 				if (Runtime.Arch == Arch.SIMULATOR)
 				{
-					var simView = new UIView(this.Frame);
+					var simView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
 					simView.BackgroundColor = UIColor.LightGray;
 					simView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 					this.InsertSubview(simView, 0);

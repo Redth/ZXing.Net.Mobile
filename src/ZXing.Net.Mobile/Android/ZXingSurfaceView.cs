@@ -120,7 +120,11 @@ namespace ZXing.Mobile
 			
 			var parameters = camera.GetParameters ();
 			parameters.PreviewFormat = ImageFormatType.Nv21;
-			
+			// Google Glass requires this fix to display the camera output correctly
+			if (Build.Model.Contains ("Glass")) {
+				parameters.SetPreviewFpsRange (30000, 30000);
+				parameters.SetPreviewSize (640, 360);
+			}
 			camera.SetParameters (parameters);
 
 			SetCameraDisplayOrientation (this.activity);

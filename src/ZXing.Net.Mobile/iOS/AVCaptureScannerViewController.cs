@@ -80,7 +80,10 @@ namespace ZXing.Mobile
 		{
 			originalStatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
 
-			UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
+            if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
+                UIApplication.SharedApplication.StatusBarStyle = UIStatusBarStyle.Default;
+            else
+                UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
 
 			Console.WriteLine("Starting to scan...");
 
