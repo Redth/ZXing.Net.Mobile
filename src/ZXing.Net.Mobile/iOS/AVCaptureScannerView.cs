@@ -256,10 +256,29 @@ namespace ZXing.Mobile
 				NSError err = null;
 				if (captureDevice.LockForConfiguration(out err))
 				{
-					captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeAutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.ModeAutoFocus;
+
+					if (captureDevice.IsExposureModeSupported (AVCaptureExposureMode.ContinuousAutoExposure))
+						captureDevice.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;
+					else if (captureDevice.IsExposureModeSupported(AVCaptureExposureMode.AutoExpose))
+						captureDevice.ExposureMode = AVCaptureExposureMode.AutoExpose;
+
+					if (captureDevice.IsWhiteBalanceModeSupported (AVCaptureWhiteBalanceMode.ContinuousAutoWhiteBalance))
+						captureDevice.WhiteBalanceMode = AVCaptureWhiteBalanceMode.ContinuousAutoWhiteBalance;
+					else if (captureDevice.IsWhiteBalanceModeSupported (AVCaptureWhiteBalanceMode.AutoWhiteBalance))
+						captureDevice.WhiteBalanceMode = AVCaptureWhiteBalanceMode.AutoWhiteBalance;
+
+					if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0) && captureDevice.AutoFocusRangeRestrictionSupported)
+						captureDevice.AutoFocusRangeRestriction = AVCaptureAutoFocusRangeRestriction.Near;
 
 					if (captureDevice.FocusPointOfInterestSupported)
 						captureDevice.FocusPointOfInterest = new PointF(0.5f, 0.5f);
+
+					if (captureDevice.ExposurePointOfInterestSupported)
+						captureDevice.ExposurePointOfInterest = new PointF (0.5f, 0.5f);
 
 					captureDevice.UnlockForConfiguration();
 				}

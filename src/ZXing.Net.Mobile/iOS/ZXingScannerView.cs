@@ -302,26 +302,42 @@ namespace ZXing.Mobile
 			//session.StartRunning ();
 
 
-			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
+			var perf5 = PerformanceCounter.Start ();
+
+			NSError err = null;
+			if (captureDevice.LockForConfiguration(out err))
 			{
-				var perf5 = PerformanceCounter.Start ();
-
-				NSError err = null;
-				if (captureDevice.LockForConfiguration(out err))
-				{
+				if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
 					captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+				else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeAutoFocus))
+					captureDevice.FocusMode = AVCaptureFocusMode.ModeAutoFocus;
 
-					if (captureDevice.FocusPointOfInterestSupported)
-						captureDevice.FocusPointOfInterest = new PointF(0.5f, 0.5f);
+				if (captureDevice.IsExposureModeSupported (AVCaptureExposureMode.ContinuousAutoExposure))
+					captureDevice.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;
+				else if (captureDevice.IsExposureModeSupported(AVCaptureExposureMode.AutoExpose))
+					captureDevice.ExposureMode = AVCaptureExposureMode.AutoExpose;
 
-					captureDevice.UnlockForConfiguration();
-				}
-				else
-					Console.WriteLine("Failed to Lock for Config: " + err.Description);
+				if (captureDevice.IsWhiteBalanceModeSupported (AVCaptureWhiteBalanceMode.ContinuousAutoWhiteBalance))
+					captureDevice.WhiteBalanceMode = AVCaptureWhiteBalanceMode.ContinuousAutoWhiteBalance;
+				else if (captureDevice.IsWhiteBalanceModeSupported (AVCaptureWhiteBalanceMode.AutoWhiteBalance))
+						captureDevice.WhiteBalanceMode = AVCaptureWhiteBalanceMode.AutoWhiteBalance;
 
-				PerformanceCounter.Stop (perf5, "PERF: Setup Focus in {0} ms.");
+				if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0) && captureDevice.AutoFocusRangeRestrictionSupported)
+					captureDevice.AutoFocusRangeRestriction = AVCaptureAutoFocusRangeRestriction.Near;
+
+				if (captureDevice.FocusPointOfInterestSupported)
+					captureDevice.FocusPointOfInterest = new PointF(0.5f, 0.5f);
+
+				if (captureDevice.ExposurePointOfInterestSupported)
+					captureDevice.ExposurePointOfInterest = new PointF (0.5f, 0.5f);
+
+				captureDevice.UnlockForConfiguration();
 			}
+			else
+				Console.WriteLine("Failed to Lock for Config: " + err.Description);
 
+			PerformanceCounter.Stop (perf5, "PERF: Setup Focus in {0} ms.");
+	
 			return true;
 		}
 
@@ -463,6 +479,7 @@ namespace ZXing.Mobile
 				{
 					// Lock the base address
 					pixelBuffer.Lock (0);
+
 					// Get the number of bytes per row for the pixel buffer
 					var baseAddress = pixelBuffer.BaseAddress;
 					int bytesPerRow = pixelBuffer.BytesPerRow;
@@ -476,7 +493,7 @@ namespace ZXing.Mobile
 					{
 						pixelBuffer.Unlock (0);
 
-						img = UIImage.FromImage (cgImage);
+						img = new UIImage(cgImage);
 					}
 				}
 
@@ -579,18 +596,18 @@ namespace ZXing.Mobile
 			{
 				NSError err;
 
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
 				device.LockForConfiguration(out err);
 
 				if (on)
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+					device.TorchMode = AVCaptureTorchMode.On;
+					device.FlashMode = AVCaptureFlashMode.On;
 				}
 				else
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+					device.TorchMode = AVCaptureTorchMode.Off;
+					device.FlashMode = AVCaptureFlashMode.Off;
 				}
 
 				device.UnlockForConfiguration();
