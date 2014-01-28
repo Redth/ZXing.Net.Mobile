@@ -275,14 +275,14 @@ namespace ZXing.Mobile
 
 				try
 				{
-					var sw = new System.Diagnostics.Stopwatch();
-					sw.Start();
+					//var sw = new System.Diagnostics.Stopwatch();
+					//sw.Start();
 
 					var rs = barcodeReader.Decode(img);
 
-					sw.Stop();
+					//sw.Stop();
 
-					Console.WriteLine("Decode Time: {0} ms", sw.ElapsedMilliseconds);
+					//Console.WriteLine("Decode Time: {0} ms", sw.ElapsedMilliseconds);
 
 					if (rs != null)
 						resultCallback(rs);
