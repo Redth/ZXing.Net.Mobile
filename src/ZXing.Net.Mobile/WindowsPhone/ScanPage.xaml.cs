@@ -106,7 +106,8 @@ namespace ZXing.Mobile
 	    
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            scannerControl.StopScanning();
+            try { scannerControl.StopScanning(); }
+            catch (Exception ex) { }
 
             base.OnNavigatingFrom(e);
         }

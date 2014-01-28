@@ -108,13 +108,20 @@ namespace ZXing.Mobile
         private void ReaderOnCameraInitialized(object sender, bool initialized)
         {
             // We dispatch (invoke) to avoid access exceptions
-            Dispatcher.BeginInvoke(() => _previewTransform.Rotation = _reader.CameraOrientation);
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (_reader != null && _previewTransform != null)
+                    _previewTransform.Rotation = _reader.CameraOrientation;
+            });
 
-            // We can set if Camera should flash or not when focused
-			_reader.FlashMode = FlashMode.Off;
+            if (_reader != null)
+            {
+                // We can set if Camera should flash or not when focused
+                _reader.FlashMode = FlashMode.Off;
 
-            // Starts the capturing process
-            _reader.Start();
+                // Starts the capturing process
+                _reader.Start();
+            }
         }
         
         private void DisplayResult(Result result)

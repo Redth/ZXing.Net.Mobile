@@ -210,6 +210,7 @@ namespace ZXing.Mobile
 
 			if (_photoCamera != null)
 			{
+                _photoCamera.Initialized -= OnPhotoCameraInitialized;
 				_photoCamera.Dispose();
 				_photoCamera = null;
 			}
@@ -222,6 +223,9 @@ namespace ZXing.Mobile
 
 		private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
 		{
+            if (_photoCamera == null)
+                return;
+
 			var width = Convert.ToInt32(_photoCamera.PreviewResolution.Width);
 			var height = Convert.ToInt32(_photoCamera.PreviewResolution.Height);
 
