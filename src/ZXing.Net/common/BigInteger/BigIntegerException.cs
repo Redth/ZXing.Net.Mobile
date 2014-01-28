@@ -6,7 +6,7 @@ namespace BigIntegerLibrary
    /// <summary>
    /// BigInteger-related exception class.
    /// </summary>
-   [System.Serializable]
+   //[System.Serializable]
    public sealed class BigIntegerException : Exception
    {
       /// <summary>
