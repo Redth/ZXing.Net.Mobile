@@ -99,9 +99,17 @@ namespace ZxingSharp.Mobile.Test
 		}
 
 		[Test]
-		public void Small()
+		public void L2Of5Small()
 		{
 			var result = Decode("l2of5small.png");
+
+			Assert.IsNotNull (result, "NULL Result");
+		}
+
+		[Test]
+		public void L2Of5VerySmall()
+		{
+			var result = Decode("l2of5verysmall.png");
 
 			Assert.IsNotNull (result, "NULL Result");
 		}

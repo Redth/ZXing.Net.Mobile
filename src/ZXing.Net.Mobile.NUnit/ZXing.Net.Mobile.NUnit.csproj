@@ -65,4 +65,7 @@
     <Content Include="Images\upce.png" />
     <Content Include="Images\l2of5small.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\l2of5verysmall.png" />
+  </ItemGroup>
 </Project>
