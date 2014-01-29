@@ -3,6 +3,11 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 GitHub Project: https://github.com/Redth/ZXing.Net.Mobile
 
 ### Changes
+ - v1.4.2
+ 	- WP8: Fixed crash when pressing back while camera initializes
+ 	- Android: Added merged workaround from @chrisntr support for Google Glass	
+ 	- Android: Now using the ***Android Support Library v4*** from the component store
+
  - v1.4.1
  	- iOS: Fixed multiple scanner launches causing Scanning to no longer work
  	- Android: Fixed rotation on some tablets showing incorrectly
@@ -17,38 +22,6 @@ GitHub Project: https://github.com/Redth/ZXing.Net.Mobile
    - Windows Phone: Dropped explicit support for WP7x (code is still there, but no binaries shipped)
    - Updated ZXing.NET version used
    - General performance enhancements and bug fixes
-   
- - v1.3.7
-   - Android: Fixed scanner camera freezing after phone is locked
-   - iOS: Fixed possible NullReferenceException in ZXingViewController
-   
- - v1.3.6
-   - Built for Xamarin 3.0 with async/await support
-   - iOS: Added PauseScanning and ResumeScanning options
-   - iOS: Added empty ctor to ZXingScannerView
-
- - v1.3.5
-   - Views for each Platform - Encapsulates scanner functionality in a reusable view
-    - iOS: ZXingScannerView as a UIView
-    - Android: ZXingScannerFragment as a Fragment
-    - Windows Phone: ZXingScannerControl as a UserControl
-   - Scanning logic improvements from ZXing.Net project
-   - Compiled against Xamarin Stable channel
-   - Performance improvements
-   - Bug fixes
-
- - v1.3.4
-   - iOS: Scanning Engine rebuilt to use AVCaptureSession
-   - iOS: ZXingScannerView inherits from UIView can now be used independently for advanced use cases
-   - Android: Fixed Torch bug on Android
-   - Android: Front Cameras now work in Sample by default
-   - Performance improvements
-
-   
- - v1.3.3
-   - Fixed Android not scanning some barcodes in Portrait
-   - Fixed Android scanning very slowly
-   - Added to MobileBarcodeScanningOptions: IntervalBetweenAnalyzingFrames to configure how 'fast' frames from the live scanner view are analyzed in an attempt to decode barcodes 
 
 
 ### Usage
@@ -64,8 +37,6 @@ buttonScan.Click += (sender, e) => {
 };
 ```
 
-### Alpha / Beta Channels
-Please note that this component was built against the **Stable Channel**.  In the past the component was compiled for the Alpha / Beta channels.  If you are working in the Alpha or Beta channel, you may need to go to the GitHub Repository and download the source and compile it manually for the Alpha or Beta.
 
 ###Features
 - Xamarin.iOS

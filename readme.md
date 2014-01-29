@@ -23,12 +23,17 @@ buttonScan.Click += (sender, e) => {
 
 ###Features
 - Xamarin.iOS
-- Xamarin.Android
-- Windows Phone
+- Xamarin.Android (Including Google Glass)
+- Windows Phone 8
 - Simple API - Scan in as little as 2 lines of code!
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
 ###Changes
+ - v1.4.2
+ 	- WP8: Fixed crash when pressing back while camera initializes
+ 	- Android: Added merged workaround from @chrisntr support for Google Glass	
+ 	- Android: Now using the ***Android Support Library v4*** from the component store
+ 	
  - v1.4.1
  	- iOS: Fixed multiple scanner launches causing Scanning to no longer work
  	- Android: Fixed rotation on some tablets showing incorrectly
