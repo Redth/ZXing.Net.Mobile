@@ -196,7 +196,6 @@ namespace ZXing
             var rpCallback = hints != null && hints.ContainsKey(DecodeHintType.NEED_RESULT_POINT_CALLBACK)
                                 ? (ResultPointCallback) hints[DecodeHintType.NEED_RESULT_POINT_CALLBACK]
                                 : null;
-
             for (var index = 0; index < readers.Count; index++)
             {
                var reader = readers[index];

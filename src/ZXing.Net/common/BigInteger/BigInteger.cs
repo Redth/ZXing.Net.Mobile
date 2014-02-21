@@ -13,11 +13,11 @@ using System.Text;
 
 namespace BigIntegerLibrary
 {
-    
+
     /// <summary>
     /// .NET 2.0 class for handling of very large integers, up to 10240 binary digits or
     /// approximately (safe to use) 3000 decimal digits.
-   /// </summary>
+    /// </summary>
 #if WindowsCE
     [Serializable]
     internal sealed class BigInteger :
@@ -25,18 +25,18 @@ namespace BigIntegerLibrary
     [Serializable]
     internal sealed class BigInteger : ISerializable, 
 #else
-    internal sealed class BigInteger :  
+    internal sealed class BigInteger :
 #endif
-       IEquatable<BigInteger>, IComparable, IComparable<BigInteger>
+ IEquatable<BigInteger>, IComparable, IComparable<BigInteger>
     {
 
         #region Fields
-        
+
         /// <summary>
         /// 2^16 numeration base for internal computations, in order to benefit the most from the
         /// 32 bit (or 64 bit) integer processor registers.
         /// </summary>
-        private const long NumberBase = 65536;
+        private const int NumberBase = 0x10000;
 
         /// <summary>
         /// Maximum size for numbers is up to 10240 binary digits or approximately (safe to use) 3000 decimal digits.
@@ -61,7 +61,7 @@ namespace BigIntegerLibrary
         /// <summary>
         /// The array of digits of the number.
         /// </summary>
-        private long[] digits;
+        private DynamicList<long> digits; // This should probably become dynamiclist<ushort>, but even this is better.
 
         /// <summary>
         /// The actual number of digits of the number.
@@ -84,9 +84,9 @@ namespace BigIntegerLibrary
         /// </summary>
         public BigInteger()
         {
-            digits = new long[MaxSize];
+            digits = new DynamicList<long>();
             size = 1;
-            digits[size] = 0;
+            //digits[size] = 0; No need for this.
             sign = Sign.Positive;
         }
 
@@ -96,7 +96,7 @@ namespace BigIntegerLibrary
         /// <param name="n">The base-10 long to be converted</param>
         public BigInteger(long n)
         {
-            digits = new long[MaxSize];
+            digits = new DynamicList<long>();
             sign = Sign.Positive;
 
             if (n == 0)
@@ -129,7 +129,7 @@ namespace BigIntegerLibrary
         /// <param name="n">The BigInteger to be copied</param>
         public BigInteger(BigInteger n)
         {
-            digits = new long[MaxSize];
+            digits = digits = new DynamicList<long>();
             size = n.size;
             sign = n.sign;
 
@@ -164,7 +164,7 @@ namespace BigIntegerLibrary
 
             sign = numberSign;
 
-            digits = new long[MaxSize];
+            digits = new DynamicList<long>();
             size = number.size;
             for (i = 0; i < number.size; i++)
                 digits[i] = number.digits[i];
@@ -181,7 +181,7 @@ namespace BigIntegerLibrary
             if (byteArray.Length / 4 > MaxSize)
                 throw new BigIntegerException("The byte array's content exceeds the maximum size of a BigInteger.", null);
 
-            digits = new long[MaxSize];
+            digits = new DynamicList<long>();
             sign = Sign.Positive;
 
             for (int i = 0; i < byteArray.Length; i += 2)
@@ -218,7 +218,7 @@ namespace BigIntegerLibrary
                 sign = Sign.Negative;
 
             size = (int)info.GetValue("size", typeof(short));
-            digits = new long[MaxSize];
+            digits = new DynamicList<long>();
 
             int i;
             for (i = 0; i < size; i++)
@@ -319,7 +319,7 @@ namespace BigIntegerLibrary
             }
 
             res.NumberSign = sign;
-            
+
             return res.ToString();
         }
 
@@ -330,7 +330,7 @@ namespace BigIntegerLibrary
         /// <returns></returns>
         public static BigInteger Parse(string str)
         {
-           return new BigInteger(str);
+            return new BigInteger(str);
         }
 
         /// <summary>
@@ -757,7 +757,7 @@ namespace BigIntegerLibrary
         {
             if ((a.sign == Sign.Negative) || (b.sign == Sign.Negative))
                 throw new BigIntegerException("Cannot compute the Gcd of negative BigIntegers.", null);
-            
+
             BigInteger r;
 
             while (b > Zero)
@@ -785,7 +785,7 @@ namespace BigIntegerLibrary
         {
             if ((a.sign == Sign.Negative) || (b.sign == Sign.Negative))
                 throw new BigIntegerException("Cannot compute the Gcd of negative BigIntegers.", null);
-            
+
             BigInteger u1 = new BigInteger();
             BigInteger u2 = new BigInteger(1);
             BigInteger v1 = new BigInteger(1);
@@ -884,23 +884,23 @@ namespace BigIntegerLibrary
 
             return res;
         }
-/*
-        /// <summary>
-        /// Tests whether the number provided is a prime.
-        /// </summary>
-        /// <param name="number">The number to be tested for primality</param>
-        /// <returns>True, if the number given is a prime, false, otherwise</returns>
-        /// <exception cref="BigIntegerException">Primality is not defined for negative numbers exception</exception>
-        public static bool IsPrime(BigInteger number)
-        {
-            if (number.sign == Sign.Negative)
-                throw new BigIntegerException("Primality is not defined for negative numbers.", null);
+        /*
+                /// <summary>
+                /// Tests whether the number provided is a prime.
+                /// </summary>
+                /// <param name="number">The number to be tested for primality</param>
+                /// <returns>True, if the number given is a prime, false, otherwise</returns>
+                /// <exception cref="BigIntegerException">Primality is not defined for negative numbers exception</exception>
+                public static bool IsPrime(BigInteger number)
+                {
+                    if (number.sign == Sign.Negative)
+                        throw new BigIntegerException("Primality is not defined for negative numbers.", null);
 
-            return PrimalityTester.IsPrime(number);
-        }
-*/
+                    return PrimalityTester.IsPrime(number);
+                }
+        */
 
-#endregion
+        #endregion
 
 
         #region Overloaded Operators
@@ -922,7 +922,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>True if a == b, false otherwise</returns>
-        public static bool operator==(BigInteger a, BigInteger b)
+        public static bool operator ==(BigInteger a, BigInteger b)
         {
             return Equals(a, b);
         }
@@ -933,7 +933,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>True if a != b, false otherwise</returns>
-        public static bool operator!=(BigInteger a, BigInteger b)
+        public static bool operator !=(BigInteger a, BigInteger b)
         {
             return !Equals(a, b);
         }
@@ -944,7 +944,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>True if a &gt; b, false otherwise</returns>
-        public static bool operator>(BigInteger a, BigInteger b)
+        public static bool operator >(BigInteger a, BigInteger b)
         {
             return Greater(a, b);
         }
@@ -955,7 +955,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>True if a &lt; b, false otherwise</returns>
-        public static bool operator<(BigInteger a, BigInteger b)
+        public static bool operator <(BigInteger a, BigInteger b)
         {
             return Smaller(a, b);
         }
@@ -966,7 +966,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>True if a &gt;= b, false otherwise</returns>
-        public static bool operator>=(BigInteger a, BigInteger b)
+        public static bool operator >=(BigInteger a, BigInteger b)
         {
             return GreaterOrEqual(a, b);
         }
@@ -977,7 +977,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>True if a &lt;= b, false otherwise</returns>
-        public static bool operator<=(BigInteger a, BigInteger b)
+        public static bool operator <=(BigInteger a, BigInteger b)
         {
             return SmallerOrEqual(a, b);
         }
@@ -987,7 +987,7 @@ namespace BigIntegerLibrary
         /// </summary>
         /// <param name="n">The BigInteger whose opposite is to be computed</param>
         /// <returns>The BigInteger inverse with respect to addition</returns>
-        public static BigInteger operator-(BigInteger n)
+        public static BigInteger operator -(BigInteger n)
         {
             return Opposite(n);
         }
@@ -998,7 +998,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>The BigInteger result of the addition</returns>
-        public static BigInteger operator+(BigInteger a, BigInteger b)
+        public static BigInteger operator +(BigInteger a, BigInteger b)
         {
             return Addition(a, b);
         }
@@ -1009,7 +1009,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>The BigInteger result of the subtraction</returns>
-        public static BigInteger operator-(BigInteger a, BigInteger b)
+        public static BigInteger operator -(BigInteger a, BigInteger b)
         {
             return Subtraction(a, b);
         }
@@ -1020,7 +1020,7 @@ namespace BigIntegerLibrary
         /// <param name="a">The 1st BigInteger</param>
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>The BigInteger result of the multiplication</returns>
-        public static BigInteger operator*(BigInteger a, BigInteger b)
+        public static BigInteger operator *(BigInteger a, BigInteger b)
         {
             return Multiplication(a, b);
         }
@@ -1032,7 +1032,7 @@ namespace BigIntegerLibrary
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>The BigInteger result of the division</returns>
         /// <exception cref="BigIntegerException">Cannot divide by zero exception</exception>
-        public static BigInteger operator/(BigInteger a, BigInteger b)
+        public static BigInteger operator /(BigInteger a, BigInteger b)
         {
             return Division(a, b);
         }
@@ -1044,7 +1044,7 @@ namespace BigIntegerLibrary
         /// <param name="b">The 2nd BigInteger</param>
         /// <returns>The BigInteger result of the modulo</returns>
         /// <exception cref="BigIntegerException">Cannot divide by zero exception</exception>
-        public static BigInteger operator%(BigInteger a, BigInteger b)
+        public static BigInteger operator %(BigInteger a, BigInteger b)
         {
             return Modulo(a, b);
         }
@@ -1054,7 +1054,7 @@ namespace BigIntegerLibrary
         /// </summary>
         /// <param name="n">The BigInteger to be incremented by one</param>
         /// <returns>The BigInteger result of incrementing by one</returns>
-        public static BigInteger operator++(BigInteger n)
+        public static BigInteger operator ++(BigInteger n)
         {
             BigInteger res = n + One;
             return res;
@@ -1065,7 +1065,7 @@ namespace BigIntegerLibrary
         /// </summary>
         /// <param name="n">The BigInteger to be decremented by one</param>
         /// <returns>The BigInteger result of decrementing by one</returns>
-        public static BigInteger operator--(BigInteger n)
+        public static BigInteger operator --(BigInteger n)
         {
             BigInteger res = n - One;
             return res;
@@ -1282,7 +1282,7 @@ namespace BigIntegerLibrary
         {
             int i;
             long borrow = 0, diff;
-            
+
             for (i = 0; i <= m; i++)
             {
                 diff = r.digits[i + k] - dq.digits[i] - borrow + NumberBase;
@@ -1296,9 +1296,10 @@ namespace BigIntegerLibrary
         /// </summary>
         private static long Trial(BigInteger r, BigInteger d, int k, int m)
         {
-            long d2, km = k + m, r3, res;
+            long d2, r3, res;
+            int km = k + m;
 
-            r3 = ((long)r.digits[km] * NumberBase + (long)r.digits[km - 1]) * NumberBase + (long)r.digits[km - 2];
+            r3 = ((long)r.digits[(int)km] * NumberBase + (long)r.digits[(int)km - 1]) * NumberBase + (long)r.digits[(int)km - 2];
             d2 = (long)d.digits[m - 1] * NumberBase + (long)d.digits[m - 2];
             res = r3 / d2;
             if (res < NumberBase - 1)
