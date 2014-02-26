@@ -143,6 +143,9 @@ namespace ZXing.Mobile
 				parameters.SetPreviewFpsRange (30000, 30000);
 				parameters.SetPreviewSize (640, 360);
 			}
+
+			SetPreviewSizePerOptions(parameters);
+
 			camera.SetParameters (parameters);
 
 			SetCameraDisplayOrientation (this.activity);
@@ -159,7 +162,6 @@ namespace ZXing.Mobile
 			ShutdownCamera ();
 		}
 
-
 		public byte[] rotateCounterClockwise(byte[] data, int width, int height)
 		{
 			var rotatedData = new byte[data.Length];
@@ -168,6 +170,23 @@ namespace ZXing.Mobile
 					rotatedData[x * height + height - y - 1] = data[x + y * width];
 			}
 			return rotatedData;
+		}
+
+		private void SetPreviewSizePerOptions (Android.Hardware.Camera.Parameters parameters)
+		{
+			if (options.PreviewSizeSelector == null)
+			{
+				return;
+			}
+			var choices = parameters.SupportedPreviewSizes
+				.Select(sz => new Dimension(sz.Width, sz.Height))
+				.ToList();
+			var selectedChoice = options.PreviewSizeSelector(choices);
+			if (selectedChoice == null)
+			{
+				return;
+			}
+			parameters.SetPreviewSize(selectedChoice.Width, selectedChoice.Height);
 		}
 		
 		DateTime lastPreviewAnalysis = DateTime.Now;
