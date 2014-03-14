@@ -26,8 +26,8 @@ namespace ZXing.Mobile
 		FrameLayout frame;
 
 	    public override View OnCreateView (LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
-		{
-			frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, null);
+	    {
+	        frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, viewGroup, false);
 
 			return frame;
 		}
@@ -72,9 +72,13 @@ namespace ZXing.Mobile
 			scanner.ShutdownCamera();
 
 			frame.RemoveView (scanner);
+            if (!UseCustomView)
+                frame.RemoveView(zxingOverlay);
+            else if (CustomOverlayView != null)
+                frame.RemoveView(CustomOverlayView);
 		}
 
-		public View CustomOverlayView { get;set; }
+	    public View CustomOverlayView { get;set; }
 		public bool UseCustomView { get; set; }
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public string TopText { get;set; }
