@@ -42,7 +42,7 @@ namespace ZXing.Mobile
 			if (!msg.Contains ("{0}"))
 				msg += " {0}";
 
-			if (System.Diagnostics.Debugger.IsAttached)
+			if (Debugger.IsAttached)
 				Console.WriteLine (msg, elapsed.TotalMilliseconds);
 		}
 	}
