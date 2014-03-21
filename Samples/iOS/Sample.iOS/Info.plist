@@ -18,5 +18,11 @@
 	<string>ZXing Sample</string>
 	<key>MinimumOSVersion</key>
 	<string>5.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.zxing.net.mobile.sample</string>
 </dict>
 </plist>
