@@ -3,7 +3,8 @@
 	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10" />
 	<application android:label="ZxingSharp.MonoForAndroid.Sample">
 	</application>
-	<uses-permission android:name="android.permission.CAMERA" />
+
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.FLASHLIGHT" />
+	<uses-permission android:name="android.permission.CAMERA" />
 </manifest>
