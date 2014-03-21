@@ -507,6 +507,8 @@ namespace ZXing.Mobile
 			if (!stopped)
 				return;
 
+			stopped = false;
+
 			var perf = PerformanceCounter.Start ();
 
 			Setup (this.Frame);
