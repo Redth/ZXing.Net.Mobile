@@ -544,6 +544,8 @@ namespace ZXing.Mobile
 			var evt = this.OnScannerSetupComplete;
 			if (evt != null)
 				evt ();
+
+                        stopped = false;
 		}
 		public void StartScanning (Action<Result> callback)
 		{
