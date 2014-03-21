@@ -14,6 +14,7 @@ using System.Drawing;
 using Android.Graphics;
 using Android.Content.PM;
 using Android.Hardware;
+using System.Threading.Tasks;
 
 namespace ZXing.Mobile
 {
@@ -36,6 +37,8 @@ namespace ZXing.Mobile
 		public ZXingSurfaceView (Activity activity, MobileBarcodeScanningOptions options, Action<ZXing.Result> callback)
 			: base (activity)
 		{
+			CheckPermissions ();
+
 			this.activity = activity;
 			this.callback = callback;
 			this.options = options;
@@ -52,6 +55,8 @@ namespace ZXing.Mobile
 	    protected ZXingSurfaceView(IntPtr javaReference, JniHandleOwnership transfer) 
             : base(javaReference, transfer) 
         {
+			CheckPermissions ();
+
             lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
 
             this.surface_holder = Holder;
@@ -61,8 +66,23 @@ namespace ZXing.Mobile
             this.tokenSource = new System.Threading.CancellationTokenSource();
 	    }
 
+		void CheckPermissions()
+		{
+			Android.Util.Log.Debug ("ZXing.Net.Mobile", "Checking Camera Permissions...");
+
+			if (!PlatformChecks.HasCameraPermission (this.Context))
+			{
+				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + PlatformChecks.PERMISSION_CAMERA + "), but was not found in your AndroidManifest.xml file.";
+				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
+
+				throw new UnauthorizedAccessException (msg);
+			}
+		}
+
 	    public void SurfaceCreated (ISurfaceHolder holder)
 		{
+			CheckPermissions ();
+
 			try 
 			{
 				var version = Android.OS.Build.VERSION.SdkInt;
@@ -126,7 +146,6 @@ namespace ZXing.Mobile
 			camera.SetParameters (parameters);
 
 			SetCameraDisplayOrientation (this.activity);
-//			camera.SetDisplayOrientation (90);
 
 			camera.StartPreview ();
 			
@@ -139,69 +158,113 @@ namespace ZXing.Mobile
 		{
 			ShutdownCamera ();
 		}
+
+
+		public byte[] rotateCounterClockwise(byte[] data, int width, int height)
+		{
+			var rotatedData = new byte[data.Length];
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++)
+					rotatedData[x * height + height - y - 1] = data[x + y * width];
+			}
+			return rotatedData;
+		}
 		
 		DateTime lastPreviewAnalysis = DateTime.Now;
 		BarcodeReader barcodeReader = null;
-		
+
+		Task processingTask;
+
 		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
 		{
-			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
+			//Check and see if we're still processing a previous frame
+			if (processingTask != null && !processingTask.IsCompleted)
 				return;
-			
-			try 
+
+			if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
+				return;
+
+			var cameraParameters = camera.GetParameters();
+			var width = cameraParameters.PreviewSize.Width;
+			var height = cameraParameters.PreviewSize.Height;
+			//var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
+			lastPreviewAnalysis = DateTime.UtcNow;
+
+			processingTask = Task.Factory.StartNew (() =>
 			{
-				var cameraParameters = camera.GetParameters();
-				var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
-				
-				if (barcodeReader == null)
+				try
 				{
-					barcodeReader = new BarcodeReader(null, null, null, (p, w, h, f) => 
-					                                  new PlanarYUVLuminanceSource(p, w, h, 0, 0, w, h, false));
-					//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
-					
-					if (this.options.TryHarder.HasValue)
-						barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
-					if (this.options.PureBarcode.HasValue)
-						barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
-					if (!string.IsNullOrEmpty (this.options.CharacterSet))
-						barcodeReader.Options.CharacterSet = this.options.CharacterSet;
-					if (this.options.TryInverted.HasValue)
-						barcodeReader.TryInverted = this.options.TryInverted.Value;
-					
-					if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+
+					if (barcodeReader == null)
 					{
-						barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
+						barcodeReader = new BarcodeReader (null, null, null, (p, w, h, f) => 
+					                                  new PlanarYUVLuminanceSource (p, w, h, 0, 0, w, h, false));
+						//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
+					
+						if (this.options.TryHarder.HasValue)
+							barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
+						if (this.options.PureBarcode.HasValue)
+							barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
+						if (!string.IsNullOrEmpty (this.options.CharacterSet))
+							barcodeReader.Options.CharacterSet = this.options.CharacterSet;
+						if (this.options.TryInverted.HasValue)
+							barcodeReader.TryInverted = this.options.TryInverted.Value;
+					
+						if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+						{
+							barcodeReader.Options.PossibleFormats = new List<BarcodeFormat> ();
 						
-						foreach (var pf in this.options.PossibleFormats)
-							barcodeReader.Options.PossibleFormats.Add(pf);
+							foreach (var pf in this.options.PossibleFormats)
+								barcodeReader.Options.PossibleFormats.Add (pf);
+						}
+					}
+
+					bool rotate = false;
+					int newWidth = width;
+					int newHeight = height;
+
+					var cDegrees = getCameraDisplayOrientation(this.activity);
+
+					if (cDegrees == 90 || cDegrees == 270)
+					{
+						rotate = true;
+						newWidth = height;
+						newHeight = width;
 					}
 					
-					//Always autorotate on android
-					barcodeReader.AutoRotate = true;
+					var start = PerformanceCounter.Start();
+					
+					if (rotate)
+						bytes = rotateCounterClockwise(bytes, width, height);
+										
+					var result = barcodeReader.Decode (bytes, newWidth, newHeight, RGBLuminanceSource.BitmapFormat.Unknown);
+
+						PerformanceCounter.Stop(start, "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " + rotate + ")");
+				
+					if (result == null || string.IsNullOrEmpty (result.Text))
+						return;
+				
+					Android.Util.Log.Debug ("ZXing.Mobile", "Barcode Found: " + result.Text);
+				
+					ShutdownCamera ();
+
+					callback (result);
+
+
 				}
+				catch (ReaderException)
+				{
+					Android.Util.Log.Debug ("ZXing.Mobile", "No barcode Found");
+					// ignore this exception; it happens every time there is a failed scan
 				
-				//Try and decode the result
-				var result = barcodeReader.Decode(img.GetYuvData(), img.Width, img.Height, RGBLuminanceSource.BitmapFormat.Unknown);
-				
-				lastPreviewAnalysis = DateTime.Now;
-				
-				if (result == null || string.IsNullOrEmpty (result.Text))
-					return;
-				
-				Android.Util.Log.Debug("ZXing.Mobile", "Barcode Found: " + result.Text);
-				
-				ShutdownCamera();
+				}
+				catch (Exception)
+				{
+					// TODO: this one is unexpected.. log or otherwise handle it
+					throw;
+				}
 
-				callback(result);
-
-			} catch (ReaderException) {
-				Android.Util.Log.Debug("ZXing.Mobile", "No barcode Found");
-				// ignore this exception; it happens every time there is a failed scan
-				
-			} catch (Exception) {
-				// TODO: this one is unexpected.. log or otherwise handle it
-				throw;
-			}
+			});
 		}
 		
 		
@@ -252,6 +315,14 @@ namespace ZXing.Mobile
 				Android.Util.Log.Info("ZXING", "Flash not supported on this device");
 				return;
 			}
+
+			if (!PlatformChecks.HasFlashlightPermission (this.Context))
+			{
+				var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + PlatformChecks.PERMISSION_FLASHLIGHT + "), but was not found in your AndroidManifest.xml file.";
+				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
+
+				throw new UnauthorizedAccessException (msg);
+			}
 			
 			if (camera == null)
 			{
@@ -287,7 +358,9 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public void SetCameraDisplayOrientation(Activity context) 
+		int cameraDegrees = 0;
+
+		int getCameraDisplayOrientation(Activity context)
 		{
 			var degrees = 0;
 
@@ -307,18 +380,18 @@ namespace ZXing.Mobile
 			{
 				switch(rotation)
 				{
-					case SurfaceOrientation.Rotation0:
-						degrees = 90;
-						break;
-					case SurfaceOrientation.Rotation90:
-						degrees = 0;
-						break;
-					case SurfaceOrientation.Rotation180:
-						degrees = 270;
-						break;
-					case SurfaceOrientation.Rotation270:
-						degrees = 180;
-						break;
+				case SurfaceOrientation.Rotation0:
+					degrees = 90;
+					break;
+				case SurfaceOrientation.Rotation90:
+					degrees = 0;
+					break;
+				case SurfaceOrientation.Rotation180:
+					degrees = 270;
+					break;
+				case SurfaceOrientation.Rotation270:
+					degrees = 180;
+					break;
 				}
 			}
 			//Natural orientation is landscape or square
@@ -326,22 +399,30 @@ namespace ZXing.Mobile
 			{
 				switch(rotation)
 				{
-					case SurfaceOrientation.Rotation0:
-						degrees = 0;
-						break;
-					case SurfaceOrientation.Rotation90:
-						degrees = 270;
-						break;
-					case SurfaceOrientation.Rotation180:
-						degrees = 180;
-						break;
-					case SurfaceOrientation.Rotation270:
-						degrees = 90; 
-						break;
+				case SurfaceOrientation.Rotation0:
+					degrees = 0;
+					break;
+				case SurfaceOrientation.Rotation90:
+					degrees = 270;
+					break;
+				case SurfaceOrientation.Rotation180:
+					degrees = 180;
+					break;
+				case SurfaceOrientation.Rotation270:
+					degrees = 90; 
+					break;
 				}
 			}
-		
+
+			return degrees;
+		}
+
+		public void SetCameraDisplayOrientation(Activity context) 
+		{
+			var degrees = getCameraDisplayOrientation (context);
+
 			Android.Util.Log.Debug ("ZXING", "Changing Camera Orientation to: " + degrees);
+			cameraDegrees = degrees;
 
 			try { camera.SetDisplayOrientation (degrees); }
 			catch (Exception ex) {
