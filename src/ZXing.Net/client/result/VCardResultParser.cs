@@ -31,7 +31,7 @@ namespace ZXing.Client.Result
    {
 #if SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE
       private static readonly Regex BEGIN_VCARD = new Regex("BEGIN:VCARD", RegexOptions.IgnoreCase);
-      private static readonly Regex VCARD_LIKE_DATE = new Regex("\\d{4}-?\\d{2}-?\\d{2}");
+      private static readonly Regex VCARD_LIKE_DATE = new Regex(@"\A(?:" + "\\d{4}-?\\d{2}-?\\d{2}" + @")\z");
       private static readonly Regex CR_LF_SPACE_TAB = new Regex("\r\n[ \t]");
       private static readonly Regex NEWLINE_ESCAPE = new Regex("\\\\[nN]");
       private static readonly Regex VCARD_ESCAPES = new Regex("\\\\([,;\\\\])");
@@ -42,7 +42,7 @@ namespace ZXing.Client.Result
       private static readonly Regex SEMICOLON_OR_COMMA = new Regex("[;,]");
 #else
       private static readonly Regex BEGIN_VCARD = new Regex("BEGIN:VCARD", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-      private static readonly Regex VCARD_LIKE_DATE = new Regex("\\d{4}-?\\d{2}-?\\d{2}", RegexOptions.Compiled);
+      private static readonly Regex VCARD_LIKE_DATE = new Regex(@"\A(?:" + "\\d{4}-?\\d{2}-?\\d{2}" + @")\z", RegexOptions.Compiled);
       private static readonly Regex CR_LF_SPACE_TAB = new Regex("\r\n[ \t]", RegexOptions.Compiled);
       private static readonly Regex NEWLINE_ESCAPE = new Regex("\\\\[nN]", RegexOptions.Compiled);
       private static readonly Regex VCARD_ESCAPES = new Regex("\\\\([,;\\\\])", RegexOptions.Compiled);
@@ -307,10 +307,8 @@ namespace ZXing.Client.Result
             {
 #if WindowsCE
                fragment = Encoding.Default.GetString(fragmentBytes, 0, fragmentBytes.Length);
-#elif (WINDOWS_PHONE70 || WINDOWS_PHONE71 || WINDOWS_PHONE80 || SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE)
-               fragment = Encoding.UTF8.GetString(fragmentBytes, 0, fragmentBytes.Length);
 #else
-               fragment = Encoding.Default.GetString(fragmentBytes);
+               fragment = Encoding.UTF8.GetString(fragmentBytes, 0, fragmentBytes.Length);
 #endif
             }
             else
@@ -321,7 +319,6 @@ namespace ZXing.Client.Result
                }
                catch (Exception )
                {
-                  // Yikes, well try anyway:
 #if WindowsCE
                   // WindowsCE doesn't support all encodings. But it is device depended.
                   // So we try here the some different ones
@@ -334,10 +331,8 @@ namespace ZXing.Client.Result
                      fragment = Encoding.Default.GetString(fragmentBytes, 0, fragmentBytes.Length);
                   }
                   fragment = Encoding.Default.GetString(fragmentBytes, 0, fragmentBytes.Length);
-#elif (WINDOWS_PHONE70 || WINDOWS_PHONE71 || WINDOWS_PHONE80 || SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE)
-                  fragment = Encoding.UTF8.GetString(fragmentBytes, 0, fragmentBytes.Length);
 #else
-                  fragment = Encoding.Default.GetString(fragmentBytes);
+                  fragment = Encoding.UTF8.GetString(fragmentBytes, 0, fragmentBytes.Length);
 #endif
                }
             }
@@ -432,7 +427,7 @@ namespace ZXing.Client.Result
                int start = 0;
                int end;
                int componentIndex = 0;
-               while (componentIndex < components.Length - 1 && (end = name.IndexOf(';', start)) > 0)
+               while (componentIndex < components.Length - 1 && (end = name.IndexOf(';', start)) >= 0)
                {
                   components[componentIndex] = name.Substring(start, end - start);
 
@@ -454,9 +449,12 @@ namespace ZXing.Client.Result
 
       private static void maybeAppendComponent(String[] components, int i, StringBuilder newName)
       {
-         if (components[i] != null)
+         if (!String.IsNullOrEmpty(components[i]))
          {
-            newName.Append(' ');
+            if (newName.Length > 0)
+            {
+               newName.Append(' ');
+            }
             newName.Append(components[i]);
          }
       }

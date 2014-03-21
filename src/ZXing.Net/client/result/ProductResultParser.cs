@@ -22,14 +22,11 @@ namespace ZXing.Client.Result
    /// <summary>
    /// Parses strings of digits that represent a UPC code.
    /// </summary>
-   /// <author>  dswitkin@google.com (Daniel Switkin)
-   /// </author>
-   /// <author>www.Redivivus.in (suraj.supekar@redivivus.in) - Ported from ZXING Java Source 
-   /// </author>
-   sealed class ProductResultParser : ResultParser
+   /// <author>dswitkin@google.com (Daniel Switkin)</author>
+   internal sealed class ProductResultParser : ResultParser
    {
       // Treat all UPC and EAN variants as UPCs, in the sense that they are all product barcodes.
-      override public ParsedResult parse(ZXing.Result result)
+      public override ParsedResult parse(ZXing.Result result)
       {
          BarcodeFormat format = result.BarcodeFormat;
          if (!(format == BarcodeFormat.UPC_A || format == BarcodeFormat.UPC_E ||
@@ -44,20 +41,15 @@ namespace ZXing.Client.Result
             return null;
          }
 
-         int length = rawText.Length;
-         for (int x = 0; x < length; x++)
+         if (!isStringOfDigits(rawText, rawText.Length))
          {
-            char c = rawText[x];
-            if (c < '0' || c > '9')
-            {
-               return null;
-            }
+            return null;
          }
          // Not actually checking the checksum again here    
 
          String normalizedProductID;
          // Expand UPC-E for purposes of searching
-         if (format == BarcodeFormat.UPC_E)
+         if (format == BarcodeFormat.UPC_E && rawText.Length == 8)
          {
             normalizedProductID = UPCEReader.convertUPCEtoUPCA(rawText);
          }

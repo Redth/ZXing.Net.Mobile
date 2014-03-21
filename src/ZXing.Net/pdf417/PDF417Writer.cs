@@ -56,6 +56,7 @@ namespace ZXing.PDF417
 
          var encoder = new Internal.PDF417();
          var margin = WHITE_SPACE;
+         var errorCorrectionLevel = 2;
 
          if (hints != null)
          {
@@ -69,7 +70,7 @@ namespace ZXing.PDF417
             }
             if (hints.ContainsKey(EncodeHintType.PDF417_DIMENSIONS))
             {
-               Dimensions dimensions = (Dimensions) hints[EncodeHintType.PDF417_DIMENSIONS];
+               var dimensions = (Dimensions) hints[EncodeHintType.PDF417_DIMENSIONS];
                encoder.setDimensions(dimensions.MaxCols,
                                      dimensions.MinCols,
                                      dimensions.MaxRows,
@@ -79,9 +80,35 @@ namespace ZXing.PDF417
             {
                margin = (int)(hints[EncodeHintType.MARGIN]);
             }
+            if (hints.ContainsKey(EncodeHintType.ERROR_CORRECTION))
+            {
+               var value = hints[EncodeHintType.ERROR_CORRECTION];
+               if (value is PDF417ErrorCorrectionLevel ||
+                   value is int)
+               {
+                  errorCorrectionLevel = (int)value;
+               }
+            }
+            if (hints.ContainsKey(EncodeHintType.CHARACTER_SET))
+            {
+#if !SILVERLIGHT || WINDOWS_PHONE
+               var encoding = (String)hints[EncodeHintType.CHARACTER_SET];
+               if (encoding != null)
+               {
+                  encoder.setEncoding(encoding);
+               }
+#else
+               // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
+               encoder.setEncoding("UTF-8");
+#endif
+            }
+            if (hints.ContainsKey(EncodeHintType.DISABLE_ECI))
+            {
+               encoder.setDisableEci((bool)hints[EncodeHintType.DISABLE_ECI]);
+            }
          }
 
-         return bitMatrixFromEncoder(encoder, contents, width, height, margin);
+         return bitMatrixFromEncoder(encoder, contents, width, height, margin, errorCorrectionLevel);
       }
 
       /// <summary>
@@ -109,9 +136,9 @@ namespace ZXing.PDF417
                                                     String contents,
                                                     int width,
                                                     int height,
-                                                    int margin)
+                                                    int margin,
+                                                    int errorCorrectionLevel)
       {
-         const int errorCorrectionLevel = 2;
          encoder.generateBarcodeLogic(contents, errorCorrectionLevel);
 
          const int lineThickness = 2;

@@ -60,6 +60,9 @@ namespace ZXing.PDF417.Internal
                                          int maxCodewordWidth)
       {
          BoundingBox boundingBox = BoundingBox.Create(image, imageTopLeft, imageBottomLeft, imageTopRight, imageBottomRight);
+         if (boundingBox == null)
+            return null;
+
          DetectionResultRowIndicatorColumn leftRowIndicatorColumn = null;
          DetectionResultRowIndicatorColumn rightRowIndicatorColumn = null;
          DetectionResult detectionResult = null;
@@ -232,16 +235,19 @@ namespace ZXing.PDF417.Internal
       private static BarcodeMetadata getBarcodeMetadata(DetectionResultRowIndicatorColumn leftRowIndicatorColumn,
                                                         DetectionResultRowIndicatorColumn rightRowIndicatorColumn)
       {
-         if (leftRowIndicatorColumn == null || leftRowIndicatorColumn.getBarcodeMetadata() == null)
+
+         BarcodeMetadata leftBarcodeMetadata;
+         if (leftRowIndicatorColumn == null ||
+             (leftBarcodeMetadata = leftRowIndicatorColumn.getBarcodeMetadata()) == null)
          {
             return rightRowIndicatorColumn == null ? null : rightRowIndicatorColumn.getBarcodeMetadata();
          }
-         if (rightRowIndicatorColumn == null || rightRowIndicatorColumn.getBarcodeMetadata() == null)
+         BarcodeMetadata rightBarcodeMetadata;
+         if (rightRowIndicatorColumn == null ||
+             (rightBarcodeMetadata = rightRowIndicatorColumn.getBarcodeMetadata()) == null)
          {
-            return leftRowIndicatorColumn == null ? null : leftRowIndicatorColumn.getBarcodeMetadata();
+            return leftBarcodeMetadata;
          }
-         BarcodeMetadata leftBarcodeMetadata = leftRowIndicatorColumn.getBarcodeMetadata();
-         BarcodeMetadata rightBarcodeMetadata = rightRowIndicatorColumn.getBarcodeMetadata();
 
          if (leftBarcodeMetadata.ColumnCount != rightBarcodeMetadata.ColumnCount &&
              leftBarcodeMetadata.ErrorCorrectionLevel != rightBarcodeMetadata.ErrorCorrectionLevel &&
@@ -509,7 +515,7 @@ namespace ZXing.PDF417.Internal
          codeword = detectionResult.DetectionResultColumns[barcodeColumn].getCodewordNearby(imageRow);
          if (codeword != null)
          {
-            return leftToRight ? codeword.EndX : codeword.StartX;
+            return leftToRight ? codeword.StartX : codeword.EndX;
          }
          if (isValidBarcodeColumn(detectionResult, barcodeColumn - offset))
          {

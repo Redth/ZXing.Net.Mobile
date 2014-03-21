@@ -246,6 +246,10 @@ namespace ZXing.OneD
          if (startPatternInfo == null)
             return null;
          int startCode = startPatternInfo[2];
+         
+         var rawCodes = new List<byte>(20);
+         rawCodes.Add((byte)startCode);
+
          int codeSet;
          switch (startCode)
          {
@@ -266,7 +270,6 @@ namespace ZXing.OneD
          bool isNextShifted = false;
 
          var result = new StringBuilder(20);
-         var rawCodes = new List<byte>(20);
 
          int lastStart = startPatternInfo[0];
          int nextStart = startPatternInfo[1];
@@ -277,6 +280,8 @@ namespace ZXing.OneD
          int checksumTotal = startCode;
          int multiplier = 0;
          bool lastCharacterWasPrintable = true;
+         bool upperMode = false;
+         bool shiftUpperMode = false;
 
          while (!done)
          {
@@ -327,11 +332,27 @@ namespace ZXing.OneD
                case CODE_CODE_A:
                   if (code < 64)
                   {
-                     result.Append((char)(' ' + code));
+                     if (shiftUpperMode == upperMode)
+                     {
+                        result.Append((char) (' ' + code));
+                     }
+                     else
+                     {
+                        result.Append((char) (' ' + code + 128));
+                     }
+                     shiftUpperMode = false;
                   }
                   else if (code < 96)
                   {
-                     result.Append((char)(code - 64));
+                     if (shiftUpperMode == upperMode)
+                     {
+                        result.Append((char) (code - 64));
+                     }
+                     else
+                     {
+                        result.Append((char) (code + 64));
+                     }
+                     shiftUpperMode = false;
                   }
                   else
                   {
@@ -361,8 +382,23 @@ namespace ZXing.OneD
                            break;
                         case CODE_FNC_2:
                         case CODE_FNC_3:
-                        case CODE_FNC_4_A:
                            // do nothing?
+                           break;
+                        case CODE_FNC_4_A:
+                           if (!upperMode && shiftUpperMode)
+                           {
+                              upperMode = true;
+                              shiftUpperMode = false;
+                           }
+                           else if (upperMode && shiftUpperMode)
+                           {
+                              upperMode = false;
+                              shiftUpperMode = false;
+                           }
+                           else
+                           {
+                              shiftUpperMode = true;
+                           }
                            break;
                         case CODE_SHIFT:
                            isNextShifted = true;
@@ -383,7 +419,15 @@ namespace ZXing.OneD
                case CODE_CODE_B:
                   if (code < 96)
                   {
-                     result.Append((char)(' ' + code));
+                     if (shiftUpperMode == upperMode)
+                     {
+                        result.Append((char)(' ' + code));
+                     }
+                     else
+                     {
+                        result.Append((char)(' ' + code + 128));
+                     }
+                     shiftUpperMode = false;
                   }
                   else
                   {
@@ -411,8 +455,23 @@ namespace ZXing.OneD
                            break;
                         case CODE_FNC_2:
                         case CODE_FNC_3:
-                        case CODE_FNC_4_B:
                            // do nothing?
+                           break;
+                        case CODE_FNC_4_B:
+                           if (!upperMode && shiftUpperMode)
+                           {
+                              upperMode = true;
+                              shiftUpperMode = false;
+                           }
+                           else if (upperMode && shiftUpperMode)
+                           {
+                              upperMode = false;
+                              shiftUpperMode = false;
+                           }
+                           else
+                           {
+                              shiftUpperMode = true;
+                           }
                            break;
                         case CODE_SHIFT:
                            isNextShifted = true;

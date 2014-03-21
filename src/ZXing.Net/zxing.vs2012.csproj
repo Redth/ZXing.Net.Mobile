@@ -15,8 +15,6 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <ProductVersion>12.0.0</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,6 +35,9 @@
     <DocumentationFile>..\..\Build\Release\net4.5\zxing.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
@@ -48,6 +49,7 @@
   <ItemGroup>
     <Compile Include="aztec\AztecDetectorResult.cs" />
     <Compile Include="aztec\AztecReader.cs" />
+    <Compile Include="aztec\AztecResultMetadata.cs" />
     <Compile Include="aztec\AztecWriter.cs" />
     <Compile Include="aztec\decoder\Decoder.cs" />
     <Compile Include="aztec\detector\Detector.cs" />
@@ -101,6 +103,8 @@
     <Compile Include="client\result\URLTOResultParser.cs" />
     <Compile Include="client\result\VCardResultParser.cs" />
     <Compile Include="client\result\VEventResultParser.cs" />
+    <Compile Include="client\result\VINParsedResult.cs" />
+    <Compile Include="client\result\VINResultParser.cs" />
     <Compile Include="client\result\WifiParsedResult.cs" />
     <Compile Include="client\result\WifiResultParser.cs" />
     <Compile Include="common\BitArray.cs" />

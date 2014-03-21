@@ -1,5 +1,5 @@
-/*
-* Copyright 2007 ZXing authors
+﻿/*
+* Copyright 2014 ZXing.Net authors
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -14,26 +14,23 @@
 * limitations under the License.
 */
 
-namespace ZXing.Client.Result
+using System;
+using System.Windows.Media.Imaging;
+using ZXing.Rendering;
+
+namespace ZXing.Presentation
 {
    /// <summary>
-   /// Represents the type of data encoded by a barcode -- from plain text, to a
-   /// URI, to an e-mail address, etc.
+   /// A smart class to encode some content to a barcode image
    /// </summary>
-   /// <author>Sean Owen</author>
-   public enum ParsedResultType
+   public class BarcodeWriter : BarcodeWriterGeneric<WriteableBitmap>
    {
-      ADDRESSBOOK,
-      EMAIL_ADDRESS,
-      PRODUCT,
-      URI,
-      TEXT,
-      GEO,
-      TEL,
-      SMS,
-      CALENDAR,
-      WIFI,
-      ISBN,
-      VIN
+      /// <summary>
+      /// Initializes a new instance of the <see cref="BarcodeWriter"/> class.
+      /// </summary>
+      public BarcodeWriter()
+      {
+         Renderer = new WriteableBitmapRenderer();
+      }
    }
 }
