@@ -93,13 +93,14 @@ namespace ZXing.Mobile
         public void StopScanning()
         {
             _reader.Stop();
+			_reader = null;
         }
 
         public void Cancel()
         {
             LastScanResult = null;
 
-            _reader.Stop();
+			StopScanning ();
 
             if (ScanCallback != null)
                 ScanCallback(null);
@@ -126,7 +127,7 @@ namespace ZXing.Mobile
         
         private void DisplayResult(Result result)
         {
-			_reader.Stop();
+			StopScanning ();
 
             if (ScanCallback != null)
                 ScanCallback(result);
@@ -136,7 +137,7 @@ namespace ZXing.Mobile
         {
             this.gridCustomOverlay.Children.Clear();
 
-            _reader.Stop(); 
+			StopScanning (); 
         }
 
         protected override void OnTap(System.Windows.Input.GestureEventArgs e)
