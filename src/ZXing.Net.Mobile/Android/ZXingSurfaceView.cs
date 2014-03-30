@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -181,14 +180,14 @@ namespace ZXing.Mobile
 			if (processingTask != null && !processingTask.IsCompleted)
 				return;
 
-			if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
+			if ((DateTime.Now - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
 				return;
 
 			var cameraParameters = camera.GetParameters();
 			var width = cameraParameters.PreviewSize.Width;
 			var height = cameraParameters.PreviewSize.Height;
 			//var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
-			lastPreviewAnalysis = DateTime.UtcNow;
+			lastPreviewAnalysis = DateTime.Now;
 
 			processingTask = Task.Factory.StartNew (() =>
 			{
