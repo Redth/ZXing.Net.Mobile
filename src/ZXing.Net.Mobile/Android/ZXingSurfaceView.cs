@@ -43,7 +43,7 @@ namespace ZXing.Mobile
 			this.callback = callback;
 			this.options = options;
 
-			lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
+            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
 
 			this.surface_holder = Holder;
 			this.surface_holder.AddCallback (this);
@@ -57,7 +57,7 @@ namespace ZXing.Mobile
         {
 			CheckPermissions ();
 
-            lastPreviewAnalysis = DateTime.Now.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
+            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
 
             this.surface_holder = Holder;
             this.surface_holder.AddCallback(this);
@@ -170,7 +170,7 @@ namespace ZXing.Mobile
 			return rotatedData;
 		}
 		
-		DateTime lastPreviewAnalysis = DateTime.Now;
+        DateTime lastPreviewAnalysis = DateTime.UtcNow;
 		BarcodeReader barcodeReader = null;
 
 		Task processingTask;
