@@ -35,14 +35,14 @@ namespace ZXing.Mobile
         public static event Action OnRequestAutoFocus;
         public static event Action OnRequestCancel;
         public static event Func<bool> OnRequestIsTorchOn;
-        
+
         public static bool RequestIsTorchOn()
         {
             var evt = OnRequestIsTorchOn;
             return evt != null && evt();
         }
 
-	    public static void RequestTorch(bool on)
+        public static void RequestTorch(bool on)
         {
             var evt = OnRequestTorch;
             if (evt != null)
@@ -106,7 +106,16 @@ namespace ZXing.Mobile
 	    
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            try { scannerControl.StopScanning(); }
+            try 
+            {
+                OnRequestAutoFocus = null;
+                OnRequestTorch = null;
+                OnRequestToggleTorch = null;
+                OnRequestCancel = null;
+                OnRequestIsTorchOn = null;
+
+                scannerControl.StopScanning();
+            }
             catch (Exception ex) { }
 
             base.OnNavigatingFrom(e);
