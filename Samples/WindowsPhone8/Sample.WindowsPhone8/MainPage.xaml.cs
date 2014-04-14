@@ -53,17 +53,17 @@ namespace ZxingSharp.WindowsPhone.Sample
             {
                 customOverlayElement = this.customOverlay.Children[0];
                 this.customOverlay.Children.RemoveAt(0);
-            }
 
-            //Wireup our buttons from the custom overlay
-            this.buttonCancel.Click += (s, e2) =>
-            {
-                scanner.Cancel();
-            };
-            this.buttonFlash.Click += (s, e2) =>
-            {
-                scanner.ToggleTorch();
-            };
+                //Wireup our buttons from the custom overlay
+                this.buttonCancel.Click += (s, e2) =>
+                {
+                    scanner.Cancel();
+                };
+                this.buttonFlash.Click += (s, e2) =>
+                {
+                    scanner.ToggleTorch();
+                };
+            }
 
             //Set our custom overlay and enable it
             scanner.CustomOverlay = customOverlayElement;
