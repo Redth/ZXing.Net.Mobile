@@ -76,6 +76,38 @@ namespace ZXing.Mobile
 		    isNewInstance = true;
 		}
 
+        void RequestAutoFocusHandler() 
+        {
+            if (scannerControl != null)
+                scannerControl.AutoFocus(); 
+        }
+
+        void RequestTorchHandler(bool on)
+        {
+            if (scannerControl != null)
+                scannerControl.Torch(on);
+        }
+
+        void RequestToggleTorchHandler()
+        {
+            if (scannerControl != null)
+                scannerControl.ToggleTorch();
+        }
+
+        void RequestCancelHandler()
+        {
+            if (scannerControl != null)
+                scannerControl.Cancel();
+        }
+
+        bool RequestIsTorchOnHandler()
+        {
+            if (scannerControl != null)
+                return scannerControl.IsTorchOn;
+
+            return false;
+        }
+
 		protected override void OnNavigatedTo(NavigationEventArgs e)
 		{
 		    scannerControl.TopText = TopText;
@@ -85,12 +117,12 @@ namespace ZXing.Mobile
             scannerControl.UseCustomOverlay = UseCustomOverlay;
 
 		    scannerControl.ScanningOptions = ScanningOptions;
-            
-            OnRequestAutoFocus += () => scannerControl.AutoFocus();
-            OnRequestTorch += (on) => scannerControl.Torch(@on);
-		    OnRequestToggleTorch += () => scannerControl.ToggleTorch();
-		    OnRequestCancel += () => scannerControl.Cancel(); 
-            OnRequestIsTorchOn += () => scannerControl.IsTorchOn;
+
+            OnRequestAutoFocus += RequestAutoFocusHandler;
+            OnRequestTorch += RequestTorchHandler;
+            OnRequestToggleTorch += RequestToggleTorchHandler;
+            OnRequestCancel += RequestCancelHandler;
+            OnRequestIsTorchOn += RequestIsTorchOnHandler;
             
             scannerControl.StartScanning(HandleResult, ScanningOptions);
 
@@ -106,7 +138,16 @@ namespace ZXing.Mobile
 	    
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
-            try { scannerControl.StopScanning(); }
+            try 
+            {
+                OnRequestAutoFocus -= RequestAutoFocusHandler;
+                OnRequestTorch -= RequestTorchHandler;
+                OnRequestToggleTorch -= RequestToggleTorchHandler;
+                OnRequestCancel -= RequestCancelHandler;
+                OnRequestIsTorchOn -= RequestIsTorchOnHandler;
+
+                scannerControl.StopScanning(); 
+            }
             catch (Exception ex) { }
 
             base.OnNavigatingFrom(e);

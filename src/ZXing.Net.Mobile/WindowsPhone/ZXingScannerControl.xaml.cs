@@ -92,6 +92,9 @@ namespace ZXing.Mobile
 
         public void StopScanning()
         {
+            if (UseCustomOverlay && CustomOverlay != null)
+                gridCustomOverlay.Children.Remove(CustomOverlay);
+
             _reader.Stop();
 			_reader = null;
         }
