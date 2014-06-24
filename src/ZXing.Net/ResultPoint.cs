@@ -25,7 +25,6 @@ namespace ZXing
    /// would be the location of a finder pattern or the corner of the barcode, for example.
    /// </summary>
    /// <author>Sean Owen</author>
-   /// <author>www.Redivivus.in (suraj.supekar@redivivus.in) - Ported from ZXING Java Source</author>
    public class ResultPoint
    {
       private readonly float x;
@@ -122,9 +121,10 @@ namespace ZXing
       }
 
       /// <summary>
-      /// Orders an array of three ResultPoints in an order [A,B,C] such that AB &lt; AC and
-      /// BC &lt; AC and the angle between BC and BA is less than 180 degrees.
+      /// Orders an array of three ResultPoints in an order [A,B,C] such that AB is less than AC and
+      /// BC is less than AC and the angle between BC and BA is less than 180 degrees.
       /// </summary>
+      /// <param name="patterns">array of three <see cref="ResultPoint" /> to order</param>
       public static void orderBestPatterns(ResultPoint[] patterns)
       {
          // Find distances between pattern centers
@@ -170,6 +170,11 @@ namespace ZXing
       }
 
 
+      /// <summary>
+      /// calculates the distance between two points
+      /// </summary>
+      /// <param name="pattern1">first pattern</param>
+      /// <param name="pattern2">second pattern</param>
       /// <returns>
       /// distance between two points
       /// </returns>

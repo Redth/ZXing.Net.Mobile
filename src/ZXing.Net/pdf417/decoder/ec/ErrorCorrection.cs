@@ -38,9 +38,9 @@ namespace ZXing.PDF417.Internal.EC
       /// <summary>
       /// Decodes the specified received.
       /// </summary>
-      /// <param name="received">The received.</param>
-      /// <param name="numECCodewords">The num EC codewords.</param>
-      /// <param name="erasures">The erasures.</param>
+      /// <param name="received">received codewords</param>
+      /// <param name="numECCodewords">number of those codewords used for EC</param>
+      /// <param name="erasures">location of erasures</param>
       /// <param name="errorLocationsCount">The error locations count.</param>
       /// <returns></returns>
       public bool decode(int[] received, int numECCodewords, int[] erasures, out int errorLocationsCount)
@@ -65,12 +65,15 @@ namespace ZXing.PDF417.Internal.EC
          }
 
          ModulusPoly knownErrors = field.One;
-         foreach (int erasure in erasures)
+         if (erasures != null)
          {
-            int b = field.exp(received.Length - 1 - erasure);
-            // Add (1 - bx) term:
-            ModulusPoly term = new ModulusPoly(field, new int[] {field.subtract(0, b), 1});
-            knownErrors = knownErrors.multiply(term);
+            foreach (int erasure in erasures)
+            {
+               int b = field.exp(received.Length - 1 - erasure);
+               // Add (1 - bx) term:
+               ModulusPoly term = new ModulusPoly(field, new int[] {field.subtract(0, b), 1});
+               knownErrors = knownErrors.multiply(term);
+            }
          }
 
          ModulusPoly syndrome = new ModulusPoly(field, S);
