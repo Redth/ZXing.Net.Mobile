@@ -17,3 +17,6 @@ compileAll: compileAndroid compileiOS
 
 clean:
 	-rm -rf Build/Release/
+
+cleanmac:
+	-rm -rf Build/Release/monotouch/ Build/Release/monodroid/
