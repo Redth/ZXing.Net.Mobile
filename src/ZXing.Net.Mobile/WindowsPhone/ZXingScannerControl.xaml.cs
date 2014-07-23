@@ -146,8 +146,12 @@ namespace ZXing.Mobile
         protected override void OnTap(System.Windows.Input.GestureEventArgs e)
         {
             base.OnTap(e);
-            //var pos = e.GetPosition(this);
-            _reader.Focus();
+
+            if (_reader != null) 
+            {
+                //var pos = e.GetPosition(this);
+                _reader.Focus();
+            }
         }
     }
 }
