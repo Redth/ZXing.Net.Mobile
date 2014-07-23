@@ -9,7 +9,7 @@ using ZXing.Mobile;
 
 namespace Sample.Android
 {
-	[Activity (Label = "ZXing.Mobile", MainLauncher = true, Theme="@android:style/Theme.Holo.Light", ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)]
+	[Activity (Label = "ZXing.Net.Mobile", MainLauncher = true, Theme="@android:style/Theme.Holo.Light", ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)]
 	public class Activity1 : Activity
 	{
 		Button buttonScanCustomView;

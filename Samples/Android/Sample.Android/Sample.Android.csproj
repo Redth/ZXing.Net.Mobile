@@ -12,7 +12,7 @@
     <AndroidResgenClass>Resource</AndroidResgenClass>
     <AndroidApplication>True</AndroidApplication>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
-    <AssemblyName>ZxingSharp.MonoForAndroid.Sample</AssemblyName>
+    <AssemblyName>ZXingSampleAndroid</AssemblyName>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
   </PropertyGroup>
@@ -36,7 +36,7 @@
     <WarningLevel>4</WarningLevel>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <ConsolePause>False</ConsolePause>
-    <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
+    <AndroidSupportedAbis>armeabi;armeabi-v7a;x86</AndroidSupportedAbis>
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
   </PropertyGroup>
   <ItemGroup>
@@ -63,6 +63,11 @@
     <AndroidResource Include="Resources\values\Strings.xml" />
     <AndroidResource Include="Resources\drawable\Icon.png" />
     <AndroidResource Include="Resources\layout\ZxingOverlay.axml" />
+    <AndroidResource Include="Resources\drawable-hdpi\launcher.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\launcher.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\launcher.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\launcher.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\launcher.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monoandroid.csproj">
