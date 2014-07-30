@@ -26,6 +26,17 @@ namespace ZXing.Mobile
 		public int DelayBetweenAnalyzingFrames { get;set;}
 		public int InitialDelayBeforeAnalyzingFrames { get;set; }
 
+		/// <summary>
+		/// If a function is provided here, it is used to customize the preview
+		/// size of the camera. The function can return null to use the default.
+		/// </summary>
+		/// <remarks>
+		/// Selecting a lower preview size improves performance on some devices.
+		/// E.g., a 2013 Nexus 7 defaults to 1920 x 1080, the processing of which
+		/// seems to cause significant lag.
+		/// </remarks>
+		public Func<IList<Dimension>, Dimension> PreviewSizeSelector { get;set; }
+
 		public static MobileBarcodeScanningOptions Default
 		{
 			get { return new MobileBarcodeScanningOptions(); }
