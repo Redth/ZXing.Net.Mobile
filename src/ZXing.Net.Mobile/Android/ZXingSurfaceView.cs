@@ -89,15 +89,19 @@ namespace ZXing.Mobile
 
 				if (version >= BuildVersionCodes.Gingerbread)
 				{
+					Android.Util.Log.Debug ("ZXing.Net.Mobile", "Checking Number of cameras...");
+
 					var numCameras = Android.Hardware.Camera.NumberOfCameras;
 					var camInfo = new Android.Hardware.Camera.CameraInfo();
 					var found = false;
-					
+					Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found " + numCameras + " cameras...");
+
 					for (int i = 0; i < numCameras; i++)
 					{
 						Android.Hardware.Camera.GetCameraInfo(i, camInfo);
 						if (camInfo.Facing == CameraFacing.Back)
 						{
+							Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found Back Camera, opening...");
 							camera = Android.Hardware.Camera.Open(i);
 							found = true;
 							break;
@@ -138,11 +142,50 @@ namespace ZXing.Mobile
 			
 			var parameters = camera.GetParameters ();
 			parameters.PreviewFormat = ImageFormatType.Nv21;
+
+
+			var availableResolutions = new List<CameraResolution> ();
+			foreach (var sps in parameters.SupportedPreviewSizes) {
+				availableResolutions.Add (new CameraResolution {
+					Width = sps.Width,
+					Height = sps.Height
+				});
+			}
+
+			// Try and get a desired resolution from the options selector
+			var resolution = options.GetResolution (availableResolutions);
+
+			// If the user did not specify a resolution, let's try and find a suitable one
+			if (resolution == null) {
+				// Loop through all supported sizes
+				foreach (var sps in parameters.SupportedPreviewSizes) {
+
+					// Find one that's >= 640x360 but <= 1000x1000
+					// This will likely pick the *smallest* size in that range, which should be fine
+					if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000) {
+						resolution = new CameraResolution {
+							Width = sps.Width,
+							Height = sps.Height
+						};
+						break;
+					}
+				}
+			}
+
 			// Google Glass requires this fix to display the camera output correctly
 			if (Build.Model.Contains ("Glass")) {
+				resolution = new CameraResolution {
+					Width = 640,
+					Height = 360
+				};
+				// Glass requires 30fps
 				parameters.SetPreviewFpsRange (30000, 30000);
-				parameters.SetPreviewSize (640, 360);
 			}
+
+			// Hopefully a resolution was selected at some point
+			if (resolution != null)
+				parameters.SetPreviewSize (resolution.Width, resolution.Height);
+
 			camera.SetParameters (parameters);
 
 			SetCameraDisplayOrientation (this.activity);

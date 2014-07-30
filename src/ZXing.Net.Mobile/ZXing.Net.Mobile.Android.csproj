@@ -52,6 +52,7 @@
     <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
     <Compile Include="Android\PlatformChecks.cs" />
     <Compile Include="Common\Performance.cs" />
+    <Compile Include="Common\CameraResolution.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
