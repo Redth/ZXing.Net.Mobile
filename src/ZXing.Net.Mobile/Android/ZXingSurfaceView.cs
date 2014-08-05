@@ -102,12 +102,17 @@ namespace ZXing.Mobile
 					var found = false;
 					Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found " + numCameras + " cameras...");
 
+					var whichCamera = CameraFacing.Back;
+
+					if (options.UseFrontCameraIfAvailable.HasValue && options.UseFrontCameraIfAvailable.Value)
+						whichCamera = CameraFacing.Front;
+
 					for (int i = 0; i < numCameras; i++)
 					{
 						Android.Hardware.Camera.GetCameraInfo(i, camInfo);
-						if (camInfo.Facing == CameraFacing.Back)
+						if (camInfo.Facing == whichCamera)
 						{
-							Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found Back Camera, opening...");
+							Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found " + whichCamera + " Camera, opening...");
 							camera = Android.Hardware.Camera.Open(i);
 							found = true;
 							break;
@@ -116,7 +121,7 @@ namespace ZXing.Mobile
 					
 					if (!found)
 					{
-						Android.Util.Log.Debug("ZXing.Net.Mobile", "Finding rear camera failed, opening camera 0...");
+						Android.Util.Log.Debug("ZXing.Net.Mobile", "Finding " + whichCamera + " camera failed, opening camera 0...");
 						camera = Android.Hardware.Camera.Open(0);
 					}
 				}
