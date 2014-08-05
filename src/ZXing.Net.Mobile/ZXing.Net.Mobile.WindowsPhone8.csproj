@@ -97,6 +97,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\CameraResolution.cs" />
     <Compile Include="Common\IMobileBarcodeScanner.cs" />
     <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
