@@ -159,12 +159,14 @@ namespace ZXing.Mobile
 			// See if the user selected a resolution
 			if (resolution != null) {
 				// Now get the preset string from the resolution chosen
-				var preset = consideredResolutions.FirstOrDefault (c => 
-					c.Value.Width == resolution.Width && c.Value.Height == resolution.Height);
+				var preset = (from c in consideredResolutions
+							  where c.Value.Width == resolution.Width
+								&& c.Value.Height == resolution.Height
+							  select c.Key).FirstOrDefault ();
 
 				// If we found a matching preset, let's set it on the session
-				if (preset != null && preset.Key != null)
-					session.SessionPreset = preset.Key;
+				if (!string.IsNullOrEmpty(preset))
+					session.SessionPreset = preset;
 			}
 
 			var input = AVCaptureDeviceInput.FromDevice (captureDevice);
