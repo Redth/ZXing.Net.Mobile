@@ -68,6 +68,8 @@ namespace ZXing.Mobile
 
 		void CheckPermissions()
 		{
+			var perf = PerformanceCounter.Start ();
+
 			Android.Util.Log.Debug ("ZXing.Net.Mobile", "Checking Camera Permissions...");
 
 			if (!PlatformChecks.HasCameraPermission (this.Context))
@@ -77,11 +79,15 @@ namespace ZXing.Mobile
 
 				throw new UnauthorizedAccessException (msg);
 			}
+
+			PerformanceCounter.Stop (perf, "CheckPermissions took {0}ms");
 		}
 
 	    public void SurfaceCreated (ISurfaceHolder holder)
 		{
 			CheckPermissions ();
+
+			var perf = PerformanceCounter.Start ();
 
 			try 
 			{
@@ -133,12 +139,16 @@ namespace ZXing.Mobile
 				Console.WriteLine("Setup Error: " + ex);
 				//throw;
 			}
+
+			PerformanceCounter.Stop (perf, "SurfaceCreated took {0}ms");
 		}
 		
 		public void SurfaceChanged (ISurfaceHolder holder, global::Android.Graphics.Format format, int w, int h)
 		{
 			if (camera == null)
 				return;
+
+			var perf = PerformanceCounter.Start ();
 			
 			var parameters = camera.GetParameters ();
 			parameters.PreviewFormat = ImageFormatType.Nv21;
@@ -183,8 +193,10 @@ namespace ZXing.Mobile
 			}
 
 			// Hopefully a resolution was selected at some point
-			if (resolution != null)
+			if (resolution != null) {
+				Android.Util.Log.Debug("ZXing.Net.Mobile", "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
 				parameters.SetPreviewSize (resolution.Width, resolution.Height);
+			}
 
 			camera.SetParameters (parameters);
 
@@ -193,7 +205,9 @@ namespace ZXing.Mobile
 			camera.StartPreview ();
 			
 			//cameraResolution = new Size(parameters.PreviewSize.Width, parameters.PreviewSize.Height);
-			
+
+			PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
+
 			AutoFocus();
 		}
 		
