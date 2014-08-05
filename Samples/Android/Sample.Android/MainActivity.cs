@@ -14,6 +14,7 @@ namespace Sample.Android
 	{
 		Button buttonScanCustomView;
 		Button buttonScanDefaultView;
+		Button buttonFragmentScanner;
 
 		MobileBarcodeScanner scanner;
 	
@@ -66,6 +67,11 @@ namespace Sample.Android
 				var result = await scanner.Scan();
 
 				HandleScanResult(result);
+			};
+
+			buttonFragmentScanner = FindViewById<Button> (Resource.Id.buttonFragment);
+			buttonFragmentScanner.Click += delegate {
+				StartActivity (typeof (FragmentActivity));	
 			};
 		}
 

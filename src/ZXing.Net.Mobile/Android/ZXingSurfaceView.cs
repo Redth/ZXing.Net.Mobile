@@ -68,6 +68,8 @@ namespace ZXing.Mobile
 
 		void CheckPermissions()
 		{
+			var perf = PerformanceCounter.Start ();
+
 			Android.Util.Log.Debug ("ZXing.Net.Mobile", "Checking Camera Permissions...");
 
 			if (!PlatformChecks.HasCameraPermission (this.Context))
@@ -77,11 +79,15 @@ namespace ZXing.Mobile
 
 				throw new UnauthorizedAccessException (msg);
 			}
+
+			PerformanceCounter.Stop (perf, "CheckPermissions took {0}ms");
 		}
 
 	    public void SurfaceCreated (ISurfaceHolder holder)
 		{
 			CheckPermissions ();
+
+			var perf = PerformanceCounter.Start ();
 
 			try 
 			{
@@ -89,15 +95,24 @@ namespace ZXing.Mobile
 
 				if (version >= BuildVersionCodes.Gingerbread)
 				{
+					Android.Util.Log.Debug ("ZXing.Net.Mobile", "Checking Number of cameras...");
+
 					var numCameras = Android.Hardware.Camera.NumberOfCameras;
 					var camInfo = new Android.Hardware.Camera.CameraInfo();
 					var found = false;
-					
+					Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found " + numCameras + " cameras...");
+
+					var whichCamera = CameraFacing.Back;
+
+					if (options.UseFrontCameraIfAvailable.HasValue && options.UseFrontCameraIfAvailable.Value)
+						whichCamera = CameraFacing.Front;
+
 					for (int i = 0; i < numCameras; i++)
 					{
 						Android.Hardware.Camera.GetCameraInfo(i, camInfo);
-						if (camInfo.Facing == CameraFacing.Back)
+						if (camInfo.Facing == whichCamera)
 						{
+							Android.Util.Log.Debug ("ZXing.Net.Mobile", "Found " + whichCamera + " Camera, opening...");
 							camera = Android.Hardware.Camera.Open(i);
 							found = true;
 							break;
@@ -106,7 +121,7 @@ namespace ZXing.Mobile
 					
 					if (!found)
 					{
-						Android.Util.Log.Debug("ZXing.Net.Mobile", "Finding rear camera failed, opening camera 0...");
+						Android.Util.Log.Debug("ZXing.Net.Mobile", "Finding " + whichCamera + " camera failed, opening camera 0...");
 						camera = Android.Hardware.Camera.Open(0);
 					}
 				}
@@ -129,20 +144,65 @@ namespace ZXing.Mobile
 				Console.WriteLine("Setup Error: " + ex);
 				//throw;
 			}
+
+			PerformanceCounter.Stop (perf, "SurfaceCreated took {0}ms");
 		}
 		
 		public void SurfaceChanged (ISurfaceHolder holder, global::Android.Graphics.Format format, int w, int h)
 		{
 			if (camera == null)
 				return;
+
+			var perf = PerformanceCounter.Start ();
 			
 			var parameters = camera.GetParameters ();
 			parameters.PreviewFormat = ImageFormatType.Nv21;
+
+
+			var availableResolutions = new List<CameraResolution> ();
+			foreach (var sps in parameters.SupportedPreviewSizes) {
+				availableResolutions.Add (new CameraResolution {
+					Width = sps.Width,
+					Height = sps.Height
+				});
+			}
+
+			// Try and get a desired resolution from the options selector
+			var resolution = options.GetResolution (availableResolutions);
+
+			// If the user did not specify a resolution, let's try and find a suitable one
+			if (resolution == null) {
+				// Loop through all supported sizes
+				foreach (var sps in parameters.SupportedPreviewSizes) {
+
+					// Find one that's >= 640x360 but <= 1000x1000
+					// This will likely pick the *smallest* size in that range, which should be fine
+					if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000) {
+						resolution = new CameraResolution {
+							Width = sps.Width,
+							Height = sps.Height
+						};
+						break;
+					}
+				}
+			}
+
 			// Google Glass requires this fix to display the camera output correctly
 			if (Build.Model.Contains ("Glass")) {
+				resolution = new CameraResolution {
+					Width = 640,
+					Height = 360
+				};
+				// Glass requires 30fps
 				parameters.SetPreviewFpsRange (30000, 30000);
-				parameters.SetPreviewSize (640, 360);
 			}
+
+			// Hopefully a resolution was selected at some point
+			if (resolution != null) {
+				Android.Util.Log.Debug("ZXing.Net.Mobile", "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+				parameters.SetPreviewSize (resolution.Width, resolution.Height);
+			}
+
 			camera.SetParameters (parameters);
 
 			SetCameraDisplayOrientation (this.activity);
@@ -150,7 +210,9 @@ namespace ZXing.Mobile
 			camera.StartPreview ();
 			
 			//cameraResolution = new Size(parameters.PreviewSize.Width, parameters.PreviewSize.Height);
-			
+
+			PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
+
 			AutoFocus();
 		}
 		

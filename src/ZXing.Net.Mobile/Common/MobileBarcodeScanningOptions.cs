@@ -7,6 +7,11 @@ namespace ZXing.Mobile
 {
 	public class MobileBarcodeScanningOptions
 	{
+		/// <summary>
+		/// Camera resolution selector delegate, must return the selected Resolution from the list of available resolutions
+		/// </summary>
+		public delegate CameraResolution CameraResolutionSelectorDelegate (List<CameraResolution> availableResolutions);
+
 		public MobileBarcodeScanningOptions ()
 		{
 			this.PossibleFormats = new List<BarcodeFormat>();
@@ -15,6 +20,7 @@ namespace ZXing.Mobile
 			this.InitialDelayBeforeAnalyzingFrames = 300;
 		}
 
+		public CameraResolutionSelectorDelegate CameraResolutionSelector { get;set; }
 		public List<BarcodeFormat> PossibleFormats { get;set; }
 		public bool? TryHarder { get;set; } 
 		public bool? PureBarcode { get;set; }
@@ -73,6 +79,19 @@ namespace ZXing.Mobile
 			reader.Hints = hints;
 
 			return reader;
+		}
+
+		internal CameraResolution GetResolution (List<CameraResolution> availableResolutions)
+		{
+			CameraResolution r = null;
+
+			var dg = CameraResolutionSelector;
+
+			if (dg != null) {
+				r = dg (availableResolutions);
+			}
+
+			return r;
 		}
 	}
 }

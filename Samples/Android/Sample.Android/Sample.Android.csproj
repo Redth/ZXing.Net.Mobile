@@ -52,6 +52,7 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="FragmentActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -68,6 +69,7 @@
     <AndroidResource Include="Resources\drawable-xhdpi\launcher.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\launcher.png" />
     <AndroidResource Include="Resources\drawable-xxxhdpi\launcher.png" />
+    <AndroidResource Include="Resources\layout\FragmentActivity.axml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monoandroid.csproj">
