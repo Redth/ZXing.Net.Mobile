@@ -589,6 +589,13 @@ namespace ZXing.Mobile
 
 		public void StopScanning()
 		{
+			if (overlayView != null) {
+				if (overlayView is ZXingDefaultOverlayView)
+					(overlayView as ZXingDefaultOverlayView).Destroy ();
+
+				overlayView = null;
+			}
+				
 			if (stopped)
 				return;
 

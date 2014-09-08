@@ -153,15 +153,36 @@ namespace ZXing.Mobile
 
 			var overlaySize = new SizeF (this.Frame.Width, this.Frame.Height - 44);
 
-			topBg.Frame = new RectangleF (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
-			bottomBg.Frame = new RectangleF (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
+			if (topBg != null)
+				topBg.Frame = new RectangleF (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
+			if (bottomBg != null)
+				bottomBg.Frame = new RectangleF (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
 
-			textTop.Frame = topBg.Frame;//  new RectangleF(0, overlaySize.Height *  0.10f, overlaySize.Width, 42);
-			textBottom.Frame = bottomBg.Frame; // new RectangleF(0, overlaySize.Height *  0.825f - 32f, overlaySize.Width, 64);
+			if (textTop != null)
+				textTop.Frame = topBg.Frame;//  new RectangleF(0, overlaySize.Height *  0.10f, overlaySize.Width, 42);
+			if (textBottom != null)
+				textBottom.Frame = bottomBg.Frame; // new RectangleF(0, overlaySize.Height *  0.825f - 32f, overlaySize.Width, 64);
 
-			redLine.Frame = new RectangleF (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f);
+			if (redLine != null)
+				redLine.Frame = new RectangleF (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f);
 		}
 
+		public void Destroy ()
+		{
+			InvokeOnMainThread (() => {
+				textTop.RemoveFromSuperview ();
+				textBottom.RemoveFromSuperview ();
+				topBg.RemoveFromSuperview ();
+				bottomBg.RemoveFromSuperview ();
+				redLine.RemoveFromSuperview ();
+
+				textBottom = null;
+				textTop = null;
+				topBg = null;
+				bottomBg = null;
+				redLine = null;
+			});
+		}
 	}
 }
 
