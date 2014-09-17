@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D119965B-BA8F-40D7-86B4-E9654E1014E2}</ProjectGuid>
     <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
@@ -106,13 +104,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monotouch.csproj">
-      <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
-      <Name>zxing.monotouch</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\ZXing.Net.Mobile.iOS.csproj">
-      <Project>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</Project>
+      <Project>{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}</Project>
       <Name>ZXing.Net.Mobile.iOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.ios.csproj">
+      <Project>{ACB2F35D-BFDA-41B1-9B79-B82BF23F6769}</Project>
+      <Name>zxing.ios</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

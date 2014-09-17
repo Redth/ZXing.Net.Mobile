@@ -36,7 +36,7 @@
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>..\..\Build\ios\classic\Debug\iPhone\</OutputPath>
+    <OutputPath>..\..\Build\ios\classic\Debug\</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -48,7 +48,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>..\..\Build\ios\classic\Release\iPhone\</OutputPath>
+    <OutputPath>..\..\Build\ios\classic\Release\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
@@ -84,7 +84,7 @@
     <Folder Include="Common\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zxing.Net\zxing.monotouch.csproj">
+    <ProjectReference Include="..\ZXing.Net\zxing.monotouch.csproj">
       <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
       <Name>zxing.monotouch</Name>
     </ProjectReference>

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>zxing.monotouch</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>zxing.monotouch</AssemblyName>
+    <AssemblyName>zxing.ios</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
