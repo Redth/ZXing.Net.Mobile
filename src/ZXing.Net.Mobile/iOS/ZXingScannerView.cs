@@ -4,6 +4,17 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
+
+#if __UNIFIED__
+using Foundation;
+using CoreFoundation;
+using AVFoundation;
+using CoreGraphics;
+using CoreMedia;
+using CoreVideo;
+using ObjCRuntime;
+using UIKit;
+#else
 using MonoTouch.AVFoundation;
 using MonoTouch.CoreFoundation;
 using MonoTouch.CoreGraphics;
@@ -12,6 +23,11 @@ using MonoTouch.CoreVideo;
 using MonoTouch.Foundation;
 using MonoTouch.ObjCRuntime;
 using MonoTouch.UIKit;
+
+using CGRect = global::System.Drawing.RectangleF;
+using CGPoint = global::System.Drawing.PointF;
+#endif
+
 using ZXing.Common;
 using ZXing.Mobile;
 
@@ -30,7 +46,7 @@ namespace ZXing.Mobile
 		{
 		}
 
-		public ZXingScannerView (RectangleF frame) : base(frame)
+		public ZXingScannerView (CGRect frame) : base(frame)
 		{
 		}
 
@@ -52,7 +68,7 @@ namespace ZXing.Mobile
 
 		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
 
-		void Setup(RectangleF frame)
+		void Setup(CGRect frame)
 		{
 			var started = DateTime.UtcNow;
 
@@ -62,7 +78,7 @@ namespace ZXing.Mobile
 			if (UseCustomOverlayView && CustomOverlayView != null)
 				overlayView = CustomOverlayView;
 			else
-				overlayView = new ZXingDefaultOverlayView (new RectangleF(0, 0, this.Frame.Width, this.Frame.Height),
+				overlayView = new ZXingDefaultOverlayView (new CGRect(0, 0, this.Frame.Width, this.Frame.Height),
 				                                          TopText, BottomText, CancelButtonText, FlashButtonText,
 				                                          () => { StopScanning (); resultCallback (null); }, ToggleTorch);
 
@@ -85,7 +101,7 @@ namespace ZXing.Mobile
 
 				overlayView.AddGestureRecognizer (tapGestureRecognizer);*/
 
-				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
+				overlayView.Frame = new CGRect(0, 0, this.Frame.Width, this.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			}
 
@@ -214,11 +230,15 @@ namespace ZXing.Mobile
 
 			var perf2 = PerformanceCounter.Start ();
 
+			#if __UNIFIED__
+			previewLayer.VideoGravity = AVLayerVideoGravity.ResizeAspectFill;
+			#else
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
-			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
-			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
+			#endif
+			previewLayer.Frame = new CGRect(0, 0, this.Frame.Width, this.Frame.Height);
+			previewLayer.Position = new CGPoint(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
 
-			layerView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
+			layerView = new UIView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height));
 			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			layerView.Layer.AddSublayer(previewLayer);
 
@@ -244,14 +264,17 @@ namespace ZXing.Mobile
 
 			var perf4 = PerformanceCounter.Start ();
 
+			var videoSettings = NSDictionary.FromObjectAndKey (new NSNumber ((int) CVPixelFormatType.CV32BGRA),
+				CVPixelBuffer.PixelFormatTypeKey);
+
+
 			// create a VideoDataOutput and add it to the sesion
-			output = new AVCaptureVideoDataOutput () {
-				//videoSettings
-				VideoSettings = new AVVideoSettings (CVPixelFormatType.CV32BGRA),
+			output = new AVCaptureVideoDataOutput {
+				WeakVideoSettings = videoSettings
 			};
 
 			// configure the output
-			queue = new MonoTouch.CoreFoundation.DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
+			queue = new DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
 
 			var barcodeReader = new BarcodeReader(null, (img) => 	
 			{
@@ -344,10 +367,10 @@ namespace ZXing.Mobile
 			NSError err = null;
 			if (captureDevice.LockForConfiguration(out err))
 			{
-				if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
-					captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
-				else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeAutoFocus))
-					captureDevice.FocusMode = AVCaptureFocusMode.ModeAutoFocus;
+				if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
+					captureDevice.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
+				else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.AutoFocus))
+					captureDevice.FocusMode = AVCaptureFocusMode.AutoFocus;
 
 				if (captureDevice.IsExposureModeSupported (AVCaptureExposureMode.ContinuousAutoExposure))
 					captureDevice.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;
@@ -393,7 +416,7 @@ namespace ZXing.Mobile
 			if (previewLayer == null)
 				return;
 
-			previewLayer.Frame = new RectangleF (0, 0, this.Frame.Width, this.Frame.Height);
+			previewLayer.Frame = new CGRect (0, 0, this.Frame.Width, this.Frame.Height);
 
 			if (previewLayer.RespondsToSelector (new Selector ("connection")))
 			{
@@ -438,7 +461,7 @@ namespace ZXing.Mobile
 
 					//Focus at the point touched
 					device.FocusPointOfInterest = pointOfInterest;
-					device.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					device.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
 					device.UnlockForConfiguration();
 				}
 			}
@@ -519,13 +542,13 @@ namespace ZXing.Mobile
 
 					// Get the number of bytes per row for the pixel buffer
 					var baseAddress = pixelBuffer.BaseAddress;
-					int bytesPerRow = pixelBuffer.BytesPerRow;
-					int width = pixelBuffer.Width;
-					int height = pixelBuffer.Height;
+					var bytesPerRow = pixelBuffer.BytesPerRow;
+					var width = pixelBuffer.Width;
+					var height = pixelBuffer.Height;
 					var flags = CGBitmapFlags.PremultipliedFirst | CGBitmapFlags.ByteOrder32Little;
 					// Create a CGImage on the RGB colorspace from the configured parameter above
 					using (var cs = CGColorSpace.CreateDeviceRGB ())
-					using (var context = new CGBitmapContext (baseAddress,width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
+					using (var context = new CGBitmapContext (baseAddress, (int)width, (int)height, 8, (int)bytesPerRow, cs, (CGImageAlphaInfo) flags))
 					using (var cgImage = context.ToImage ())
 					{
 						pixelBuffer.Unlock (0);
@@ -565,7 +588,7 @@ namespace ZXing.Mobile
 
 				if (Runtime.Arch == Arch.SIMULATOR)
 				{
-					var simView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
+					var simView = new UIView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height));
 					simView.BackgroundColor = UIColor.LightGray;
 					simView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 					this.InsertSubview(simView, 0);

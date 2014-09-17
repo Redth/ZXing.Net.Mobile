@@ -1,13 +1,25 @@
 using System;
-using System.Drawing;
 using System.Text;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
+#if __UNIFIED__
+using UIKit;
+using Foundation;
+using AVFoundation;
+using CoreGraphics;
+#else
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
-using ZXing;
 using MonoTouch.AVFoundation;
-using System.Threading.Tasks;
+using MonoTouch.CoreGraphics;
+using System.Drawing;
+
+using CGSize = System.Drawing.SizeF;
+using CGRect = System.Drawing.RectangleF;
+#endif
+
+using ZXing;
 
 namespace ZXing.Mobile
 {	
@@ -32,7 +44,7 @@ namespace ZXing.Mobile
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
 
-			this.View.Frame = new RectangleF(0, 0, appFrame.Width, appFrame.Height);
+			this.View.Frame = new CGRect(0, 0, appFrame.Width, appFrame.Height);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 		}
 
@@ -53,7 +65,7 @@ namespace ZXing.Mobile
 		{
 			loadingBg = new UIView (this.View.Frame) { BackgroundColor = UIColor.Black };
 			loadingView = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.WhiteLarge);
-			loadingView.Frame = new RectangleF ((this.View.Frame.Width - loadingView.Frame.Width) / 2, 
+			loadingView.Frame = new CGRect ((this.View.Frame.Width - loadingView.Frame.Width) / 2, 
 				(this.View.Frame.Height - loadingView.Frame.Height) / 2,
 				loadingView.Frame.Width, 
 				loadingView.Frame.Height);			
@@ -62,7 +74,7 @@ namespace ZXing.Mobile
 			View.AddSubview (loadingBg);
 			loadingView.StartAnimating ();
 
-			scannerView = new ZXingScannerView(new RectangleF(0, 0, this.View.Frame.Width, this.View.Frame.Height));
+			scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height));
 			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			scannerView.UseCustomOverlayView = this.Scanner.UseCustomOverlay;
 			scannerView.CustomOverlayView = this.Scanner.CustomOverlay;
@@ -172,7 +184,7 @@ namespace ZXing.Mobile
 					UIView.SetAnimationDuration(2.0f);
 					UIView.SetAnimationCurve(UIViewAnimationCurve.EaseOut);
 
-					loadingBg.Transform = MonoTouch.CoreGraphics.CGAffineTransform.MakeScale(2.0f, 2.0f);
+					loadingBg.Transform = CGAffineTransform.MakeScale(2.0f, 2.0f);
 					loadingBg.Alpha = 0.0f;
 
 					UIView.CommitAnimations();

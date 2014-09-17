@@ -1,8 +1,19 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
+
+#if __UNIFIED__
+using Foundation;
+using AVFoundation;
+using CoreFoundation;
+using CoreGraphics;
+using CoreMedia;
+using CoreVideo;
+using ObjCRuntime;
+using UIKit;
+#else
 using MonoTouch.AVFoundation;
 using MonoTouch.CoreFoundation;
 using MonoTouch.CoreGraphics;
@@ -11,9 +22,14 @@ using MonoTouch.CoreVideo;
 using MonoTouch.Foundation;
 using MonoTouch.ObjCRuntime;
 using MonoTouch.UIKit;
+using System.Drawing;
+
+using CGRect = global::System.Drawing.RectangleF;
+using CGPoint = global::System.Drawing.PointF;
+#endif
+
 using ZXing.Common;
 using ZXing.Mobile;
-using System.Linq;
 
 namespace ZXing.Mobile
 {
@@ -27,7 +43,7 @@ namespace ZXing.Mobile
 		{
 		}
 
-		public AVCaptureScannerView (RectangleF frame) : base(frame)
+		public AVCaptureScannerView (CGRect frame) : base(frame)
 		{
 		}
 
@@ -58,7 +74,7 @@ namespace ZXing.Mobile
 			if (UseCustomOverlayView && CustomOverlayView != null)
 				overlayView = CustomOverlayView;
 			else
-				overlayView = new ZXingDefaultOverlayView (new RectangleF(0, 0, this.Frame.Width, this.Frame.Height),
+				overlayView = new ZXingDefaultOverlayView (new CGRect(0, 0, this.Frame.Width, this.Frame.Height),
 					TopText, BottomText, CancelButtonText, FlashButtonText,
 					() => { StopScanning (); resultCallback (null); }, ToggleTorch);
 
@@ -81,7 +97,7 @@ namespace ZXing.Mobile
 
 				overlayView.AddGestureRecognizer (tapGestureRecognizer);*/
 
-				overlayView.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
+				overlayView.Frame = new CGRect(0, 0, this.Frame.Width, this.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 
 
@@ -172,7 +188,7 @@ namespace ZXing.Mobile
 					resultCallback(rs);
 				});
 
-			metadataOutput.SetDelegate (dg, MonoTouch.CoreFoundation.DispatchQueue.MainQueue);
+			metadataOutput.SetDelegate (dg, DispatchQueue.MainQueue);
 			session.AddOutput (metadataOutput);
 
 			//Setup barcode formats
@@ -216,11 +232,15 @@ namespace ZXing.Mobile
                     previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
             }
 
+			#if __UNIFIED__
+			previewLayer.VideoGravity = AVLayerVideoGravity.ResizeAspectFill;
+			#else
 			previewLayer.LayerVideoGravity = AVLayerVideoGravity.ResizeAspectFill;
-			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
-			previewLayer.Position = new PointF(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
+			#endif
+			previewLayer.Frame = new CGRect(0, 0, this.Frame.Width, this.Frame.Height);
+			previewLayer.Position = new CGPoint(this.Layer.Bounds.Width / 2, (this.Layer.Bounds.Height / 2));
 
-			layerView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
+			layerView = new UIView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height));
 			layerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			layerView.Layer.AddSublayer(previewLayer);
 
@@ -251,15 +271,15 @@ namespace ZXing.Mobile
 			//session.StartRunning ();
 
 
-			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
+			if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
 			{
 				NSError err = null;
 				if (captureDevice.LockForConfiguration(out err))
 				{
-					if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeContinuousAutoFocus))
-						captureDevice.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
-					else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ModeAutoFocus))
-						captureDevice.FocusMode = AVCaptureFocusMode.ModeAutoFocus;
+					if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
+					else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.AutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.AutoFocus;
 
 					if (captureDevice.IsExposureModeSupported (AVCaptureExposureMode.ContinuousAutoExposure))
 						captureDevice.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;
@@ -275,10 +295,10 @@ namespace ZXing.Mobile
 						captureDevice.AutoFocusRangeRestriction = AVCaptureAutoFocusRangeRestriction.Near;
 
 					if (captureDevice.FocusPointOfInterestSupported)
-						captureDevice.FocusPointOfInterest = new PointF(0.5f, 0.5f);
+						captureDevice.FocusPointOfInterest = new CGPoint(0.5f, 0.5f);
 
 					if (captureDevice.ExposurePointOfInterestSupported)
-						captureDevice.ExposurePointOfInterest = new PointF (0.5f, 0.5f);
+						captureDevice.ExposurePointOfInterest = new CGPoint (0.5f, 0.5f);
 
 					captureDevice.UnlockForConfiguration();
 				}
@@ -304,7 +324,7 @@ namespace ZXing.Mobile
 			if (previewLayer == null)
 				return;
 
-			previewLayer.Frame = new RectangleF(0, 0, this.Frame.Width, this.Frame.Height);
+			previewLayer.Frame = new CGRect(0, 0, this.Frame.Width, this.Frame.Height);
 
 			if (previewLayer.RespondsToSelector (new Selector ("connection")))
 			{
@@ -326,7 +346,7 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public void Focus(PointF pointOfInterest)
+		public void Focus(CGPoint pointOfInterest)
 		{
 			//Get the device
 			if (AVMediaType.Video == null)
@@ -349,7 +369,7 @@ namespace ZXing.Mobile
 
 					//Focus at the point touched
 					device.FocusPointOfInterest = pointOfInterest;
-					device.FocusMode = AVCaptureFocusMode.ModeContinuousAutoFocus;
+					device.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
 					device.UnlockForConfiguration();
 				}
 			}
@@ -383,7 +403,7 @@ namespace ZXing.Mobile
 
 				if (Runtime.Arch == Arch.SIMULATOR)
 				{
-					var simView = new UIView(new RectangleF(0, 0, this.Frame.Width, this.Frame.Height));
+					var simView = new UIView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height));
 					simView.BackgroundColor = UIColor.LightGray;
 					simView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 					this.InsertSubview(simView, 0);
@@ -443,18 +463,18 @@ namespace ZXing.Mobile
 			{
 				NSError err;
 
-				var device = MonoTouch.AVFoundation.AVCaptureDevice.DefaultDeviceWithMediaType(MonoTouch.AVFoundation.AVMediaType.Video);
+				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
 				device.LockForConfiguration(out err);
 
 				if (on)
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.On;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.On;
+					device.TorchMode = AVCaptureTorchMode.On;
+					device.FlashMode = AVCaptureFlashMode.On;
 				}
 				else
 				{
-					device.TorchMode = MonoTouch.AVFoundation.AVCaptureTorchMode.Off;
-					device.FlashMode = MonoTouch.AVFoundation.AVCaptureFlashMode.Off;
+					device.TorchMode = AVCaptureTorchMode.Off;
+					device.FlashMode = AVCaptureFlashMode.Off;
 				}
 
 				device.UnlockForConfiguration();

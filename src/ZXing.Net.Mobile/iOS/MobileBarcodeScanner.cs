@@ -1,9 +1,16 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+
+#if __UNIFIED__
+using Foundation;
+using CoreFoundation;
+using UIKit;
+#else
 using MonoTouch.Foundation;
 using MonoTouch.CoreFoundation;
 using MonoTouch.UIKit;
-using System.Threading;
+#endif
 
 namespace ZXing.Mobile
 {

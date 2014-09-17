@@ -1,17 +1,33 @@
 using System;
-using System.Drawing;
+using System.Collections.Generic;
+
+#if __UNIFIED__
+using Foundation;
+using CoreGraphics;
+using CoreFoundation;
+using UIKit;
+using AVFoundation;
+#else
 using MonoTouch.CoreFoundation;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
-using ZXing.Mobile;
-using System.Collections.Generic;
 using MonoTouch.AVFoundation;
+using System.Drawing;
+
+using CGRect = global::System.Drawing.RectangleF;
+using CGPoint = global::System.Drawing.PointF;
+using CGSize = global::System.Drawing.SizeF;
+#endif
+
+
+using ZXing.Mobile;
+
 
 namespace ZXing.Mobile
 {
 	public class ZXingDefaultOverlayView : UIView
 	{
-		public ZXingDefaultOverlayView (RectangleF frame, string topText, 
+		public ZXingDefaultOverlayView (CGRect frame, string topText, 
 		                                string bottomText, string cancelText, string flashText,
 		                                Action onCancel, Action onTorch) : base(frame)
 		{
@@ -50,26 +66,26 @@ namespace ZXing.Mobile
 			var picFrameX = (Frame.Width - picFrameWidth) / 2;
 			var picFrameY = (Frame.Height - picFrameHeight) / 2;
 			
-			var picFrame = new RectangleF((int)picFrameX, (int)picFrameY, (int)picFrameWidth, (int)picFrameHeight);
+			var picFrame = new CGRect((int)picFrameX, (int)picFrameY, (int)picFrameWidth, (int)picFrameHeight);
 
 
 			//Setup Overlay
-			var overlaySize = new SizeF (this.Frame.Width, this.Frame.Height - 44);
+			var overlaySize = new CGSize (this.Frame.Width, this.Frame.Height - 44);
 			
-			topBg = new UIView (new RectangleF (0, 0, overlaySize.Width, (overlaySize.Height - picFrame.Height) / 2));
-			topBg.Frame = new RectangleF (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
+			topBg = new UIView (new CGRect (0, 0, overlaySize.Width, (overlaySize.Height - picFrame.Height) / 2));
+			topBg.Frame = new CGRect (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
 			topBg.BackgroundColor = UIColor.Black;
 			topBg.Alpha = 0.6f;
 			topBg.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin;
 			
-			bottomBg = new UIView (new RectangleF (0, topBg.Frame.Height + picFrame.Height, overlaySize.Width, topBg.Frame.Height));
-			bottomBg.Frame = new RectangleF (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
+			bottomBg = new UIView (new CGRect (0, topBg.Frame.Height + picFrame.Height, overlaySize.Width, topBg.Frame.Height));
+			bottomBg.Frame = new CGRect (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
 			bottomBg.BackgroundColor = UIColor.Black;
 			bottomBg.Alpha = 0.6f;
 			bottomBg.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleTopMargin;
 
 			
-			redLine = new UIView (new RectangleF (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f));
+			redLine = new UIView (new CGRect (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f));
 			redLine.BackgroundColor = UIColor.Red;
 			redLine.Alpha = 0.4f;
 			redLine.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin | UIViewAutoresizing.FlexibleTopMargin;
@@ -126,7 +142,7 @@ namespace ZXing.Mobile
 			
 			InvokeOnMainThread(delegate {
 				// Setting tool bar
-				var toolBar = new UIToolbar(new RectangleF(0, Frame.Height - 44, Frame.Width, 44));
+				var toolBar = new UIToolbar(new CGRect(0, Frame.Height - 44, Frame.Width, 44));
 				
 				var buttons = new List<UIBarButtonItem>();
 				buttons.Add(new UIBarButtonItem(cancelText, UIBarButtonItemStyle.Done, 
@@ -151,12 +167,12 @@ namespace ZXing.Mobile
 		{
 			base.LayoutSubviews ();
 
-			var overlaySize = new SizeF (this.Frame.Width, this.Frame.Height - 44);
+			var overlaySize = new CGSize (this.Frame.Width, this.Frame.Height - 44);
 
 			if (topBg != null)
-				topBg.Frame = new RectangleF (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
+				topBg.Frame = new CGRect (0, 0, overlaySize.Width, overlaySize.Height * 0.30f);
 			if (bottomBg != null)
-				bottomBg.Frame = new RectangleF (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
+				bottomBg.Frame = new CGRect (0, overlaySize.Height * 0.70f, overlaySize.Width, overlaySize.Height * 0.30f);
 
 			if (textTop != null)
 				textTop.Frame = topBg.Frame;//  new RectangleF(0, overlaySize.Height *  0.10f, overlaySize.Width, 42);
@@ -164,7 +180,7 @@ namespace ZXing.Mobile
 				textBottom.Frame = bottomBg.Frame; // new RectangleF(0, overlaySize.Height *  0.825f - 32f, overlaySize.Width, 64);
 
 			if (redLine != null)
-				redLine.Frame = new RectangleF (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f);
+				redLine.Frame = new CGRect (0, overlaySize.Height * 0.5f - 2.0f, overlaySize.Width, 4.0f);
 		}
 
 		public void Destroy ()
