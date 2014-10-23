@@ -63,8 +63,11 @@ namespace ZXing.Mobile
 
 		public override void ViewDidLoad ()
 		{
-			loadingBg = new UIView (this.View.Frame) { BackgroundColor = UIColor.Black };
-			loadingView = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.WhiteLarge);
+			loadingBg = new UIView (this.View.Frame) { BackgroundColor = UIColor.Black, AutoresizingMask = UIViewAutoresizing.FlexibleDimensions };
+			loadingView = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.WhiteLarge)
+			{
+				AutoresizingMask = UIViewAutoresizing.FlexibleMargins
+			};
 			loadingView.Frame = new CGRect ((this.View.Frame.Width - loadingView.Frame.Width) / 2, 
 				(this.View.Frame.Height - loadingView.Frame.Height) / 2,
 				loadingView.Frame.Width, 
