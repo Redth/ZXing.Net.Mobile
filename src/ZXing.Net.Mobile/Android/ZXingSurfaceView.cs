@@ -498,10 +498,17 @@ namespace ZXing.Mobile
 			tokenSource.Cancel();
 			
 			if (camera != null) {
-				camera.SetPreviewCallback (null);
-				camera.StopPreview ();
-				camera.Release ();
-				camera = null;
+		                try {
+		                    camera.SetPreviewCallback(null);
+		                    camera.StopPreview();
+		                    camera.Release();
+		                }
+		                catch (Exception e) {
+		                    Android.Util.Log.Error("ZXing.Net.Mobile", e.ToString());
+		                }
+		                finally {
+		                    camera = null;
+		                }
 			}
 		}
 		
