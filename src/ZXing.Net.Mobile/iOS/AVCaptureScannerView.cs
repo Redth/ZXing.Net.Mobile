@@ -194,12 +194,14 @@ namespace ZXing.Mobile
 			//Setup barcode formats
 			if (ScanningOptions.PossibleFormats != null && ScanningOptions.PossibleFormats.Count > 0)
 			{
-				var formats = new List<string> ();
+                var formats = AVMetadataObjectType.None;
 
-				foreach (var f in ScanningOptions.PossibleFormats)
-					formats.AddRange (AVCaptureBarcodeFormatFromZXingBarcodeFormat (f));
+                foreach (var f in ScanningOptions.PossibleFormats)
+                    formats |= AVCaptureBarcodeFormatFromZXingBarcodeFormat (f);
+					
+                formats &= ~AVMetadataObjectType.None;
 
-				metadataOutput.MetadataObjectTypes = (from f in formats.Distinct () select new NSString(f)).ToArray();
+                metadataOutput.MetadataObjectTypes = formats;
 			}
 			else
 				metadataOutput.MetadataObjectTypes = metadataOutput.AvailableMetadataObjectTypes;
@@ -512,6 +514,7 @@ namespace ZXing.Mobile
 				BarcodeFormat.AZTEC, BarcodeFormat.CODE_128, BarcodeFormat.CODE_39,
 				BarcodeFormat.CODE_93, BarcodeFormat.EAN_13, BarcodeFormat.EAN_8,
 				BarcodeFormat.PDF_417, BarcodeFormat.QR_CODE, BarcodeFormat.UPC_E,
+                BarcodeFormat.DATA_MATRIX, BarcodeFormat.ITF,
 				BarcodeFormat.All_1D
 			};
 
@@ -544,62 +547,66 @@ namespace ZXing.Mobile
 			return BarcodeFormat.QR_CODE;
 		}
 
-		string[] AVCaptureBarcodeFormatFromZXingBarcodeFormat(BarcodeFormat zxingBarcodeFormat)
+		AVMetadataObjectType AVCaptureBarcodeFormatFromZXingBarcodeFormat(BarcodeFormat zxingBarcodeFormat)
 		{
-			List<string> formats = new List<string> ();
+            AVMetadataObjectType formats = AVMetadataObjectType.None;
 
 			switch (zxingBarcodeFormat)
 			{
-				case BarcodeFormat.AZTEC:
-					formats.Add (AVMetadataObject.TypeAztecCode);
-					break;
-				case BarcodeFormat.CODE_128:
-					formats.Add (AVMetadataObject.TypeCode128Code);
-					break;
-				case BarcodeFormat.CODE_39:
-					formats.Add (AVMetadataObject.TypeCode39Code);
-					formats.Add (AVMetadataObject.TypeCode39Mod43Code);
-					break;
-				case BarcodeFormat.CODE_93:
-					formats.Add (AVMetadataObject.TypeCode93Code);
-					break;
-				case BarcodeFormat.EAN_13:
-					formats.Add (AVMetadataObject.TypeEAN13Code);
-					break;
-				case BarcodeFormat.EAN_8:
-					formats.Add (AVMetadataObject.TypeEAN8Code);
-					break;
-				case BarcodeFormat.PDF_417:
-					formats.Add (AVMetadataObject.TypePDF417Code);
-					break;
-				case BarcodeFormat.QR_CODE:
-					formats.Add (AVMetadataObject.TypeQRCode);
-					break;
-				case BarcodeFormat.UPC_E:
-					formats.Add (AVMetadataObject.TypeUPCECode);
-					break;
-				case BarcodeFormat.All_1D:
-					formats.Add (AVMetadataObject.TypeUPCECode);
-					formats.Add (AVMetadataObject.TypeEAN13Code);
-					formats.Add (AVMetadataObject.TypeEAN8Code);
-					formats.Add (AVMetadataObject.TypeCode39Code);
-					formats.Add (AVMetadataObject.TypeCode39Mod43Code);
-					formats.Add (AVMetadataObject.TypeCode93Code);
-					break;
-				case BarcodeFormat.CODABAR:
-				case BarcodeFormat.DATA_MATRIX:
-				case BarcodeFormat.ITF:
-				case BarcodeFormat.MAXICODE:
-				case BarcodeFormat.MSI:
-				case BarcodeFormat.PLESSEY:
-				case BarcodeFormat.RSS_14:
-				case BarcodeFormat.RSS_EXPANDED:
-				case BarcodeFormat.UPC_A:
-					//TODO: Throw exception?
-					break;
+            case BarcodeFormat.AZTEC:
+                formats |= AVMetadataObjectType.AztecCode;					
+                break;
+            case BarcodeFormat.CODE_128:
+                formats |= AVMetadataObjectType.Code128Code;
+				break;
+			case BarcodeFormat.CODE_39:
+                formats |= AVMetadataObjectType.Code39Code;
+                formats |= AVMetadataObjectType.Code39Mod43Code;				
+				break;
+			case BarcodeFormat.CODE_93:
+                formats |= AVMetadataObjectType.Code93Code;
+				break;
+			case BarcodeFormat.EAN_13:
+                formats |= AVMetadataObjectType.EAN13Code;
+				break;
+			case BarcodeFormat.EAN_8:
+                formats |= AVMetadataObjectType.EAN8Code;
+				break;
+			case BarcodeFormat.PDF_417:
+                formats |= AVMetadataObjectType.PDF417Code;
+				break;
+			case BarcodeFormat.QR_CODE:
+                formats |= AVMetadataObjectType.QRCode;
+				break;
+			case BarcodeFormat.UPC_E:
+                formats |= AVMetadataObjectType.UPCECode;
+				break;
+			case BarcodeFormat.All_1D:
+                formats |= AVMetadataObjectType.UPCECode;
+                formats |= AVMetadataObjectType.EAN13Code;
+                formats |= AVMetadataObjectType.EAN8Code;
+                formats |= AVMetadataObjectType.Code39Code;
+                formats |= AVMetadataObjectType.Code39Mod43Code;
+                formats |= AVMetadataObjectType.Code93Code;
+				break;			
+            case BarcodeFormat.DATA_MATRIX:
+                formats |= AVMetadataObjectType.DataMatrixCode;
+                break;
+            case BarcodeFormat.ITF:
+                formats |= AVMetadataObjectType.ITF14Code;
+                break;
+            case BarcodeFormat.CODABAR:
+            case BarcodeFormat.MAXICODE:
+			case BarcodeFormat.MSI:
+			case BarcodeFormat.PLESSEY:
+			case BarcodeFormat.RSS_14:
+			case BarcodeFormat.RSS_EXPANDED:
+			case BarcodeFormat.UPC_A:
+				//TODO: Throw exception?
+				break;
 			}
 
-			return formats.ToArray();
+            return formats;
 		}
 	}
 

@@ -93,12 +93,12 @@ This product includes software developed at The Apache Software Foundation (http
 
 ### ZXing.Net
 ZXing.Net is released under the Apache 2.0 license.
-ZXing.Net can be found here: http://code.google.com/p/zxing/
+ZXing.Net can be found here: http://zxingnet.codeplex.com/
 A copy of the Apache 2.0 license can be found here: http://www.apache.org/licenses/LICENSE-2.0
 
 ### ZXing
 ZXing is released under the Apache 2.0 license.
-ZXing can be found here: http://code.google.com/p/zxing/
+ZXing can be found here: https://github.com/zxing/zxing
 A copy of the Apache 2.0 license can be found here: http://www.apache.org/licenses/LICENSE-2.0
 
 ### System.Drawing
