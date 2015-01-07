@@ -548,7 +548,7 @@ namespace ZXing.Mobile
 					var flags = CGBitmapFlags.PremultipliedFirst | CGBitmapFlags.ByteOrder32Little;
 					// Create a CGImage on the RGB colorspace from the configured parameter above
 					using (var cs = CGColorSpace.CreateDeviceRGB ())
-					using (var context = new CGBitmapContext (baseAddress, (int)width, (int)height, 8, (int)bytesPerRow, cs, (CGImageAlphaInfo) flags))
+					using (var context = new CGBitmapContext (baseAddress, width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
 					using (var cgImage = context.ToImage ())
 					{
 						pixelBuffer.Unlock (0);
