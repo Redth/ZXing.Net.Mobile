@@ -95,10 +95,17 @@ namespace ZXing.Mobile
             if (UseCustomOverlay && CustomOverlay != null)
                 gridCustomOverlay.Children.Remove(CustomOverlay);
 
+            BlackoutVideoBrush();
+            
             _reader.Stop();
 			_reader = null;
         }
 
+        private void BlackoutVideoBrush()
+        {
+        	_previewVideo.SetSource(new MediaElement());
+        }
+        
         public void Cancel()
         {
             LastScanResult = null;
