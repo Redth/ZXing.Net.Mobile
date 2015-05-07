@@ -418,7 +418,7 @@ namespace ZXing.Mobile
 
 			previewLayer.Frame = new CGRect (0, 0, this.Frame.Width, this.Frame.Height);
 
-			if (previewLayer.RespondsToSelector (new Selector ("connection")))
+			if (previewLayer.RespondsToSelector (new Selector ("connection")) && previewLayer.Connection != null)
 			{
 				switch (orientation)
 				{
