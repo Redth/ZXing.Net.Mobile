@@ -17,7 +17,7 @@
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>..\..\Build\Debug\monodroid\</OutputPath>
+    <OutputPath>..\..\Build\Debug\android\</OutputPath>
     <DefineConstants>DEBUG;MONOANDROID</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,13 +27,13 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>True</Optimize>
-    <OutputPath>..\..\Build\Release\monodroid\</OutputPath>
+    <OutputPath>..\..\Build\Release\android\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <DefineConstants>MONOANDROID</DefineConstants>
-    <DocumentationFile>..\..\Build\Release\monodroid\zxing.monoandroid.XML</DocumentationFile>
+    <DocumentationFile>..\..\Build\Release\android\zxing.monoandroid.XML</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
