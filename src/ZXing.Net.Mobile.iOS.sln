@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.iOS", "ZXi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.monotouch", "Zxing.Net\zxing.monotouch.csproj", "{BD0FA561-182D-4A89-BAA7-228693B07862}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.ios", "ZXing.Net\zxing.ios.csproj", "{ACB2F35D-BFDA-41B1-9B79-B82BF23F6769}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.iOS-Classic", "ZXing.Net.Mobile\ZXing.Net.Mobile.iOS-Classic.csproj", "{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.ios", "ZXing.Net\zxing.ios.csproj", "{ACB2F35D-BFDA-41B1-9B79-B82BF23F6769}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,9 +115,6 @@ Global
 		{BD0FA561-182D-4A89-BAA7-228693B07862}.Release|iPhone.Build.0 = Release|Any CPU
 		{BD0FA561-182D-4A89-BAA7-228693B07862}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{BD0FA561-182D-4A89-BAA7-228693B07862}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ZXing.Net.Mobile\ZXing.Net.Mobile.iOS.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

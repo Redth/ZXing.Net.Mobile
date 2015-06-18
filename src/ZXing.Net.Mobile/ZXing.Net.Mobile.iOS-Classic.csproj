@@ -84,7 +84,7 @@
     <Folder Include="Common\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ZXing.Net\zxing.monotouch.csproj">
+    <ProjectReference Include="..\Zxing.Net\zxing.monotouch.csproj">
       <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
       <Name>zxing.monotouch</Name>
     </ProjectReference>
