@@ -27,6 +27,8 @@ namespace ZXing.Mobile
 
 				var scanIntent = new Intent(this.Context, typeof(ZxingActivity));
 
+				scanIntent.AddFlags(ActivityFlags.NewTask);
+
 				ZxingActivity.UseCustomView = this.UseCustomOverlay;
 				ZxingActivity.CustomOverlayView = this.CustomOverlay;
 				ZxingActivity.ScanningOptions = options;
