@@ -34,16 +34,19 @@ using System.Runtime.InteropServices;
 #if WINDOWS_PHONE80
 [assembly: AssemblyTitle("zxing.net for windows phone 8.0")]
 #endif
+#if WINDOWS_PHONE81
+[assembly: AssemblyTitle("zxing.net for windows phone 8.1")]
+#endif
 #if MONOANDROID
 [assembly: AssemblyTitle("zxing.net for mono android")]
 #endif
 #if MONOTOUCH
 [assembly: AssemblyTitle("zxing.net for mono touch")]
 #endif
-[assembly: AssemblyDescription("port of the java based barcode scanning library for .net (java zxing 23.04.2014 14:49:05)")]
+[assembly: AssemblyDescription("port of the java based barcode scanning library for .net (java zxing 06.02.2015 22:39:28)")]
 [assembly: AssemblyCompany("ZXing.Net Development")]
 [assembly: AssemblyProduct("ZXing.Net")]
-[assembly: AssemblyCopyright("Copyright © 2012-2014")]
+[assembly: AssemblyCopyright("Copyright © 2012-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 #if !PORTABLE
@@ -60,9 +63,9 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Revision and Build Numbers
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("0.14.0.0")]
+[assembly: AssemblyVersion("0.14.1.0")]
 #if !WindowsCE
-[assembly: AssemblyFileVersion("0.14.0.0")]
+[assembly: AssemblyFileVersion("0.14.1.0")]
 #endif
 
 [assembly: CLSCompliant(true)]

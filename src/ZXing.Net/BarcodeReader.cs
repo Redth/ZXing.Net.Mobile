@@ -49,7 +49,7 @@ namespace ZXing
 #if MONOTOUCH
    public class BarcodeReader : BarcodeReaderGeneric<UIImage>, IBarcodeReader, IMultipleBarcodeReader
    {
-      private static readonly Func<UIImage, LuminanceSource> defaultCreateLuminanceSource = 
+      private static readonly Func<UIImage, LuminanceSource> defaultCreateLuminanceSource =
          (img) => new RGBLuminanceSource(img);
 #else
 #if !PORTABLE
@@ -97,7 +97,7 @@ namespace ZXing
       /// If null then HybridBinarizer is used</param>
       public BarcodeReader(Reader reader,
 #if MONOTOUCH
-         Func<UIImage, LuminanceSource> createLuminanceSource,         
+         Func<UIImage, LuminanceSource> createLuminanceSource,
 #elif MONOANDROID
          Func<Android.Graphics.Bitmap, LuminanceSource> createLuminanceSource,
 #else

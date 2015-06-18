@@ -14,7 +14,7 @@
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>..\..\Build\Debug\ios\</OutputPath>
+    <OutputPath>..\..\Build\Debug\monotouch\</OutputPath>
     <DefineConstants>DEBUG;MONOTOUCH</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -23,7 +23,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>True</Optimize>
-    <OutputPath>..\..\Build\Release\ios\</OutputPath>
+    <OutputPath>..\..\Build\Release\monotouch\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
@@ -36,8 +36,6 @@
     <Reference Include="monotouch" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
   <ItemGroup>
     <Compile Include="BarcodeFormat.cs" />
     <Compile Include="BarcodeReader.cs" />
@@ -55,13 +53,13 @@
     <Compile Include="IBarcodeReaderGeneric.cs" />
     <Compile Include="IBarcodeWriter.cs" />
     <Compile Include="IBarcodeWriterGeneric.cs" />
+    <Compile Include="imb\IMBReader.cs" />
     <Compile Include="IMultipleBarcodeReader.cs" />
     <Compile Include="IMultipleBarcodeReaderGeneric.cs" />
     <Compile Include="InvertedLuminanceSource.cs" />
     <Compile Include="LuminanceSource.cs" />
     <Compile Include="MultiFormatReader.cs" />
     <Compile Include="MultiFormatWriter.cs" />
-    <Compile Include="NotFoundException.cs" />
     <Compile Include="PlanarYUVLuminanceSource.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="ReaderException.cs" />
@@ -298,7 +296,12 @@
     <Compile Include="qrcode\encoder\QRCode.cs" />
     <Compile Include="qrcode\encoder\QrCodeEncodingOptions.cs" />
     <Compile Include="renderer\IBarcodeRenderer.cs" />
+    <Compile Include="renderer\PixelData.cs" />
+    <Compile Include="renderer\PixelDataRenderer.cs" />
     <Compile Include="renderer\SVGRenderer.cs" />
+    <Compile Include="silverlight\BigInteger.cs" />
+    <Compile Include="silverlight\BrowsableAttribute.cs" />
+    <Compile Include="silverlight\SerializableAttribute.cs" />
     <Compile Include="xamarin\Color.cs" />
     <Compile Include="xamarin\ColorConverter.cs" />
     <Compile Include="xamarin\ColorTranslator.cs" />
@@ -308,4 +311,5 @@
     <Compile Include="xamarin\SystemColors.cs" />
     <Compile Include="xamarin\BitmapRenderer.monotouch.cs" />
   </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
 </Project>

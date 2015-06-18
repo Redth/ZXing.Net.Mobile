@@ -132,7 +132,7 @@ namespace ZXing.PDF417.Internal
       private static readonly sbyte[] MIXED = new sbyte[128];
       private static readonly sbyte[] PUNCTUATION = new sbyte[128];
 
-      internal static String[] DEFAULT_ENCODING_NAMES = new [] {"CP437", "IBM437"};
+      internal static string DEFAULT_ENCODING_NAME = "ISO-8859-1";
 
       static PDF417HighLevelEncoder()
       {
@@ -175,7 +175,7 @@ namespace ZXing.PDF417.Internal
          //the codewords 0..928 are encoded as Unicode characters
          var sb = new StringBuilder(msg.Length);
 
-         if (encoding != null && !disableEci && !Contains(DEFAULT_ENCODING_NAMES, encoding.WebName))
+         if (encoding != null && !disableEci && String.Compare(DEFAULT_ENCODING_NAME, encoding.WebName, StringComparison.Ordinal) != 0)
          {
             CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding.WebName);
             if (eci != null)
@@ -254,7 +254,11 @@ namespace ZXing.PDF417.Internal
                      else
                      {
                         //Mode latch performed by encodeBinary()
-                        encodeBinary(bytes, p, b, encodingMode, sb);
+                        encodeBinary(bytes,
+                                     toBytes(msg.Substring(0, p), encoding).Length,
+                                     toBytes(msg.Substring(p, b), encoding).Length,
+                                     encodingMode,
+                                     sb);
                         encodingMode = BYTE_COMPACTION;
                         textSubMode = SUBMODE_ALPHA; //Reset after latch
                      }
@@ -286,21 +290,16 @@ namespace ZXing.PDF417.Internal
       private static byte[] toBytes(String msg, Encoding encoding)
       {
          // Defer instantiating default Charset until needed, since it may be for an unsupported
-         // encoding. For example the default of Cp437 doesn't seem to exist on Android.
+         // encoding.
          if (encoding == null)
          {
-            for (var index = 0; index < DEFAULT_ENCODING_NAMES.Length; index++)
+            try
             {
-               String encodingName = DEFAULT_ENCODING_NAMES[index];
-               try
-               {
-
-                  encoding = Encoding.GetEncoding(encodingName);
-               }
-               catch (Exception )
-               {
-                  // continue
-               }
+               encoding = Encoding.GetEncoding(DEFAULT_ENCODING_NAME);
+            }
+            catch (Exception )
+            {
+               // continue
             }
             if (encoding == null)
             {
@@ -310,16 +309,14 @@ namespace ZXing.PDF417.Internal
 #if WindowsCE
                   try
                   {
-                     encoding = Encoding.GetEncoding("CP437");
+                     encoding = Encoding.GetEncoding(1252);
                   }
                   catch (PlatformNotSupportedException)
                   {
                      // WindowsCE doesn't support all encodings. But it is device depended.
-                     // So we try here the some different ones
-                     encoding = Encoding.GetEncoding(1252);
+                     // So we try here some different ones
+                     encoding = Encoding.GetEncoding("CP437");
                   }
-#elif (!SILVERLIGHT || WINDOWS) && !MONOTOUCH
-                  encoding = Encoding.GetEncoding("CP437");
 #else
                   // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
                   encoding = Encoding.GetEncoding("UTF-8");
@@ -328,7 +325,7 @@ namespace ZXing.PDF417.Internal
                }
                catch (Exception uce)
                {
-                  throw new WriterException("No support for any encoding: " + DEFAULT_ENCODING_NAMES, uce);
+                  throw new WriterException("No support for any encoding: " + DEFAULT_ENCODING_NAME, uce);
                }
             }
          }
@@ -748,6 +745,7 @@ namespace ZXing.PDF417.Internal
       {
          int len = msg.Length;
          int idx = startpos;
+         int idxb = idx;  // bytes index (may differ from idx for utf-8 and other unicode encodings)
          while (idx < len)
          {
             char ch = msg[idx];
@@ -768,31 +766,19 @@ namespace ZXing.PDF417.Internal
             {
                return idx - startpos;
             }
-            int textCount = 0;
-            while (textCount < 5 && isText(ch))
-            {
-               textCount++;
-               int i = idx + textCount;
-               if (i >= len)
-               {
-                  break;
-               }
-               ch = msg[i];
-            }
-            if (textCount >= 5)
-            {
-               return idx - startpos;
-            }
             ch = msg[idx];
 
             //Check if character is encodable
             //Sun returns a ASCII 63 (?) for a character that cannot be mapped. Let's hope all
             //other VMs do the same
-            if (bytes[idx] == 63 && ch != '?')
+            if (bytes[idxb] == 63 && ch != '?')
             {
                throw new WriterException("Non-encodable character detected: " + ch + " (Unicode: " + (int) ch + ')');
             }
             idx++;
+            idxb++;
+            if (ch >= 256)  // for non-ascii symbols
+                idxb++;
          }
          return idx - startpos;
       }

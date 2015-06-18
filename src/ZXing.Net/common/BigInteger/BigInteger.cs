@@ -2,7 +2,7 @@
 #if !(WindowsCE || PORTABLE)
 using System.Runtime.Serialization;
 #endif
-#if !(WINDOWS_PHONE70 || WINDOWS_PHONE71 || WINDOWS_PHONE80 || SILVERLIGHT4 || SILVERLIGHT5 || WindowsCE || PORTABLE)
+#if !(WINDOWS_PHONE || SILVERLIGHT4 || SILVERLIGHT5 || WindowsCE || PORTABLE)
 using System.Runtime.Serialization.Formatters;
 #endif
 #if !PORTABLE
@@ -21,7 +21,7 @@ namespace BigIntegerLibrary
 #if WindowsCE
     [Serializable]
     internal sealed class BigInteger :
-#elif !(WINDOWS_PHONE70 || WINDOWS_PHONE71 || WINDOWS_PHONE80 || SILVERLIGHT4 || SILVERLIGHT5 || MONOTOUCH || MONOANDROID || PORTABLE)
+#elif !(WINDOWS_PHONE || SILVERLIGHT4 || SILVERLIGHT5 || MONOTOUCH || MONOANDROID || PORTABLE)
     [Serializable]
     internal sealed class BigInteger : ISerializable, 
 #else
@@ -205,7 +205,7 @@ namespace BigIntegerLibrary
             }
         }
 
-#if !(WINDOWS_PHONE70 || WINDOWS_PHONE71 || WINDOWS_PHONE80 || SILVERLIGHT4 || SILVERLIGHT5 || WindowsCE || PORTABLE)
+#if !(WINDOWS_PHONE || SILVERLIGHT4 || SILVERLIGHT5 || WindowsCE || PORTABLE)
         /// <summary>
         /// Constructor deserializing a BigInteger.
         /// </summary>
@@ -233,7 +233,7 @@ namespace BigIntegerLibrary
 
         #region Public Methods
 
-#if !(WINDOWS_PHONE70 || WINDOWS_PHONE71 || WINDOWS_PHONE80 || SILVERLIGHT4 || SILVERLIGHT5 || WindowsCE || MONOTOUCH || MONOANDROID || PORTABLE)
+#if !(WINDOWS_PHONE || SILVERLIGHT4 || SILVERLIGHT5 || WindowsCE || MONOTOUCH || MONOANDROID || PORTABLE)
         /// <summary>
         /// BigInteger serializing method, which should not be called manually.
         /// </summary>
@@ -914,6 +914,40 @@ namespace BigIntegerLibrary
         public static implicit operator BigInteger(long n)
         {
             return new BigInteger(n);
+        }
+
+        /// <summary>
+        /// Implicit conversion operator from int to BigInteger.
+        /// </summary>
+        /// <param name="n">The int to be converted to a BigInteger</param>
+        /// <returns>The BigInteger converted from the given int</returns>
+        public static implicit operator BigInteger(int n)
+        {
+           return new BigInteger(n);
+        }
+
+        public static explicit operator int(BigInteger value)
+        {
+           long result = 0;
+           for (var index = value.size - 1; index >= 0; index--)
+           {
+              result *= NumberBase;
+              result += value.digits[index];
+           }
+
+           return value.sign == Sign.Negative ? -1 * (int)result : (int)result;
+        }
+
+        public static explicit operator ulong(BigInteger value)
+        {
+           ulong result = 0;
+           for (var index = value.size - 1; index >= 0; index--)
+           {
+              result *= NumberBase;
+              result += (ulong)value.digits[index];
+           }
+
+           return result;
         }
 
         /// <summary>

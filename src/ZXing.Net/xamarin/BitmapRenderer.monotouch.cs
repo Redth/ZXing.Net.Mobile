@@ -48,7 +48,7 @@ namespace ZXing.Rendering
 					context.FillRect(new CGRect(x, y, 1, 1));
 				}
 			}
-			
+
 			
 			var img = UIGraphics.GetImageFromCurrentImageContext();
 			
