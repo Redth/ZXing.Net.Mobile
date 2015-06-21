@@ -93,14 +93,14 @@ namespace ZXing.Mobile
 			get
 			{
 
-				if (_initialized && _photoCamera != null)
+				if (_initialized && _photoCamera != null && _photoCamera.IsFlashModeSupported(FlashMode.On))
 					return _photoCamera.FlashMode != FlashMode.Off ? _photoCamera.FlashMode : FlashMode.Off;
 
 				return FlashMode.Off;
 			}
 			set
 			{
-				if (_photoCamera != null)
+				if (_photoCamera != null && _photoCamera.IsFlashModeSupported(FlashMode.On))
 					_photoCamera.FlashMode = value;
 			}
 		}
@@ -161,7 +161,7 @@ namespace ZXing.Mobile
 
 					CameraButtons.ShutterKeyHalfPressed += (o, arg) =>
 					{
-						_photoCamera.Focus();
+                        Focus();
 					};
 
 					_timer.Start();
@@ -173,7 +173,7 @@ namespace ZXing.Mobile
 				// Do nothing
 			}
 
-            _photoCamera.Focus();
+            Focus();
 		}
 
         public void Focus()
@@ -218,7 +218,7 @@ namespace ZXing.Mobile
 
 		public void ShutterHalfPressed()
 		{
-			_photoCamera.Focus();
+            Focus();
 		}
 
 		private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
@@ -231,7 +231,11 @@ namespace ZXing.Mobile
 
 			_luminance = new PhotoCameraLuminanceSource(width, height);
 
-			_photoCamera.FlashMode = FlashMode.Off;
+            // If a phone does not have flash, IsFlashModeSupported returns true for FlashMode.Off. However,
+            //   the FlashMode property will throw an exception if there is no flash. Because of this, we
+            //   check for FlashMode.On, as this will return false if the phone does not support flash.
+            if (_photoCamera.IsFlashModeSupported(FlashMode.On))
+			    _photoCamera.FlashMode = FlashMode.Off;
 
 			_initialized = true;
 
