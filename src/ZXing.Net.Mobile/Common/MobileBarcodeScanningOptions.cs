@@ -18,6 +18,8 @@ namespace ZXing.Mobile
 			//this.AutoRotate = true;
 			this.DelayBetweenAnalyzingFrames = 150;
 			this.InitialDelayBeforeAnalyzingFrames = 300;
+			this.ShutdownCameraAfterScan = true;
+			this.DelayAfterScanWithoutShutdown = 1000;
 		}
 
 		public CameraResolutionSelectorDelegate CameraResolutionSelector { get;set; }
@@ -28,6 +30,9 @@ namespace ZXing.Mobile
 		public string CharacterSet { get;set; }
 		public bool? TryInverted { get;set; }
 		public bool? UseFrontCameraIfAvailable { get; set; }
+
+		public bool ShutdownCameraAfterScan { get; set; }
+		public int DelayAfterScanWithoutShutdown { get; set; }
 
 		public int DelayBetweenAnalyzingFrames { get;set;}
 		public int InitialDelayBeforeAnalyzingFrames { get;set; }
