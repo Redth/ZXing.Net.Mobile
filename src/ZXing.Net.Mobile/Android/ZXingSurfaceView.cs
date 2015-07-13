@@ -15,6 +15,7 @@ using Android.Graphics;
 using Android.Content.PM;
 using Android.Hardware;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ZXing.Mobile
 {
@@ -33,6 +34,8 @@ namespace ZXing.Mobile
 		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> callback;
 		Activity activity;
+
+        static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim(true);
 
 		public ZXingSurfaceView (Activity activity, MobileBarcodeScanningOptions options, Action<ZXing.Result> callback)
 			: base (activity)
@@ -89,9 +92,11 @@ namespace ZXing.Mobile
 
 			var perf = PerformanceCounter.Start ();
 
+            GetExclusiveAccess();
+
 			try 
 			{
-				var version = Android.OS.Build.VERSION.SdkInt;
+				var version = Build.VERSION.SdkInt;
 
 				if (version >= BuildVersionCodes.Gingerbread)
 				{
@@ -497,19 +502,24 @@ namespace ZXing.Mobile
 		{
 			tokenSource.Cancel();
 			
-			if (camera != null) {
-		                try {
-		                    camera.SetPreviewCallback(null);
-		                    camera.StopPreview();
-		                    camera.Release();
-		                }
-		                catch (Exception e) {
-		                    Android.Util.Log.Error("ZXing.Net.Mobile", e.ToString());
-		                }
-		                finally {
-		                    camera = null;
-		                }
-			}
+            if (camera == null)
+                return;
+
+            var theCamera = camera;
+            camera = null;
+
+            // make this asyncronous so that we can return from the view straight away instead of waiting for the camera to release.
+            Task.Factory.StartNew(() => {
+                try {
+                    theCamera.SetPreviewCallback(null);
+                    theCamera.StopPreview();
+                    theCamera.Release();
+                } catch (Exception e) {
+                    Android.Util.Log.Error("ZXing.Net.Mobile", e.ToString());
+                } finally {
+                    ReleaseExclusiveAccess();
+                }
+            });
 		}
 		
 		
@@ -566,6 +576,24 @@ namespace ZXing.Mobile
 			
 			return new Size(s.Width, s.Height);
 		}
+
+        private void GetExclusiveAccess()
+        {
+            Android.Util.Log.Debug("ZXing.Net.Mobile", "Getting Camera Exclusive access");
+            var result = _cameraLockEvent.Wait(TimeSpan.FromSeconds(10));
+            if (!result)
+                throw new Exception("Couldn't get exclusive access to the camera");
+
+            _cameraLockEvent.Reset();
+            Android.Util.Log.Debug("ZXing.Net.Mobile", "Got Camera Exclusive access");
+        }
+
+        private void ReleaseExclusiveAccess()
+        {
+            // release the camera exclusive access allowing it to be used again.
+            Android.Util.Log.Debug("ZXing.Net.Mobile", "Releasing Camera exclusive access");
+            _cameraLockEvent.Set();
+        }
 	}
 }
 
