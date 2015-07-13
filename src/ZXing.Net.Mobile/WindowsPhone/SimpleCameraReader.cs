@@ -161,7 +161,14 @@ namespace ZXing.Mobile
 
 					CameraButtons.ShutterKeyHalfPressed += (o, arg) =>
 					{
-						_photoCamera.Focus();
+						try
+						{
+							_photoCamera.Focus();
+						}
+						catch
+						{
+							// Do nothing
+						}
 					};
 
 					_timer.Start();
