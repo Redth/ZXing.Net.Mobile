@@ -34,6 +34,7 @@ namespace ZXing.Mobile
 		MobileBarcodeScanningOptions options;
 		Action<ZXing.Result> callback;
 		Activity activity;
+		bool wasScanned;
 
         static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim(true);
 
@@ -251,6 +252,11 @@ namespace ZXing.Mobile
 			if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
 				return;
 
+			if (wasScanned && ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayAfterScanWithoutShutdown))
+				return;
+
+			wasScanned = false;
+
 			var cameraParameters = camera.GetParameters();
 			var width = cameraParameters.PreviewSize.Width;
 			var height = cameraParameters.PreviewSize.Height;
@@ -312,12 +318,14 @@ namespace ZXing.Mobile
 						return;
 				
 					Android.Util.Log.Debug ("ZXing.Mobile", "Barcode Found: " + result.Text);
-				
-					ShutdownCamera ();
+
+					if (options.ShutdownCameraAfterScan)
+					{
+						ShutdownCamera();
+					}
+					wasScanned = true;
 
 					callback (result);
-
-
 				}
 				catch (ReaderException)
 				{
