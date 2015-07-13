@@ -22,11 +22,14 @@ namespace Sample.Android
 		{
 			base.OnCreate (bundle);
 
+            // Initialize the scanner first so we can track the current context
+            MobileBarcodeScanner.Initialize (Application);
+
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
 
 			//Create a new instance of our Scanner
-			scanner = new MobileBarcodeScanner(this);
+			scanner = new MobileBarcodeScanner();
 
 			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
 			buttonScanDefaultView.Click += async delegate {

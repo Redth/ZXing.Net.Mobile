@@ -6,14 +6,20 @@ using ZXing;
 namespace ZXing.Mobile
 {
 
-	public class MobileBarcodeScanner : MobileBarcodeScannerBase
+    public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-		public MobileBarcodeScanner (Context context)
-		{
-			this.Context = context;
-		}
+        static ActivityLifecycleContextListener lifecycleListener = new ActivityLifecycleContextListener ();
 
-		public Context Context { get; private set; }
+        public static void Initialize (Android.App.Application app)
+        {
+            app.RegisterActivityLifecycleCallbacks (lifecycleListener);
+        }
+
+        public static void Uninitialize (Android.App.Application app)
+        {
+            app.UnregisterActivityLifecycleCallbacks (lifecycleListener);
+        }
+
 		public Android.Views.View CustomOverlay { get; set; }
 		//public int CaptureSound { get;set; }
 			
@@ -25,7 +31,7 @@ namespace ZXing.Mobile
 			      
 				var waitScanResetEvent = new System.Threading.ManualResetEvent(false);
 
-				var scanIntent = new Intent(this.Context, typeof(ZxingActivity));
+				var scanIntent = new Intent(lifecycleListener.Context, typeof(ZxingActivity));
 
 				scanIntent.AddFlags(ActivityFlags.NewTask);
 
@@ -48,7 +54,7 @@ namespace ZXing.Mobile
 					waitScanResetEvent.Set();
 				};
 
-				this.Context.StartActivity(scanIntent);
+				lifecycleListener.Context.StartActivity(scanIntent);
 
 				waitScanResetEvent.WaitOne();
 
