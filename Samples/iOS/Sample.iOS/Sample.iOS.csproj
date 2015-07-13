@@ -109,9 +109,9 @@
       <Project>{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}</Project>
       <Name>ZXing.Net.Mobile.iOS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.ios.csproj">
-      <Project>{ACB2F35D-BFDA-41B1-9B79-B82BF23F6769}</Project>
-      <Name>zxing.ios</Name>
+    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.portable.csproj">
+      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
+      <Name>zxing.portable</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

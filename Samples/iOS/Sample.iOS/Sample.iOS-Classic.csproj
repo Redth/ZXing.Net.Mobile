@@ -108,9 +108,9 @@
       <Project>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</Project>
       <Name>ZXing.Net.Mobile.iOS-Classic</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.monotouch.csproj">
-      <Project>{BD0FA561-182D-4A89-BAA7-228693B07862}</Project>
-      <Name>zxing.monotouch</Name>
+    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.portable.csproj">
+      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
+      <Name>zxing.portable</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
