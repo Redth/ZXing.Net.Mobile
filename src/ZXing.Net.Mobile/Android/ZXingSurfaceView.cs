@@ -35,7 +35,7 @@ namespace ZXing.Mobile
 		Action<ZXing.Result> callback;
 		Activity activity;
 
-        private static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim(true);
+        static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim(true);
 
 		public ZXingSurfaceView (Activity activity, MobileBarcodeScanningOptions options, Action<ZXing.Result> callback)
 			: base (activity)
@@ -77,7 +77,7 @@ namespace ZXing.Mobile
 
 			if (!PlatformChecks.HasCameraPermission (this.Context))
 			{
-				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + PlatformChecks.PERMISSION_CAMERA + "), but was not found in your AndroidManifest.xml file.";
+				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + Android.Manifest.Permission.Camera + "), but was not found in your AndroidManifest.xml file.";
 				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
 
 				throw new UnauthorizedAccessException (msg);
@@ -92,11 +92,11 @@ namespace ZXing.Mobile
 
 			var perf = PerformanceCounter.Start ();
 
+            GetExclusiveAccess();
+
 			try 
 			{
-                GetExclusiveAccess();
-
-				var version = Android.OS.Build.VERSION.SdkInt;
+				var version = Build.VERSION.SdkInt;
 
 				if (version >= BuildVersionCodes.Gingerbread)
 				{
@@ -385,7 +385,7 @@ namespace ZXing.Mobile
 
 			if (!PlatformChecks.HasFlashlightPermission (this.Context))
 			{
-				var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + PlatformChecks.PERMISSION_FLASHLIGHT + "), but was not found in your AndroidManifest.xml file.";
+				var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + Android.Manifest.Permission.Flashlight + "), but was not found in your AndroidManifest.xml file.";
 				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
 
 				throw new UnauthorizedAccessException (msg);
@@ -425,7 +425,7 @@ namespace ZXing.Mobile
 			}
 		}
 
-		int cameraDegrees = 0;
+		//int cameraDegrees = 0;
 
 		int getCameraDisplayOrientation(Activity context)
 		{
@@ -489,7 +489,7 @@ namespace ZXing.Mobile
 			var degrees = getCameraDisplayOrientation (context);
 
 			Android.Util.Log.Debug ("ZXING", "Changing Camera Orientation to: " + degrees);
-			cameraDegrees = degrees;
+			//cameraDegrees = degrees;
 
 			try { camera.SetDisplayOrientation (degrees); }
 			catch (Exception ex) {
@@ -500,7 +500,7 @@ namespace ZXing.Mobile
 		public void ShutdownCamera ()
 		{
 			tokenSource.Cancel();
-
+			
             if (camera == null)
                 return;
 
@@ -508,20 +508,17 @@ namespace ZXing.Mobile
             camera = null;
 
             // make this asyncronous so that we can return from the view straight away instead of waiting for the camera to release.
-            Task.Factory.StartNew(() =>
-                {
-                    try {
-                        theCamera.SetPreviewCallback(null);
-                        theCamera.StopPreview();
-                        theCamera.Release();
-                    }
-                    catch (Exception e) {
-                        Android.Util.Log.Error("ZXing.Net.Mobile", e.ToString());
-                    }
-                    finally {
-                        ReleaseExclusiveAccess();
-                    }
-                });
+            Task.Factory.StartNew(() => {
+                try {
+                    theCamera.SetPreviewCallback(null);
+                    theCamera.StopPreview();
+                    theCamera.Release();
+                } catch (Exception e) {
+                    Android.Util.Log.Error("ZXing.Net.Mobile", e.ToString());
+                } finally {
+                    ReleaseExclusiveAccess();
+                }
+            });
 		}
 		
 		
@@ -582,7 +579,7 @@ namespace ZXing.Mobile
         private void GetExclusiveAccess()
         {
             Android.Util.Log.Debug("ZXing.Net.Mobile", "Getting Camera Exclusive access");
-            var result = _cameraLockEvent.Wait(TimeSpan.FromSeconds(30));
+            var result = _cameraLockEvent.Wait(TimeSpan.FromSeconds(10));
             if (!result)
                 throw new Exception("Couldn't get exclusive access to the camera");
 

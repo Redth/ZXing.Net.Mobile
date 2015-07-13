@@ -276,9 +276,9 @@ namespace ZXing.Mobile
 			// configure the output
 			queue = new DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
 
-			var barcodeReader = new BarcodeReader(null, (img) => 	
+			var barcodeReader = new BarcodeReaderiOS(null, (img) => 	
 			{
-				var src = new RGBLuminanceSource(img); //, bmp.Width, bmp.Height);
+				var src = new RGBLuminanceSourceiOS(img); //, bmp.Width, bmp.Height);
 
 				//Don't try and rotate properly if we're autorotating anyway
 				if (ScanningOptions.AutoRotate.HasValue && ScanningOptions.AutoRotate.Value)
@@ -338,7 +338,7 @@ namespace ZXing.Mobile
 					//var sw = new System.Diagnostics.Stopwatch();
 					//sw.Start();
 
-					var rs = barcodeReader.Decode(img);
+                    var rs = barcodeReader.Decode(img);
 
 					//sw.Stop();
 
