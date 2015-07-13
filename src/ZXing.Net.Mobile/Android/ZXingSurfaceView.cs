@@ -74,7 +74,7 @@ namespace ZXing.Mobile
 
 			if (!PlatformChecks.HasCameraPermission (this.Context))
 			{
-				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + PlatformChecks.PERMISSION_CAMERA + "), but was not found in your AndroidManifest.xml file.";
+				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + Android.Manifest.Permission.Camera + "), but was not found in your AndroidManifest.xml file.";
 				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
 
 				throw new UnauthorizedAccessException (msg);
@@ -380,7 +380,7 @@ namespace ZXing.Mobile
 
 			if (!PlatformChecks.HasFlashlightPermission (this.Context))
 			{
-				var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + PlatformChecks.PERMISSION_FLASHLIGHT + "), but was not found in your AndroidManifest.xml file.";
+				var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + Android.Manifest.Permission.Flashlight + "), but was not found in your AndroidManifest.xml file.";
 				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
 
 				throw new UnauthorizedAccessException (msg);
@@ -420,7 +420,7 @@ namespace ZXing.Mobile
 			}
 		}
 
-		int cameraDegrees = 0;
+		//int cameraDegrees = 0;
 
 		int getCameraDisplayOrientation(Activity context)
 		{
@@ -484,7 +484,7 @@ namespace ZXing.Mobile
 			var degrees = getCameraDisplayOrientation (context);
 
 			Android.Util.Log.Debug ("ZXING", "Changing Camera Orientation to: " + degrees);
-			cameraDegrees = degrees;
+			//cameraDegrees = degrees;
 
 			try { camera.SetDisplayOrientation (degrees); }
 			catch (Exception ex) {

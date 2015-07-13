@@ -14,24 +14,21 @@ namespace ZXing.Mobile
 {
 	class PlatformChecks
 	{
-		public const string PERMISSION_CAMERA = "android.permission.CAMERA";
-		public const string PERMISSION_FLASHLIGHT = "android.permission.FLASHLIGHT";
-
 		public static bool HasCameraPermission(Context context)
 		{
-			return HasPermission (context, PERMISSION_CAMERA);
+            return HasPermission (context, Android.Manifest.Permission.Camera);
 		}
 
 		public static bool HasFlashlightPermission(Context context)
 		{
-			return HasPermission (context, PERMISSION_FLASHLIGHT);
+            return HasPermission (context, Android.Manifest.Permission.Flashlight);
 		}
 
 		static bool HasPermission(Context context, string permission)
 		{
 			PermissionInfo pi = null;
 
-			try { pi = context.PackageManager.GetPermissionInfo (PERMISSION_CAMERA, PackageInfoFlags.Permissions); }
+			try { pi = context.PackageManager.GetPermissionInfo (permission, PackageInfoFlags.Permissions); }
 			catch { }
 
 			return pi != null;
