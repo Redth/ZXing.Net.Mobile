@@ -16,6 +16,7 @@ namespace ZXing.Mobile
 		void Cancel();
 
 		bool IsTorchOn { get; }
+        bool ContinuousScanning { get;set; }
 
 		event Action<ZXing.Result> OnScannedResult;
 

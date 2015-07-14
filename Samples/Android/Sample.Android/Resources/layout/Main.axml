@@ -3,12 +3,18 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:weightSum="1.5">
+    android:weightSum="2.0">
     <Button
         android:text="Scan with Default Overlay"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/buttonScanDefaultView"
+        android:layout_weight="0.5" />
+    <Button
+        android:text="Continuous Scanning"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonScanContinuous"
         android:layout_weight="0.5" />
     <Button
         android:id="@+id/buttonScanCustomView"

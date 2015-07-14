@@ -32,6 +32,9 @@ namespace ZXing.Mobile
 		Task<Result> Scan(MobileBarcodeScanningOptions options);
 		Task<Result> Scan();
 
+        void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler);
+        void ScanContinuously(Action<Result> scanHandler);
+
 		void Cancel();
 
 		void Torch(bool on);
@@ -71,6 +74,13 @@ namespace ZXing.Mobile
 		{
 			return Scan(MobileBarcodeScanningOptions.Default);
 		}
+
+        public void ScanContinuously (Action<Result> scanHandler)
+        {
+            ScanContinuously (MobileBarcodeScanningOptions.Default, scanHandler);
+        }
+
+        public abstract void ScanContinuously (MobileBarcodeScanningOptions options, Action<Result> scanHandler);
 
 		public abstract void Cancel();
 

@@ -58,8 +58,7 @@ namespace Sample.Android
                 }
 
                 // Otherwise, proceed with result
-                Toast.MakeText (this, "Scanned: " + result.Text, ToastLength.Short).Show ();
-
+                RunOnUiThread (() => Toast.MakeText (this, "Scanned: " + result.Text, ToastLength.Short).Show ());
             });
         }
 	}

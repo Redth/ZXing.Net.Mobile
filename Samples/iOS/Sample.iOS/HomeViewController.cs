@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 #if __UNIFIED__
 using Foundation;
+using CoreGraphics;
 using UIKit;
 #else
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
+using CGRect = System.Drawing.RectangleF;
 #endif
 
 using ZXing;
@@ -20,6 +19,7 @@ namespace Sample.iOS
 	public class HomeViewController : UIViewController
 	{
 		UIButton buttonCustomScan;
+        UIButton buttonContinuousScan;
 		UIButton buttonDefaultScan;
 		UIButton buttonAVCaptureScan;
 
@@ -41,6 +41,8 @@ namespace Sample.iOS
 			if (is7orgreater)
 				EdgesForExtendedLayout = UIRectEdge.None;
 	
+            var startX = (View.Frame.Width - 280) / 2;
+            View.BackgroundColor = UIColor.White;
 			NavigationItem.Title = "ZXing.Net.Mobile";
 
 			//Create a new instance of our scanner
@@ -48,7 +50,7 @@ namespace Sample.iOS
 
 			//Setup our button
 			buttonDefaultScan = new UIButton(UIButtonType.RoundedRect);
-			buttonDefaultScan.Frame = new RectangleF(20, 80, 280, 40);
+            buttonDefaultScan.Frame = new CGRect(startX, 20, 280, 40);
 			buttonDefaultScan.SetTitle("Scan with Default View", UIControlState.Normal);
 			buttonDefaultScan.TouchUpInside += async (sender, e) => 
 			{
@@ -64,12 +66,31 @@ namespace Sample.iOS
 				HandleScanResult(result);
 			};
 
+            buttonContinuousScan = new UIButton(UIButtonType.RoundedRect);
+            buttonContinuousScan.Frame = new CGRect(startX, 80, 280, 40);
+            buttonContinuousScan.SetTitle("Scan Continuously", UIControlState.Normal);
+            buttonContinuousScan.TouchUpInside += delegate {
+                //Tell our scanner to use the default overlay
+                scanner.UseCustomOverlay = false;
+
+                //Tell our scanner to use our custom overlay
+                scanner.UseCustomOverlay = true;
+                scanner.CustomOverlay = customOverlay;
+
+
+                var opt = new MobileBarcodeScanningOptions ();
+                opt.DelayBetweenContinuousScans = 3000;
+
+                //Start scanning
+                scanner.ScanContinuously (opt, true, HandleScanResult);
+            };
+
 			buttonCustomScan = new UIButton(UIButtonType.RoundedRect);
-			buttonCustomScan.Frame = new RectangleF(20, 20, 280, 40);
+			buttonCustomScan.Frame = new CGRect(startX, 140, 280, 40);
 			buttonCustomScan.SetTitle("Scan with Custom View", UIControlState.Normal);
-			buttonCustomScan.TouchUpInside += async (sender, e) =>
-			{
-				//Create an instance of our custom overlay
+			buttonCustomScan.TouchUpInside += async (sender, e) => {
+				
+                //Create an instance of our custom overlay
 				customOverlay = new CustomOverlayView();
 				//Wireup the buttons from our custom overlay
 				customOverlay.ButtonTorch.TouchUpInside += delegate {
@@ -91,7 +112,7 @@ namespace Sample.iOS
 			if (is7orgreater)
 			{
 				buttonAVCaptureScan = new UIButton (UIButtonType.RoundedRect);
-				buttonAVCaptureScan.Frame = new RectangleF (20, 140, 280, 40);
+				buttonAVCaptureScan.Frame = new CGRect (startX, 200, 280, 40);
 				buttonAVCaptureScan.SetTitle ("Scan with AVCapture Engine", UIControlState.Normal);
 				buttonAVCaptureScan.TouchUpInside += async (sender, e) =>
 				{
@@ -110,6 +131,7 @@ namespace Sample.iOS
 
 			this.View.AddSubview (buttonDefaultScan);
 			this.View.AddSubview (buttonCustomScan);
+            this.View.AddSubview (buttonContinuousScan);
 
 			if (is7orgreater)
 				this.View.AddSubview (buttonAVCaptureScan);

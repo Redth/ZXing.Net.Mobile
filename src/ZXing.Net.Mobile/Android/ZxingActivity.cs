@@ -55,6 +55,7 @@ namespace ZXing.Mobile
 		public static MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public static string TopText { get;set; }
 		public static string BottomText { get;set; }
+        public static bool ScanContinuously { get;set; }
 
 		ZXingScannerFragment scannerFragment;
 
@@ -96,7 +97,8 @@ namespace ZXing.Mobile
                 if (evt != null)
                     OnScanCompleted(result);
 
-                this.Finish();
+                if (!ZxingActivity.ScanContinuously)
+                    this.Finish();
             });
         }
 

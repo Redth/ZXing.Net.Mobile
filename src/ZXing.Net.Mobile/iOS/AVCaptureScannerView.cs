@@ -61,6 +61,8 @@ namespace ZXing.Mobile
 		UIView layerView;
 		UIView overlayView = null;
 
+        public event Action OnCancelButtonPressed;
+
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
@@ -71,12 +73,17 @@ namespace ZXing.Mobile
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview ();
 
-			if (UseCustomOverlayView && CustomOverlayView != null)
-				overlayView = CustomOverlayView;
-			else
-				overlayView = new ZXingDefaultOverlayView (new CGRect(0, 0, this.Frame.Width, this.Frame.Height),
-					TopText, BottomText, CancelButtonText, FlashButtonText,
-					() => { StopScanning (); resultCallback (null); }, ToggleTorch);
+            if (UseCustomOverlayView && CustomOverlayView != null)
+                overlayView = CustomOverlayView;
+            else {
+                overlayView = new ZXingDefaultOverlayView (new CGRect (0, 0, this.Frame.Width, this.Frame.Height),
+                    TopText, BottomText, CancelButtonText, FlashButtonText,
+                    () => {
+                        var evt = OnCancelButtonPressed;
+                        if (evt != null)
+                            evt();
+                    }, ToggleTorch);
+            }
 
 			if (overlayView != null)
 			{
