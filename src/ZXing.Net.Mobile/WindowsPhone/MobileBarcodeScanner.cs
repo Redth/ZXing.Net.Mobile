@@ -22,6 +22,31 @@ namespace ZXing.Mobile
 
 		System.Windows.Threading.Dispatcher Dispatcher { get; set; }
 
+        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            Result result = null;
+
+            //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
+
+            ScanPage.ScanningOptions = options;
+            ScanPage.ResultFoundAction = (r) =>
+            {
+
+            };
+
+            ScanPage.UseCustomOverlay = this.UseCustomOverlay;
+            ScanPage.CustomOverlay = this.CustomOverlay;
+            ScanPage.TopText = TopText;
+            ScanPage.BottomText = BottomText;
+            ScanPage.ContinuousScanning = true;
+
+            this.Dispatcher.BeginInvoke(() =>
+            {
+                ((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
+                    new Uri("/ZXingNetMobile;component/WindowsPhone/ScanPage.xaml", UriKind.Relative));
+            });
+        }
+
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
             return Task.Factory.StartNew(new Func<Result>(() =>
@@ -33,7 +58,7 @@ namespace ZXing.Mobile
                 //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
 
                 ScanPage.ScanningOptions = options;
-                ScanPage.FinishedAction = (r) => 
+                ScanPage.ResultFoundAction = (r) => 
                 {
                     result = r;
                     scanResultResetEvent.Set();

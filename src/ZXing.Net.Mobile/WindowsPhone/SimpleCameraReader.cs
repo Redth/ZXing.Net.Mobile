@@ -159,17 +159,7 @@ namespace ZXing.Mobile
 					_timer.Interval = _scanInterval;
 					_timer.Tick += (o, arg) => ScanPreviewBuffer();
 
-					CameraButtons.ShutterKeyHalfPressed += (o, arg) =>
-					{
-						try
-						{
-							_photoCamera.Focus();
-						}
-						catch
-						{
-							// Do nothing
-						}
-					};
+                    CameraButtons.ShutterKeyHalfPressed += CameraButtons_ShutterKeyHalfPressed;
 
 					_timer.Start();
 				});
@@ -182,6 +172,11 @@ namespace ZXing.Mobile
 
             _photoCamera.Focus();
 		}
+
+        private void CameraButtons_ShutterKeyHalfPressed(object sender, EventArgs e)
+        {
+            Focus();
+        }
 
         public void Focus()
         {
@@ -217,15 +212,12 @@ namespace ZXing.Mobile
 
 			if (_photoCamera != null)
 			{
+                CameraButtons.ShutterKeyHalfPressed -= CameraButtons_ShutterKeyHalfPressed;
+
                 _photoCamera.Initialized -= OnPhotoCameraInitialized;
 				_photoCamera.Dispose();
 				_photoCamera = null;
 			}
-		}
-
-		public void ShutterHalfPressed()
-		{
-			_photoCamera.Focus();
 		}
 
 		private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
