@@ -8,6 +8,8 @@ namespace ZXing.Mobile
 
     public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
+        public const string TAG = "ZXing.Net.Mobile";
+
         static ActivityLifecycleContextListener lifecycleListener = new ActivityLifecycleContextListener ();
 
         public static void Initialize (Android.App.Application app)
@@ -35,7 +37,7 @@ namespace ZXing.Mobile
 
 				scanIntent.AddFlags(ActivityFlags.NewTask);
 
-				ZxingActivity.UseCustomView = this.UseCustomOverlay;
+				ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
 				ZxingActivity.CustomOverlayView = this.CustomOverlay;
 				ZxingActivity.ScanningOptions = options;
 				ZxingActivity.TopText = TopText;

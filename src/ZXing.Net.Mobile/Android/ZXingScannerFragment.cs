@@ -1,5 +1,6 @@
 
 using System;
+using System.Threading.Tasks;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
@@ -7,22 +8,13 @@ using Android.Support.V4.App;
 
 namespace ZXing.Mobile
 {
-	public class ZXingScannerFragment : Fragment
+    public class ZXingScannerFragment : Fragment, IZXingScanner<View>
 	{
 	    public ZXingScannerFragment() 
         {
-            ScanningOptions = MobileBarcodeScanningOptions.Default;
-            UseCustomView = false;
+            UseCustomOverlayView = false;
 	    }
-
-		public ZXingScannerFragment(Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
-		{
-            Callback = scanResultCallback;
-			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
-			UseCustomView = false;
-		}
-
-	    public Action<Result> Callback { get; set; }
+            
 		FrameLayout frame;
 
 	    public override View OnCreateView (LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
@@ -34,19 +26,19 @@ namespace ZXing.Mobile
 
 		public override void OnResume ()
 		{
-			base.OnResume ();
+            base.OnResume ();
 
 			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
 			layoutParams.Weight = 1;
 
 			try
 			{
-				scanner = new ZXingSurfaceView (this.Activity, ScanningOptions, Callback);
+				scanner = new ZXingSurfaceView (this.Activity);
 
 				frame.AddView(scanner, layoutParams);
 
 
-				if (!UseCustomView)
+				if (!UseCustomOverlayView)
 				{
 					zxingOverlay = new ZxingOverlayView (this.Activity);
 					zxingOverlay.TopText = TopText ?? "";
@@ -63,6 +55,12 @@ namespace ZXing.Mobile
 			{
 				Console.WriteLine ("Create Surface View Failed: " + ex);
 			}
+
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "ZXingScannerFragment->OnResume exit");
+
+
+            if (scanImmediately)
+                scan ();            
 		}
 
 		public override void OnPause ()
@@ -73,15 +71,15 @@ namespace ZXing.Mobile
 
 			frame.RemoveView (scanner);
 
-			if (!UseCustomView)
+			if (!UseCustomOverlayView)
 				frame.RemoveView (zxingOverlay);
 			else if (CustomOverlayView != null)
 				frame.RemoveView (CustomOverlayView);
 		}
 
 		public View CustomOverlayView { get;set; }
-		public bool UseCustomView { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
+        public bool UseCustomOverlayView { get; set ; }
+		//public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public string TopText { get;set; }
 		public string BottomText { get;set; }
 		
@@ -90,18 +88,74 @@ namespace ZXing.Mobile
 
 		public void SetTorch(bool on)
 		{
-			this.scanner.Torch(on);
+			scanner.SetTorch(on);
 		}
 		
 		public void AutoFocus()
 		{
-			this.scanner.AutoFocus();
+			scanner.AutoFocus();
 		}
 
-		public void Shutdown()
-		{
-			scanner.ShutdownCamera ();
-		}
+        Action<Result> scanCallback;
+        bool scanImmediately = false;
+
+        public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
+        {            
+            ScanningOptions = options;
+            scanCallback = callback;
+
+            if (scanner == null) {
+                scanImmediately = true;
+                return;
+            }
+
+            scan ();
+        }
+
+        void scan ()
+        {
+            scanner.StartScanning (ScanningOptions, scanCallback);
+        }
+
+
+        public void StartScanning (Action<Result> callback)
+        {
+            StartScanning (MobileBarcodeScanningOptions.Default, callback);
+        }
+
+        public void StopScanning ()
+        {
+            scanner.StopScanning ();
+        }
+
+        public void PauseAnalysis ()
+        {
+            scanner.PauseAnalysis ();
+        }
+
+        public void ResumeAnalysis ()
+        {
+            scanner.ResumeAnalysis ();
+        }
+
+        public void ToggleTorch ()
+        {
+            scanner.ToggleTorch ();
+        }
+
+        public bool IsTorchOn {
+            get {
+                return scanner.IsTorchOn;
+            }
+        }
+
+        public bool IsAnalyzing {
+            get {
+                return scanner.IsAnalyzing;
+            }
+        }
+
+        public MobileBarcodeScanningOptions ScanningOptions { get; private set; }
 	}
 }
 

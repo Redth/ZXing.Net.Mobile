@@ -15,12 +15,12 @@
     <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>none</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>..\..\Build\Debug\android\</OutputPath>
     <WarningLevel>4</WarningLevel>
     <AndroidLinkMode>None</AndroidLinkMode>
     <DefineConstants>MONODROID;DEBUG</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -45,7 +45,6 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Android\ZxingActivity.cs" />
     <Compile Include="Android\ZxingOverlayView.cs" />
-    <Compile Include="Android\ZxingScanner.cs" />
     <Compile Include="Android\ZXingScannerFragment.cs" />
     <Compile Include="Android\ZXingSurfaceView.cs" />
     <Compile Include="Common\IMobileBarcodeScanner.cs" />
@@ -54,6 +53,7 @@
     <Compile Include="Common\Performance.cs" />
     <Compile Include="Common\CameraResolution.cs" />
     <Compile Include="Android\ActivityLifecycleContextListener.cs" />
+    <Compile Include="Android\MobileBarcodeScanner.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
