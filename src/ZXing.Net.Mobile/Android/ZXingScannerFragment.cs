@@ -1,6 +1,4 @@
-
 using System;
-using System.Threading.Tasks;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
@@ -79,7 +77,7 @@ namespace ZXing.Mobile
 
 		public View CustomOverlayView { get;set; }
         public bool UseCustomOverlayView { get; set ; }
-		//public MobileBarcodeScanningOptions ScanningOptions { get;set; }
+		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public string TopText { get;set; }
 		public string BottomText { get;set; }
 		
@@ -154,8 +152,6 @@ namespace ZXing.Mobile
                 return scanner.IsAnalyzing;
             }
         }
-
-        public MobileBarcodeScanningOptions ScanningOptions { get; private set; }
 	}
 }
 
