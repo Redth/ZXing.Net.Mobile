@@ -138,7 +138,14 @@ namespace ZXing.Mobile
 
 		private void InitializeCamera()
 		{
-			_photoCamera = new PhotoCamera();
+            if (Options.UseFrontCameraIfAvailable.HasValue && Options.UseFrontCameraIfAvailable.Value)
+            {
+                try { _photoCamera = new PhotoCamera(CameraType.FrontFacing); }
+                catch { }
+            }
+
+            if (_photoCamera == null)
+    			_photoCamera = new PhotoCamera();
 			_photoCamera.Initialized += OnPhotoCameraInitialized;
 		}
 
