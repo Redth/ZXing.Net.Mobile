@@ -143,9 +143,9 @@
       <Project>{C9EFC2F6-AC4C-446C-8FBF-91824B00431D}</Project>
       <Name>ZXing.Net.Mobile.WindowsPhone8</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.wp8.0.csproj">
-      <Project>{B90C2C94-B895-4C7F-BD20-32135AE5D49B}</Project>
-      <Name>zxing.wp8.0</Name>
+    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.portable.csproj">
+      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
+      <Name>zxing.portable</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
