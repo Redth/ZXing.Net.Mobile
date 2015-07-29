@@ -73,22 +73,22 @@ namespace ZXing.Mobile
         
         public bool IsTorchOn
         {
-            get { return _reader.Camera.FlashMode == FlashMode.On; }
+            get { return _reader.FlashMode == FlashMode.On; }
         }
 
         public void Torch(bool on)
         {
-            _reader.Camera.FlashMode = on ? FlashMode.On : FlashMode.Auto;
+            _reader.FlashMode = FlashMode.On;
         }
 
         public void ToggleTorch()
         {
-            _reader.Camera.FlashMode = _reader.Camera.FlashMode == FlashMode.On ? FlashMode.Auto : FlashMode.On;
+            _reader.FlashMode = _reader.FlashMode == FlashMode.Off ? FlashMode.On : FlashMode.Off;
         }
 
         public void AutoFocus()
         {
-            _reader.Camera.Focus();
+            _reader.Focus();
         }
 
         public void StopScanning()
