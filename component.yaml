@@ -1,0 +1,50 @@
+name: ZXing.Net.Mobile
+id: zxing.net.mobile
+publisher: Redth
+license: License.md
+skip_docs: true
+icons: 
+  - ./zxing.net.mobile_128x128.png
+  - ./zxing.net.mobile_512x512.png
+publisher-url: https://github.com/Redth/ZXing.Net.Mobile
+libraries: 
+  ios:
+    - ./Build/Release/ios/zxing.portable.dll
+    - ./Build/Release/ios/ZXingNetMobile.dll
+  ios-unified:
+    - ./Build/Release/ios-unified/zxing.portable.dll
+    - ./Build/Release/ios-unified/ZXingNetMobile.dll
+  android:
+    - ./Build/Release/android/zxing.portable.dll
+    - ./Build/Release/android/ZXingNetMobile.dll
+  winphone-8.0:
+    - ./Build/Release/wp8.0/zxing.portable.dll
+    - ./Build/Release/wp8.0/ZXingNetMobile.dll
+packages:
+  android:
+    - Xamarin.Android.Support.v4, Version=22.2.1.0
+  winphone-8.0:
+    - WriteableBitmapEx, Version=1.5.0.0
+summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library"
+details: ./Details.md
+getting-started: ./GettingStarted.md
+version: 1.5.0.0
+samples: 
+  - name: Xamarin.iOS Unified API Sample
+    path: "./samples/iOS/Sample.iOS.sln"
+    no_build: true
+    skip_docs: true
+  - name: Xamarin.iOS Classic API Sample
+    path: "./samples/iOS/Sample.iOS-Classic.sln"
+    no_build: true
+    skip_docs: true
+  - name: Xamarin.Android Sample
+    path: "./samples/Android/Sample.Android.sln"
+    no_build: true
+    skip_docs: true
+  - name: Windows Phone 8 Sample
+    path: "./samples/WindowsPhone8/Sample.WindowsPhone8.sln"
+    no_build: true
+    skip_docs: true
+no_build: true
+
