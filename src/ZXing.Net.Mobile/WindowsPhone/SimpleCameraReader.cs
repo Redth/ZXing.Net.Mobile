@@ -94,15 +94,14 @@ namespace ZXing.Mobile
 		{
 			get
 			{
-
-				if (_initialized && _photoCamera != null)
+				if (_initialized && _photoCamera != null && _photoCamera.IsFlashModeSupported(FlashMode.On))
 					return _photoCamera.FlashMode != FlashMode.Off ? _photoCamera.FlashMode : FlashMode.Off;
 
 				return FlashMode.Off;
 			}
 			set
 			{
-				if (_photoCamera != null)
+				if (_photoCamera != null && _photoCamera.IsFlashModeSupported(value))
 					_photoCamera.FlashMode = value;
 			}
 		}
@@ -179,7 +178,7 @@ namespace ZXing.Mobile
 				// Do nothing
 			}
 
-            _photoCamera.Focus();
+            Focus();
 		}
 
         private void CameraButtons_ShutterKeyHalfPressed(object sender, EventArgs e)
@@ -203,8 +202,8 @@ namespace ZXing.Mobile
             {
                 if (_photoCamera.IsFocusAtPointSupported)
                     _photoCamera.FocusAtPoint(point.X, point.Y);
-                else if (_photoCamera.IsFocusSupported)
-                    _photoCamera.Focus();
+                else
+                    Focus();
             }
             catch { }
         }
@@ -239,7 +238,8 @@ namespace ZXing.Mobile
 
 			_luminance = new PhotoCameraLuminanceSource(width, height);
 
-			_photoCamera.FlashMode = FlashMode.Off;
+            if (_photoCamera.IsFlashModeSupported(FlashMode.Off))
+    			_photoCamera.FlashMode = FlashMode.Off;
 
 			_initialized = true;
 
