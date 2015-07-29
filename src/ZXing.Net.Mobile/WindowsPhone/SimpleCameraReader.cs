@@ -238,7 +238,7 @@ namespace ZXing.Mobile
 
 			_luminance = new PhotoCameraLuminanceSource(width, height);
 
-            if (_photoCamera.IsFlashModeSupported(FlashMode.Off))
+            if (_photoCamera.IsFlashModeSupported(FlashMode.On))
     			_photoCamera.FlashMode = FlashMode.Off;
 
 			_initialized = true;
