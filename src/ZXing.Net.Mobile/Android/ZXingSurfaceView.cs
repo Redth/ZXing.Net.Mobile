@@ -309,7 +309,11 @@ namespace ZXing.Mobile
 				if (!tokenSource.IsCancellationRequested)
 				{
                     Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
-					camera.AutoFocus(this);
+                    try { 
+                        camera.AutoFocus(this); 
+                    } catch (Exception ex) {
+                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
+                    }
 				}
 			}
 		}
