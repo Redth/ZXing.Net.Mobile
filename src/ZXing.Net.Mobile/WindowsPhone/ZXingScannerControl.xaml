@@ -33,6 +33,9 @@
             <Rectangle VerticalAlignment="Top" Width="480" Height="240" Fill="Black" Opacity="0.3">
             </Rectangle>
 
+            <Border Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="80">
+                <Button Name="buttonToggleFlash" Click="buttonToggleFlash_Click">Flash</Button>
+            </Border>
             <Border Height="240" Width="480" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                 <TextBlock Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
             </Border>

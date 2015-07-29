@@ -162,5 +162,10 @@ namespace ZXing.Mobile
                 _reader.Focus();
             }
         }
+
+        private void buttonToggleFlash_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleTorch();
+        }
     }
 }
