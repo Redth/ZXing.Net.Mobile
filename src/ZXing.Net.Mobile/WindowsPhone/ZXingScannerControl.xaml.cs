@@ -65,6 +65,7 @@ namespace ZXing.Mobile
         public string TopText { get; set; }
         public string BottomText { get; set; }
         public bool UseCustomOverlay { get; set; }
+        public bool ContinuousScanning { get; set; }
 
         public Result LastScanResult { get; set; }
 
@@ -137,7 +138,8 @@ namespace ZXing.Mobile
         
         private void DisplayResult(Result result)
         {
-			StopScanning ();
+            if (!ContinuousScanning)
+			    StopScanning ();
 
             if (ScanCallback != null)
                 ScanCallback(result);

@@ -36,9 +36,11 @@ namespace ZXing.Mobile
 		private PhotoCamera _photoCamera;
 
 		private TimeSpan _scanInterval;
+        private DateTime _lastAnalysis = DateTime.MinValue;
 
         bool doCancel = false;
 		private bool _initialized;
+        private bool _wasScanned = false;
 
 		private VideoBrush _surface;
 
@@ -242,7 +244,18 @@ namespace ZXing.Mobile
 			if (_photoCamera == null) return;
 			if (!_initialized) return;
 
-			try
+            // Don't scan too frequently
+            // Check the minimum time between frames
+            // as well as the min time between continuous scans
+            var msSinceLastPreview = (DateTime.UtcNow - _lastAnalysis).TotalMilliseconds;
+            if ((DateTime.UtcNow - _lastAnalysis).TotalMilliseconds < Options.DelayBetweenAnalyzingFrames
+                || (_wasScanned && msSinceLastPreview < Options.DelayBetweenContinuousScans))
+                return;
+
+            _wasScanned = false;
+            _lastAnalysis = DateTime.UtcNow;
+
+            try
 			{
 				_photoCamera.GetPreviewBufferY(_luminance.PreviewBufferY);
 				var binarizer = new ZXing.Common.HybridBinarizer(_luminance);
@@ -251,8 +264,11 @@ namespace ZXing.Mobile
 
 				var result = _reader.decode(binBitmap);
 
-				if (result != null)
-					OnDecodingCompleted(result);
+                if (result != null)
+                {
+                    _wasScanned = true;
+                    OnDecodingCompleted(result);
+                }
 			}
 			catch (Exception)
 			{

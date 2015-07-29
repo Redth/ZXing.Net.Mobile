@@ -24,14 +24,12 @@ namespace ZXing.Mobile
 
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
-            Result result = null;
-
             //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
 
             ScanPage.ScanningOptions = options;
             ScanPage.ResultFoundAction = (r) =>
             {
-
+                scanHandler(r);
             };
 
             ScanPage.UseCustomOverlay = this.UseCustomOverlay;

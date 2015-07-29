@@ -118,6 +118,7 @@ namespace ZXing.Mobile
             scannerControl.UseCustomOverlay = UseCustomOverlay;
 
 		    scannerControl.ScanningOptions = ScanningOptions;
+            scannerControl.ContinuousScanning = ScanPage.ContinuousScanning;
 
             OnRequestAutoFocus += RequestAutoFocusHandler;
             OnRequestTorch += RequestTorchHandler;
