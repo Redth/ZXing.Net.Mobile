@@ -15,12 +15,17 @@ namespace ZXing.Mobile
 {
     public class MobileBarcodeScanner : MobileBarcodeScannerBase
     {
+        public MobileBarcodeScanner () : base ()
+        {
+            this.Dispatcher = Deployment.Current.Dispatcher;
+        }
+
         public MobileBarcodeScanner(System.Windows.Threading.Dispatcher dispatcher) : base()
         {
 			this.Dispatcher = dispatcher;
         }
 
-		System.Windows.Threading.Dispatcher Dispatcher { get; set; }
+		public System.Windows.Threading.Dispatcher Dispatcher { get; set; }
 
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
@@ -38,7 +43,7 @@ namespace ZXing.Mobile
             ScanPage.BottomText = BottomText;
             ScanPage.ContinuousScanning = true;
 
-            this.Dispatcher.BeginInvoke(() =>
+            Dispatcher.BeginInvoke(() =>
             {
                 ((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
                     new Uri("/ZXingNetMobile;component/WindowsPhone/ScanPage.xaml", UriKind.Relative));
@@ -67,7 +72,7 @@ namespace ZXing.Mobile
                 ScanPage.TopText = TopText;
                 ScanPage.BottomText = BottomText;
 
-				this.Dispatcher.BeginInvoke(() =>
+                Dispatcher.BeginInvoke(() =>
 				{
 					((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
 						new Uri("/ZXingNetMobile;component/WindowsPhone/ScanPage.xaml", UriKind.Relative));
@@ -108,6 +113,11 @@ namespace ZXing.Mobile
         {
             get;
             set;
+        }
+
+        internal static void Log(string message, params object[] args)
+        {
+            System.Diagnostics.Debug.WriteLine(message, args);
         }
     }
 }

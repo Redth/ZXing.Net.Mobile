@@ -150,7 +150,9 @@ namespace ZXing.Mobile
 
                 scannerControl.StopScanning(); 
             }
-            catch (Exception ex) { }
+            catch (Exception ex) {
+                MobileBarcodeScanner.Log("OnNavigatingFrom Error: {0}", ex);
+            }
 
             base.OnNavigatingFrom(e);
         }

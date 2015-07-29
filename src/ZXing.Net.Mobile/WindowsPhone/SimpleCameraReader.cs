@@ -140,12 +140,18 @@ namespace ZXing.Mobile
             if (Options.UseFrontCameraIfAvailable.HasValue && Options.UseFrontCameraIfAvailable.Value)
             {
                 try { _photoCamera = new PhotoCamera(CameraType.FrontFacing); }
-                catch { }
+                catch (Exception ex) {
+                    MobileBarcodeScanner.Log ("Failed to create front facing camera: {0}", ex);
+                }
             }
+
+            MobileBarcodeScanner.Log("InitializeCamera");
 
             if (_photoCamera == null)
     			_photoCamera = new PhotoCamera();
 			_photoCamera.Initialized += OnPhotoCameraInitialized;
+
+            MobileBarcodeScanner.Log("Wired up Initizialied");
 		}
 
 		/// <summary>
@@ -230,8 +236,12 @@ namespace ZXing.Mobile
 
 		private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
 		{
+            MobileBarcodeScanner.Log("Initialized Camera");
+
             if (_photoCamera == null)
                 return;
+
+            MobileBarcodeScanner.Log("Creating Luminance Source");
 
 			var width = Convert.ToInt32(_photoCamera.PreviewResolution.Width);
 			var height = Convert.ToInt32(_photoCamera.PreviewResolution.Height);
@@ -242,6 +252,8 @@ namespace ZXing.Mobile
     			_photoCamera.FlashMode = FlashMode.Off;
 
 			_initialized = true;
+
+            MobileBarcodeScanner.Log("Luminance Source Created");
 
 			OnCameraInitialized(_initialized);
 		}

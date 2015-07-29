@@ -40,9 +40,13 @@ namespace ZXing.Mobile
                 gridDefaultOverlay.Visibility = Visibility.Visible;
             }
 
+            MobileBarcodeScanner.Log("ZXingScannerControl.StartScanning");
+
             // Initialize a new instance of SimpleCameraReader with Auto-Focus mode on
             if (_reader == null)
             {
+                MobileBarcodeScanner.Log("Creating SimpleCameraReader");
+
                 _reader = new SimpleCameraReader(options);
                 _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
 
@@ -125,6 +129,8 @@ namespace ZXing.Mobile
                 if (_reader != null && _previewTransform != null)
                     _previewTransform.Rotation = _reader.CameraOrientation;
             });
+
+            MobileBarcodeScanner.Log("ReaderOnCameraInitialized");
 
             if (_reader != null)
             {

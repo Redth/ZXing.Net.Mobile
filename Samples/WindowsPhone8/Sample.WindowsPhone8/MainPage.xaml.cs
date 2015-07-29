@@ -27,6 +27,7 @@ namespace ZxingSharp.WindowsPhone.Sample
 
             //Create a new instance of our scanner
             scanner = new MobileBarcodeScanner(this.Dispatcher);
+            scanner.Dispatcher = this.Dispatcher;
         }
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
