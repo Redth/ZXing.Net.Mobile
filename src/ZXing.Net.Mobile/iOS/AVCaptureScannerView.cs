@@ -118,6 +118,16 @@ namespace ZXing.Mobile
 
 		bool SetupCaptureSession ()
 		{
+            var availableResolutions = new List<CameraResolution> ();
+
+            var consideredResolutions = new Dictionary<NSString, CameraResolution> {
+                { AVCaptureSession.Preset352x288, new CameraResolution   { Width = 352,  Height = 288 } },
+                { AVCaptureSession.PresetMedium, new CameraResolution    { Width = 480,  Height = 360 } },  //480x360
+                { AVCaptureSession.Preset640x480, new CameraResolution   { Width = 640,  Height = 480 } },
+                { AVCaptureSession.Preset1280x720, new CameraResolution  { Width = 1280, Height = 720 } },
+                { AVCaptureSession.Preset1920x1080, new CameraResolution { Width = 1920, Height = 1080 } }
+            };
+
 			// configure the capture session for low resolution, change this if your code
 			// can cope with more data or volume
 			session = new AVCaptureSession () {
@@ -148,6 +158,32 @@ namespace ZXing.Mobile
 				}
 				return false;
 			}
+
+            CameraResolution resolution = null;
+
+            // Find resolution
+            // Go through the resolutions we can even consider
+            foreach (var cr in consideredResolutions) {
+                // Now check to make sure our selected device supports the resolution
+                // so we can add it to the list to pick from
+                if (captureDevice.SupportsAVCaptureSessionPreset (cr.Key))
+                    availableResolutions.Add (cr.Value);
+            }
+
+            resolution = options.GetResolution (availableResolutions);
+
+            // See if the user selected a resolution
+            if (resolution != null) {
+                // Now get the preset string from the resolution chosen
+                var preset = (from c in consideredResolutions
+                    where c.Value.Width == resolution.Width
+                    && c.Value.Height == resolution.Height
+                    select c.Key).FirstOrDefault ();
+
+                // If we found a matching preset, let's set it on the session
+                if (!string.IsNullOrEmpty(preset))
+                    session.SessionPreset = preset;
+            }
 
 			var input = AVCaptureDeviceInput.FromDevice (captureDevice);
 			if (input == null){
