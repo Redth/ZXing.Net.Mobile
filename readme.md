@@ -29,22 +29,25 @@ buttonScan.Click += (sender, e) => {
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
 ###Changes
+ - v1.4.7.1
+        - iOS: Updated Unified support
+
  - v1.4.7
-        - Updated ZXing.NET
+        - Updated ZXing.Net
         - iOS: Better destruction of default overlay to prevent memory leak
         - WP8: Fixed issue with HW shutter pressed after camera no longer available
         - Android: Fixed `Scan` method
 
  - v1.4.6
         - Android: Updated Android Support Library v4 component used (20.0.0.3)
-        - Updated ZXing.NET (SVN commit 88850)
+        - Updated ZXing.Net (SVN commit 88850)
         - Android: now takes `UseFrontCameraIfAvailable` into account ([#120](https://github.com/Redth/ZXing.Net.Mobile/issues/120))
         - Added camera resolution selector to MobileBarcodeScanningOptions
         - WP8: Fixed a null reference exception ([#104](https://github.com/Redth/ZXing.Net.Mobile/issues/104))
 
  - v1.4.5
         - Android: Updated Android Support Library v4 component used (20.0.0)
-        - Updated ZXing.NET
+        - Updated ZXing.Net
         - WP8: Fixed an issue with an exception on subsequent scans ([#102](https://github.com/Redth/ZXing.Net.Mobile/pull/102))
         - Android: Updated Android Support Library v4 component used (4.19.0.1)
 
@@ -59,7 +62,7 @@ buttonScan.Click += (sender, e) => {
         - Android: Scanner rotates as needed for orientation
         - Android: Removed YuvImage use for better, faster decoding with less memory usage
         - Android: Added permission checks
-        - Updated ZXing.NET version used
+        - Updated ZXing.Net version used
 
  - v1.4.2
  	- WP8: Fixed crash when pressing back while camera initializes
