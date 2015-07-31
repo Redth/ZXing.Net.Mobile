@@ -32,19 +32,44 @@ version: 1.5.0.0
 samples: 
   - name: Xamarin.iOS Unified API Sample
     path: "./samples/iOS/Sample.iOS.sln"
+    removeProjects: 
+      - ZXing.Net.Mobile.iOS
+    installNuGets:
+      - project: Sample.iOS
+        packages: 
+          - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
   - name: Xamarin.iOS Classic API Sample
     path: "./samples/iOS/Sample.iOS-Classic.sln"
+    removeProjects: 
+      - ZXing.Net.Mobile.iOS-Classic
+    installNuGets:
+      - project: Sample.iOS-Classic
+        packages: 
+          - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
   - name: Xamarin.Android Sample
     path: "./samples/Android/Sample.Android.sln"
+    removeProjects: 
+      - ZXing.Net.Mobile.Android
+    installNuGets:
+      - project: Sample.Android
+        packages: 
+          - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
   - name: Windows Phone 8 Sample
     path: "./samples/WindowsPhone8/Sample.WindowsPhone8.sln"
+    removeProjects: 
+      - ZXing.Net.Mobile.WindowsPhone8
+    installNuGets:
+      - project: Sample.WindowsPhone8
+        packages: 
+          - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
+local-nuget-repo: ./NuGet
 no_build: true
 
