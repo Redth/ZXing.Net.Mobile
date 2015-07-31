@@ -92,6 +92,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="monotouch" />
+    <Reference Include="MonoTouch.Dialog-1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -101,6 +102,7 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="HomeViewController.cs" />
     <Compile Include="CustomOverlayView.cs" />
+    <Compile Include="ImageViewController.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
   <ItemGroup>
