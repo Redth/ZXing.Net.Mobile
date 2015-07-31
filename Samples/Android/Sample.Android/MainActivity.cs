@@ -16,6 +16,7 @@ namespace Sample.Android
 		Button buttonScanDefaultView;
         Button buttonContinuousScan;
 		Button buttonFragmentScanner;
+        Button buttonGenerate;
 
 		MobileBarcodeScanner scanner;
 	
@@ -93,6 +94,11 @@ namespace Sample.Android
 			buttonFragmentScanner.Click += delegate {
 				StartActivity (typeof (FragmentActivity));	
 			};
+
+            buttonGenerate = FindViewById<Button> (Resource.Id.buttonGenerate);
+            buttonGenerate.Click += delegate {
+                StartActivity (typeof (ImageActivity));
+            };
 		}
 
 		void HandleScanResult (ZXing.Result result)
