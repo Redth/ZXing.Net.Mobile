@@ -94,12 +94,14 @@
     <Compile Include="Common\IMobileBarcodeScanner.cs" />
     <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="WindowsPhone\BarcodeWriter.cs" />
     <Compile Include="WindowsPhone\PhotoCameraLuminanceSource.cs" />
     <Compile Include="WindowsPhone\ScanPage.xaml.cs">
       <DependentUpon>ScanPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="WindowsPhone\SimpleCameraReader.cs" />
     <Compile Include="WindowsPhone\MobileBarcodeScanner.cs" />
+    <Compile Include="WindowsPhone\WriteableBitmapRenderer.cs" />
     <Compile Include="WindowsPhone\ZXingScannerControl.xaml.cs">
       <DependentUpon>ZXingScannerControl.xaml</DependentUpon>
     </Compile>

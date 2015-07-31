@@ -117,6 +117,12 @@ namespace ZxingSharp.WindowsPhone.Sample
 				//Don't allow to navigate back to the scanner with the back button
 				NavigationService.RemoveBackEntry();
 			});
-        }     
+        }
+
+        private void buttonGenerate_Click(object sender, RoutedEventArgs e)
+        {
+            //Go back to the main page
+            NavigationService.Navigate(new Uri("/ImagePage.xaml", UriKind.Relative));
+        }
     }
 }
