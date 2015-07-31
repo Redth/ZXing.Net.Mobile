@@ -28,7 +28,7 @@ packages:
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library"
 details: ./Details.md
 getting-started: ./GettingStarted.md
-version: 1.5.0.0
+version: 1.5.1.0
 samples: 
   - name: Xamarin.iOS Unified API Sample
     path: "./samples/iOS/Sample.iOS.sln"

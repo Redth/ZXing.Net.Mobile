@@ -44,10 +44,10 @@ Task ("tools").WithCriteria (!FileExists ("./Component/tools/xamarin-component.e
 	DeleteFile ("./Component/tools/tools.zip");
 });
 
-Task ("component")
-//.IsDependentOn ("libs")
-.IsDependentOn ("tools").Does (() => 
+Task ("component").IsDependentOn ("libs").IsDependentOn ("tools").Does (() => 
 {
+	DeleteFiles ("./Build/**/*.xml");
+	
 	if (IsRunningOnWindows ())
 		StartProcess ("./Component/tools/xamarin-component.exe", new ProcessSettings { Arguments = "package ./" });
 	else
@@ -61,8 +61,7 @@ Task ("nuget").IsDependentOn ("libs").Does (() =>
 	
 });
 
-Task ("publish")
-	//.IsDependentOn ("nuget").IsDependentOn ("component")
+Task ("publish").IsDependentOn ("nuget").IsDependentOn ("component")
 	.Does (() => 
 {
 	if (string.IsNullOrEmpty (version)) {
@@ -89,9 +88,13 @@ Task ("stage").IsDependentOn ("nuget").Does (() =>
 
 Task ("clean").Does (() => 
 {
-	DeleteDirectory ("./Component/tools/", true);
+
+	CleanDirectory ("./Component/tools/");
 
 	CleanDirectories ("./Build/");
+
+	CleanDirectories ("./**/bin");
+	CleanDirectories ("./**/obj");
 });
 
 RunTarget (target);
