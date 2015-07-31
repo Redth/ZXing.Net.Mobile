@@ -83,6 +83,8 @@
     <Compile Include="Common\CameraResolution.cs" />
     <Compile Include="iOS\BarcodeReaderiOS.cs" />
     <Compile Include="iOS\RGBLuminanceSourceiOS.cs" />
+    <Compile Include="iOS\BarcodeWriter.cs" />
+    <Compile Include="iOS\BitmapRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="iOS\" />
