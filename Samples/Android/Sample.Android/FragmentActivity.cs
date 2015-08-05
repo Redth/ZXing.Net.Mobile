@@ -20,34 +20,47 @@ namespace Sample.Android
 
 			SetContentView (Resource.Layout.FragmentActivity);
 
-			scanFragment = new ZXingScannerFragment (result => {
-
-				// Null result means scanning was cancelled
-				if (result == null || string.IsNullOrEmpty (result.Text)) {
-					Toast.MakeText (this, "Scanning Cancelled", ToastLength.Long).Show ();
-					return;
-				}
-
-				// Otherwise, proceed with result
-
-
-			}, new MobileBarcodeScanningOptions {
-				PossibleFormats = new List<ZXing.BarcodeFormat> {
-					ZXing.BarcodeFormat.All_1D
-				},
-				CameraResolutionSelector = availableResolutions => {
-
-					foreach (var ar in availableResolutions) {
-						Console.WriteLine ("Resolution: " + ar.Width + "x" + ar.Height);
-					}
-					return null;
-				}
-			});
+			scanFragment = new ZXingScannerFragment ();
 
 			SupportFragmentManager.BeginTransaction ()
 				.Replace (Resource.Id.fragment_container, scanFragment)
-				.Commit ();
+				.Commit ();            
 		}
+
+        protected override void OnResume ()
+        {
+            base.OnResume ();
+
+            scan ();
+        }
+
+        void scan ()
+        {
+            var opts = new MobileBarcodeScanningOptions {
+                PossibleFormats = new List<ZXing.BarcodeFormat> {
+                    ZXing.BarcodeFormat.QR_CODE
+                },
+                CameraResolutionSelector = availableResolutions => {
+
+                    foreach (var ar in availableResolutions) {
+                        Console.WriteLine ("Resolution: " + ar.Width + "x" + ar.Height);
+                    }
+                    return null;
+                }
+            };
+
+            scanFragment.StartScanning (opts, result => {
+
+                // Null result means scanning was cancelled
+                if (result == null || string.IsNullOrEmpty (result.Text)) {
+                    Toast.MakeText (this, "Scanning Cancelled", ToastLength.Long).Show ();
+                    return;
+                }
+
+                // Otherwise, proceed with result
+                RunOnUiThread (() => Toast.MakeText (this, "Scanned: " + result.Text, ToastLength.Short).Show ());
+            });
+        }
 	}
 }
 

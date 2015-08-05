@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>ZXing.Net.Mobile</id>
-        <version>1.5.0.0</version>
+        <version>1.5.1.0</version>
         <title>ZXing.Net.Mobile Barcode Scanner</title>
         <authors>Redth</authors>
         <licenseUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/License.md</licenseUrl>
@@ -15,30 +15,32 @@
         <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
         <dependencies>
         	<group targetFramework="MonoAndroid403">
-        		<dependency id="Xamarin.Android.Support.v4" version="22.2.0.0" />
+        		<dependency id="Xamarin.Android.Support.v4" version="22.2.1.0" />
         	</group>
+            <group targetFramework="wp8">
+                <dependency id="WriteableBitmapEx" version="1.5.0" />
+            </group>
         </dependencies>
     </metadata>
     <files>
         <!-- Android 4.0.3 and higher -->
-        <file src="..\Build\Release\android\zxing.portable.dll" target="lib\MonoAndroid403\zxing.portable.dll" />        
-        <file src="..\Build\Release\android\ZXingNetMobile.dll" target="lib\MonoAndroid403\ZXingNetMobile.dll" />
+        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid403\zxing.portable.dll" />        
+        <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid403\ZXingNetMobile.dll" />
 
         <!-- iOS Classic API -->
-        <file src="..\Build\Release\ios\zxing.portable.dll" target="lib\MonoTouch\zxing.portable.dll" />
-        <file src="..\Build\Release\ios\ZXingNetMobile.dll" target="lib\MonoTouch\ZXingNetMobile.dll" />
+        <file src="Build/Release/ios/zxing.portable.dll" target="lib\MonoTouch\zxing.portable.dll" />
+        <file src="Build/Release/ios/ZXingNetMobile.dll" target="lib\MonoTouch\ZXingNetMobile.dll" />
 
         <!-- iOS Unified API -->
-        <file src="..\Build\Release\ios-unified\zxing.portable.dll" target="lib\Xamarin.iOS\zxing.portable.dll" />
-        <file src="..\Build\Release\ios-unified\ZXingNetMobile.dll" target="lib\Xamarin.iOS\ZXingNetMobile.dll" />
+        <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS\zxing.portable.dll" />
+        <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS\ZXingNetMobile.dll" />
         
         <!-- Windows Phone  -->
-        <file src="..\Build\Release\winphone-8.0\WriteableBitmapExWinPhone.dll" target="lib\wp8\WriteableBitmapExWinPhone.dll" />
-        <file src="..\Build\Release\winphone-8.0\zxing.portable.dll" target="lib\wp8\zxing.portable.dll" />
-        <file src="..\Build\Release\winphone-8.0\ZXingNetMobile.dll" target="lib\wp8\ZXingNetMobile.dll" />
+        <file src="Build/Release/wp8.0/zxing.portable.dll" target="lib\wp8\zxing.portable.dll" />
+        <file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wp8\ZXingNetMobile.dll" />
 
         <!-- Portable PCL -->
-        <file src="..\Build\Release\portable\zxing.portable.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\zxing.portable.dll" />
-        <file src="..\Build\Release\portable\ZXingNetMobile.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\ZXingNetMobile.dll" />
+        <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\zxing.portable.dll" />
+        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\portable-net45+netcore45+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\ZXingNetMobile.dll" />
     </files>
 </package>

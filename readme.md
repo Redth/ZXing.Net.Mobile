@@ -29,6 +29,41 @@ buttonScan.Click += (sender, e) => {
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
 ###Changes
+ - v1.4.7.1
+        - iOS: Updated Unified support
+
+ - v1.4.7
+        - Updated ZXing.Net
+        - iOS: Better destruction of default overlay to prevent memory leak
+        - WP8: Fixed issue with HW shutter pressed after camera no longer available
+        - Android: Fixed `Scan` method
+
+ - v1.4.6
+        - Android: Updated Android Support Library v4 component used (20.0.0.3)
+        - Updated ZXing.Net (SVN commit 88850)
+        - Android: now takes `UseFrontCameraIfAvailable` into account ([#120](https://github.com/Redth/ZXing.Net.Mobile/issues/120))
+        - Added camera resolution selector to MobileBarcodeScanningOptions
+        - WP8: Fixed a null reference exception ([#104](https://github.com/Redth/ZXing.Net.Mobile/issues/104))
+
+ - v1.4.5
+        - Android: Updated Android Support Library v4 component used (20.0.0)
+        - Updated ZXing.Net
+        - WP8: Fixed an issue with an exception on subsequent scans ([#102](https://github.com/Redth/ZXing.Net.Mobile/pull/102))
+        - Android: Updated Android Support Library v4 component used (4.19.0.1)
+
+ - v1.4.4
+        - iOS: Fixed issue with loading view size in landscape orientation ([#100](https://github.com/Redth/ZXing.Net.Mobile/issues/100))
+        - Android: Fixed issue with scanning not working from timestamps ([#98](https://github.com/Redth/ZXing.Net.Mobile/issues/98))
+
+ - v1.4.3
+        - iOS: Fixed slowness after 4-5 scans ([#71](https://github.com/Redth/ZXing.Net.Mobile/issues/71))
+        - WP8: Fixed preview sometimes not starting
+        - Android: Fixed resuming fragment which closes
+        - Android: Scanner rotates as needed for orientation
+        - Android: Removed YuvImage use for better, faster decoding with less memory usage
+        - Android: Added permission checks
+        - Updated ZXing.Net version used
+
  - v1.4.2
  	- WP8: Fixed crash when pressing back while camera initializes
  	- Android: Added merged workaround from @chrisntr support for Google Glass	

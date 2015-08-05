@@ -25,10 +25,11 @@ namespace ZXing.Mobile
         public static string TopText { get; set; }
         public static string BottomText { get; set; }
         public static bool UseCustomOverlay { get; set; }
+        public static bool ContinuousScanning { get; set; }
 
         public static Result LastScanResult { get; set; }
-        
-        public static Action<Result> FinishedAction { get; set; }
+
+        public static Action<Result> ResultFoundAction { get; set; }
 
         public static event Action<bool> OnRequestTorch;
         public static event Action OnRequestToggleTorch;
@@ -117,6 +118,7 @@ namespace ZXing.Mobile
             scannerControl.UseCustomOverlay = UseCustomOverlay;
 
 		    scannerControl.ScanningOptions = ScanningOptions;
+            scannerControl.ContinuousScanning = ScanPage.ContinuousScanning;
 
             OnRequestAutoFocus += RequestAutoFocusHandler;
             OnRequestTorch += RequestTorchHandler;
@@ -148,7 +150,9 @@ namespace ZXing.Mobile
 
                 scannerControl.StopScanning(); 
             }
-            catch (Exception ex) { }
+            catch (Exception ex) {
+                MobileBarcodeScanner.Log("OnNavigatingFrom Error: {0}", ex);
+            }
 
             base.OnNavigatingFrom(e);
         }
@@ -157,12 +161,15 @@ namespace ZXing.Mobile
         {
             LastScanResult = result;
 
-            var evt = FinishedAction;
+            var evt = ResultFoundAction;
             if (evt != null)
-                evt(LastScanResult); 
+                evt(LastScanResult);
 
-            if (NavigationService.CanGoBack)
-                NavigationService.GoBack();
+            if (!ContinuousScanning)
+            {
+                if (NavigationService.CanGoBack)
+                    NavigationService.GoBack();
+            }
         }
 	}
 }

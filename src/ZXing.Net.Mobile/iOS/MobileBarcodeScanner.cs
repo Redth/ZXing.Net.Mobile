@@ -14,7 +14,7 @@ using MonoTouch.UIKit;
 
 namespace ZXing.Mobile
 {
-	public class MobileBarcodeScanner : MobileBarcodeScannerBase
+    public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
 		//ZxingCameraViewController viewController;
 		IScannerViewController viewController;
@@ -49,6 +49,65 @@ namespace ZXing.Mobile
 		{
 			return Scan (options, false);
 		}
+
+
+        public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            ScanContinuously (options, false, scanHandler);
+        }
+
+        public void ScanContinuously (MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<Result> scanHandler)
+        {
+            try
+            {             
+                Version sv = new Version (0, 0, 0);
+                Version.TryParse (UIDevice.CurrentDevice.SystemVersion, out sv);
+
+                var is7orgreater = sv.Major >= 7;
+                var allRequestedFormatsSupported = true;
+
+                if (useAVCaptureEngine)
+                    allRequestedFormatsSupported = AVCaptureScannerView.SupportsAllRequestedBarcodeFormats(options.PossibleFormats);
+
+                this.appController.InvokeOnMainThread(() => {
+
+
+                    if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
+                    {
+                        viewController = new AVCaptureScannerViewController(options, this);
+                        viewController.ContinuousScanning = true;
+                    }
+                    else
+                    {           
+                        if (useAVCaptureEngine && !is7orgreater)
+                            Console.WriteLine("Not iOS 7 or greater, cannot use AVCapture for barcode decoding, using ZXing instead");
+                        else if (useAVCaptureEngine && !allRequestedFormatsSupported)
+                            Console.WriteLine("Not all requested barcode formats were supported by AVCapture, using ZXing instead");
+
+                        viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
+                        viewController.ContinuousScanning = true;
+                    }
+
+                    viewController.OnScannedResult += barcodeResult => {
+
+                        // If null, stop scanning was called
+                        if (barcodeResult == null) {
+                            ((UIViewController)viewController).InvokeOnMainThread(() => {
+                                ((UIViewController)viewController).DismissViewController(true, null);
+                            });
+                        }
+
+                        scanHandler (barcodeResult);
+                    };
+
+                    appController.PresentViewController((UIViewController)viewController, true, null);
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
 
 		public Task<Result> Scan (MobileBarcodeScanningOptions options, bool useAVCaptureEngine)
 		{
@@ -126,7 +185,7 @@ namespace ZXing.Mobile
 					((UIViewController)viewController).DismissViewController(true, null);
 				});
 			}
-
+                
 			scanResultResetEvent.Set();
 		}
 
@@ -152,7 +211,6 @@ namespace ZXing.Mobile
 			}
 		}
 		public UIView CustomOverlay { get;set; }
-
 	}
 }
 

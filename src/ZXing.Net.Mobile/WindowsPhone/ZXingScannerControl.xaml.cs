@@ -40,9 +40,13 @@ namespace ZXing.Mobile
                 gridDefaultOverlay.Visibility = Visibility.Visible;
             }
 
+            MobileBarcodeScanner.Log("ZXingScannerControl.StartScanning");
+
             // Initialize a new instance of SimpleCameraReader with Auto-Focus mode on
             if (_reader == null)
             {
+                MobileBarcodeScanner.Log("Creating SimpleCameraReader");
+
                 _reader = new SimpleCameraReader(options);
                 _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
 
@@ -65,6 +69,7 @@ namespace ZXing.Mobile
         public string TopText { get; set; }
         public string BottomText { get; set; }
         public bool UseCustomOverlay { get; set; }
+        public bool ContinuousScanning { get; set; }
 
         public Result LastScanResult { get; set; }
 
@@ -72,22 +77,22 @@ namespace ZXing.Mobile
         
         public bool IsTorchOn
         {
-            get { return _reader.Camera.FlashMode == FlashMode.On; }
+            get { return _reader.FlashMode == FlashMode.On; }
         }
 
         public void Torch(bool on)
         {
-            _reader.Camera.FlashMode = on ? FlashMode.On : FlashMode.Auto;
+            _reader.FlashMode = FlashMode.On;
         }
 
         public void ToggleTorch()
         {
-            _reader.Camera.FlashMode = _reader.Camera.FlashMode == FlashMode.On ? FlashMode.Auto : FlashMode.On;
+            _reader.FlashMode = _reader.FlashMode == FlashMode.Off ? FlashMode.On : FlashMode.Off;
         }
 
         public void AutoFocus()
         {
-            _reader.Camera.Focus();
+            _reader.Focus();
         }
 
         public void StopScanning()
@@ -125,6 +130,8 @@ namespace ZXing.Mobile
                     _previewTransform.Rotation = _reader.CameraOrientation;
             });
 
+            MobileBarcodeScanner.Log("ReaderOnCameraInitialized");
+
             if (_reader != null)
             {
                 // We can set if Camera should flash or not when focused
@@ -137,7 +144,8 @@ namespace ZXing.Mobile
         
         private void DisplayResult(Result result)
         {
-			StopScanning ();
+            if (!ContinuousScanning)
+			    StopScanning ();
 
             if (ScanCallback != null)
                 ScanCallback(result);
@@ -159,6 +167,11 @@ namespace ZXing.Mobile
                 //var pos = e.GetPosition(this);
                 _reader.Focus();
             }
+        }
+
+        private void buttonToggleFlash_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleTorch();
         }
     }
 }

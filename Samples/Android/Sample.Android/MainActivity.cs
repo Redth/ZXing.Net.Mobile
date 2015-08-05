@@ -14,7 +14,9 @@ namespace Sample.Android
 	{
 		Button buttonScanCustomView;
 		Button buttonScanDefaultView;
+        Button buttonContinuousScan;
 		Button buttonFragmentScanner;
+        Button buttonGenerate;
 
 		MobileBarcodeScanner scanner;
 	
@@ -47,6 +49,22 @@ namespace Sample.Android
 				HandleScanResult(result);
 			};
 
+            buttonContinuousScan = FindViewById<Button> (Resource.Id.buttonScanContinuous);
+            buttonContinuousScan.Click += delegate {
+
+                scanner.UseCustomOverlay = false;
+
+                //We can customize the top and bottom text of the default overlay
+                scanner.TopText = "Hold the camera up to the barcode\nAbout 6 inches away";
+                scanner.BottomText = "Wait for the barcode to automatically scan!";
+
+                var opt = new MobileBarcodeScanningOptions ();
+                opt.DelayBetweenContinuousScans = 3000;
+
+                //Start scanning
+                scanner.ScanContinuously(opt, HandleScanResult);
+            };
+
 			Button flashButton;
 			View zxingOverlay;
 
@@ -76,6 +94,11 @@ namespace Sample.Android
 			buttonFragmentScanner.Click += delegate {
 				StartActivity (typeof (FragmentActivity));	
 			};
+
+            buttonGenerate = FindViewById<Button> (Resource.Id.buttonGenerate);
+            buttonGenerate.Click += delegate {
+                StartActivity (typeof (ImageActivity));
+            };
 		}
 
 		void HandleScanResult (ZXing.Result result)

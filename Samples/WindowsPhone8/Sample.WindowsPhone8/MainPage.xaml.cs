@@ -27,6 +27,7 @@ namespace ZxingSharp.WindowsPhone.Sample
 
             //Create a new instance of our scanner
             scanner = new MobileBarcodeScanner(this.Dispatcher);
+            scanner.Dispatcher = this.Dispatcher;
         }
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
@@ -42,6 +43,26 @@ namespace ZxingSharp.WindowsPhone.Sample
             {
                 if (t.Result != null)
                     HandleScanResult(t.Result);
+            });
+        }
+
+        private void buttonScanContinuously_Click(object sender, RoutedEventArgs e)
+        {
+            //Tell our scanner to use the default overlay
+            scanner.UseCustomOverlay = false;
+            //We can customize the top and bottom text of our default overlay
+            scanner.TopText = "Hold camera up to barcode";
+            scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
+
+            //Start scanning
+            scanner.ScanContinuously(result =>
+            {
+                var msg = "Found Barcode: " + result.Text;
+                
+                this.Dispatcher.BeginInvoke(() =>
+                {
+                    MessageBox.Show(msg);
+                });
             });
         }
 
@@ -96,6 +117,12 @@ namespace ZxingSharp.WindowsPhone.Sample
 				//Don't allow to navigate back to the scanner with the back button
 				NavigationService.RemoveBackEntry();
 			});
+        }
+
+        private void buttonGenerate_Click(object sender, RoutedEventArgs e)
+        {
+            //Go back to the main page
+            NavigationService.Navigate(new Uri("/ImagePage.xaml", UriKind.Relative));
         }
     }
 }

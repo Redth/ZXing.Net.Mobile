@@ -36,9 +36,11 @@ namespace ZXing.Mobile
 		private PhotoCamera _photoCamera;
 
 		private TimeSpan _scanInterval;
+        private DateTime _lastAnalysis = DateTime.MinValue;
 
         bool doCancel = false;
 		private bool _initialized;
+        private bool _wasScanned = false;
 
 		private VideoBrush _surface;
 
@@ -92,15 +94,14 @@ namespace ZXing.Mobile
 		{
 			get
 			{
-
-				if (_initialized && _photoCamera != null)
+				if (_initialized && _photoCamera != null && _photoCamera.IsFlashModeSupported(FlashMode.On))
 					return _photoCamera.FlashMode != FlashMode.Off ? _photoCamera.FlashMode : FlashMode.Off;
 
 				return FlashMode.Off;
 			}
 			set
 			{
-				if (_photoCamera != null)
+				if (_photoCamera != null && _photoCamera.IsFlashModeSupported(value))
 					_photoCamera.FlashMode = value;
 			}
 		}
@@ -136,8 +137,21 @@ namespace ZXing.Mobile
 
 		private void InitializeCamera()
 		{
-			_photoCamera = new PhotoCamera();
+            if (Options.UseFrontCameraIfAvailable.HasValue && Options.UseFrontCameraIfAvailable.Value)
+            {
+                try { _photoCamera = new PhotoCamera(CameraType.FrontFacing); }
+                catch (Exception ex) {
+                    MobileBarcodeScanner.Log ("Failed to create front facing camera: {0}", ex);
+                }
+            }
+
+            MobileBarcodeScanner.Log("InitializeCamera");
+
+            if (_photoCamera == null)
+    			_photoCamera = new PhotoCamera();
 			_photoCamera.Initialized += OnPhotoCameraInitialized;
+
+            MobileBarcodeScanner.Log("Wired up Initizialied");
 		}
 
 		/// <summary>
@@ -159,17 +173,7 @@ namespace ZXing.Mobile
 					_timer.Interval = _scanInterval;
 					_timer.Tick += (o, arg) => ScanPreviewBuffer();
 
-					CameraButtons.ShutterKeyHalfPressed += (o, arg) =>
-					{
-						try
-						{
-							_photoCamera.Focus();
-						}
-						catch
-						{
-							// Do nothing
-						}
-					};
+                    CameraButtons.ShutterKeyHalfPressed += CameraButtons_ShutterKeyHalfPressed;
 
 					_timer.Start();
 				});
@@ -180,8 +184,13 @@ namespace ZXing.Mobile
 				// Do nothing
 			}
 
-            _photoCamera.Focus();
+            Focus();
 		}
+
+        private void CameraButtons_ShutterKeyHalfPressed(object sender, EventArgs e)
+        {
+            Focus();
+        }
 
         public void Focus()
         {
@@ -199,8 +208,8 @@ namespace ZXing.Mobile
             {
                 if (_photoCamera.IsFocusAtPointSupported)
                     _photoCamera.FocusAtPoint(point.X, point.Y);
-                else if (_photoCamera.IsFocusSupported)
-                    _photoCamera.Focus();
+                else
+                    Focus();
             }
             catch { }
         }
@@ -217,30 +226,34 @@ namespace ZXing.Mobile
 
 			if (_photoCamera != null)
 			{
+                CameraButtons.ShutterKeyHalfPressed -= CameraButtons_ShutterKeyHalfPressed;
+
                 _photoCamera.Initialized -= OnPhotoCameraInitialized;
 				_photoCamera.Dispose();
 				_photoCamera = null;
 			}
 		}
 
-		public void ShutterHalfPressed()
-		{
-			_photoCamera.Focus();
-		}
-
 		private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
 		{
+            MobileBarcodeScanner.Log("Initialized Camera");
+
             if (_photoCamera == null)
                 return;
+
+            MobileBarcodeScanner.Log("Creating Luminance Source");
 
 			var width = Convert.ToInt32(_photoCamera.PreviewResolution.Width);
 			var height = Convert.ToInt32(_photoCamera.PreviewResolution.Height);
 
 			_luminance = new PhotoCameraLuminanceSource(width, height);
 
-			_photoCamera.FlashMode = FlashMode.Off;
+            if (_photoCamera.IsFlashModeSupported(FlashMode.On))
+    			_photoCamera.FlashMode = FlashMode.Off;
 
 			_initialized = true;
+
+            MobileBarcodeScanner.Log("Luminance Source Created");
 
 			OnCameraInitialized(_initialized);
 		}
@@ -250,7 +263,18 @@ namespace ZXing.Mobile
 			if (_photoCamera == null) return;
 			if (!_initialized) return;
 
-			try
+            // Don't scan too frequently
+            // Check the minimum time between frames
+            // as well as the min time between continuous scans
+            var msSinceLastPreview = (DateTime.UtcNow - _lastAnalysis).TotalMilliseconds;
+            if ((DateTime.UtcNow - _lastAnalysis).TotalMilliseconds < Options.DelayBetweenAnalyzingFrames
+                || (_wasScanned && msSinceLastPreview < Options.DelayBetweenContinuousScans))
+                return;
+
+            _wasScanned = false;
+            _lastAnalysis = DateTime.UtcNow;
+
+            try
 			{
 				_photoCamera.GetPreviewBufferY(_luminance.PreviewBufferY);
 				var binarizer = new ZXing.Common.HybridBinarizer(_luminance);
@@ -259,8 +283,11 @@ namespace ZXing.Mobile
 
 				var result = _reader.decode(binBitmap);
 
-				if (result != null)
-					OnDecodingCompleted(result);
+                if (result != null)
+                {
+                    _wasScanned = true;
+                    OnDecodingCompleted(result);
+                }
 			}
 			catch (Exception)
 			{

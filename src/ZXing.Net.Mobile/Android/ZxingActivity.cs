@@ -51,10 +51,11 @@ namespace ZXing.Mobile
 		}
 
 		public static View CustomOverlayView { get;set; }
-		public static bool UseCustomView { get; set; }
+		public static bool UseCustomOverlayView { get; set; }
 		public static MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public static string TopText { get;set; }
 		public static string BottomText { get;set; }
+        public static bool ScanContinuously { get;set; }
 
 		ZXingScannerFragment scannerFragment;
 
@@ -72,28 +73,34 @@ namespace ZXing.Mobile
 
 			SetContentView(Resource.Layout.zxingscanneractivitylayout);
 
-			scannerFragment = new ZXingScannerFragment(result => {
-				var evt = OnScanCompleted;
-				if (evt != null)
-					OnScanCompleted(result);
-
-				this.Finish();
-
-			}, ScanningOptions);
+            scannerFragment = new ZXingScannerFragment ();
 			scannerFragment.CustomOverlayView = CustomOverlayView;
-			scannerFragment.UseCustomView = UseCustomView;
+			scannerFragment.UseCustomOverlayView = UseCustomOverlayView;
 			scannerFragment.TopText = TopText;
 			scannerFragment.BottomText = BottomText;
 
 			SupportFragmentManager.BeginTransaction()
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
 				.Commit();
-
+            
 			OnCancelRequested += HandleCancelScan;
 			OnAutoFocusRequested += HandleAutoFocus;
 			OnTorchRequested += HandleTorchRequested;
-
 		}
+
+        protected override void OnResume ()
+        {
+            base.OnResume ();
+
+            scannerFragment.StartScanning (ScanningOptions, result => {
+                var evt = OnScanCompleted;
+                if (evt != null)
+                    OnScanCompleted(result);
+
+                if (!ZxingActivity.ScanContinuously)
+                    this.Finish();
+            });
+        }
 
 		void HandleTorchRequested(bool on)
 		{
@@ -123,7 +130,7 @@ namespace ZXing.Mobile
 		{
 			base.OnConfigurationChanged (newConfig);
 
-			Android.Util.Log.Debug("ZXING", "Configuration Changed");
+            Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Configuration Changed");
 		}
 
 		public void SetTorch(bool on)

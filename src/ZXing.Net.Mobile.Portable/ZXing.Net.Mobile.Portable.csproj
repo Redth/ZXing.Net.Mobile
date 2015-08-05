@@ -7,7 +7,7 @@
     <ProjectGuid>{78407906-99C6-42B0-A511-973FC78C58CB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ZXing.Mobile</RootNamespace>
-    <AssemblyName>ZXing.Net.Mobile</AssemblyName>
+    <AssemblyName>ZXingNetMobile</AssemblyName>
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
@@ -15,7 +15,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>..\..\Build\Debug\portable</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,32 +24,35 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>..\..\Build\Release\portable</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\src\ZXing.Net.Mobile\Common\CameraResolution.cs">
+    <Compile Include="..\ZXing.Net.Mobile\Common\CameraResolution.cs">
       <Link>Common\CameraResolution.cs</Link>
     </Compile>
-    <Compile Include="..\src\ZXing.Net.Mobile\Common\IMobileBarcodeScanner.cs">
+    <Compile Include="..\ZXing.Net.Mobile\Common\IMobileBarcodeScanner.cs">
       <Link>Common\IMobileBarcodeScanner.cs</Link>
     </Compile>
-    <Compile Include="..\src\ZXing.Net.Mobile\Common\MobileBarcodeScanningOptions.cs">
+    <Compile Include="..\ZXing.Net.Mobile\Common\MobileBarcodeScanningOptions.cs">
       <Link>Common\MobileBarcodeScanningOptions.cs</Link>
     </Compile>
     <Compile Include="Common\MobileBarcodeScanner.cs" />
+    <Compile Include="..\ZXing.Net.Mobile\Properties\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\src\ZXing.Net\zxing.portable.csproj">
+    <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
       <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Common\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

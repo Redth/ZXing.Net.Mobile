@@ -7,7 +7,6 @@
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <RootNamespace>ZXing.Mobile</RootNamespace>
-    <AssemblyName>ZXing.Net.Mobile</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>True</DebugSymbols>
@@ -21,6 +20,7 @@
     <MtouchLink>None</MtouchLink>
     <MtouchDebug>True</MtouchDebug>
     <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXingNetMobile</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -31,6 +31,7 @@
     <ConsolePause>False</ConsolePause>
     <MtouchLink>None</MtouchLink>
     <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXingNetMobile</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>True</DebugSymbols>
@@ -44,6 +45,7 @@
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
     <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXing.Net.Mobile</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -54,6 +56,7 @@
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXing.Net.Mobile</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -80,6 +83,8 @@
     <Compile Include="Common\CameraResolution.cs" />
     <Compile Include="iOS\BarcodeReaderiOS.cs" />
     <Compile Include="iOS\RGBLuminanceSourceiOS.cs" />
+    <Compile Include="iOS\BarcodeWriter.cs" />
+    <Compile Include="iOS\BitmapRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="iOS\" />

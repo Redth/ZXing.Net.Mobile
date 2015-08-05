@@ -21,7 +21,7 @@ using ZXing;
 
 namespace ZXing.Mobile
 {	
-	public class AVCaptureScannerViewController : UIViewController, IScannerViewController
+    public class AVCaptureScannerViewController : UIViewController, IScannerViewController
 	{
 		AVCaptureScannerView scannerView;
 
@@ -29,6 +29,7 @@ namespace ZXing.Mobile
 
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }
+        public bool ContinuousScanning { get;set; }
 
 		UIActivityIndicatorView loadingView;
 		UIView loadingBg;
@@ -52,7 +53,7 @@ namespace ZXing.Mobile
 		public void Cancel()
 		{
 			this.InvokeOnMainThread(() => scannerView.StopScanning());
-		}
+        }
 
 		UIStatusBarStyle originalStatusBarStyle = UIStatusBarStyle.Default;
 
@@ -82,6 +83,9 @@ namespace ZXing.Mobile
 			scannerView.BottomText = this.Scanner.BottomText;
 			scannerView.CancelButtonText = this.Scanner.CancelButtonText;
 			scannerView.FlashButtonText = this.Scanner.FlashButtonText;
+            scannerView.OnCancelButtonPressed += () => {
+                Scanner.Cancel ();
+            };
 
 			this.View.AddSubview(scannerView);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
@@ -120,15 +124,14 @@ namespace ZXing.Mobile
 
 			scannerView.StartScanning(this.ScanningOptions, result => {
 
-				Console.WriteLine("Stopping scan...");
-
-				scannerView.StopScanning();
+                if (!ContinuousScanning) {
+				    Console.WriteLine("Stopping scan...");
+				    scannerView.StopScanning();
+                }
 
 				var evt = this.OnScannedResult;
 				if (evt != null)
-					evt(result);
-
-
+					evt(result);                
 			});
 		}
 
