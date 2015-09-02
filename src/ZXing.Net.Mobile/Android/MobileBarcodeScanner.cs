@@ -40,11 +40,6 @@ namespace ZXing.Mobile
             ZxingActivity.TopText = TopText;
             ZxingActivity.BottomText = BottomText;
 
-            ZxingActivity.OnCanceled += () => 
-            {
-                ZxingActivity.RequestCancel ();
-            };
-
             ZxingActivity.OnScanCompleted += (Result result) => 
             {
                 if (scanHandler != null)
