@@ -69,6 +69,8 @@ namespace ZXing.Mobile
 
 			frame.RemoveView (scanner);
 
+			scanner = null;
+
 			if (!UseCustomOverlayView)
 				frame.RemoveView (zxingOverlay);
 			else if (CustomOverlayView != null)

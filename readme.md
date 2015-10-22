@@ -10,14 +10,17 @@ The simplest example of using ZXing.Net.Mobile looks something like this:
 ```csharp  
 buttonScan.Click += (sender, e) => {
 
-  //NOTE: On Android, you MUST pass a Context into the Constructor!
+	#if __ANDROID__
+	// Initialize the scanner first so it can track the current context
+	MobileBarcodeScanner.Initialize (Application);
+  	#endif
+  	
 	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 
-  var result = await scanner.Scan();
+	var result = await scanner.Scan();
 
 	if (result != null)
-    Console.WriteLine("Scanned Barcode: " + result.Text);
-
+		Console.WriteLine("Scanned Barcode: " + result.Text);
 };
 ```
 
@@ -140,12 +143,17 @@ All of the platform samples have examples of custom overlays.
 By default, all barcode formats are monitored while scanning.  You can change which formats to check for by passing a ZxingScanningOptions instance into the StartScanning method:
 
 ```csharp
+//NOTE: On Android you should call the initialize method with an application instance
+#if __ANDROID__
+// Initialize the scanner first so it can track the current context
+MobileBarcodeScanner.Initialize (Application);
+#endif
+
 var options = new ZXing.Mobile.MobileBarcodeScanningOptions();
 options.PossibleFormats = new List<ZXing.BarcodeFormat>() { 
     ZXing.BarcodeFormat.Ean8, ZXing.BarcodeFormat.Ean13 
 };
 
-//NOTE: On Android you MUST pass a Context into the Constructor!
 var scanner = new ZXing.Mobile.MobileBarcodeScanner(); 
 var result = await scanner.Scan(options);
 //Handle result
