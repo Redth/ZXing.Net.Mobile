@@ -9,7 +9,7 @@ List<string> GetSamples ()
 	l.Add ("Samples/iOS/Sample.iOS-Classic.sln");
 	
 	if (IsRunningOnWindows ()) {
-		l.Add ("Samples/WindowsPhone8/Sample.WindowsPhone8.sln");
+		//l.Add ("Samples/WindowsPhone8/Sample.WindowsPhone8.sln");
 	}
 	
 	return l;
