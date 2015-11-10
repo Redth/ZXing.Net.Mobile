@@ -147,22 +147,17 @@ namespace ZXing.Mobile
 
 						viewController.OnScannedResult += barcodeResult => {
 
-                            ((UIViewController)viewController).InvokeOnMainThread(() =>
-                            {
+                            ((UIViewController)viewController).InvokeOnMainThread(() => {
+
                                 viewController.Cancel();
 
                                 // Handle error situation that occurs when user manually closes scanner in the same moment that a QR code is detected
-                                try
-                                {
-                                    ((UIViewController) viewController).DismissViewController(true, () =>
-                                    {
+                                try {
+                                    ((UIViewController) viewController).DismissViewController(true, () => {
                                         result = barcodeResult;
                                         scanResultResetEvent.Set();
                                     });
-                                }
-                                catch (ObjectDisposedException)
-                                
-                                {
+                                } catch (ObjectDisposedException) {
                                     // In all likelihood, iOS has decided to close the scanner at this point. But just in case it executes the
                                     // post-scan code instead, set the result so we will not get a NullReferenceException.
                                     result = barcodeResult;
