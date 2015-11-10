@@ -56,7 +56,7 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>Bin\x86\Release</OutputPath>
+    <OutputPath>..\..\Build\Release\wp8.0\</OutputPath>
     <DefineConstants>TRACE;SILVERLIGHT;WINDOWS_PHONE</DefineConstants>
     <Optimize>true</Optimize>
     <NoStdLib>true</NoStdLib>
