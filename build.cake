@@ -9,7 +9,7 @@ List<string> GetSamples ()
 	l.Add ("Samples/iOS/Sample.iOS-Classic.sln");
 	
 	if (IsRunningOnWindows ()) {
-		//l.Add ("Samples/WindowsPhone8/Sample.WindowsPhone8.sln");
+		l.Add ("Samples/WindowsPhone8/Sample.WindowsPhone8.sln");
 	}
 	
 	return l;
@@ -27,7 +27,15 @@ Task ("libs").Does (() =>
 
 		// Build each project
 		NuGetRestore (s);
-		DotNetBuild (s, c => c.Configuration = "Release");
+
+		if (s.Contains ("WindowsPhone8")) {
+			MSBuild (s, c => {
+					c.Configuration = "Release";
+					c.PlatformTarget = Cake.Common.Tools.MSBuild.PlatformTarget.x86;
+			});
+		} else {
+			DotNetBuild (s, c => c.Configuration = "Release");
+		}
 	}
 });
 
@@ -60,6 +68,8 @@ Task ("nuget").IsDependentOn ("libs").Does (() =>
 	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./NuGet/" });
 	
 });
+
+Task ("release").IsDependentOn ("component").IsDependentOn ("nuget");
 
 Task ("publish").IsDependentOn ("nuget").IsDependentOn ("component")
 	.Does (() => 
