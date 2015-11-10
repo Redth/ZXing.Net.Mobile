@@ -64,9 +64,10 @@ Task ("component").IsDependentOn ("libs").IsDependentOn ("tools").Does (() =>
 
 Task ("nuget").IsDependentOn ("libs").Does (() => 
 {
+	if (!DirectoryExists ("./NuGet/"))
+		CreateDirectory ("./NuGet");
 
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./NuGet/" });
-	
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./NuGet/" });	
 });
 
 Task ("release").IsDependentOn ("nuget").IsDependentOn ("component");
