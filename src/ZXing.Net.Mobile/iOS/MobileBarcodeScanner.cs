@@ -147,16 +147,29 @@ namespace ZXing.Mobile
 
 						viewController.OnScannedResult += barcodeResult => {
 
-							((UIViewController)viewController).InvokeOnMainThread(() => {
-								viewController.Cancel();
-								((UIViewController)viewController).DismissViewController(true, () => {
+                            ((UIViewController)viewController).InvokeOnMainThread(() =>
+                            {
+                                viewController.Cancel();
 
-									result = barcodeResult;
-									scanResultResetEvent.Set();
-
-								});
-							});
-						};
+                                // Handle error situation that occurs when user manually closes scanner in the same moment that a QR code is detected
+                                try
+                                {
+                                    ((UIViewController) viewController).DismissViewController(true, () =>
+                                    {
+                                        result = barcodeResult;
+                                        scanResultResetEvent.Set();
+                                    });
+                                }
+                                catch (ObjectDisposedException)
+                                
+                                {
+                                    // In all likelihood, iOS has decided to close the scanner at this point. But just in case it executes the
+                                    // post-scan code instead, set the result so we will not get a NullReferenceException.
+                                    result = barcodeResult;
+                                    scanResultResetEvent.Set();
+                                }
+                            });
+                        };
 
 						appController.PresentViewController((UIViewController)viewController, true, null);
 					});
@@ -182,7 +195,8 @@ namespace ZXing.Mobile
 				((UIViewController)viewController).InvokeOnMainThread(() => {
 					viewController.Cancel();
 
-					((UIViewController)viewController).DismissViewController(true, null);
+                    // Calling with animated:true here will result in a blank screen when the scanner is closed on iOS 7.
+                    ((UIViewController)viewController).DismissViewController(false, null); 
 				});
 			}
                 
