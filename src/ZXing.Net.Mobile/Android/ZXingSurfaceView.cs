@@ -395,9 +395,12 @@ namespace ZXing.Mobile
 		{
 			tokenSource.Cancel();
 			
-            if (camera == null)
-                return;
-
+			if (camera == null) 
+			{
+				ReleaseExclusiveAccess();
+				return;
+			}
+            
             var theCamera = camera;
             camera = null;
 
