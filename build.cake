@@ -71,6 +71,7 @@ Task ("nuget").IsDependentOn ("libs").Does (() =>
 });
 
 Task ("release").IsDependentOn ("nuget").IsDependentOn ("component");
+Task ("Default").IsDependentOn ("release");
 
 Task ("publish").IsDependentOn ("nuget").IsDependentOn ("component")
 	.Does (() => 
