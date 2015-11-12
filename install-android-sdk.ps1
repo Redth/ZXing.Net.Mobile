@@ -1,5 +1,5 @@
-#$AndroidToolPath = "${env:ProgramFiles(x86)}\Android\android-sdk\tools\android" 
-$AndroidToolPath = "$env:localappdata\Android\android-sdk\tools\android"
+$AndroidToolPath = "${env:ProgramFiles(x86)}\Android\android-sdk\tools\android" 
+#$AndroidToolPath = "$env:localappdata\Android\android-sdk\tools\android"
 
 Function Get-AndroidSDKs() { 
     $output = & $AndroidToolPath list sdk --all 
