@@ -21,6 +21,9 @@ libraries:
   winphone-8.0:
     - ./Build/Release/wp8.0/zxing.portable.dll
     - ./Build/Release/wp8.0/ZXingNetMobile.dll
+  pcl:
+    - ./Build/Release/zxing.portable.dll
+    - ./Build/Release/ZXingNetMobile.dll
 packages:
   android:
     - Xamarin.Android.Support.v4, Version=22.2.1.0
