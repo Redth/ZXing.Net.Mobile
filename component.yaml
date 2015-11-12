@@ -1,4 +1,4 @@
-version: 1.5.3.0
+version: 1.5.4.0
 name: ZXing.Net.Mobile
 id: zxing.net.mobile
 publisher: Redth
@@ -21,14 +21,27 @@ libraries:
   winphone-8.0:
     - ./Build/Release/wp8.0/zxing.portable.dll
     - ./Build/Release/wp8.0/ZXingNetMobile.dll
+  winphone-8.1:
+    - ./Build/Release/wp8.0/zxing.portable.dll
+    - ./Build/Release/wp8.0/ZXingNetMobile.dll
   pcl:
     - ./Build/Release/zxing.portable.dll
     - ./Build/Release/ZXingNetMobile.dll
+is_shell: true
 packages:
   android:
+    - ZXing.Net.Mobile, Version=1.5.4
     - Xamarin.Android.Support.v4, Version=22.2.1.0
   winphone-8.0:
+    - ZXing.Net.Mobile, Version=1.5.4
     - WriteableBitmapEx, Version=1.5.0.0
+  winphone-8.1:
+    - ZXing.Net.Mobile, Version=1.5.4
+    - WriteableBitmapEx, Version=1.5.0.0
+  ios:
+    - ZXing.Net.Mobile, Version=1.5.4
+  ios-unified:
+    - ZXing.Net.Mobile, Version=1.5.4
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library"
 details: ./Details.md
 getting-started: ./GettingStarted.md
