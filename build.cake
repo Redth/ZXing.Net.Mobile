@@ -81,7 +81,7 @@ Task ("publish").IsDependentOn ("nuget").IsDependentOn ("component")
 		return;
 	}
 
-	var apiKey = TransformTextFile("./nuget_api_key.txt").ToString ().Trim ();
+	var apiKey = TransformTextFile("./.nugetapikey").ToString ().Trim ();
 
 	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile." + version + ".nupkg " + apiKey });
 });
@@ -93,7 +93,7 @@ Task ("stage").IsDependentOn ("nuget").Does (() =>
 		return;
 	}
 
-	var apiKey = TransformTextFile("./myget_api_key.txt").ToString ().Trim ();
+	var apiKey = TransformTextFile("./.mygetapikey").ToString ().Trim ();
 
 	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile." + version + ".nupkg -Source https://www.myget.org/F/redth/api/v2 " + apiKey });
 });

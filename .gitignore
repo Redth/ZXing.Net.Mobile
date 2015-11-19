@@ -32,3 +32,9 @@ ZXing.UIImageTool/
 Backup/
 
 TestCloud/
+
+tools/
+.nugetapikey
+.mygetapikey
+*.xam
+*.nupkg
