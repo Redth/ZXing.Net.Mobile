@@ -16,6 +16,7 @@ using Android.Content.PM;
 using Android.Hardware;
 using System.Threading.Tasks;
 using System.Threading;
+using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile
 {
@@ -36,6 +37,7 @@ namespace ZXing.Mobile
         bool isAnalyzing = false;
         bool wasScanned = false;
         bool isTorchOn = false;
+        int cameraId = 0;
 
         static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim(true);
 
@@ -328,53 +330,30 @@ namespace ZXing.Mobile
 
 			var rotation = display.Rotation;
 
-			var displayMetrics = new Android.Util.DisplayMetrics ();
-
-			display.GetMetrics (displayMetrics);
-
-			int width = displayMetrics.WidthPixels;
-			int height = displayMetrics.HeightPixels;
-
-			if((rotation == SurfaceOrientation.Rotation0 || rotation == SurfaceOrientation.Rotation180) && height > width ||
-				(rotation == SurfaceOrientation.Rotation90 || rotation == SurfaceOrientation.Rotation270) && width > height)
+			switch(rotation)
 			{
-				switch(rotation)
-				{
-				case SurfaceOrientation.Rotation0:
-					degrees = 90;
-					break;
-				case SurfaceOrientation.Rotation90:
-					degrees = 0;
-					break;
-				case SurfaceOrientation.Rotation180:
-					degrees = 270;
-					break;
-				case SurfaceOrientation.Rotation270:
-					degrees = 180;
-					break;
-				}
-			}
-			//Natural orientation is landscape or square
-			else
-			{
-				switch(rotation)
-				{
-				case SurfaceOrientation.Rotation0:
-					degrees = 0;
-					break;
-				case SurfaceOrientation.Rotation90:
-					degrees = 270;
-					break;
-				case SurfaceOrientation.Rotation180:
-					degrees = 180;
-					break;
-				case SurfaceOrientation.Rotation270:
-					degrees = 90; 
-					break;
-				}
+			case SurfaceOrientation.Rotation0:
+				degrees = 0;
+				break;
+			case SurfaceOrientation.Rotation90:
+				degrees = 90;
+				break;
+			case SurfaceOrientation.Rotation180:
+				degrees = 180;
+				break;
+			case SurfaceOrientation.Rotation270:
+				degrees = 270;
+				break;
 			}
 
-			return degrees;
+
+			Camera.CameraInfo info = new Camera.CameraInfo();
+            
+			Camera.GetCameraInfo(cameraId, info);
+
+			int correctedDegrees = (360 + info.Orientation - degrees) % 360;
+
+			return correctedDegrees;
 		}
 
 		public void SetCameraDisplayOrientation(Activity context) 
@@ -532,6 +511,7 @@ namespace ZXing.Mobile
                         {
                             Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + whichCamera + " Camera, opening...");
                             camera = Android.Hardware.Camera.Open(i);
+							cameraId = i;
                             found = true;
                             break;
                         }
@@ -541,6 +521,7 @@ namespace ZXing.Mobile
                     {
                         Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Finding " + whichCamera + " camera failed, opening camera 0...");
                         camera = Android.Hardware.Camera.Open(0);
+                        cameraId = 0;
                     }
                 }
                 else
