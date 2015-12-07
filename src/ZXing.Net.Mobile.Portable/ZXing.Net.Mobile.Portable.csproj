@@ -46,13 +46,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
       <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\" />
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

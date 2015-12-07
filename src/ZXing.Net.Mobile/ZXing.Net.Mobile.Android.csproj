@@ -39,7 +39,6 @@
       <HintPath>..\..\Samples\Android\packages\Xamarin.Android.Support.v4.22.2.1.0\lib\MonoAndroid403\Xamarin.Android.Support.v4.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -66,12 +65,13 @@
     <AndroidResource Include="Resources\layout\zxingscannerfragmentlayout.axml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <ItemGroup>
     <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
       <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>
