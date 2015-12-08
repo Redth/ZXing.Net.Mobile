@@ -20,9 +20,9 @@
             <group targetFramework="wp8">
                 <dependency id="WriteableBitmapEx" version="1.5.0" />
             </group>
-            <group targetFramework="wpa81">
-                <dependency id="WriteableBitmapEx" version="1.5.0" />
-            </group>
+            <!--<group targetFramework="wpa81">-->
+            <!--    <dependency id="WriteableBitmapEx" version="1.5.0" />-->
+            <!--</group>-->
         </dependencies>
     </metadata>
     <files>
@@ -43,8 +43,8 @@
         <file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wp8\ZXingNetMobile.dll" />
 
         <!-- Windows Phone  -->
-        <file src="Build/Release/wp8.0/zxing.portable.dll" target="lib\wpa81\zxing.portable.dll" />
-        <file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wpa81\ZXingNetMobile.dll" />
+        <!--<file src="Build/Release/wp8.0/zxing.portable.dll" target="lib\wpa81\zxing.portable.dll" />-->
+        <!--<file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wpa81\ZXingNetMobile.dll" />-->
 
         <!-- Portable PCL -->
         <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wp8+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\zxing.portable.dll" />
