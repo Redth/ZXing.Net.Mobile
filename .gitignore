@@ -32,6 +32,8 @@ ZXing.UIImageTool/
 Backup/
 
 TestCloud/
+.vs/
+project.lock.json
 
 tools/
 .nugetapikey
