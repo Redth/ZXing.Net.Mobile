@@ -1,26 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
-using Microsoft.Devices;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
-using ZXing;
-using Windows.Phone.Media.Capture;
+﻿using Microsoft.Devices;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Windows.Phone.Media.Capture;
 
 namespace ZXing.Mobile
 {
     /// <summary>
-    /// A simple and easy to use wrapper for ZXing 2.0 for use with Windows Phone 7
-    /// Written by Henning M. Stephansen
+    /// Replacement camera preview reader/processor that uses SL8 APIs and fixes issues with turning on the flash/torch.
+    /// Written by Rodrigo 'r2d2rigo' Diaz
+    /// http://www.r2d2rigo.es
+    /// Based on SimpleCameraReader written by Henning M. Stephansen
     /// http://www.henning.ms
     /// </summary>
     public class AudioVideoCaptureDeviceCameraReader
@@ -36,7 +29,6 @@ namespace ZXing.Mobile
         private DispatcherTimer _timer;
         private PhotoCameraLuminanceSource _luminance;
         private MultiFormatReader _reader;
-        // private PhotoCamera _photoCamera;
         private AudioVideoCaptureDevice _photoCamera;
 
         private TimeSpan _scanInterval;
