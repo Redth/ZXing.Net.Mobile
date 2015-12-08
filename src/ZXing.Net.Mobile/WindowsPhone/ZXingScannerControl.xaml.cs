@@ -47,12 +47,19 @@ namespace ZXing.Mobile
             {
                 MobileBarcodeScanner.Log("Creating SimpleCameraReader");
 
+#if WP8
+                _reader = new AudioVideoCaptureDeviceCameraReader(options);
+                _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
+
+                // _previewVideo.SetSource has been moved to ReaderOnCameraInitialized
+#else
                 _reader = new SimpleCameraReader(options);
                 _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
 
                 // We need to set the VideoBrush we're going to display the preview feed on
                 // IMPORTANT that it gets set before Camera initializes
                 _previewVideo.SetSource(_reader.Camera);
+#endif
 
                 // The reader throws an event when a result is available 
                 _reader.DecodingCompleted += (o, r) => DisplayResult(r);
@@ -73,8 +80,12 @@ namespace ZXing.Mobile
 
         public Result LastScanResult { get; set; }
 
+#if WP8
+        AudioVideoCaptureDeviceCameraReader _reader;
+#else
         SimpleCameraReader _reader;
-        
+#endif
+
         public bool IsTorchOn
         {
             get { return _reader.FlashMode == FlashMode.On; }
@@ -101,31 +112,44 @@ namespace ZXing.Mobile
                 gridCustomOverlay.Children.Remove(CustomOverlay);
 
             BlackoutVideoBrush();
-            
+
+#if WP8
+            if (_reader != null)
+            {
+                _reader.Stop();
+                _reader = null;
+            }
+#else
             _reader.Stop();
-			_reader = null;
+            _reader = null;
+#endif
         }
 
         private void BlackoutVideoBrush()
         {
-        	_previewVideo.SetSource(new MediaElement());
+            _previewVideo.SetSource(new MediaElement());
         }
-        
+
         public void Cancel()
         {
             LastScanResult = null;
 
-			StopScanning ();
+            StopScanning ();
 
             if (ScanCallback != null)
                 ScanCallback(null);
         }
-        
+
         private void ReaderOnCameraInitialized(object sender, bool initialized)
         {
             // We dispatch (invoke) to avoid access exceptions
             Dispatcher.BeginInvoke(() =>
             {
+#if WP8
+                // This must be called here - until now, _reader.Camera is null
+                _previewVideo.SetSource(_reader.Camera);
+#endif
+
                 if (_reader != null && _previewTransform != null)
                     _previewTransform.Rotation = _reader.CameraOrientation;
             });
@@ -141,11 +165,11 @@ namespace ZXing.Mobile
                 _reader.Start();
             }
         }
-        
+
         private void DisplayResult(Result result)
         {
             if (!ContinuousScanning)
-			    StopScanning ();
+                StopScanning ();
 
             if (ScanCallback != null)
                 ScanCallback(result);
@@ -155,14 +179,14 @@ namespace ZXing.Mobile
         {
             this.gridCustomOverlay.Children.Clear();
 
-			StopScanning (); 
+            StopScanning ();
         }
 
         protected override void OnTap(System.Windows.Input.GestureEventArgs e)
         {
             base.OnTap(e);
 
-            if (_reader != null) 
+            if (_reader != null)
             {
                 //var pos = e.GetPosition(this);
                 _reader.Focus();
