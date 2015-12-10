@@ -26,10 +26,11 @@ namespace ZXing.Mobile
             this.topText.Text = TopText;
             this.bottomText.Text = BottomText;
 
-            if (UseCustomOverlay && CustomOverlay != null)
+            if (UseCustomOverlay)
             {
                 gridCustomOverlay.Children.Clear();
-                gridCustomOverlay.Children.Add(CustomOverlay);
+                if (CustomOverlay != null)
+                    gridCustomOverlay.Children.Add(CustomOverlay);
 
                 gridCustomOverlay.Visibility = Visibility.Visible;
                 gridDefaultOverlay.Visibility = Visibility.Collapsed;
