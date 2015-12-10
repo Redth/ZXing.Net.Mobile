@@ -35,28 +35,25 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
-    <Reference Include="Xamarin.Android.Support.v4">
-      <HintPath>..\..\Samples\Android\packages\Xamarin.Android.Support.v4.22.2.1.0\lib\MonoAndroid403\Xamarin.Android.Support.v4.dll</HintPath>
+    <Reference Include="Xamarin.Android.Support.v4, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Xamarin.Android.Support.v4.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.v4.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="ActivityLifecycleContextListener.cs" />
+    <Compile Include="BitmapRenderer.cs" />
+    <Compile Include="BitmapWriter.cs" />
+    <Compile Include="MobileBarcodeScanner.cs" />
+    <Compile Include="PlatformChecks.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
-    <Compile Include="Android\ZxingActivity.cs" />
-    <Compile Include="Android\ZxingOverlayView.cs" />
-    <Compile Include="Android\ZXingScannerFragment.cs" />
-    <Compile Include="Android\ZXingSurfaceView.cs" />
-    <Compile Include="Common\IMobileBarcodeScanner.cs" />
-    <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
-    <Compile Include="Android\PlatformChecks.cs" />
-    <Compile Include="Common\Performance.cs" />
-    <Compile Include="Common\CameraResolution.cs" />
-    <Compile Include="Android\ActivityLifecycleContextListener.cs" />
-    <Compile Include="Android\MobileBarcodeScanner.cs" />
-    <Compile Include="Android\BitmapWriter.cs" />
-    <Compile Include="Android\BitmapRenderer.cs" />
+    <Compile Include="ZxingActivity.cs" />
+    <Compile Include="ZxingOverlayView.cs" />
+    <Compile Include="ZXingScannerFragment.cs" />
+    <Compile Include="ZXingSurfaceView.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="Resources\drawable\" />
     <Folder Include="Resources\values\" />
   </ItemGroup>
@@ -64,14 +61,18 @@
     <AndroidResource Include="Resources\layout\zxingscanneractivitylayout.axml" />
     <AndroidResource Include="Resources\layout\zxingscannerfragmentlayout.axml" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
+      <Project>{7528dd0a-1781-47f4-adbf-eeddb011f6bb}</Project>
+      <Name>ZXing.Net.Mobile.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
       <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

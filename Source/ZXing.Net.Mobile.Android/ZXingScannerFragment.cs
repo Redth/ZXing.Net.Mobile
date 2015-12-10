@@ -65,9 +65,12 @@ namespace ZXing.Mobile
 		{
 			base.OnPause ();
 
-			scanner.ShutdownCamera();
+            if (scanner != null)
+            {
+                scanner.ShutdownCamera();
 
-			frame.RemoveView (scanner);
+                frame.RemoveView(scanner);
+            }
 
 			scanner = null;
 
@@ -114,7 +117,8 @@ namespace ZXing.Mobile
 
         void scan ()
         {
-            scanner.StartScanning (ScanningOptions, scanCallback);
+            if (scanner != null)
+                scanner.StartScanning (ScanningOptions, scanCallback);
         }
 
 

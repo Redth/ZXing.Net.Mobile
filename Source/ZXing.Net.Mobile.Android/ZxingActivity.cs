@@ -16,12 +16,18 @@ using Android.Widget;
 
 using ZXing;
 using Android.Support.V4.App;
+using System.Linq;
 
 namespace ZXing.Mobile
 {
 	[Activity (Label = "Scanner", ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden|ConfigChanges.ScreenLayout)]
 	public class ZxingActivity : FragmentActivity 
 	{
+        public static readonly string[] RequiredPermissions = new[] {
+            Android.Manifest.Permission.Camera,
+            Android.Manifest.Permission.Flashlight
+        };
+
 		public static event Action<ZXing.Result> OnScanCompleted;
 		public static event Action OnCanceled;
 
@@ -86,13 +92,57 @@ namespace ZXing.Mobile
 			OnCancelRequested += HandleCancelScan;
 			OnAutoFocusRequested += HandleAutoFocus;
 			OnTorchRequested += HandleTorchRequested;
+
+            var permissionsToRequest = new List<string>();
+
+            // Check and request any permissions
+            foreach (var permission in RequiredPermissions) {
+                if (PlatformChecks.IsPermissionInManifest (this, permission)) {
+                    if (!PlatformChecks.IsPermissionGranted(this, permission))
+                        permissionsToRequest.Add(permission);                        
+                }
+            }
+
+            if (permissionsToRequest.Any())
+            {
+                waitingForPermission = PlatformChecks.RequestPermissions(this, permissionsToRequest.ToArray (), 101);
+            }
 		}
+
+        bool waitingForPermission = false;
 
         protected override void OnResume ()
         {
             base.OnResume ();
 
-            scannerFragment.StartScanning (ScanningOptions, result => {
+            if (!waitingForPermission)
+                StartScanning();
+            
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        { 
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            if (waitingForPermission) {
+                waitingForPermission = false;
+
+                var canScan = false;
+
+                for (int i =0; i < permissions.Length; i++)
+                {
+                    if (permissions[i] == Android.Manifest.Permission.Camera && grantResults[i] == Permission.Granted)
+                        canScan = true;
+                }
+
+                if (canScan)
+                    StartScanning();
+            }
+        }
+
+        void StartScanning ()
+        {
+            scannerFragment.StartScanning(ScanningOptions, result => {
                 var evt = OnScanCompleted;
                 if (evt != null)
                     OnScanCompleted(result);
@@ -102,7 +152,7 @@ namespace ZXing.Mobile
             });
         }
 
-		void HandleTorchRequested(bool on)
+        void HandleTorchRequested(bool on)
 		{
 			this.SetTorch(on);
 		}

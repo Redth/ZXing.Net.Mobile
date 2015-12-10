@@ -45,36 +45,49 @@ namespace ZXing.Mobile
                 // In BGRA8 format, each pixel is defined by 4 bytes
                 const int BYTES_PER_PIXEL = 4;
 
-                using (var buffer = bitmap.LockBuffer(BitmapBufferAccessMode.ReadWrite))
+                using (var buffer = bitmap.LockBuffer(BitmapBufferAccessMode.Read))
                 using (var reference = buffer.CreateReference())
                 {
-                    // Get a pointer to the pixel buffer
-                    byte* data;
-                    uint capacity;
-                    ((IMemoryBufferByteAccess)reference).GetBuffer(out data, out capacity);
 
-                    // Get information about the BitmapBuffer
-                    var desc = buffer.GetPlaneDescription(0);
-                    var luminanceIndex = 0;
-
-                    // Iterate over all pixels
-                    for (uint row = 0; row < desc.Height; row++)
+                    if (reference is IMemoryBufferByteAccess)
                     {
-                        for (uint col = 0; col < desc.Width; col++)
+
+
+                        try
                         {
-                            // Index of the current pixel in the buffer (defined by the next 4 bytes, BGRA8)
-                            var currPixel = desc.StartIndex + desc.Stride * row + BYTES_PER_PIXEL * col;
+                            // Get a pointer to the pixel buffer
+                            byte* data;
+                            uint capacity;
+                            ((IMemoryBufferByteAccess)reference).GetBuffer(out data, out capacity);
 
-                            // Read the current pixel information into b,g,r channels (leave out alpha channel)
-                            var b = data[currPixel + 0]; // Blue
-                            var g = data[currPixel + 1]; // Green
-                            var r = data[currPixel + 2]; // Red
+                            // Get information about the BitmapBuffer
+                            var desc = buffer.GetPlaneDescription(0);
+                            var luminanceIndex = 0;
 
-                            var luminance = (byte)((RChannelWeight * r + GChannelWeight * g + BChannelWeight * b) >> ChannelWeight);
-                            var alpha = data[currPixel + 3];
-                            luminance = (byte)(((luminance * alpha) >> 8) + (255 * (255 - alpha) >> 8));
-                            luminances[luminanceIndex] = luminance;
-                            luminanceIndex++;                            
+                            // Iterate over all pixels
+                            for (uint row = 0; row < desc.Height; row++)
+                            {
+                                for (uint col = 0; col < desc.Width; col++)
+                                {
+                                    // Index of the current pixel in the buffer (defined by the next 4 bytes, BGRA8)
+                                    var currPixel = desc.StartIndex + desc.Stride * row + BYTES_PER_PIXEL * col;
+
+                                    // Read the current pixel information into b,g,r channels (leave out alpha channel)
+                                    var b = data[currPixel + 0]; // Blue
+                                    var g = data[currPixel + 1]; // Green
+                                    var r = data[currPixel + 2]; // Red
+
+                                    var luminance = (byte)((RChannelWeight * r + GChannelWeight * g + BChannelWeight * b) >> ChannelWeight);
+                                    var alpha = data[currPixel + 3];
+                                    luminance = (byte)(((luminance * alpha) >> 8) + (255 * (255 - alpha) >> 8));
+                                    luminances[luminanceIndex] = luminance;
+                                    luminanceIndex++;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Luminance Source Failed: {0}", ex);
                         }
                     }
                 }

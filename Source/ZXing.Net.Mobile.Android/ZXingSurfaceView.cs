@@ -72,7 +72,8 @@ namespace ZXing.Mobile
 
             Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking Camera Permissions...");
 
-			if (!PlatformChecks.HasCameraPermission (this.Context))
+			if (!PlatformChecks.IsPermissionInManifest (this.Context, Android.Manifest.Permission.Camera)
+                || !PlatformChecks.IsPermissionGranted (this.Context, Android.Manifest.Permission.Camera))
 			{
 				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + Android.Manifest.Permission.Camera + "), but was not found in your AndroidManifest.xml file.";
 				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
@@ -311,7 +312,7 @@ namespace ZXing.Mobile
 				if (!tokenSource.IsCancellationRequested)
 				{
                     Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
-                    try { 
+                    try {                         
                         camera.AutoFocus(this); 
                     } catch (Exception ex) {
                         Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
@@ -572,7 +573,8 @@ namespace ZXing.Mobile
                 return;
             }
 
-            if (!PlatformChecks.HasFlashlightPermission (this.Context))
+            if (!PlatformChecks.IsPermissionInManifest (this.Context, Android.Manifest.Permission.Flashlight)
+                || !PlatformChecks.IsPermissionGranted (this.Context, Android.Manifest.Permission.Flashlight))
             {
                 var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + Android.Manifest.Permission.Flashlight + "), but was not found in your AndroidManifest.xml file.";
                 Android.Util.Log.Error (MobileBarcodeScanner.TAG, msg);
