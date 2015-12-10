@@ -40,49 +40,39 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FormsViewGroup, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Xamarin.Forms.2.0.0.6490\lib\MonoAndroid10\FormsViewGroup.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
-    <Reference Include="Xamarin.Android.Support.Design, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FormsViewGroup, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\packages\Xamarin.Forms.2.0.0.6490\lib\MonoAndroid10\FormsViewGroup.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Design, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Android.Support.Design.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.Design.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Android.Support.v4, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Android.Support.v4, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Android.Support.v4.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.v4.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Android.Support.v7.AppCompat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Android.Support.v7.AppCompat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Android.Support.v7.AppCompat.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.v7.AppCompat.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Android.Support.v7.CardView, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Android.Support.v7.CardView, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Android.Support.v7.CardView.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.v7.CardView.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Android.Support.v7.MediaRouter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Android.Support.v7.MediaRouter, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Android.Support.v7.MediaRouter.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.v7.MediaRouter.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Forms.2.0.0.6490\lib\MonoAndroid10\Xamarin.Forms.Core.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Forms.Platform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Forms.Platform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Forms.2.0.0.6490\lib\MonoAndroid10\Xamarin.Forms.Platform.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Forms.Platform.Android, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Forms.Platform.Android, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Forms.2.0.0.6490\lib\MonoAndroid10\Xamarin.Forms.Platform.Android.dll</HintPath>
-      <Private>True</Private>
     </Reference>
-    <Reference Include="Xamarin.Forms.Xaml, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Forms.Xaml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\packages\Xamarin.Forms.2.0.0.6490\lib\MonoAndroid10\Xamarin.Forms.Xaml.dll</HintPath>
-      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -110,11 +100,11 @@
   <Import Project="..\..\src\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\..\src\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />
   <ItemGroup>
     <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
-      <Project>{7528dd0a-1781-47f4-adbf-eeddb011f6bb}</Project>
+      <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Source\ZXing.Net\zxing.portable.csproj">
-      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
+      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Forms.Android\ZXing.Net.Mobile.Forms.Android.csproj">
@@ -130,7 +120,7 @@
       <Name>ZXing.Net.Mobile.Android</Name>
     </ProjectReference>
     <ProjectReference Include="..\Core\FormsSample.csproj">
-      <Project>{0daf97ca-02db-4e4f-9163-b8f14eae2d90}</Project>
+      <Project>{0DAF97CA-02DB-4E4F-9163-B8F14EAE2D90}</Project>
       <Name>FormsSample</Name>
     </ProjectReference>
   </ItemGroup>

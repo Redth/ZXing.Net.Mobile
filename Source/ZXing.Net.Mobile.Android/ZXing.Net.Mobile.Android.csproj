@@ -35,9 +35,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
-    <Reference Include="Xamarin.Android.Support.v4, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Xamarin.Android.Support.v4, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\packages\Xamarin.Android.Support.v4.23.0.1.3\lib\MonoAndroid403\Xamarin.Android.Support.v4.dll</HintPath>
-      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -64,7 +63,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ItemGroup>
     <ProjectReference Include="..\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
-      <Project>{7528dd0a-1781-47f4-adbf-eeddb011f6bb}</Project>
+      <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">

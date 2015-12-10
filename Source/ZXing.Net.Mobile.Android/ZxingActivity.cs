@@ -142,14 +142,14 @@ namespace ZXing.Mobile
 
         void StartScanning ()
         {
-            scannerFragment.StartScanning(ScanningOptions, result => {
+            scannerFragment.StartScanning(result => {
                 var evt = OnScanCompleted;
                 if (evt != null)
                     OnScanCompleted(result);
 
                 if (!ZxingActivity.ScanContinuously)
                     this.Finish();
-            });
+            }, ScanningOptions);
         }
 
         void HandleTorchRequested(bool on)
@@ -185,7 +185,7 @@ namespace ZXing.Mobile
 
 		public void SetTorch(bool on)
 		{
-			scannerFragment.SetTorch(on);
+			scannerFragment.Torch(on);
 		}
 
 		public void AutoFocus()

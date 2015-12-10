@@ -21,7 +21,7 @@ using Camera = Android.Hardware.Camera;
 namespace ZXing.Mobile
 {
 	// based on https://github.com/xamarin/monodroid-samples/blob/master/ApiDemo/Graphics/CameraPreview.cs
-    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Android.Hardware.Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback
+    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Android.Hardware.Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback, IScannerView
 	{
 		private const int MIN_FRAME_WIDTH = 240;
 		private const int MIN_FRAME_HEIGHT = 240;
@@ -305,7 +305,12 @@ namespace ZXing.Mobile
 			return r;
 		}
 		
-		public void AutoFocus()
+        public void AutoFocus ()
+        {
+            AutoFocus (-1, -1);
+        }
+
+        public void AutoFocus(int x, int y)
 		{
 			if (camera != null)
 			{
@@ -471,10 +476,10 @@ namespace ZXing.Mobile
             _cameraLockEvent.Set();
         }
 
-        public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
+        public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {           
             this.callback = callback;
-            this.options = options;
+            this.options = options ?? MobileBarcodeScanningOptions.Default;
 
             lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
             isAnalyzing = true;
@@ -544,11 +549,6 @@ namespace ZXing.Mobile
             PerformanceCounter.Stop (perf, "SurfaceCreated took {0}ms");
         }
 
-        public void StartScanning (Action<Result> callback)
-        {
-            StartScanning (new MobileBarcodeScanningOptions (), callback);
-        }
-
         public void StopScanning ()
         {
             isAnalyzing = false;
@@ -565,7 +565,7 @@ namespace ZXing.Mobile
             isAnalyzing = true;
         }
 
-        public void SetTorch (bool on)
+        public void Torch (bool on)
         {
             if (!this.Context.PackageManager.HasSystemFeature(PackageManager.FeatureCameraFlash))
             {
@@ -620,7 +620,7 @@ namespace ZXing.Mobile
 
         public void ToggleTorch ()
         {
-            SetTorch (!isTorchOn);
+            Torch (!isTorchOn);
         }
         public MobileBarcodeScanningOptions ScanningOptions {
             get { return options; }

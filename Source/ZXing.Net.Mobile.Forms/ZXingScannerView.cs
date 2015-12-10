@@ -4,17 +4,12 @@ using ZXing.Mobile;
 
 namespace ZXing.Net.Mobile.Forms
 {
-    public class ZXingScannerView : View
+    public class ZXingScannerView : View, IScannerView
     {
         public delegate void ScanResultDelegate (ZXing.Result result);
         public event ScanResultDelegate OnScanResult;
 
-        Action<MobileBarcodeScanningOptions> startScanningHandler;
-        Action stopScanningHandler;
-        Action toggleFlashHandler;
-        Func<bool> getFlashHandler;
-        Action<bool> setFlashHandler;
-        Action<int, int> autoFocusHandler;
+        public IScannerView InternalNativeScannerImplementation { get; set; }
 
         public ZXingScannerView ()
         {
@@ -23,77 +18,107 @@ namespace ZXing.Net.Mobile.Forms
             HorizontalOptions = LayoutOptions.FillAndExpand;
         }
 
-        public void StartScanning (MobileBarcodeScanningOptions options = null)
-        {
-            var h = startScanningHandler;
-            if (h != null)
-                h (options ?? MobileBarcodeScanningOptions.Default);
-        }
-
-        public void StopScanning ()
-        {
-            var h = stopScanningHandler;
-            if (h != null)
-                h ();
-        }
-
-        public void ToggleFlash ()
-        {
-            var h = toggleFlashHandler;
-            if (h != null)
-                h ();
-        }
-
-        public bool Flash
-        {
-            get {
-                var h = getFlashHandler;
-                if (h != null)
-                    return h ();
-
-                return false;
-            } 
-            set {
-                var h = setFlashHandler;
-                if (h != null)
-                    h (value);
-            }
-        }
-
-        public void AutoFocus ()
-        {
-            var h = autoFocusHandler;
-            if (h != null)
-                h (-1, -1);
-        }
-
-        public void AutoFocus (int x, int y)
-        {
-            var h = autoFocusHandler;
-            if (h != null)
-                h (x, y);
-        }
-
-        public void SetInternalHandlers (
-            Action<MobileBarcodeScanningOptions> startScanning,
-            Action stopScanning,
-            Action toggleFlash,
-            Func<bool> getFlash,
-            Action<bool> setFlash,
-            Action<int, int> autoFocus) {
-            startScanningHandler = startScanning;
-            stopScanningHandler = stopScanning;
-            toggleFlashHandler = toggleFlash;
-            getFlashHandler = getFlash;
-            setFlashHandler = setFlash;
-            autoFocusHandler = autoFocus;
-        }
-
         public void RaiseScanResult (ZXing.Result result)
         {
             var e = this.OnScanResult;
             if (e != null)
                 e (result);
+        }
+
+        public void StartScanning (MobileBarcodeScanningOptions options = null)
+        {
+            if (InternalNativeScannerImplementation != null) {
+                InternalNativeScannerImplementation.StartScanning (result => {
+                    var h = OnScanResult;
+                    if (h != null)
+                        h (result);                    
+                }, options);
+            }
+        }
+
+        public void StopScanning ()
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.StopScanning ();
+        }
+
+        public void ToggleTorch ()
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.ToggleTorch ();
+        }
+
+        public void AutoFocus ()
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.AutoFocus ();
+        }
+
+        public void AutoFocus (int x, int y)
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.AutoFocus (x, y);
+        }
+
+        public void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
+        {
+            if (InternalNativeScannerImplementation != null) {
+                InternalNativeScannerImplementation.StartScanning (result => {
+                    var h = OnScanResult;
+                    if (h != null)
+                        h (result);
+                    if (scanResultHandler != null)
+                        scanResultHandler (result);
+                }, options);
+            }
+        }
+
+        public void PauseAnalysis ()
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.PauseAnalysis ();
+        }
+
+        public void ResumeAnalysis ()
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.ResumeAnalysis ();
+        }
+
+        public void Torch (bool on)
+        {
+            if (InternalNativeScannerImplementation != null)
+                InternalNativeScannerImplementation.Torch (on);
+        }
+
+        public bool IsTorchOn {
+            get {
+                if (InternalNativeScannerImplementation != null)
+                    return InternalNativeScannerImplementation.IsTorchOn;
+
+                return false;
+            }
+            set {
+                if (InternalNativeScannerImplementation != null)
+                    InternalNativeScannerImplementation.Torch (value);
+            }
+        }
+
+        public bool IsAnalyzing {
+            get {
+                if (InternalNativeScannerImplementation != null)
+                    return InternalNativeScannerImplementation.IsAnalyzing;
+
+                return false;
+            }
+            set {
+                if (InternalNativeScannerImplementation != null) {
+                    if (value && !IsAnalyzing)
+                        InternalNativeScannerImplementation.ResumeAnalysis ();
+                    else if (!value && IsAnalyzing)
+                        InternalNativeScannerImplementation.PauseAnalysis ();
+                }
+            }
         }
     }
 }

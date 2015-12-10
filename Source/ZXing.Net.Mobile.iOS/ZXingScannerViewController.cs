@@ -98,7 +98,7 @@ namespace ZXing.Mobile
 		public void Torch(bool on)
 		{
 			if (scannerView != null)
-				scannerView.SetTorch (on);
+				scannerView.Torch (on);
 		}
 
 		public void ToggleTorch()
@@ -130,7 +130,7 @@ namespace ZXing.Mobile
 
 			Task.Factory.StartNew (() =>
 			{
-				BeginInvokeOnMainThread(() => scannerView.StartScanning (this.ScanningOptions, result => {
+				BeginInvokeOnMainThread(() => scannerView.StartScanning (result => {
 
                     if (!ContinuousScanning) {
                         Console.WriteLine ("Stopping scan...");
@@ -141,7 +141,7 @@ namespace ZXing.Mobile
 					if (evt != null)
 						evt (result);
                         
-				}));
+                },this.ScanningOptions));
 			});
 		}
 

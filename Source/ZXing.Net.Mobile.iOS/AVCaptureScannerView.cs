@@ -33,7 +33,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-	public class AVCaptureScannerView : UIView, IZXingScanner<UIView>
+    public class AVCaptureScannerView : UIView, IZXingScanner<UIView>
 	{
 		public AVCaptureScannerView()
 		{
@@ -432,7 +432,7 @@ namespace ZXing.Mobile
 
 
 		#region IZXingScanner implementation
-		public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
+        public void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
 		{
 			if (!analyzing)
 				analyzing = true;
@@ -443,7 +443,7 @@ namespace ZXing.Mobile
 			Setup ();
 
 			this.options = options;
-			this.resultCallback = callback;
+			this.resultCallback = scanResultHandler;
 
 			Console.WriteLine("StartScanning");
 
@@ -467,10 +467,7 @@ namespace ZXing.Mobile
 
 			stopped = false;
 		}
-		public void StartScanning (Action<Result> callback)
-		{
-			StartScanning (new MobileBarcodeScanningOptions (), callback);
-		}
+		
 
 		public void StopScanning()
 		{
@@ -511,7 +508,7 @@ namespace ZXing.Mobile
 			analyzing = true;
 		}
 
-		public void SetTorch (bool on)
+		public void Torch (bool on)
 		{
 			try
 			{
@@ -541,13 +538,18 @@ namespace ZXing.Mobile
 
 		public void ToggleTorch()
 		{
-			SetTorch(!IsTorchOn);
+			Torch(!IsTorchOn);
 		}
 
 		public void AutoFocus ()
 		{
 			//Doesn't do much on iOS :(
 		}
+
+        public void AutoFocus (int x, int y)
+        {
+            //Doesn't do much on iOS :(
+        }
 
 		public string TopText { get;set; }
 		public string BottomText { get;set; }

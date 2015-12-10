@@ -576,7 +576,7 @@ namespace ZXing.Mobile
 		}
 	
 		#region IZXingScanner implementation
-		public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
+        public void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
 		{
 			if (!stopped)
 				return;
@@ -588,7 +588,7 @@ namespace ZXing.Mobile
 			Setup (this.Frame);
 
 			this.options = options;
-			this.resultCallback = callback;
+			this.resultCallback = scanResultHandler;
 
 			Console.WriteLine("StartScanning");
 
@@ -619,11 +619,7 @@ namespace ZXing.Mobile
 			if (evt != null)
 				evt ();
 		}
-		public void StartScanning (Action<Result> callback)
-		{
-			StartScanning (new MobileBarcodeScanningOptions (), callback);
-		}
-
+		
 		public void StopScanning()
 		{
 			if (overlayView != null) {
@@ -673,7 +669,7 @@ namespace ZXing.Mobile
 			analyzing = true;
 		}
 
-		public void SetTorch (bool on)
+		public void Torch (bool on)
 		{
 			try
 			{
@@ -703,13 +699,18 @@ namespace ZXing.Mobile
 
 		public void ToggleTorch()
 		{
-			SetTorch(!IsTorchOn);
+			Torch(!IsTorchOn);
 		}
 
 		public void AutoFocus ()
 		{
 			//Doesn't do much on iOS :(
 		}
+
+        public void AutoFocus (int x, int y)
+        {
+            //Doesn't do much on iOS :(
+        }
 
 		public string TopText { get;set; }
 		public string BottomText { get;set; }

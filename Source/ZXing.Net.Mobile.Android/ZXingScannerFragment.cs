@@ -6,7 +6,7 @@ using Android.Support.V4.App;
 
 namespace ZXing.Mobile
 {
-    public class ZXingScannerFragment : Fragment, IZXingScanner<View>
+    public class ZXingScannerFragment : Fragment, IZXingScanner<View>, IScannerView
 	{
 	    public ZXingScannerFragment() 
         {
@@ -89,12 +89,17 @@ namespace ZXing.Mobile
 		ZXingSurfaceView scanner;
 		ZxingOverlayView zxingOverlay;
 
-		public void SetTorch(bool on)
+		public void Torch(bool on)
 		{
-			scanner.SetTorch(on);
+			scanner.Torch(on);
 		}
 		
-		public void AutoFocus()
+        public void AutoFocus()
+        {
+            scanner.AutoFocus();
+        }
+
+        public void AutoFocus(int x, int y)
 		{
 			scanner.AutoFocus();
 		}
@@ -102,10 +107,10 @@ namespace ZXing.Mobile
         Action<Result> scanCallback;
         bool scanImmediately = false;
 
-        public void StartScanning (MobileBarcodeScanningOptions options, Action<Result> callback)
+        public void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
         {            
             ScanningOptions = options;
-            scanCallback = callback;
+            scanCallback = scanResultHandler;
 
             if (scanner == null) {
                 scanImmediately = true;
@@ -118,13 +123,7 @@ namespace ZXing.Mobile
         void scan ()
         {
             if (scanner != null)
-                scanner.StartScanning (ScanningOptions, scanCallback);
-        }
-
-
-        public void StartScanning (Action<Result> callback)
-        {
-            StartScanning (MobileBarcodeScanningOptions.Default, callback);
+                scanner.StartScanning (scanCallback, ScanningOptions);
         }
 
         public void StopScanning ()

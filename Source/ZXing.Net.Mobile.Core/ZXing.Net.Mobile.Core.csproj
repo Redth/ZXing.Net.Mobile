@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
@@ -36,7 +36,7 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
-      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
+      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
   </ItemGroup>
@@ -46,6 +46,7 @@
     <Compile Include="IMobileBarcodeScanner.cs" />
     <Compile Include="MobileBarcodeScanningOptions.cs" />
     <Compile Include="Performance.cs" />
+    <Compile Include="IFormsScannerView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

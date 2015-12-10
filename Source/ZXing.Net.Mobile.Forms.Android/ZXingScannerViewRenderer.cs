@@ -29,26 +29,7 @@ namespace ZXing.Net.Mobile.Forms.Android
                 zxingSurface = new ZXing.Mobile.ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity);
                 zxingSurface.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
 
-                formsView.SetInternalHandlers (options => {
-                    // Start Scanning
-                    var opt = options ?? ZXing.Mobile.MobileBarcodeScanningOptions.Default;
-                    zxingSurface.StartScanning (opt, formsView.RaiseScanResult);
-                }, () => {
-                    // Stop Scanning
-                    zxingSurface.StopScanning ();
-                }, () => {
-                    // Toggle Flash
-                    zxingSurface.ToggleTorch ();
-                }, () => {
-                    // Get Flash
-                    return zxingSurface.IsTorchOn;
-                }, (on) => {
-                    // Set Flash Handler
-                    zxingSurface.SetTorch (on);
-                }, (x, y) => {
-                    // Autofocus
-                    zxingSurface.AutoFocus ();
-                });
+                formsView.InternalNativeScannerImplementation = zxingSurface;
                   
                 base.SetNativeControl (zxingSurface);                
             }
