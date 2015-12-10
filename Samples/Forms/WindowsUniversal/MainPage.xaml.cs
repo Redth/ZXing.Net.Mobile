@@ -25,6 +25,9 @@ namespace WindowsUniversal
         public MainPage()
         {
             this.InitializeComponent();
+
+            ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+
             // add this line
             LoadApplication(new FormsSample.App());
         }

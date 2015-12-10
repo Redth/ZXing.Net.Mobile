@@ -14,20 +14,21 @@ namespace WindowsPhone
 {
     public partial class MainPage : PhoneApplicationPage
     {
+        FormsSample.App app;
+
         // Constructor
         public MainPage()
         {
             InitializeComponent();
-            
-            Forms.Init();
-            
-            // Set our view from the "main" layout resource
-            Content = BuildView().ConvertPageToUIElement(this);
-        }
 
-        static Xamarin.Forms.Page BuildView()
-        {
-            return new FormsSample.App().MainPage;
+            // Force the renderer assembly to load
+            ZXing.Net.Mobile.Forms.WindowsPhone.ZXingScannerViewRenderer.Init();
+
+            Forms.Init();
+
+            app = new FormsSample.App();
+            // Set our view from the "main" layout resource
+            Content = app.MainPage.ConvertPageToUIElement(this);
         }
 
         // Sample code for building a localized ApplicationBar

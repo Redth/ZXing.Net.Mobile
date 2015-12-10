@@ -1,17 +1,22 @@
 ﻿using System;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
-using ZXing.Net.Mobile.Forms.WindowsUniversal;
 using System.ComponentModel;
 using System.Reflection;
 using Xamarin.Forms.Platform.WinPhone;
+using ZXing.Net.Mobile.Forms.WindowsPhone;
 
 [assembly: ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
-namespace ZXing.Net.Mobile.Forms.WindowsUniversal
+namespace ZXing.Net.Mobile.Forms.WindowsPhone
 {
     //[Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingScannerControl>
     {
+        public static void Init()
+        {
+            // Force the assembly to load
+        }
+
         ZXingScannerView formsView;
 
         ZXing.Mobile.ZXingScannerControl zxingControl;
@@ -23,6 +28,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
             if (zxingControl == null)
             {
                 zxingControl = new ZXing.Mobile.ZXingScannerControl();
+                zxingControl.UseCustomOverlay = false;
 
                 formsView.SetInternalHandlers(options => {
                     // Start Scanning

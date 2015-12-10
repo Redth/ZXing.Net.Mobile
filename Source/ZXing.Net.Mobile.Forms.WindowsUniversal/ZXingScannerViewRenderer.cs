@@ -12,6 +12,11 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
     //[Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingScannerControl>
     {
+        public static void Init ()
+        {
+            // Cause the assembly to load
+        }
+
         ZXingScannerView formsView;
 
         ZXing.Mobile.ZXingScannerControl zxingControl;
