@@ -1,0 +1,44 @@
+﻿using System;
+using Xamarin.Forms;
+using ZXing.Net.Mobile.Forms;
+using Xamarin.Forms.Platform.iOS;
+using System.ComponentModel;
+using System.Reflection;
+using Foundation;
+using ZXing.Net.Mobile.Forms.iOS;
+
+[assembly:ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
+namespace ZXing.Net.Mobile.Forms.iOS
+{
+    [Preserve(AllMembers = true)]
+    public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingScannerView>
+    {       
+        ZXingScannerView formsView;
+
+        ZXing.Mobile.ZXingScannerView zxingView;
+
+        protected override void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
+        {
+            formsView = Element;
+
+            if (zxingView == null) {
+
+                zxingView = new ZXing.Mobile.ZXingScannerView ();
+
+                formsView.InternalNativeScannerImplementation = zxingView;
+
+                base.SetNativeControl (zxingView);                
+            }
+
+            base.OnElementChanged (e);
+        }
+
+        public override void TouchesEnded (NSSet touches, UIKit.UIEvent evt)
+        {
+            base.TouchesEnded (touches, evt);
+
+            zxingView.AutoFocus ();
+        }
+    }
+}
+
