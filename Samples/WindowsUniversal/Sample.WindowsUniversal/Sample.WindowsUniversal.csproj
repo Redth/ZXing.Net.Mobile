@@ -143,11 +143,15 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\ZXing.Net.Mobile\Universal\ZXing.Net.Mobile.Universal.csproj">
-      <Project>{1b000bca-4895-4acf-a0c6-3adf3a9bedf2}</Project>
-      <Name>ZXing.Net.Mobile.Universal</Name>
+    <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
+      <Project>{7528dd0a-1781-47f4-adbf-eeddb011f6bb}</Project>
+      <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\ZXing.Net\zxing.portable.csproj">
+    <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.WindowsUniversal\ZXing.Net.Mobile.WindowsUniversal.csproj">
+      <Project>{1b000bca-4895-4acf-a0c6-3adf3a9bedf2}</Project>
+      <Name>ZXing.Net.Mobile.WindowsUniversal</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Source\ZXing.Net\zxing.portable.csproj">
       <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
