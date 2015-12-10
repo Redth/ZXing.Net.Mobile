@@ -86,7 +86,7 @@ namespace ZXing.Mobile
 			return reader;
 		}
 
-		internal CameraResolution GetResolution (List<CameraResolution> availableResolutions)
+		public CameraResolution GetResolution (List<CameraResolution> availableResolutions)
 		{
 			CameraResolution r = null;
 
