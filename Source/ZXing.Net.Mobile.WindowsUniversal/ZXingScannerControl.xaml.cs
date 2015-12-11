@@ -26,7 +26,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-    public sealed partial class ZXingScannerControl : UserControl, IDisposable
+    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IDisposable
     {
         public ZXingScannerControl()
         {
@@ -57,9 +57,35 @@ namespace ZXing.Mobile
         readonly SystemMediaTransportControls _systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
 
 
-
-        public async Task StartScanning(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
+        public async void StartScanning (Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
         {
+            await StartScanningAsync(scanCallback, options);
+        }
+
+        public async void StopScanning ()
+        {
+            await StopScanningAsync();
+        }
+
+        public void PauseAnalysis ()
+        {
+            isAnalyzing = false;
+        }
+
+        public void ResumeAnalysis ()
+        {
+            
+            isAnalyzing = true;
+        }
+
+        public bool IsAnalyzing
+        {
+            get { return isAnalyzing; }
+        }
+
+        public async Task StartScanningAsync(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
+        {
+            isAnalyzing = true;
             ScanCallback = scanCallback;
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
@@ -159,6 +185,9 @@ namespace ZXing.Mobile
                     return;
                 if (processing)
                     return;
+                if (!isAnalyzing)
+                    return;
+
                 processing = true;
 
                 SoftwareBitmapLuminanceSource luminanceSource = null;
@@ -194,7 +223,7 @@ namespace ZXing.Mobile
                 if (result != null && !string.IsNullOrEmpty (result.Text))
                 {
                     if (!ContinuousScanning)
-                        await StopScanning();
+                        await StopScanningAsync();
                     LastScanResult = result;
                     ScanCallback(result);                    
                 }
@@ -227,7 +256,7 @@ namespace ZXing.Mobile
             System.Diagnostics.Debug.WriteLine("AutoFocus requested");
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
-            await AutoFocus((int)pt.Position.X, (int)pt.Position.Y);
+            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y);
 
         }
 
@@ -237,6 +266,7 @@ namespace ZXing.Mobile
         bool stopping = false;
 
         volatile bool processing = false;
+        volatile bool isAnalyzing = false;
 
         public Action<Result> ScanCallback { get; set; }
         public MobileBarcodeScanningOptions ScanningOptions { get; set; }
@@ -286,30 +316,40 @@ namespace ZXing.Mobile
             }            
         }
 
-        public async Task AutoFocus(int x = -1, int y = -1)
+        public async void AutoFocus ()
+        {
+            await AutoFocusAsync(-1, -1);
+        }
+
+        public async void AutoFocus (int x = -1, int y = -1)
+        {
+            await AutoFocusAsync(x, y);
+        }
+
+        public async Task AutoFocusAsync(int x = -1, int y = -1)
         {
             if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
                 if (mediaCapture.VideoDeviceController.FocusControl.Supported)
                     await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();            
         }
 
-        public async Task StopScanning()
+        public async Task StopScanningAsync()
         {
             stopping = true;
+            isAnalyzing = false;
             await mediaCapture.StopPreviewAsync();
             if (UseCustomOverlay && CustomOverlay != null)
                 gridCustomOverlay.Children.Remove(CustomOverlay);
 
             timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
-            stopping = false;
-            //TODO: Stop
+            stopping = false;            
         }
 
         public async Task Cancel()
         {
             LastScanResult = null;
 
-           await StopScanning();
+           await StopScanningAsync();
 
             if (ScanCallback != null)
                 ScanCallback(null);
@@ -317,7 +357,7 @@ namespace ZXing.Mobile
 
         public async void Dispose()
         {
-            await StopScanning();
+            await StopScanningAsync();
             this.gridCustomOverlay.Children.Clear();            
         }
 

@@ -30,27 +30,8 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
                 zxingControl = new ZXing.Mobile.ZXingScannerControl();
                 zxingControl.UseCustomOverlay = false;
 
-                formsView.SetInternalHandlers(options => {
-                    // Start Scanning
-                    var opt = options ?? ZXing.Mobile.MobileBarcodeScanningOptions.Default;
-                    zxingControl.StartScanning(formsView.RaiseScanResult, opt);
-                }, () => {
-                    // Stop Scanning
-                    zxingControl.StopScanning();
-                }, () => {
-                    // Toggle Flash
-                    zxingControl.ToggleTorch();
-                }, () => {
-                    // Get Flash
-                    return zxingControl.IsTorchOn;
-                }, (on) => {
-                    // Set Flash Handler
-                    zxingControl.Torch(on);
-                }, (x, y) => {
-                    // Autofocus
-                    zxingControl.AutoFocus();
-                });
-
+                formsView.InternalNativeScannerImplementation = zxingControl;
+                
                 base.SetNativeControl(zxingControl);
             }
 

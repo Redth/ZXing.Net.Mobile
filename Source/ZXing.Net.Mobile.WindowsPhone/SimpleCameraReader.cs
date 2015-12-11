@@ -41,6 +41,7 @@ namespace ZXing.Mobile
         bool doCancel = false;
 		private bool _initialized;
         private bool _wasScanned = false;
+        public bool IsAnalyzing { get; set; }
 
 		private VideoBrush _surface;
 
@@ -220,6 +221,7 @@ namespace ZXing.Mobile
 		public void Stop()
 		{
             doCancel = true;
+            IsAnalyzing = false;
 
 			if (_timer != null && _timer.IsEnabled)
 				_timer.Stop();
@@ -232,6 +234,7 @@ namespace ZXing.Mobile
 				_photoCamera.Dispose();
 				_photoCamera = null;
 			}
+
 		}
 
 		private void OnPhotoCameraInitialized(object sender, CameraOperationCompletedEventArgs e)
@@ -240,6 +243,7 @@ namespace ZXing.Mobile
 
             if (_photoCamera == null)
                 return;
+            IsAnalyzing = true;
 
             MobileBarcodeScanner.Log("Creating Luminance Source");
 
@@ -269,6 +273,9 @@ namespace ZXing.Mobile
             var msSinceLastPreview = (DateTime.UtcNow - _lastAnalysis).TotalMilliseconds;
             if ((DateTime.UtcNow - _lastAnalysis).TotalMilliseconds < Options.DelayBetweenAnalyzingFrames
                 || (_wasScanned && msSinceLastPreview < Options.DelayBetweenContinuousScans))
+                return;
+
+            if (!IsAnalyzing)
                 return;
 
             _wasScanned = false;

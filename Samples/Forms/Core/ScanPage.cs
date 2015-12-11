@@ -32,7 +32,7 @@ namespace FormsSample
                 ShowFlashButton = true,
             };
             overlay.FlashButtonClicked += (sender, e) => {
-                zxing.ToggleFlash();
+                zxing.ToggleTorch();
             };
             var grid = new Grid
             {

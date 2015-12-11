@@ -11,7 +11,7 @@ using Microsoft.Phone.Shell;
 
 namespace ZXing.Mobile
 {
-    public partial class ZXingScannerControl : UserControl, IDisposable
+    public partial class ZXingScannerControl : UserControl, IDisposable, IScannerView
     {
         public ZXingScannerControl() : base()
         {
@@ -75,7 +75,7 @@ namespace ZXing.Mobile
         public Result LastScanResult { get; set; }
 
         SimpleCameraReader _reader;
-        
+
         public bool IsTorchOn
         {
             get { return _reader.FlashMode == FlashMode.On; }
@@ -96,6 +96,33 @@ namespace ZXing.Mobile
             _reader.Focus();
         }
 
+        public void AutoFocus (int x = -1, int y = -1)
+        {
+            _reader.Focus();
+        }
+
+        public bool IsAnalyzing
+        {
+            get {
+                if (_reader != null)
+                    return _reader.IsAnalyzing;
+
+                return false;
+            }
+        }
+
+        public void ResumeAnalysis ()
+        {
+            if (_reader != null && !_reader.IsAnalyzing)
+                _reader.IsAnalyzing = false;
+        }
+
+        public void PauseAnalysis ()
+        {
+            if (_reader != null && _reader.IsAnalyzing)
+                _reader.IsAnalyzing = false;
+        }
+
         public void StopScanning()
         {
             if (UseCustomOverlay && CustomOverlay != null)
@@ -104,7 +131,7 @@ namespace ZXing.Mobile
             BlackoutVideoBrush();
             
             _reader.Stop();
-			_reader = null;
+			_reader = null;            
         }
 
         private void BlackoutVideoBrush()

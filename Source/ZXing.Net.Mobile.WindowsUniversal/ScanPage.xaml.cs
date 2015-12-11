@@ -133,7 +133,7 @@ namespace ZXing.Mobile
             OnRequestCancel += ScanPage_OnRequestCancel;
             OnRequestIsTorchOn += RequestIsTorchOnHandler;
 
-            await scannerControl.StartScanning(HandleResult, ScanningOptions);
+            await scannerControl.StartScanningAsync(HandleResult, ScanningOptions);
 
             if (!isNewInstance && Frame.CanGoBack)
                 Frame.GoBack();
@@ -158,7 +158,7 @@ namespace ZXing.Mobile
                 OnRequestCancel -= ScanPage_OnRequestCancel;
                 OnRequestIsTorchOn -= RequestIsTorchOnHandler;
 
-                await scannerControl.StopScanning();
+                await scannerControl.StopScanningAsync();
             }
             catch (Exception ex)
             {
