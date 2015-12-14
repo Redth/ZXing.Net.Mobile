@@ -16,6 +16,8 @@ namespace ZXing.Mobile
         void ToggleTorch();
         bool IsTorchOn { get; }
         bool IsAnalyzing { get; }
+
+        bool HasTorch { get; }
     }
 }
 
