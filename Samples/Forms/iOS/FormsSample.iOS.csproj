@@ -117,10 +117,6 @@
   <Import Project="..\..\src\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\..\src\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />
   <Import Project="..\..\..\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\..\..\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />
   <ItemGroup>
-    <ProjectReference Include="..\Core\FormsSample.csproj">
-      <Project>{0DAF97CA-02DB-4E4F-9163-B8F14EAE2D90}</Project>
-      <Name>FormsSample</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
       <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
@@ -140,6 +136,10 @@
     <ProjectReference Include="..\..\..\Source\ZXing.Net\zxing.portable.csproj">
       <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
       <Name>zxing.portable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Core\FormsSample.csproj">
+      <Project>{0daf97ca-02db-4e4f-9163-b8f14eae2d90}</Project>
+      <Name>FormsSample</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
