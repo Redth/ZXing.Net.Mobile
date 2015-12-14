@@ -46,7 +46,7 @@ namespace ZXing.Mobile
             Dispatcher.BeginInvoke(() =>
             {
                 ((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
-                    new Uri("/ZXingNetMobile;component/WindowsPhone/ScanPage.xaml", UriKind.Relative));
+                    new Uri("/ZXingNetMobile;component/ScanPage.xaml", UriKind.Relative));
             });
         }
 
@@ -75,7 +75,7 @@ namespace ZXing.Mobile
                 Dispatcher.BeginInvoke(() =>
 				{
 					((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
-						new Uri("/ZXingNetMobile;component/WindowsPhone/ScanPage.xaml", UriKind.Relative));
+						new Uri("/ZXingNetMobile;component/ScanPage.xaml", UriKind.Relative));
 				});
 
                 scanResultResetEvent.WaitOne();

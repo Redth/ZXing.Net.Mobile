@@ -48,12 +48,14 @@ namespace ZXing.Mobile
             {
                 MobileBarcodeScanner.Log("Creating SimpleCameraReader");
 
-                _reader = new SimpleCameraReader(options);
+                //_reader = new SimpleCameraReader(options);
+                _reader = new AudioVideoCaptureDeviceCameraReader(options);
                 _reader.ScanInterval = ScanningOptions.DelayBetweenAnalyzingFrames;
 
+                // AudioVideoCaptureDevice - move this to camera initialized otherwise throws
                 // We need to set the VideoBrush we're going to display the preview feed on
                 // IMPORTANT that it gets set before Camera initializes
-                _previewVideo.SetSource(_reader.Camera);
+                //_previewVideo.SetSource(_reader.Camera);
 
                 // The reader throws an event when a result is available 
                 _reader.DecodingCompleted += (o, r) => DisplayResult(r);
@@ -74,7 +76,8 @@ namespace ZXing.Mobile
 
         public Result LastScanResult { get; set; }
 
-        SimpleCameraReader _reader;
+        //SimpleCameraReader _reader;
+        AudioVideoCaptureDeviceCameraReader _reader;
 
         public bool IsTorchOn
         {
@@ -89,6 +92,14 @@ namespace ZXing.Mobile
         public void ToggleTorch()
         {
             _reader.FlashMode = _reader.FlashMode == FlashMode.Off ? FlashMode.On : FlashMode.Off;
+        }
+
+        public bool HasTorch
+        {
+            get
+            {
+                return _reader.HasTorch;
+            }
         }
 
         public void AutoFocus()
@@ -129,9 +140,12 @@ namespace ZXing.Mobile
                 gridCustomOverlay.Children.Remove(CustomOverlay);
 
             BlackoutVideoBrush();
-            
-            _reader.Stop();
-			_reader = null;            
+
+            if (_reader != null)
+            {
+                _reader.Stop();
+                _reader = null;
+            }
         }
 
         private void BlackoutVideoBrush()
@@ -154,6 +168,9 @@ namespace ZXing.Mobile
             // We dispatch (invoke) to avoid access exceptions
             Dispatcher.BeginInvoke(() =>
             {
+                // This must be called here - until now, _reader.Camera is null
+                _previewVideo.SetSource(_reader.Camera);
+
                 if (_reader != null && _previewTransform != null)
                     _previewTransform.Rotation = _reader.CameraOrientation;
             });

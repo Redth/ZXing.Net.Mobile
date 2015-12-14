@@ -90,6 +90,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AudioVideoCaptureDeviceCameraReader.cs" />
     <Compile Include="BarcodeWriter.cs" />
     <Compile Include="MobileBarcodeScanner.cs" />
     <Compile Include="PhotoCameraLuminanceSource.cs" />
