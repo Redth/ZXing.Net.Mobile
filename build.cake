@@ -1,15 +1,49 @@
 var target = Argument("target", "libs");
 var version = Argument("nugetversion", "");
 
+var libs = new Dictionary<string, string> {
+	{ "./ZXing.Net.Mobile.sln", "Any" },
+	{ "./ZXing.Net.Mobile.Forms.sln", "Any" }
+};
+
+var samples = new Dictionary<string, string> {
+	{ "./Samples/Android/Sample.Android.sln", "Any" },
+	{ "./Samples/iOS/Sample.iOS.sln", "Any" },
+	{ "./Samples/WindowsPhone/Sample.WindowsPhone.sln", "Win" },
+	{ "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", "Win" },
+	{ "./Samples/Forms/Sample.Forms.sln", "Win" },
+};
+
+var buildAction = new Action<Dictionary<string, string>> (solutions => {
+
+	foreach (var sln in solutions) {
+
+		if ((sln.Value == "Any")
+				|| (sln.Value == "Win" && IsRunningOnWindows ())
+				|| (sln.Value == "Mac" && IsRunningOnUnix ())) {
+
+			NuGetRestore (sln.Key);
+			
+			if (IsRunningOnWindows ())
+				MSBuild (sln.Key, c => { 
+					c.Configuration = "Release";
+					c.MSBuildPlatform = MSBuildPlatform.x86;
+				});
+			else 
+				DotNetBuild (sln.Key, c => c.Configuration = "Release");
+		}
+	}
+});
+
 Task ("libs").Does (() => 
 {
-	// Build core
-	NuGetRestore ("./ZXing.Net.Mobile.sln");
-	DotNetBuild ("./ZXing.Net.Mobile.sln", c => c.Configuration = "Release");
+	buildAction (libs);
+});
 
-	// Build forms
-	NuGetRestore ("./ZXing.Net.Mobile.Forms.sln");
-	DotNetBuild ("./ZXing.Net.Mobile.Forms.sln", c => c.Configuration = "Release");
+
+Task ("samples").Does (() => 
+{
+	buildAction (samples);
 });
 
 
