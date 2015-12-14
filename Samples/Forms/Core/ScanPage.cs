@@ -20,19 +20,27 @@ namespace FormsSample
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 VerticalOptions = LayoutOptions.FillAndExpand
             };
-            zxing.OnScanResult += (result) => {
-                System.Diagnostics.Debug.WriteLine(result.Text);
-                zxing.StopScanning();
-            };
+            zxing.OnScanResult += (result) => 
+                Device.BeginInvokeOnMainThread (async () => {
+
+                    // Stop analysis until we navigate away so we don't keep reading barcodes
+                    zxing.IsAnalyzing = false;
+
+                    // Show an alert
+                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
+
+                    // Navigate away
+                    await Navigation.PopAsync ();
+                });
 
             overlay = new ZXingDefaultOverlay
             {
                 TopText = "Hold your phone up to the barcode",
                 BottomText = "Scanning will happen automatically",
-                ShowFlashButton = true,
+                ShowFlashButton = zxing.HasTorch,
             };
             overlay.FlashButtonClicked += (sender, e) => {
-                zxing.ToggleTorch();
+                zxing.IsTorchOn = !zxing.IsTorchOn;
             };
             var grid = new Grid
             {
@@ -50,12 +58,13 @@ namespace FormsSample
         {
             base.OnAppearing();
 
-            zxing.StartScanning();
+            zxing.IsScanning = true;
         }
 
         protected override void OnDisappearing()
         {
-            zxing.StopScanning();
+            zxing.IsScanning = false;
+
             base.OnDisappearing();
         }
     }

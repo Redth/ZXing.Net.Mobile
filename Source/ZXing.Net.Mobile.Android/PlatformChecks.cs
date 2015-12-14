@@ -14,7 +14,7 @@ using Android.Support.V4.Content;
 
 namespace ZXing.Mobile
 {
-	class PlatformChecks
+	public class PlatformChecks
 	{
 		public static bool IsPermissionInManifest(Context context, string permission)
 		{            

@@ -4,7 +4,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Net.Mobile.Forms
 {
-    public class ZXingScannerView : View, IScannerView
+    public class ZXingScannerView : View
     {
         public delegate void ScanResultDelegate (ZXing.Result result);
         public event ScanResultDelegate OnScanResult;
@@ -13,7 +13,6 @@ namespace ZXing.Net.Mobile.Forms
 
         public ZXingScannerView ()
         {
-            //IsClippedToBounds = true;
             VerticalOptions = LayoutOptions.FillAndExpand;
             HorizontalOptions = LayoutOptions.FillAndExpand;
         }
@@ -25,22 +24,6 @@ namespace ZXing.Net.Mobile.Forms
                 e (result);
         }
 
-        public void StartScanning (MobileBarcodeScanningOptions options = null)
-        {
-            if (InternalNativeScannerImplementation != null) {
-                InternalNativeScannerImplementation.StartScanning (result => {
-                    var h = OnScanResult;
-                    if (h != null)
-                        h (result);                    
-                }, options);
-            }
-        }
-
-        public void StopScanning ()
-        {
-            if (InternalNativeScannerImplementation != null)
-                InternalNativeScannerImplementation.StopScanning ();
-        }
 
         public void ToggleTorch ()
         {
@@ -60,65 +43,99 @@ namespace ZXing.Net.Mobile.Forms
                 InternalNativeScannerImplementation.AutoFocus (x, y);
         }
 
-        public void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
-        {
-            if (InternalNativeScannerImplementation != null) {
-                InternalNativeScannerImplementation.StartScanning (result => {
-                    var h = OnScanResult;
-                    if (h != null)
-                        h (result);
-                    if (scanResultHandler != null)
-                        scanResultHandler (result);
-                }, options);
-            }
+
+        public static readonly BindableProperty OptionsProperty =
+            BindableProperty.Create<ZXingScannerView, MobileBarcodeScanningOptions> (
+                p => p.Options, 
+                defaultValue: MobileBarcodeScanningOptions.Default, 
+                defaultBindingMode: BindingMode.TwoWay);
+        
+        public MobileBarcodeScanningOptions Options {
+            get { return (MobileBarcodeScanningOptions)GetValue (OptionsProperty); }
+            set { SetValue (OptionsProperty, value); }
         }
 
-        public void PauseAnalysis ()
-        {
-            if (InternalNativeScannerImplementation != null)
-                InternalNativeScannerImplementation.PauseAnalysis ();
+        public static readonly BindableProperty IsScanningProperty =
+            BindableProperty.Create<ZXingScannerView, bool> (
+                p => p.IsScanning, 
+                defaultValue: false, 
+                defaultBindingMode: BindingMode.TwoWay,
+                propertyChanged: (bindable, oldValue, newValue) => {
+                    if (bindable == null)
+                        return;
+                    var scannerView = (ZXingScannerView)bindable;
+                    if (newValue && !scannerView.isScanning) {
+                        if (scannerView.InternalNativeScannerImplementation != null) {
+                            scannerView.isScanning = true;
+
+
+                            scannerView.InternalNativeScannerImplementation.StartScanning (
+                                    scannerView.RaiseScanResult, scannerView.Options);
+                        }
+                    } else if (!newValue && scannerView.isScanning) {
+                        scannerView.isScanning = false;
+                        if (scannerView.InternalNativeScannerImplementation != null)
+                            scannerView.InternalNativeScannerImplementation.StopScanning ();
+                    }
+                });
+
+        bool isScanning = false;
+        public bool IsScanning {
+            get { return isScanning; }
+            set { SetValue (IsScanningProperty, value); }
         }
 
-        public void ResumeAnalysis ()
-        {
-            if (InternalNativeScannerImplementation != null)
-                InternalNativeScannerImplementation.ResumeAnalysis ();
-        }
-
-        public void Torch (bool on)
-        {
-            if (InternalNativeScannerImplementation != null)
-                InternalNativeScannerImplementation.Torch (on);
-        }
+        public static readonly BindableProperty IsTorchOnProperty =
+            BindableProperty.Create<ZXingScannerView, bool> (
+                p => p.IsTorchOn, 
+                defaultValue: false, 
+                defaultBindingMode: BindingMode.TwoWay,
+                propertyChanged: (bindable, oldValue, newValue) => {
+                    if (bindable == null)
+                        return;
+                    var scannerView = (ZXingScannerView)bindable;
+                    if (scannerView.InternalNativeScannerImplementation != null)
+                        scannerView.InternalNativeScannerImplementation.Torch (newValue);
+                });
 
         public bool IsTorchOn {
-            get {
-                if (InternalNativeScannerImplementation != null)
-                    return InternalNativeScannerImplementation.IsTorchOn;
-
-                return false;
-            }
-            set {
-                if (InternalNativeScannerImplementation != null)
-                    InternalNativeScannerImplementation.Torch (value);
-            }
+            get { return InternalNativeScannerImplementation != null && InternalNativeScannerImplementation.IsTorchOn; }
+            set { SetValue (IsTorchOnProperty, value); }                
         }
 
-        public bool IsAnalyzing {
-            get {
-                if (InternalNativeScannerImplementation != null)
-                    return InternalNativeScannerImplementation.IsAnalyzing;
 
-                return false;
-            }
-            set {
-                if (InternalNativeScannerImplementation != null) {
-                    if (value && !IsAnalyzing)
-                        InternalNativeScannerImplementation.ResumeAnalysis ();
-                    else if (!value && IsAnalyzing)
-                        InternalNativeScannerImplementation.PauseAnalysis ();
-                }
-            }
+        public static readonly BindableProperty HasTorchProperty =
+            BindableProperty.Create<ZXingScannerView, bool> (
+                p => p.HasTorch, 
+                defaultValue: false, 
+                defaultBindingMode: BindingMode.OneWay);
+
+        public bool HasTorch {
+            get { return InternalNativeScannerImplementation != null && InternalNativeScannerImplementation.HasTorch; }
+        }
+
+
+        public static readonly BindableProperty IsAnalyzingProperty = 
+            BindableProperty.Create<ZXingScannerView, bool> (
+                p => p.IsAnalyzing,
+                defaultValue: false,
+                defaultBindingMode: BindingMode.TwoWay,
+                propertyChanged: 
+                (bindable, oldValue, newValue) => {
+                    if (bindable == null)
+                        return;
+                    var scannerView = (ZXingScannerView)bindable;
+                    if (scannerView.InternalNativeScannerImplementation != null) {
+                        if (newValue && !scannerView.InternalNativeScannerImplementation.IsAnalyzing)
+                            scannerView.InternalNativeScannerImplementation.ResumeAnalysis ();
+                        else if (!newValue && scannerView.InternalNativeScannerImplementation.IsAnalyzing)
+                            scannerView.InternalNativeScannerImplementation.PauseAnalysis ();
+                    }
+                });
+
+        public bool IsAnalyzing {
+            get { return InternalNativeScannerImplementation != null && InternalNativeScannerImplementation.IsAnalyzing; }
+            set { SetValue (IsAnalyzingProperty, value); }
         }
     }
 }
