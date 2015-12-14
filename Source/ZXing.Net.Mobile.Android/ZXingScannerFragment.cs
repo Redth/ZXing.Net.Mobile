@@ -19,52 +19,41 @@ namespace ZXing.Mobile
 		{
 			frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, viewGroup, false);
 
-			return frame;
-		}
+            var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
+            layoutParams.Weight = 1;
 
-		public override void OnResume ()
-		{
-            base.OnResume ();
+            try
+            {
+                scanner = new ZXingSurfaceView (this.Activity);
 
-			var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
-			layoutParams.Weight = 1;
-
-			try
-			{
-				scanner = new ZXingSurfaceView (this.Activity);
-
-				frame.AddView(scanner, layoutParams);
+                frame.AddView(scanner, layoutParams);
 
 
-				if (!UseCustomOverlayView)
-				{
-					zxingOverlay = new ZxingOverlayView (this.Activity);
-					zxingOverlay.TopText = TopText ?? "";
-					zxingOverlay.BottomText = BottomText ?? "";
+                if (!UseCustomOverlayView)
+                {
+                    zxingOverlay = new ZxingOverlayView (this.Activity);
+                    zxingOverlay.TopText = TopText ?? "";
+                    zxingOverlay.BottomText = BottomText ?? "";
 
-					frame.AddView (zxingOverlay, layoutParams);
-				}
-				else if (CustomOverlayView != null)
-				{
-					frame.AddView(CustomOverlayView, layoutParams);
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine ("Create Surface View Failed: " + ex);
-			}
+                    frame.AddView (zxingOverlay, layoutParams);
+                }
+                else if (CustomOverlayView != null)
+                {
+                    frame.AddView(CustomOverlayView, layoutParams);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine ("Create Surface View Failed: " + ex);
+            }
 
             Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "ZXingScannerFragment->OnResume exit");
 
-
-            if (scanImmediately)
-                scan ();            
+			return frame;
 		}
 
-		public override void OnPause ()
-		{
-			base.OnPause ();
-
+        public override void OnStop ()
+        {
             if (scanner != null)
             {
                 scanner.ShutdownCamera();
@@ -72,13 +61,15 @@ namespace ZXing.Mobile
                 frame.RemoveView(scanner);
             }
 
-			scanner = null;
+            scanner = null;
 
-			if (!UseCustomOverlayView)
-				frame.RemoveView (zxingOverlay);
-			else if (CustomOverlayView != null)
-				frame.RemoveView (CustomOverlayView);
-		}
+            if (!UseCustomOverlayView)
+                frame.RemoveView (zxingOverlay);
+            else if (CustomOverlayView != null)
+                frame.RemoveView (CustomOverlayView);
+            
+            base.OnStop ();
+        }
 
 		public View CustomOverlayView { get;set; }
         public bool UseCustomOverlayView { get; set ; }
@@ -155,6 +146,12 @@ namespace ZXing.Mobile
         public bool IsAnalyzing {
             get {
                 return scanner.IsAnalyzing;
+            }
+        }
+
+        public bool HasTorch {
+            get {
+                return scanner.HasTorch; 
             }
         }
 	}
