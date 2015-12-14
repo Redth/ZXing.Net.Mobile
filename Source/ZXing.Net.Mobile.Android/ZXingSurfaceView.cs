@@ -481,7 +481,7 @@ namespace ZXing.Mobile
 
         public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {           
-            this.callback = callback;
+            this.callback = scanResultCallback;
             this.options = options ?? MobileBarcodeScanningOptions.Default;
 
             lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
