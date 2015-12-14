@@ -1,42 +1,17 @@
 var target = Argument("target", "libs");
 var version = Argument("nugetversion", "");
 
-List<string> GetSamples ()
-{
-	var l = new List<string> ();
-	l.Add ("Samples/Android/Sample.Android.sln");
-	l.Add ("Samples/iOS/Sample.iOS.sln");
-	l.Add ("Samples/iOS/Sample.iOS-Classic.sln");
-	
-	if (IsRunningOnWindows ()) {
-		l.Add ("Samples/WindowsPhone8/Sample.WindowsPhone8.sln");
-	}
-	
-	return l;
-}
-
 var slns = GetSamples ();
 
 Task ("libs").Does (() => 
 {
-	// Build the PCL
-	NuGetRestore ("ZXing.Net.Mobile.sln");
-	DotNetBuild ("src/ZXing.Net.Mobile.Portable/ZXing.Net.Mobile.Portable.csproj", c => c.Configuration = "Release");
+	// Build core
+	NuGetRestore ("./ZXing.Net.Mobile.sln");
+	DotNetBuild ("./ZXing.Net.Mobile.sln", c => c.Configuration = "Release");
 
-	foreach (var s in slns) {
-
-		// Build each project
-		NuGetRestore (s);
-
-		if (s.Contains ("WindowsPhone8")) {
-			MSBuild (s, c => {
-					c.Configuration = "Release";
-					c.PlatformTarget = Cake.Common.Tools.MSBuild.PlatformTarget.x86;
-			});
-		} else {
-			DotNetBuild (s, c => c.Configuration = "Release");
-		}
-	}
+	// Build forms
+	NuGetRestore ("./ZXing.Net.Mobile.Forms.sln");
+	DotNetBuild ("./ZXing.Net.Mobile.Forms.sln", c => c.Configuration = "Release");
 });
 
 
@@ -64,10 +39,11 @@ Task ("component").IsDependentOn ("libs").IsDependentOn ("tools").Does (() =>
 
 Task ("nuget").IsDependentOn ("libs").Does (() => 
 {
-	if (!DirectoryExists ("./NuGet/"))
-		CreateDirectory ("./NuGet");
+	if (!DirectoryExists ("./Build/nuget/"))
+		CreateDirectory ("./Build/nuget");
 
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./NuGet/" });	
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" });	
+	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" });	
 });
 
 Task ("release").IsDependentOn ("nuget").IsDependentOn ("component");
@@ -84,6 +60,7 @@ Task ("publish").IsDependentOn ("nuget").IsDependentOn ("component")
 	var apiKey = TransformTextFile("./.nugetapikey").ToString ().Trim ();
 
 	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile." + version + ".nupkg " + apiKey });
+	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile.Forms." + version + ".nupkg " + apiKey });
 });
 
 Task ("stage").IsDependentOn ("nuget").Does (() => 
@@ -96,6 +73,7 @@ Task ("stage").IsDependentOn ("nuget").Does (() =>
 	var apiKey = TransformTextFile("./.mygetapikey").ToString ().Trim ();
 
 	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile." + version + ".nupkg -Source https://www.myget.org/F/redth/api/v2 " + apiKey });
+	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile.Forms." + version + ".nupkg -Source https://www.myget.org/F/redth/api/v2 " + apiKey });
 });
 
 Task ("clean").Does (() => 
