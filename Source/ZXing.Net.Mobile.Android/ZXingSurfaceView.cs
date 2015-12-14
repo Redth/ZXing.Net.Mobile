@@ -634,6 +634,25 @@ namespace ZXing.Mobile
         public bool IsAnalyzing {
             get { return isAnalyzing; }
         }
+
+        bool? hasTorch = null;
+
+        public bool HasTorch {
+            get {
+                if (hasTorch.HasValue)
+                    return hasTorch.Value;  
+                
+                var p = camera.GetParameters();
+                var supportedFlashModes = p.SupportedFlashModes;
+
+                if (supportedFlashModes != null
+                    && (supportedFlashModes.Contains (Camera.Parameters.FlashModeTorch)
+                        || supportedFlashModes.Contains (Camera.Parameters.FlashModeOn)))
+                    hasTorch = true;
+
+                return hasTorch.Value;
+            }
+        }
 	}
 }
 
