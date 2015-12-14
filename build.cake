@@ -21,16 +21,21 @@ var buildAction = new Action<Dictionary<string, string>> (solutions => {
 		if ((sln.Value == "Any")
 				|| (sln.Value == "Win" && IsRunningOnWindows ())
 				|| (sln.Value == "Mac" && IsRunningOnUnix ())) {
-
-			NuGetRestore (sln.Key);
 			
-			if (IsRunningOnWindows ())
+			if (IsRunningOnWindows ()) {
+				NuGetRestore (sln.Key, new NuGetRestoreSettings {
+					ToolPath = "./tools/nuget3.exe"
+				});
+
 				MSBuild (sln.Key, c => { 
 					c.Configuration = "Release";
 					c.MSBuildPlatform = MSBuildPlatform.x86;
 				});
-			else 
+			} else {
+				NuGetRestore (sln.Key);
+
 				DotNetBuild (sln.Key, c => c.Configuration = "Release");
+			}
 		}
 	}
 });
