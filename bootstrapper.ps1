@@ -11,6 +11,7 @@ Param(
 
 $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
 $NUGET_EXE = Join-Path $TOOLS_DIR "nuget.exe"
+$NUGET3_EXE = Join-Path $TOOLS_DIR "nuget3.exe"
 $PACKAGES_CONFIG = Join-Path $TOOLS_DIR "packages.config"
 $CAKE_EXE = Join-Path $TOOLS_DIR "Cake/Cake.exe"
 $XC_EXE = Join-Path $TOOLS_DIR "xamarin-component.exe"
@@ -40,6 +41,11 @@ if (!(Test-Path $PACKAGES_CONFIG)) {
 # Make sure NuGet exists where we expect it.
 if (!(Test-Path $NUGET_EXE)) {
     Invoke-WebRequest -Uri http://nuget.org/nuget.exe -OutFile $NUGET_EXE
+}
+
+# Make sure NuGet exists where we expect it.
+if (!(Test-Path $NUGET3_EXE)) {
+    Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile $NUGET3_EXE
 }
 
 # Make sure NuGet exists where we expect it.
