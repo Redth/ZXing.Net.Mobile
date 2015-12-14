@@ -388,8 +388,8 @@ namespace ZXing.Mobile
                 try {
                     if (theCamera != null) {
                         try {
-                            theCamera.StopPreview();
                             theCamera.SetPreviewCallback(null);
+                            theCamera.StopPreview();
                         } catch (Exception ex) {
                             Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
                         }
