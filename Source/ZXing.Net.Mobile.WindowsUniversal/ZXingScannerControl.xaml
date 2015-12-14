@@ -42,7 +42,7 @@
                 <Button x:Name="buttonToggleFlash" Click="buttonToggleFlash_Click">Flash</Button>
             </Border>
             <Border Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock x:Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                <TextBlock x:Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
             </Border>
 
 
@@ -52,7 +52,7 @@
             <Rectangle Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Fill="Black" Opacity="0.3"></Rectangle>
 
             <Border Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock x:Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                <TextBlock x:Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
             </Border>
 
         </Grid>

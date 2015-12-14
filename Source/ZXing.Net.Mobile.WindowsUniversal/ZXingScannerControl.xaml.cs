@@ -170,6 +170,8 @@ namespace ZXing.Mobile
 
             await SetPreviewRotationAsync();
 
+            captureElement.Stretch = Stretch.UniformToFill;
+
             // Get our preview properties
             var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
             
@@ -314,6 +316,15 @@ namespace ZXing.Mobile
                     Torch(!IsTorchOn);
                 }
             }            
+        }
+
+        public bool HasTorch
+        {
+            get
+            {
+                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null
+                    && mediaCapture.VideoDeviceController.FlashControl.Supported;
+            }
         }
 
         public async void AutoFocus ()
