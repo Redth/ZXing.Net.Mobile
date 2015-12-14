@@ -66,6 +66,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AVCaptureScannerView.cs" />
     <Compile Include="AVCaptureScannerViewController.cs" />
     <Compile Include="BarcodeReaderiOS.cs" />

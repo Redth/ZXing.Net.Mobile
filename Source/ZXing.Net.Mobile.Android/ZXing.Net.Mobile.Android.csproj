@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityLifecycleContextListener.cs" />
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BitmapRenderer.cs" />
     <Compile Include="BitmapWriter.cs" />
     <Compile Include="MobileBarcodeScanner.cs" />
