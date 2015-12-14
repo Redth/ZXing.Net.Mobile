@@ -58,6 +58,9 @@
     <IntermediateOutputPath>obj\unified\$(Platform)\$(Configuration)\</IntermediateOutputPath>
     <AssemblyName>ZXing.Net.Mobile</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>ZXingNetMobile</AssemblyName>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
