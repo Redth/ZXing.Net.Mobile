@@ -159,7 +159,7 @@ namespace ZXing.Mobile
 		
 		public void SurfaceDestroyed (ISurfaceHolder holder)
 		{
-			ShutdownCamera ();
+			//ShutdownCamera ();
 		}
 
 
@@ -380,21 +380,21 @@ namespace ZXing.Mobile
 		{
 			tokenSource.Cancel();
 			
-			if (camera == null) 
-			{
-				ReleaseExclusiveAccess();
-				return;
-			}
-            
             var theCamera = camera;
             camera = null;
 
             // make this asyncronous so that we can return from the view straight away instead of waiting for the camera to release.
             Task.Factory.StartNew(() => {
                 try {
-                    theCamera.SetPreviewCallback(null);
-                    theCamera.StopPreview();
-                    theCamera.Release();
+                    if (theCamera != null) {
+                        try {
+                            theCamera.StopPreview();
+                            theCamera.SetPreviewCallback(null);
+                        } catch (Exception ex) {
+                            Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
+                        }
+                        theCamera.Release();
+                    }
                 } catch (Exception e) {
                     Android.Util.Log.Error(MobileBarcodeScanner.TAG, e.ToString());
                 } finally {
@@ -471,6 +471,9 @@ namespace ZXing.Mobile
 
         private void ReleaseExclusiveAccess()
         {
+            if (_cameraLockEvent.IsSet)
+                return;
+            
             // release the camera exclusive access allowing it to be used again.
             Console.WriteLine ("Releasing Exclusive access to camera");
             _cameraLockEvent.Set();
