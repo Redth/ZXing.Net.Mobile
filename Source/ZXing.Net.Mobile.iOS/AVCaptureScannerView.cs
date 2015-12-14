@@ -515,20 +515,26 @@ namespace ZXing.Mobile
 				NSError err;
 
 				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
-				device.LockForConfiguration(out err);
+                if (device.HasFlash || device.HasTorch) {
+    				device.LockForConfiguration(out err);
 
-				if (on)
-				{
-					device.TorchMode = AVCaptureTorchMode.On;
-					device.FlashMode = AVCaptureFlashMode.On;
-				}
-				else
-				{
-					device.TorchMode = AVCaptureTorchMode.Off;
-					device.FlashMode = AVCaptureFlashMode.Off;
-				}
+    				if (on)
+    				{
+                        if (device.HasTorch)
+    					    device.TorchMode = AVCaptureTorchMode.On;
+                        if (device.HasFlash)
+    					    device.FlashMode = AVCaptureFlashMode.On;
+    				}
+    				else
+    				{
+                        if (device.HasTorch)
+    					    device.TorchMode = AVCaptureTorchMode.Off;
+                        if (device.HasFlash)
+    					    device.FlashMode = AVCaptureFlashMode.Off;
+    				}
 
-				device.UnlockForConfiguration();
+    				device.UnlockForConfiguration();
+                }
 				device = null;
 
 				torch = on;
@@ -560,6 +566,18 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanningOptions ScanningOptions { get { return options; } }
 		public bool IsAnalyzing { get { return analyzing; } }
 		public bool IsTorchOn { get { return torch; } }
+
+        bool? hasTorch = null;
+        public bool HasTorch {
+            get {
+                if (hasTorch.HasValue)
+                    return hasTorch.Value;
+                
+                var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+                hasTorch = device.HasFlash || device.HasTorch;
+                return hasTorch.Value;
+            }
+        }
 		#endregion
 
 		public static bool SupportsAllRequestedBarcodeFormats(IEnumerable<BarcodeFormat> formats)

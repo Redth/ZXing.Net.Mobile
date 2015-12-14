@@ -12,7 +12,12 @@ namespace ZXing.Net.Mobile.Forms.iOS
 {
     [Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingScannerView>
-    {       
+    {   
+        // No-op to be called from app to prevent linker from stripping this out    
+        public static void Init ()
+        {
+        }
+
         ZXingScannerView formsView;
 
         ZXing.Mobile.ZXingScannerView zxingView;
@@ -24,6 +29,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
             if (zxingView == null) {
 
                 zxingView = new ZXing.Mobile.ZXingScannerView ();
+                zxingView.UseCustomOverlayView = true;
 
                 formsView.InternalNativeScannerImplementation = zxingView;
 

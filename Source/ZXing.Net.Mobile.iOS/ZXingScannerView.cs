@@ -76,7 +76,7 @@ namespace ZXing.Mobile
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview ();
 
-            if (UseCustomOverlayView && CustomOverlayView != null)
+            if (UseCustomOverlayView)
                 overlayView = CustomOverlayView;
             else {
                 overlayView = new ZXingDefaultOverlayView (new CGRect (0, 0, this.Frame.Width, this.Frame.Height),
@@ -587,7 +587,7 @@ namespace ZXing.Mobile
 
 			Setup (this.Frame);
 
-			this.options = options;
+			this.options = options ?? MobileBarcodeScanningOptions.Default;
 			this.resultCallback = scanResultHandler;
 
 			Console.WriteLine("StartScanning");
@@ -676,21 +676,30 @@ namespace ZXing.Mobile
 				NSError err;
 
 				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
-				device.LockForConfiguration(out err);
 
-				if (on)
-				{
-					device.TorchMode = AVCaptureTorchMode.On;
-					device.FlashMode = AVCaptureFlashMode.On;
-				}
-				else
-				{
-					device.TorchMode = AVCaptureTorchMode.Off;
-					device.FlashMode = AVCaptureFlashMode.Off;
-				}
+                if (device.HasTorch || device.HasFlash) {
+                    
+    				device.LockForConfiguration(out err);
 
-				device.UnlockForConfiguration();
+    				if (on)
+    				{
+                        if (device.HasTorch)
+    					    device.TorchMode = AVCaptureTorchMode.On;
+                        if (device.HasFlash)
+    					    device.FlashMode = AVCaptureFlashMode.On;
+    				}
+    				else
+    				{
+                        if (device.HasTorch)
+    					    device.TorchMode = AVCaptureTorchMode.Off;
+                        if (device.HasFlash)
+    					    device.FlashMode = AVCaptureFlashMode.Off;
+    				}
+
+    				device.UnlockForConfiguration();
+                }
 				device = null;
+
 
 				torch = on;
 			}
@@ -721,6 +730,18 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanningOptions ScanningOptions { get { return options; } }
 		public bool IsAnalyzing { get { return analyzing; } }
 		public bool IsTorchOn { get { return torch; } }
+
+        bool? hasTorch = null;
+        public bool HasTorch {
+            get {
+                if (hasTorch.HasValue)
+                    return hasTorch.Value;
+
+                var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+                hasTorch = device.HasFlash || device.HasTorch;
+                return hasTorch.Value;
+            }
+        }
 		#endregion
 	}
 }
