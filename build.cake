@@ -1,8 +1,6 @@
 var target = Argument("target", "libs");
 var version = Argument("nugetversion", "");
 
-var slns = GetSamples ();
-
 Task ("libs").Does (() => 
 {
 	// Build core
