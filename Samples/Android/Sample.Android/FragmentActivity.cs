@@ -34,6 +34,13 @@ namespace Sample.Android
             scan ();
         }
 
+        protected override void OnPause ()
+        {
+            scanFragment.StopScanning ();
+
+            base.OnPause ();
+        }
+
         void scan ()
         {
             var opts = new MobileBarcodeScanningOptions {
@@ -49,7 +56,7 @@ namespace Sample.Android
                 }
             };
 
-            scanFragment.StartScanning (opts, result => {
+            scanFragment.StartScanning (result => {
 
                 // Null result means scanning was cancelled
                 if (result == null || string.IsNullOrEmpty (result.Text)) {
@@ -59,7 +66,7 @@ namespace Sample.Android
 
                 // Otherwise, proceed with result
                 RunOnUiThread (() => Toast.MakeText (this, "Scanned: " + result.Text, ToastLength.Short).Show ());
-            });
+            }, opts);
         }
 	}
 }
