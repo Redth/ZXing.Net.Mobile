@@ -26,21 +26,21 @@ libraries:
 is_shell: true
 packages:
   android:
-    - ZXing.Net.Mobile.Forms, Version=2.0.0-beta1    
+    - ZXing.Net.Mobile.Forms, Version=2.0.0
   winphone-8.0:
-    - ZXing.Net.Mobile.Forms, Version=2.0.0-beta1    
+    - ZXing.Net.Mobile.Forms, Version=2.0.0
   winphone-8.1:
-    - ZXing.Net.Mobile.Forms, Version=2.0.0-beta1    
+    - ZXing.Net.Mobile.Forms, Version=2.0.0
   ios-unified:
-    - ZXing.Net.Mobile.Forms, Version=2.0.0-beta1
+    - ZXing.Net.Mobile.Forms, Version=2.0.0
   winuniversal-10.0:
-    - ZXing.Net.Mobile.Forms, Version=2.0.0-beta1
+    - ZXing.Net.Mobile.Forms, Version=2.0.0
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library for Xamarin.Forms"
 details: ./Details.md
 getting-started: ./GettingStarted.md
 samples: 
   - name: Forms Sample
-    path: "./Samples/Forms/Sample.Forms.sln"
+    path: "../Samples/Forms/Sample.Forms.sln"
     removeProjects: 
       - zxing.portable
       - ZXing.Net.Mobile.Core
@@ -71,6 +71,6 @@ samples:
           - ZXing.Net.Mobile.Forms
     no_build: true
     skip_docs: true  
-local-nuget-repo: ./Build/nuget
+local-nuget-repo: ../Build/nuget
 no_build: true
 

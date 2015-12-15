@@ -52,26 +52,31 @@ Task ("samples").Does (() =>
 });
 
 
-Task ("tools").WithCriteria (!FileExists ("./Component/tools/xamarin-component.exe")).Does (() => 
-{
-	if (!DirectoryExists ("./Component/tools/"))
-		CreateDirectory ("./Component/tools/");
+// Task ("tools").WithCriteria (!FileExists ("./Component/tools/xamarin-component.exe")).Does (() => 
+// {
+// 	if (!DirectoryExists ("./Component/tools/"))
+// 		CreateDirectory ("./Component/tools/");
 
-	DownloadFile ("https://components.xamarin.com/submit/xpkg", "./Component/tools/tools.zip");
+// 	DownloadFile ("https://components.xamarin.com/submit/xpkg", "./Component/tools/tools.zip");
 
-	Unzip ("./Component/tools/tools.zip", "./Component/tools/");
+// 	Unzip ("./Component/tools/tools.zip", "./Component/tools/");
 
-	DeleteFile ("./Component/tools/tools.zip");
-});
+// 	DeleteFile ("./Component/tools/tools.zip");
+// });
 
-Task ("component").IsDependentOn ("libs").IsDependentOn ("tools").Does (() => 
+Task ("component")
+	//.IsDependentOn ("nuget")
+	.Does (() => 
 {
 	DeleteFiles ("./Build/**/*.xml");
 	
-	if (IsRunningOnWindows ())
-		StartProcess ("./Component/tools/xamarin-component.exe", new ProcessSettings { Arguments = "package ./" });
-	else
-		StartProcess ("mono", new ProcessSettings { Arguments = "./Component/tools/xamarin-component.exe package ./" });
+	if (IsRunningOnWindows ()) {
+		StartProcess ("./tools/xamarin-component.exe", new ProcessSettings { Arguments = "package ./Component/" });
+		StartProcess ("./tools/xamarin-component.exe", new ProcessSettings { Arguments = "package ./Component-Forms/" });
+	} else {
+		StartProcess ("mono", new ProcessSettings { Arguments = "./tools/xamarin-component.exe package ./Component/" });
+		StartProcess ("mono", new ProcessSettings { Arguments = "./tools/xamarin-component.exe package ./Component-Forms/" });
+	}
 });
 
 Task ("nuget").IsDependentOn ("libs").Does (() => 
