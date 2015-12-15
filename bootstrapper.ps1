@@ -55,9 +55,10 @@ if (!(Test-Path $NUGET_EXE)) {
 
 # Make sure xamarin-component exists where we expect it.
 if (!(Test-Path $XC_EXE)) {
-    Invoke-WebRequest -Uri https://components.xamarin.com/submit/xpkg -OutFile (Join-Path $TOOLS_DIR "xpkg.zip")    
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [System.IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $TOOLS_DIR "xpkg.zip"), ($TOOLS_DIR))   
+    Invoke-WebRequest -Uri https://www.dropbox.com/s/mpiesu3nfs5pguu/xamarin-component.exe?dl=1 -OutFile (Join-Path $TOOLS_DIR "xamarin-component.exe")        
+    #Invoke-WebRequest -Uri https://components.xamarin.com/submit/xpkg -OutFile (Join-Path $TOOLS_DIR "xpkg.zip")    
+    #Add-Type -AssemblyName System.IO.Compression.FileSystem
+    #[System.IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $TOOLS_DIR "xpkg.zip"), ($TOOLS_DIR))   
 }
 
 # Restore tools from NuGet.

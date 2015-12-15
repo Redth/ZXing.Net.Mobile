@@ -1,6 +1,6 @@
 # Getting Started #
 
-You can use ZXing.Net.Mobile in your Xamarin.iOS, Xamarin.Android, and Windows Phone apps.  Simply download the component, and reference the dll's for yoru platform.
+You can use ZXing.Net.Mobile for Forms in your iOS, Android, Windows Phone (Silverlight) and Windows Universal Forms projects.
 
 ### Usage
 The simplest example of using ZXing.Net.Mobile looks something like this:

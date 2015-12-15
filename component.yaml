@@ -18,7 +18,7 @@ libraries:
   winphone-8.0:
     - ./Build/Release/wp8.0/zxing.portable.dll
     - ./Build/Release/wp8.0/ZXingNetMobile.dll
-  uwp:
+  winuniversal-10.0:
     - ./Build/Release/uwp/zxing.portable.dll
     - ./Build/Release/uwp/ZXingNetMobile.dll
   pcl:
@@ -36,6 +36,8 @@ packages:
     - ZXing.Net.Mobile, Version=2.0.0-beta1
     - WriteableBitmapEx, Version=1.5.0.0
   ios-unified:
+    - ZXing.Net.Mobile, Version=2.0.0-beta1
+  winuniversal-10.0:
     - ZXing.Net.Mobile, Version=2.0.0-beta1
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library"
 details: ./Details.md
@@ -77,18 +79,18 @@ samples:
           - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
-  # - name: Windows Universal Sample
-  #   path: "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln"
-  #   removeProjects: 
-  #     - ZXing.Net.Mobile.WindowsUniversal
-  #     - ZXing.Net.Mobile.Core
-  #     - zxing.portable
-  #   installNuGets:
-  #     - project: Sample.WindowsUniversal
-  #       packages: 
-  #         - ZXing.Net.Mobile
-  #   no_build: true
-  #   skip_docs: true
+   - name: Windows Universal Sample
+     path: "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln"
+     removeProjects: 
+       - ZXing.Net.Mobile.WindowsUniversal
+       - ZXing.Net.Mobile.Core
+       - zxing.portable
+     installNuGets:
+       - project: Sample.WindowsUniversal
+         packages: 
+           - ZXing.Net.Mobile
+     no_build: true
+     skip_docs: true
 local-nuget-repo: ./Build/nuget
 no_build: true
 
