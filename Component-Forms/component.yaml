@@ -58,18 +58,23 @@ samples:
     installNuGets:
       - project: FormsSample
         packages: 
+          - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.iOS
         packages: 
+          - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.Droid
         packages: 
+          - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.WindowsPhone
         packages: 
+          - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.WindowsUniversal
         packages: 
+          - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
     no_build: true
     skip_docs: true  
