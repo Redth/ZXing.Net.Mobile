@@ -1,7 +1,7 @@
 ﻿using System;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
-using ZXing.Net.Mobile.Forms.Android;
+using ZXing.Net.Mobile.Forms.iOS;
 using System.ComponentModel;
 using System.Reflection;
 using ZXing.Mobile;
@@ -23,7 +23,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
         ZXingBarcodeImageView formsView;
         UIImageView imageView;
 
-        protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
+        protected override async void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
         {
             formsView = Element;
 
@@ -36,10 +36,10 @@ namespace ZXing.Net.Mobile.Forms.iOS
 
             var writer = new ZXing.Mobile.BarcodeWriter ();
 
-            if (formsView != null && formsView.Options != null)
-                writer.Options = formsView.Options;
-            if (formsView != null && formsView.Format != null)
-                writer.Format = formsView.Format;
+            if (formsView != null && formsView.BarcodeOptions != null)
+                writer.Options = formsView.BarcodeOptions;
+            if (formsView != null && formsView.BarcodeFormat != null)
+                writer.Format = formsView.BarcodeFormat;
 
             var value = formsView != null ? formsView.BarcodeValue : string.Empty;
 
