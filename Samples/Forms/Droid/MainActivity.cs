@@ -19,6 +19,8 @@ namespace FormsSample.Droid
 
             global::Xamarin.Forms.Forms.Init (this, bundle);
 
+            global::ZXing.Net.Mobile.Forms.Android.Platform.Init ();
+
             LoadApplication (new App ());
         }
 

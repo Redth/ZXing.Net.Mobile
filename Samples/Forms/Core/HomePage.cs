@@ -4,30 +4,98 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using ZXing.Net.Mobile.Forms;
 
 namespace FormsSample
 {
     public class HomePage : ContentPage
     {
-        Button buttonScan;
+        ZXingScannerPage scanPage;
+        Button buttonScanDefaultOverlay;
+        Button buttonScanCustomOverlay;
+        Button buttonScanContinuously;
+        Button buttonScanCustomPage;
+        Button buttonGenerateBarcode;
 
         public HomePage () : base ()
         {
-            buttonScan = new Button
-            {
+            buttonScanDefaultOverlay = new Button {
                 Text = "Scan with Default Overlay",
             };
-            buttonScan.Clicked += async delegate
-            {
-                await Navigation.PushAsync(new ScanPage());
+            buttonScanDefaultOverlay.Clicked += async delegate {
+                scanPage = new ZXingScannerPage ();
+                scanPage.OnScanResult += async (result) => {
+                    scanPage.IsAnalyzing = false;
+
+                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
+
+                    await Navigation.PopAsync ();
+                };
+                await Navigation.PushAsync (scanPage);
             };
 
-            var stack = new StackLayout
-            {
 
+            buttonScanCustomOverlay = new Button {
+                Text = "Scan with Custom Overlay",
+            };
+            buttonScanCustomOverlay.Clicked += async delegate {
+                // Create our custom overlay
+                var customOverlay = new StackLayout {
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    VerticalOptions = LayoutOptions.FillAndExpand
+                };
+                var torch = new Button {
+                    Text = "Toggle Torch"
+                };
+                torch.Clicked += delegate {
+                    scanPage.ToggleTorch ();
+                };
+                customOverlay.Children.Add (torch);
+
+                scanPage = new ZXingScannerPage (customOverlay: customOverlay);
+                scanPage.OnScanResult += async (result) => {
+                    scanPage.IsAnalyzing = false;
+
+                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
+
+                    await Navigation.PopAsync ();
+                };
+                await Navigation.PushAsync (scanPage);
             };
 
-            stack.Children.Add(buttonScan);
+
+            buttonScanContinuously = new Button {
+                Text = "Scan Continuously",
+            };
+            buttonScanContinuously.Clicked += async delegate {
+                scanPage = new ZXingScannerPage ();
+                scanPage.OnScanResult += async (result) => 
+                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
+
+                await Navigation.PushAsync (scanPage);
+            };
+
+            buttonScanCustomPage = new Button {
+                Text = "Scan Continuously",
+            };
+            buttonScanCustomPage.Clicked += async delegate {
+                var customScanPage = new CustomScanPage ();
+                await Navigation.PushAsync (customScanPage);
+            };
+
+
+            buttonGenerateBarcode = new Button {
+                Text = "Barcode Generator"
+            };
+            buttonGenerateBarcode.Clicked += async delegate {
+                await Navigation.PushAsync (new BarcodePage ());    
+            };
+
+            var stack = new StackLayout ();
+            stack.Children.Add (buttonScanDefaultOverlay);
+            stack.Children.Add (buttonScanCustomOverlay);
+            stack.Children.Add (buttonScanContinuously);
+            stack.Children.Add (buttonGenerateBarcode);
 
             Content = stack;
         }

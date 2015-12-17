@@ -35,7 +35,8 @@
     <Compile Include="FormsSample.cs" />
     <Compile Include="HomePage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScanPage.cs" />
+    <Compile Include="CustomScanPage.cs" />
+    <Compile Include="BarcodePage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

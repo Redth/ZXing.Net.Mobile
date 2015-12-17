@@ -8,12 +8,12 @@ using ZXing.Net.Mobile.Forms;
 
 namespace FormsSample
 {
-    public class ScanPage : ContentPage
+    public class CustomScanPage : ContentPage
     {
         ZXingScannerView zxing;
         ZXingDefaultOverlay overlay;
 
-        public ScanPage () : base ()
+        public CustomScanPage () : base ()
         {
             zxing = new ZXingScannerView
             {
