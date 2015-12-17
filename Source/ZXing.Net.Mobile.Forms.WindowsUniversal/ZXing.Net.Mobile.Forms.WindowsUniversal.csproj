@@ -107,6 +107,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ZXingBarcodeImageViewRenderer.cs" />
     <Compile Include="ZXingScannerViewRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\ZXing.Net.Mobile.Forms.WindowsUniversal.rd.xml" />
