@@ -61,22 +61,24 @@ namespace ZXing.Net.Mobile.Forms
                 defaultValue: false, 
                 defaultBindingMode: BindingMode.TwoWay,
                 propertyChanged: (bindable, oldValue, newValue) => {
-                    if (bindable == null)
-                        return;
-                    var scannerView = (ZXingScannerView)bindable;
-                    if (newValue && !scannerView.isScanning) {
-                        if (scannerView.InternalNativeScannerImplementation != null) {
-                            scannerView.isScanning = true;
+                    try {
+                        if (bindable == null)
+                            return;
+                        var scannerView = (ZXingScannerView)bindable;
+                        if (newValue && !scannerView.isScanning) {
+                            if (scannerView.InternalNativeScannerImplementation != null) {
+                                scannerView.isScanning = true;
 
 
-                            scannerView.InternalNativeScannerImplementation.StartScanning (
-                                    scannerView.RaiseScanResult, scannerView.Options);
+                                scannerView.InternalNativeScannerImplementation.StartScanning (
+                                        scannerView.RaiseScanResult, scannerView.Options);
+                            }
+                        } else if (!newValue && scannerView.isScanning) {
+                            scannerView.isScanning = false;
+                            if (scannerView.InternalNativeScannerImplementation != null)
+                                scannerView.InternalNativeScannerImplementation.StopScanning ();
                         }
-                    } else if (!newValue && scannerView.isScanning) {
-                        scannerView.isScanning = false;
-                        if (scannerView.InternalNativeScannerImplementation != null)
-                            scannerView.InternalNativeScannerImplementation.StopScanning ();
-                    }
+                    } catch {}
                 });
 
         bool isScanning = false;
@@ -91,11 +93,13 @@ namespace ZXing.Net.Mobile.Forms
                 defaultValue: false, 
                 defaultBindingMode: BindingMode.TwoWay,
                 propertyChanged: (bindable, oldValue, newValue) => {
-                    if (bindable == null)
-                        return;
-                    var scannerView = (ZXingScannerView)bindable;
-                    if (scannerView.InternalNativeScannerImplementation != null)
-                        scannerView.InternalNativeScannerImplementation.Torch (newValue);
+                    try {
+                        if (bindable == null)
+                            return;
+                        var scannerView = (ZXingScannerView)bindable;
+                        if (scannerView.InternalNativeScannerImplementation != null)
+                            scannerView.InternalNativeScannerImplementation.Torch (newValue);
+                    } catch { }
                 });
 
         public bool IsTorchOn {
@@ -122,15 +126,17 @@ namespace ZXing.Net.Mobile.Forms
                 defaultBindingMode: BindingMode.TwoWay,
                 propertyChanged: 
                 (bindable, oldValue, newValue) => {
-                    if (bindable == null)
-                        return;
-                    var scannerView = (ZXingScannerView)bindable;
-                    if (scannerView.InternalNativeScannerImplementation != null) {
-                        if (newValue && !scannerView.InternalNativeScannerImplementation.IsAnalyzing)
-                            scannerView.InternalNativeScannerImplementation.ResumeAnalysis ();
-                        else if (!newValue && scannerView.InternalNativeScannerImplementation.IsAnalyzing)
-                            scannerView.InternalNativeScannerImplementation.PauseAnalysis ();
-                    }
+                    try { 
+                        if (bindable == null)
+                            return;
+                        var scannerView = (ZXingScannerView)bindable;
+                        if (scannerView.InternalNativeScannerImplementation != null) {
+                            if (newValue && !scannerView.InternalNativeScannerImplementation.IsAnalyzing)
+                                scannerView.InternalNativeScannerImplementation.ResumeAnalysis ();
+                            else if (!newValue && scannerView.InternalNativeScannerImplementation.IsAnalyzing)
+                                scannerView.InternalNativeScannerImplementation.PauseAnalysis ();
+                        }
+                    } catch { }
                 });
 
         public bool IsAnalyzing {

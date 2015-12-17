@@ -18,6 +18,10 @@ namespace ZXing.Net.Mobile.Forms.Android
     [Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingSurfaceView>
     {       
+        public static void Init ()
+        {
+        }
+
         ZXingScannerView formsView;
         IntermediaryScanner intermediaryScanner;
 

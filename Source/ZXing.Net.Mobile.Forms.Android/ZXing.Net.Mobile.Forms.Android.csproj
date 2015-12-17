@@ -78,6 +78,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZXingScannerViewRenderer.cs" />
     <Compile Include="PermissionsHandler.cs" />
+    <Compile Include="ZXingBarcodeImageViewRenderer.cs" />
+    <Compile Include="Platform.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
