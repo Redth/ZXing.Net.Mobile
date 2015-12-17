@@ -1,7 +1,8 @@
 ﻿using System;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
-using Xamarin.Forms.Platform.WindowsPhone;
+using Xamarin.Forms.Platform.WinPhone;
+using ZXing.Net.Mobile.Forms.WindowsPhone;
 using System.ComponentModel;
 using System.Reflection;
 using ZXing.Mobile;
@@ -10,15 +11,14 @@ using System.Threading.Tasks;
 [assembly: ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.WindowsPhone
 {
-    [Preserve(AllMembers = true)]
-    public class ZXingBarcodeImageViewRenderer : ViewRenderer<ZXingBarcodeImageView, Image>
+    public class ZXingBarcodeImageViewRenderer : ViewRenderer<ZXingBarcodeImageView, System.Windows.Controls.Image>
     {
         public static void Init()
         {
         }
 
         ZXingBarcodeImageView formsView;
-        Image imageView;
+        System.Windows.Controls.Image imageView;
 
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
         {
@@ -27,7 +27,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
             if (imageView == null)
             {
 
-                imageView = new Image();
+                imageView = new System.Windows.Controls.Image();
 
                 base.SetNativeControl(imageView);
             }
@@ -43,7 +43,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
 
             var image = writer.Write(value);
 
-            imageView.SetImageBitmap(image);
+            imageView.Source = image;
 
             base.OnElementChanged(e);
         }
