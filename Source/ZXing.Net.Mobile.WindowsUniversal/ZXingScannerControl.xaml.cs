@@ -348,9 +348,14 @@ namespace ZXing.Mobile
         {
             stopping = true;
             isAnalyzing = false;
-            await mediaCapture.StopPreviewAsync();
-            if (UseCustomOverlay && CustomOverlay != null)
-                gridCustomOverlay.Children.Remove(CustomOverlay);
+
+            try
+            {
+                await mediaCapture.StopPreviewAsync();
+                if (UseCustomOverlay && CustomOverlay != null)
+                    gridCustomOverlay.Children.Remove(CustomOverlay);
+            }
+            catch { }
 
             timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
             stopping = false;            
