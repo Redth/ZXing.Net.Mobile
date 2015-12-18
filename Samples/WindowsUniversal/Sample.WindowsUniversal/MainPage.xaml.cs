@@ -128,7 +128,7 @@ namespace Sample.WindowsUniversal
         {
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
             {                
-                var dialog = new MessageDialog("Somtiemes Being simple is much better. Be simple!");
+                var dialog = new MessageDialog(text);
                 await dialog.ShowAsync();
             });
         }
