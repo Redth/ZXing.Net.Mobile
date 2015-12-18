@@ -97,7 +97,8 @@ namespace ZXing.Mobile
 
                     if (supportedCameraModes.ToList().Contains((UInt32)VideoTorchMode.On))
                     {
-                        var torchStatus = (VideoTorchMode)_photoCamera.GetProperty(KnownCameraAudioVideoProperties.VideoTorchMode);
+                        UInt32 propValue = (UInt32)_photoCamera.GetProperty(KnownCameraAudioVideoProperties.VideoTorchMode);                        
+                        var torchStatus = (VideoTorchMode)propValue;
 
                         switch (torchStatus)
                         {
