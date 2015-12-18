@@ -33,8 +33,9 @@ namespace ZXing.Net.Mobile.Forms.Android
 
         protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
         {
-            formsView = Element;
+            base.OnElementChanged (e);
 
+            formsView = Element;
 
             if (zxingSurface == null) {
                 finishedSetup = new TaskCompletionSource<bool> ();
@@ -58,8 +59,6 @@ namespace ZXing.Net.Mobile.Forms.Android
 
                 finishedSetup.TrySetResult (true);
             }
-
-            base.OnElementChanged (e);
         }
 
         public override bool OnTouchEvent (MotionEvent e)
