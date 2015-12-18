@@ -19,7 +19,8 @@ namespace ZXing.Net.Mobile.Forms
             zxing.OnScanResult += (result) => {
                 var eh = this.OnScanResult;
                 if (eh != null)
-                    Device.BeginInvokeOnMainThread (() => eh (result));
+                    eh(result);
+                    //Device.BeginInvokeOnMainThread (() => eh (result));
             };
 
             if (customOverlay == null) {
