@@ -183,10 +183,9 @@ namespace ZXing.Mobile
             // preview-image and fire our timer events
             uiDispatcher = Application.Current.RootVisual.Dispatcher;
 
-            InitializeCamera();
-
-
             _reader = this.Options.BuildMultiFormatReader();
+
+            InitializeCamera();            
         }
 
         private async Task InitializeCamera()
@@ -357,7 +356,7 @@ namespace ZXing.Mobile
 
         private void ScanPreviewBuffer()
         {
-            if (IsAnalyzing) return;
+            if (!IsAnalyzing) return;
             if (_photoCamera == null) return;
             if (!_initialized) return;
 
