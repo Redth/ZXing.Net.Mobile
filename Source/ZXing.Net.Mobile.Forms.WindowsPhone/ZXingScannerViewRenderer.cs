@@ -28,7 +28,8 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
             if (zxingControl == null)
             {
                 zxingControl = new ZXing.Mobile.ZXingScannerControl();
-                zxingControl.UseCustomOverlay = false;
+                zxingControl.UseCustomOverlay = true;
+                zxingControl.ContinuousScanning = true;
 
                 formsView.InternalNativeScannerImplementation = zxingControl;
                 
