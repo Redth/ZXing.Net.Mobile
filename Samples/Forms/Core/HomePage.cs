@@ -27,13 +27,12 @@ namespace FormsSample
                 scanPage.OnScanResult += (result) => {
                     scanPage.IsScanning = false;
 
-                   Device.BeginInvokeOnMainThread(async () =>
-                   {
-                       await DisplayAlert("Scanned Barcode", result.Text, "OK");
-
-                       await Navigation.PopAsync();
-                   });
+                    Device.BeginInvokeOnMainThread (() => {
+                        Navigation.PopAsync ();
+                        DisplayAlert("Scanned Barcode", result.Text, "OK");
+                    });
                 };
+
                 await Navigation.PushAsync (scanPage);
             };
 
@@ -59,11 +58,10 @@ namespace FormsSample
                 scanPage.OnScanResult += (result) => {
                     scanPage.IsScanning = false;
 
-                    Device.BeginInvokeOnMainThread(async () =>
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        await DisplayAlert("Scanned Barcode", result.Text, "OK");
-
-                        await Navigation.PopAsync();
+                        Navigation.PopAsync();
+                        DisplayAlert("Scanned Barcode", result.Text, "OK");
                     });
                 };
                 await Navigation.PushAsync (scanPage);
@@ -76,12 +74,9 @@ namespace FormsSample
             buttonScanContinuously.Clicked += async delegate {
                 scanPage = new ZXingScannerPage ();
                 scanPage.OnScanResult += (result) =>
-                {
-                    Device.BeginInvokeOnMainThread(async() =>
-                    {
-                        await DisplayAlert("Scanned Barcode", result.Text, "OK");
-                    });
-                };
+                    Device.BeginInvokeOnMainThread (() => 
+                        DisplayAlert ("Scanned Barcode", result.Text, "OK"));
+                
                 await Navigation.PushAsync (scanPage);
             };
 
