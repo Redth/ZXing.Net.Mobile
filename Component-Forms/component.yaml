@@ -1,4 +1,4 @@
-version: 2.0.2.0
+version: 2.0.3.0
 name: ZXing.Net.Mobile for Forms
 id: zxing.net.mobile.forms
 publisher: Redth
@@ -26,15 +26,15 @@ libraries:
 is_shell: true
 packages:
   android:
-    - ZXing.Net.Mobile.Forms, Version=2.0.2
+    - ZXing.Net.Mobile.Forms, Version=2.0.3
   winphone-8.0:
-    - ZXing.Net.Mobile.Forms, Version=2.0.2
+    - ZXing.Net.Mobile.Forms, Version=2.0.3
   winphone-8.1:
-    - ZXing.Net.Mobile.Forms, Version=2.0.2
+    - ZXing.Net.Mobile.Forms, Version=2.0.3
   ios-unified:
-    - ZXing.Net.Mobile.Forms, Version=2.0.2
+    - ZXing.Net.Mobile.Forms, Version=2.0.3
   winuniversal-10.0:
-    - ZXing.Net.Mobile.Forms, Version=2.0.2
+    - ZXing.Net.Mobile.Forms, Version=2.0.3
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library for Xamarin.Forms"
 details: ./Details.md
 getting-started: ./GettingStarted.md
