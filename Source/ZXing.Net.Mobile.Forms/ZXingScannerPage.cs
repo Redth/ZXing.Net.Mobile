@@ -149,6 +149,19 @@ namespace ZXing.Net.Mobile.Forms
             }
         }
 
+        public bool IsScanning
+        {
+            get
+            {
+                return zxing == null ? false : zxing.IsScanning;
+            }
+            set
+            {
+                if (zxing != null)
+                    zxing.IsScanning = value;
+            }
+        }
+
         public bool HasTorch {
             get {
                 return zxing == null ? false : zxing.HasTorch;

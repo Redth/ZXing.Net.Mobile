@@ -25,7 +25,7 @@ namespace FormsSample
             buttonScanDefaultOverlay.Clicked += async delegate {
                 scanPage = new ZXingScannerPage ();
                 scanPage.OnScanResult += (result) => {
-                    scanPage.IsAnalyzing = false;
+                    scanPage.IsScanning = false;
 
                    Device.BeginInvokeOnMainThread(async () =>
                    {
@@ -57,7 +57,7 @@ namespace FormsSample
 
                 scanPage = new ZXingScannerPage (customOverlay: customOverlay);
                 scanPage.OnScanResult += (result) => {
-                    scanPage.IsAnalyzing = false;
+                    scanPage.IsScanning = false;
 
                     Device.BeginInvokeOnMainThread(async () =>
                     {
