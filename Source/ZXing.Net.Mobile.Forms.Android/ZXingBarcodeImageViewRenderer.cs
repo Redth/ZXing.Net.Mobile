@@ -20,6 +20,7 @@ namespace ZXing.Net.Mobile.Forms.Android
     {       
         public static void Init ()
         {
+            var temp = DateTime.Now;
         }
 
         ZXingBarcodeImageView formsView;

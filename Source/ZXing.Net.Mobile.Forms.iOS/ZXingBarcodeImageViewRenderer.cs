@@ -18,6 +18,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
     {       
         public static void Init ()
         {
+            var temp = DateTime.Now;
         }
 
         ZXingBarcodeImageView formsView;

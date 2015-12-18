@@ -16,6 +16,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
         // No-op to be called from app to prevent linker from stripping this out    
         public static void Init ()
         {
+            var temp = DateTime.Now;
         }
 
         ZXingScannerView formsView;
