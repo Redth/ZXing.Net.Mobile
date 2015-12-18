@@ -32,18 +32,21 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
                 base.SetNativeControl(imageView);
             }
 
-            var writer = new ZXing.Mobile.BarcodeWriter();
+            if (formsView != null && formsView.BarcodeValue != null)
+            {
+                var writer = new ZXing.Mobile.BarcodeWriter();
 
-            if (formsView != null && formsView.BarcodeOptions != null)
-                writer.Options = formsView.BarcodeOptions;
-            if (formsView != null && formsView.BarcodeFormat != null)
-                writer.Format = formsView.BarcodeFormat;
+                if (formsView != null && formsView.BarcodeOptions != null)
+                    writer.Options = formsView.BarcodeOptions;
+                if (formsView != null && formsView.BarcodeFormat != null)
+                    writer.Format = formsView.BarcodeFormat;
 
-            var value = formsView != null ? formsView.BarcodeValue : string.Empty;
+                var value = formsView != null ? formsView.BarcodeValue : string.Empty;
 
-            var image = writer.Write(value);
+                var image = writer.Write(value);
 
-            imageView.Source = image;
+                imageView.Source = image;
+            }
             
             base.OnElementChanged(e);
         }
