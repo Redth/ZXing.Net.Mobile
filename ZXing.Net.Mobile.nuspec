@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>ZXing.Net.Mobile</id>
-        <version>2.0.3</version>
+        <version>2.0.3.1</version>
         <title>ZXing.Net.Mobile Barcode Scanner</title>
         <authors>Redth</authors>
         <licenseUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/License.md</licenseUrl>
@@ -48,6 +48,8 @@
         <file src="Build/Release/uwp/zxing.portable.dll" target="lib\UAP10\zxing.portable.dll" />
         <file src="Build/Release/uwp/ZXing.Net.Mobile.Core.dll" target="lib\UAP10\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/uwp/ZXingNetMobile.dll" target="lib\UAP10\ZXingNetMobile.dll" />
+        <file src="Build/Release/uwp/ZXingNetMobile.pri" target="lib\UAP10\ZXingNetMobile.pri" />
+        <file src="Build/Release/uwp/ZXingNetMobile.xr.xml" target="lib\UAP10\ZXingNetMobile\ZXingNetMobile.xr.xml" />
 
         <!-- Portable PCL -->
         <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wp8+UAP10+MonoAndroid403+MonoTouch10+Xamarin.iOS10\zxing.portable.dll" />
