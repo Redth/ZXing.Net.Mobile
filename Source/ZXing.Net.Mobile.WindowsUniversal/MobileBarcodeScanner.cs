@@ -22,10 +22,12 @@ namespace ZXing.Mobile
 
         public CoreDispatcher Dispatcher { get; set; }
 
+        public Frame Frame { get; set; }
+
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
             //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-            var rootFrame = Window.Current.Content as Frame;
+            var rootFrame = this.Frame ?? Window.Current.Content as Frame;
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             ScanPage.ScanningOptions = options;
@@ -48,7 +50,7 @@ namespace ZXing.Mobile
 
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
-            var rootFrame = Window.Current.Content as Frame;
+            var rootFrame = this.Frame ?? Window.Current.Content as Frame;
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             return Task.Factory.StartNew(new Func<Result>(() =>
