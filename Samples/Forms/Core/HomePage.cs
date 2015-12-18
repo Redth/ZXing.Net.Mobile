@@ -24,12 +24,15 @@ namespace FormsSample
             };
             buttonScanDefaultOverlay.Clicked += async delegate {
                 scanPage = new ZXingScannerPage ();
-                scanPage.OnScanResult += async (result) => {
+                scanPage.OnScanResult += (result) => {
                     scanPage.IsAnalyzing = false;
 
-                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
+                   Device.BeginInvokeOnMainThread(async () =>
+                   {
+                       await DisplayAlert("Scanned Barcode", result.Text, "OK");
 
-                    await Navigation.PopAsync ();
+                       await Navigation.PopAsync();
+                   });
                 };
                 await Navigation.PushAsync (scanPage);
             };
@@ -53,12 +56,15 @@ namespace FormsSample
                 customOverlay.Children.Add (torch);
 
                 scanPage = new ZXingScannerPage (customOverlay: customOverlay);
-                scanPage.OnScanResult += async (result) => {
+                scanPage.OnScanResult += (result) => {
                     scanPage.IsAnalyzing = false;
 
-                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
+                    Device.BeginInvokeOnMainThread(async () =>
+                    {
+                        await DisplayAlert("Scanned Barcode", result.Text, "OK");
 
-                    await Navigation.PopAsync ();
+                        await Navigation.PopAsync();
+                    });
                 };
                 await Navigation.PushAsync (scanPage);
             };
@@ -69,9 +75,13 @@ namespace FormsSample
             };
             buttonScanContinuously.Clicked += async delegate {
                 scanPage = new ZXingScannerPage ();
-                scanPage.OnScanResult += async (result) => 
-                    await DisplayAlert ("Scanned Barcode", result.Text, "OK");
-
+                scanPage.OnScanResult += (result) =>
+                {
+                    Device.BeginInvokeOnMainThread(async() =>
+                    {
+                        await DisplayAlert("Scanned Barcode", result.Text, "OK");
+                    });
+                };
                 await Navigation.PushAsync (scanPage);
             };
 
