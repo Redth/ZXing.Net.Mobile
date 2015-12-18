@@ -85,6 +85,9 @@ namespace ZXing.Mobile
 
         public async Task StartScanningAsync(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
         {
+            if (stopping)
+                return;
+
             isAnalyzing = true;
             ScanCallback = scanCallback;
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
