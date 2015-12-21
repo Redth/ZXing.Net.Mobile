@@ -86,7 +86,7 @@ namespace ZXing.Mobile
 
         public void Torch(bool on)
         {
-            _reader.FlashMode = FlashMode.On;
+            _reader.FlashMode = on ? FlashMode.On : FlashMode.Off;
         }
 
         public void ToggleTorch()
