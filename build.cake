@@ -1,5 +1,5 @@
 var target = Argument("target", "libs");
-var version = Argument("nugetversion", "");
+var version = Argument("nugetversion", Argument("version", "2.0.0.9999"));
 
 var libs = new Dictionary<string, string> {
 	{ "./ZXing.Net.Mobile.sln", "Any" },
@@ -57,7 +57,21 @@ Task ("component")
 	.Does (() => 
 {
 	DeleteFiles ("./Build/**/*.xml");
-	
+
+	// Generate component.yaml files from templates
+	CopyFile ("./Component/component.template.yaml", "./Component/component.yaml");
+	CopyFile ("./Component-Forms/component.template.yaml", "./Component-Forms/component.yaml");
+
+	// Replace version in template files
+	FileWriteText ("./Component/component.yaml",
+		TransformTextFile("./Component/component.yaml", "{", "}")
+   			.WithToken("VERSION", version)
+   			.ToString());
+	FileWriteText ("./Component-Forms/component.yaml",
+		TransformTextFile("./Component-Forms/component.yaml", "{", "}")
+   			.WithToken("VERSION", version)
+   			.ToString());
+
 	StartProcess ("./tools/xamarin-component.exe", "package ./Component/");
 	StartProcess ("./tools/xamarin-component.exe", "package ./Component-Forms/");	
 });
@@ -67,8 +81,8 @@ Task ("nuget").IsDependentOn ("libs").Does (() =>
 	if (!DirectoryExists ("./Build/nuget/"))
 		CreateDirectory ("./Build/nuget");
 
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" });	
-	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" });	
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = version });	
+	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" Version = version });	
 });
 
 Task ("release").IsDependentOn ("nuget").IsDependentOn ("component");
