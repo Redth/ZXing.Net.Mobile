@@ -21,7 +21,6 @@ TestResults
 packages/
 
 Libraries/
-Component/
 Documentation/
 
 ZXing.YuvTool/
@@ -32,3 +31,11 @@ ZXing.UIImageTool/
 Backup/
 
 TestCloud/
+.vs/
+project.lock.json
+
+tools/
+.nugetapikey
+.mygetapikey
+*.xam
+*.nupkg

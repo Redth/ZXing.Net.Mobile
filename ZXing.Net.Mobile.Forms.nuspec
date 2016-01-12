@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>ZXing.Net.Mobile.Forms</id>
+        <version>$version$</version>
+        <title>ZXing.Net.Mobile Barcode Scanner for Xamarin.Forms</title>
+        <authors>Redth</authors>
+        <licenseUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/License.md</licenseUrl>
+        <projectUrl>http://github.com/Redth/ZXing.Net.Mobile</projectUrl>
+        <iconUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/Art/ZXing.Net.Mobile-Icon.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port. It works with Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight), and Windows Universal. The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.</description>
+        <summary>ZXing Barcode Scanning for your Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight), and Windows Universal apps!</summary>
+        <copyright />
+        <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
+        <dependencies>
+
+        	<!-- Every platforms requires the ZXing.Net.Mobile and Xamarin.Forms packages -->
+        	<group>
+        		<dependency id="ZXing.Net.Mobile" version="$version$" />
+        		<dependency id="Xamarin.Forms" version="2.0.0.6490" />
+        	</group>
+
+        </dependencies>
+    </metadata>
+    <files>
+        <!-- Android 4.0.3 and higher -->
+        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Forms.dll" />        
+        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Forms.Android.dll" />
+
+        <!-- iOS Unified API -->
+        <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.iOS.dll" />
+        
+        <!-- Windows Phone  -->
+        <file src="Build/Forms/Release/wp8.0/ZXing.Net.Mobile.Forms.dll" target="lib\wp8\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/wp8.0/ZXing.Net.Mobile.Forms.WindowsPhone.dll" target="lib\wp8\ZXing.Net.Mobile.Forms.WindowsPhone.dll" />
+
+        <!-- Windows RT / Store  -->
+        <!-- Not supported -->        
+
+		<!-- Windows Universal  -->
+        <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.dll" />
+        <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.pri" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.pri" />
+
+        <!-- Portable PCL -->
+        <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\portable-net45+netcore45+wp8+UAP10.0+MonoAndroid403+MonoTouch10+Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />        
+    </files>
+</package>
