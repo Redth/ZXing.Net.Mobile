@@ -208,8 +208,8 @@ namespace ZXing.Mobile
 
 			var dg = new CaptureDelegate (metaDataObjects =>
 				{
-//					if (foundResult)
-//						return;
+                    if (!analyzing)
+                        return;
 
 					//Console.WriteLine("Found MetaData Objects");
 

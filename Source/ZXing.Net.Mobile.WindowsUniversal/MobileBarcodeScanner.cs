@@ -102,6 +102,16 @@ namespace ZXing.Mobile
             ScanPage.RequestAutoFocus();
         }
 
+        public override void PauseAnalysis()
+        {
+            ScanPage.RequestPauseAnalysis();
+        }
+
+        public override void ResumeAnalysis()
+        {
+            ScanPage.RequestResumeAnalysis();
+        }
+
         public UIElement CustomOverlay
         {
             get;

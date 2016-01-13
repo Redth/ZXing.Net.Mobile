@@ -214,6 +214,16 @@ namespace ZXing.Mobile
 			//Does nothing on iOS
 		}
 
+        public override void PauseAnalysis ()
+        {
+            viewController.PauseAnalysis ();
+        }
+
+        public override void ResumeAnalysis ()
+        {
+            viewController.ResumeAnalysis ();
+        }
+
 		public override bool IsTorchOn {
 			get {
 				return viewController.IsTorchOn;

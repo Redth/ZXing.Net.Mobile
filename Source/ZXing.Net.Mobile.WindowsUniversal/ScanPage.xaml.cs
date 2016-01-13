@@ -49,6 +49,8 @@ namespace ZXing.Mobile
         public static event Action OnRequestAutoFocus;
         public static event Action OnRequestCancel;
         public static event Func<bool> OnRequestIsTorchOn;
+        public static event Action OnRequestPauseAnalysis;
+        public static event Action OnRequestResumeAnalysis;
 
         public static bool RequestIsTorchOn()
         {
@@ -84,6 +86,20 @@ namespace ZXing.Mobile
                 evt();
         }
 
+        public static void RequestPauseAnalysis()
+        {
+            var evt = OnRequestPauseAnalysis;
+            if (evt != null)
+                evt();
+        }
+
+        public static void RequestResumeAnalysis()
+        {
+            var evt = OnRequestResumeAnalysis;
+            if (evt != null)
+                evt();
+        }
+
         void RequestAutoFocusHandler()
         {
             if (scannerControl != null)
@@ -115,6 +131,18 @@ namespace ZXing.Mobile
 
             return false;
         }
+
+        void RequestPauseAnalysisHandler()
+        {
+            if (scannerControl != null)
+                scannerControl.PauseAnalysis();
+        }
+
+        void RequestResumeAnalysisHandler()
+        {
+            if (scannerControl != null)
+                scannerControl.ResumeAnalysis();
+        }
         
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -132,6 +160,8 @@ namespace ZXing.Mobile
             OnRequestToggleTorch += RequestToggleTorchHandler;
             OnRequestCancel += ScanPage_OnRequestCancel;
             OnRequestIsTorchOn += RequestIsTorchOnHandler;
+            OnRequestPauseAnalysis += RequestPauseAnalysisHandler;
+            OnRequestResumeAnalysis += RequestResumeAnalysisHandler;
 
             await scannerControl.StartScanningAsync(HandleResult, ScanningOptions);
 
@@ -157,6 +187,8 @@ namespace ZXing.Mobile
                 OnRequestToggleTorch -= RequestToggleTorchHandler;
                 OnRequestCancel -= ScanPage_OnRequestCancel;
                 OnRequestIsTorchOn -= RequestIsTorchOnHandler;
+                OnRequestPauseAnalysis -= RequestPauseAnalysisHandler;
+                OnRequestResumeAnalysis -= RequestResumeAnalysisHandler;
 
                 await scannerControl.StopScanningAsync();
             }

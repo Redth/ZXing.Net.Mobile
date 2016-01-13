@@ -99,6 +99,16 @@ namespace ZXing.Mobile
             ScanPage.RequestToggleTorch();
         }
 
+        public override void PauseAnalysis ()
+        {
+            ScanPage.RequestPauseAnalysis ();
+        }
+
+        public override void ResumeAnalysis ()
+        {
+            ScanPage.RequestResumeAnalysis ();
+        }
+
         public override bool IsTorchOn
         {
             get { return ScanPage.RequestIsTorchOn(); }

@@ -110,6 +110,16 @@ namespace ZXing.Mobile
 			Torch (!torch);
 		}
 
+        public override void PauseAnalysis ()
+        {
+            ZxingActivity.RequestPauseAnalysis ();
+        }
+
+        public override void ResumeAnalysis ()
+        {
+            ZxingActivity.RequestResumeAnalysis ();
+        }
+
 		public override bool IsTorchOn {
 			get {
 				return torch;

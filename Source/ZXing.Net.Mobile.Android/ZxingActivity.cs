@@ -34,6 +34,8 @@ namespace ZXing.Mobile
 		public static Action CancelRequestedHandler;
 		public static Action<bool> TorchRequestedHandler;
 		public static Action AutoFocusRequestedHandler;
+        public static Action PauseAnalysisHandler;
+        public static Action ResumeAnalysisHandler;
 
 		public static void RequestCancel ()
 		{
@@ -55,6 +57,20 @@ namespace ZXing.Mobile
 			if (h != null)
 				h();
 		}
+
+        public static void RequestPauseAnalysis ()
+        {
+            var h = PauseAnalysisHandler;
+            if (h != null)
+                h();
+        }
+
+        public static void RequestResumeAnalysis ()
+        {
+            var h = ResumeAnalysisHandler;
+            if (h != null)
+                h();
+        }
 
 		public static View CustomOverlayView { get;set; }
 		public static bool UseCustomOverlayView { get; set; }
@@ -89,9 +105,11 @@ namespace ZXing.Mobile
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
 				.Commit();
             
-			CancelRequestedHandler += HandleCancelScan;
-			AutoFocusRequestedHandler += HandleAutoFocus;
-			TorchRequestedHandler += HandleTorchRequested;
+			CancelRequestedHandler = HandleCancelScan;
+            AutoFocusRequestedHandler = AutoFocus;
+			TorchRequestedHandler = SetTorch;
+            PauseAnalysisHandler = scannerFragment.PauseAnalysis;
+            ResumeAnalysisHandler = scannerFragment.ResumeAnalysis;
 
             var permissionsToRequest = new List<string>();
 
@@ -151,30 +169,6 @@ namespace ZXing.Mobile
                     this.Finish();
             }, ScanningOptions);
         }
-
-        void HandleTorchRequested(bool on)
-		{
-			this.SetTorch(on);
-		}
-
-		void HandleAutoFocus()
-		{
-			this.AutoFocus();
-		}
-
-		void HandleCancelScan()
-		{
-			this.CancelScan();
-		}
-
-		protected override void OnDestroy ()
-		{
-//			CancelRequestedHandler -= HandleCancelScan;
-//			AutoFocusRequestedHandler = HandleAutoFocus;
-//			TorchRequestedHandler -= HandleTorchRequested;
-
-			base.OnDestroy ();
-		}
 
 		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
 		{

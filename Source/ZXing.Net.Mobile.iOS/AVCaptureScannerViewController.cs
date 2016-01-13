@@ -108,6 +108,16 @@ namespace ZXing.Mobile
 			get { return scannerView.IsTorchOn; }
 		}
 
+        public void PauseAnalysis ()
+        {
+            scannerView.PauseAnalysis ();
+        }
+
+        public void ResumeAnalysis ()
+        {
+            scannerView.ResumeAnalysis ();
+        }
+
 		public override void ViewDidAppear (bool animated)
 		{
 			originalStatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
