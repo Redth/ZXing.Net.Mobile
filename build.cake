@@ -1,7 +1,7 @@
 #addin "Cake.FileHelpers"
 
 var target = Argument("target", "libs");
-var version = Argument("nugetversion", Argument("version", "2.0.0.9999"));
+var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("nugetversion", Argument("version", "2.0.0.9999"));
 
 var libs = new Dictionary<string, string> {
 	{ "./ZXing.Net.Mobile.sln", "Any" },
