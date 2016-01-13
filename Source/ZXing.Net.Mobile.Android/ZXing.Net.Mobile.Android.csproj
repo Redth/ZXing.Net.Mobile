@@ -51,6 +51,7 @@
     <Compile Include="ZxingOverlayView.cs" />
     <Compile Include="ZXingScannerFragment.cs" />
     <Compile Include="ZXingSurfaceView.cs" />
+    <Compile Include="Permissions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
