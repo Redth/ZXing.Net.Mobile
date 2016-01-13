@@ -1,3 +1,5 @@
+#addin "Cake.FileHelpers"
+
 var target = Argument("target", "libs");
 var version = Argument("nugetversion", Argument("version", "2.0.0.9999"));
 
