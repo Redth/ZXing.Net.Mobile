@@ -122,6 +122,7 @@
       <DependentUpon>ScanPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SoftwareBitmapLuminanceSource.cs" />
+    <Compile Include="VisualTreeHelperExt.cs" />
     <Compile Include="WriteableBitmapRenderer.cs" />
     <Compile Include="ZXingScannerControl.xaml.cs">
       <DependentUpon>ZXingScannerControl.xaml</DependentUpon>

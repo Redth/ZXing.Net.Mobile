@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using ZXing;
 
 namespace ZXing.Mobile
 {
@@ -22,19 +20,16 @@ namespace ZXing.Mobile
 
         public CoreDispatcher Dispatcher { get; set; }
 
-        public Frame Frame { get; set; }
+        public Frame RootFrame { get; set; }
 
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
             //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-            var rootFrame = this.Frame ?? Window.Current.Content as Frame;
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             ScanPage.ScanningOptions = options;
-            ScanPage.ResultFoundAction = (r) =>
-            {
-                scanHandler(r);
-            };
+            ScanPage.ResultFoundAction = scanHandler;
 
             ScanPage.UseCustomOverlay = this.UseCustomOverlay;
             ScanPage.CustomOverlay = this.CustomOverlay;
@@ -44,13 +39,13 @@ namespace ZXing.Mobile
             
             dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                rootFrame.Navigate(typeof(ZXing.Mobile.ScanPage));
+                rootFrame.Navigate(typeof(ScanPage));
             });
         }
 
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
-            var rootFrame = this.Frame ?? Window.Current.Content as Frame;
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             return Task.Factory.StartNew(new Func<Result>(() =>
@@ -73,7 +68,7 @@ namespace ZXing.Mobile
 
                 dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    rootFrame.Navigate(typeof(ZXing.Mobile.ScanPage));
+                    rootFrame.Navigate(typeof(ScanPage));
                 });
                 
                 scanResultResetEvent.WaitOne();
