@@ -9,13 +9,15 @@ namespace ZXing.Net.Mobile.Forms
         ZXingScannerView zxing;
         ZXingDefaultOverlay defaultOverlay = null;
        
-        public ZXingScannerPage (ZXing.Mobile.MobileBarcodeScanningOptions options = null, View customOverlay = null) : base ()
+        public ZXingScannerPage (MobileBarcodeScanningOptions options = null, View customOverlay = null) : base ()
         {
             zxing = new ZXingScannerView
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                Options = options
             };
+
             zxing.OnScanResult += (result) => {
                 var eh = this.OnScanResult;
                 if (eh != null)
