@@ -105,7 +105,7 @@ namespace ZXing.Mobile
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
 				.Commit();
             
-			CancelRequestedHandler = HandleCancelScan;
+            CancelRequestedHandler = CancelScan;
             AutoFocusRequestedHandler = AutoFocus;
 			TorchRequestedHandler = SetTorch;
             PauseAnalysisHandler = scannerFragment.PauseAnalysis;
