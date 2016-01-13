@@ -128,7 +128,7 @@ namespace ZXing.Mobile
             
             scannerControl.StartScanning(HandleResult, ScanningOptions);
 
-            if (!isNewInstance && NavigationService.CanGoBack)
+            if (!isNewInstance && !isDeactivated && NavigationService.CanGoBack)
                 NavigationService.GoBack();
             
             isNewInstance = false;
@@ -136,12 +136,14 @@ namespace ZXing.Mobile
             base.OnNavigatedTo(e);
         }
 
-	    private bool isNewInstance = false;
+	private bool isNewInstance = false;
+	private bool isDeactivated = false;
 	    
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
             try 
             {
+            	isDeactivated = e.NavigationMode != NavigationMode.Back;
                 OnRequestAutoFocus -= RequestAutoFocusHandler;
                 OnRequestTorch -= RequestTorchHandler;
                 OnRequestToggleTorch -= RequestToggleTorchHandler;
