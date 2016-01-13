@@ -3,14 +3,10 @@ using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
 using ZXing.Net.Mobile.Forms.Android;
 using Android.Runtime;
-using Android.App;
 using Xamarin.Forms.Platform.Android;
-using Android.Views;
 using System.ComponentModel;
-using System.Reflection;
 using Android.Widget;
 using ZXing.Mobile;
-using System.Threading.Tasks;
 
 [assembly:ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Android
@@ -26,6 +22,13 @@ namespace ZXing.Net.Mobile.Forms.Android
         ZXingBarcodeImageView formsView;
         ImageView imageView;
 
+        protected override void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
+        {
+            regenerate ();
+
+            base.OnElementPropertyChanged (sender, e);
+        }
+
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
         {
             formsView = Element;
@@ -37,6 +40,13 @@ namespace ZXing.Net.Mobile.Forms.Android
                 base.SetNativeControl (imageView);     
             }
 
+            regenerate ();
+
+            base.OnElementChanged (e);
+        }
+
+        void regenerate ()
+        {
             if (formsView != null && formsView.BarcodeValue != null)
             {
                 var writer = new ZXing.Mobile.BarcodeWriter();
@@ -52,8 +62,6 @@ namespace ZXing.Net.Mobile.Forms.Android
 
                 imageView.SetImageBitmap(image);
             }
-
-            base.OnElementChanged (e);
         }
     }
 }
