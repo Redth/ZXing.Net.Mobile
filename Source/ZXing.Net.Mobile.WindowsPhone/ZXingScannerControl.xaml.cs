@@ -144,6 +144,8 @@ namespace ZXing.Mobile
             if (_reader != null)
             {
                 _reader.Stop();
+                _reader.CameraInitialized -= ReaderOnCameraInitialized;
+		_reader.DecodingCompleted -= (o, r) => DisplayResult(r);
                 _reader = null;
             }
         }
