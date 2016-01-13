@@ -96,7 +96,7 @@ namespace ZXing.Mobile
 		}
 
         Action<Result> scanCallback;
-        bool scanImmediately = false;
+        //bool scanImmediately = false;
 
         public void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
         {            
@@ -104,7 +104,7 @@ namespace ZXing.Mobile
             scanCallback = scanResultHandler;
 
             if (scanner == null) {
-                scanImmediately = true;
+                //scanImmediately = true;
                 return;
             }
 

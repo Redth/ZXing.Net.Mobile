@@ -40,7 +40,7 @@ namespace ZXing.Mobile
             ZxingActivity.TopText = TopText;
             ZxingActivity.BottomText = BottomText;
 
-            ZxingActivity.OnScanCompleted += (Result result) => 
+            ZxingActivity.ScanCompletedHandler = (Result result) => 
             {
                 if (scanHandler != null)
                     scanHandler (result);
@@ -62,17 +62,18 @@ namespace ZXing.Mobile
 				ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
 				ZxingActivity.CustomOverlayView = this.CustomOverlay;
 				ZxingActivity.ScanningOptions = options;
+                ZxingActivity.ScanContinuously = false;
 				ZxingActivity.TopText = TopText;
 				ZxingActivity.BottomText = BottomText;
 
 				Result scanResult = null;
 
-				ZxingActivity.OnCanceled += () => 
+				ZxingActivity.CanceledHandler = () => 
 				{
 					waitScanResetEvent.Set();
 				};
 
-				ZxingActivity.OnScanCompleted += (Result result) => 
+				ZxingActivity.ScanCompletedHandler = (Result result) => 
 				{
 					scanResult = result;
 					waitScanResetEvent.Set();

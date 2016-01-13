@@ -28,32 +28,32 @@ namespace ZXing.Mobile
             Android.Manifest.Permission.Flashlight
         };
 
-		public static event Action<ZXing.Result> OnScanCompleted;
-		public static event Action OnCanceled;
+		public static Action<ZXing.Result> ScanCompletedHandler;
+		public static Action CanceledHandler;
 
-		public static event Action OnCancelRequested;
-		public static event Action<bool> OnTorchRequested;
-		public static event Action OnAutoFocusRequested;
+		public static Action CancelRequestedHandler;
+		public static Action<bool> TorchRequestedHandler;
+		public static Action AutoFocusRequestedHandler;
 
 		public static void RequestCancel ()
 		{
-			var evt = OnCancelRequested;
-			if (evt != null)
-				evt();
+            var h = CancelRequestedHandler;
+			if (h != null)
+				h();
 		}
 
 		public static void RequestTorch (bool torchOn)
 		{
-			var evt = OnTorchRequested;
-			if (evt != null)
-				evt(torchOn);
+            var h = TorchRequestedHandler;
+			if (h != null)
+				h(torchOn);
 		}
 
 		public static void RequestAutoFocus ()
 		{
-			var evt = OnAutoFocusRequested;
-			if (evt != null)
-				evt();
+            var h = AutoFocusRequestedHandler;
+			if (h != null)
+				h();
 		}
 
 		public static View CustomOverlayView { get;set; }
@@ -89,9 +89,9 @@ namespace ZXing.Mobile
 				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
 				.Commit();
             
-			OnCancelRequested += HandleCancelScan;
-			OnAutoFocusRequested += HandleAutoFocus;
-			OnTorchRequested += HandleTorchRequested;
+			CancelRequestedHandler += HandleCancelScan;
+			AutoFocusRequestedHandler += HandleAutoFocus;
+			TorchRequestedHandler += HandleTorchRequested;
 
             var permissionsToRequest = new List<string>();
 
@@ -143,9 +143,9 @@ namespace ZXing.Mobile
         void StartScanning ()
         {
             scannerFragment.StartScanning(result => {
-                var evt = OnScanCompleted;
-                if (evt != null)
-                    OnScanCompleted(result);
+                var h = ScanCompletedHandler;
+                if (h != null)
+                    h (result);
 
                 if (!ZxingActivity.ScanContinuously)
                     this.Finish();
@@ -169,9 +169,9 @@ namespace ZXing.Mobile
 
 		protected override void OnDestroy ()
 		{
-			OnCancelRequested -= HandleCancelScan;
-			OnAutoFocusRequested -= HandleAutoFocus;
-			OnTorchRequested -= HandleTorchRequested;
+//			CancelRequestedHandler -= HandleCancelScan;
+//			AutoFocusRequestedHandler = HandleAutoFocus;
+//			TorchRequestedHandler -= HandleTorchRequested;
 
 			base.OnDestroy ();
 		}
@@ -196,9 +196,9 @@ namespace ZXing.Mobile
 		public void CancelScan ()
 		{
 			Finish ();
-			var evt = OnCanceled;
-			if (evt !=null)
-				evt();
+			var h = CanceledHandler;
+			if (h !=null)
+                h ();
 		}
 
 		public override bool OnKeyDown (Keycode keyCode, KeyEvent e)
