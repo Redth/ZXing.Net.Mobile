@@ -11,7 +11,7 @@ var libs = new Dictionary<string, string> {
 
 var samples = new Dictionary<string, string> {
 	{ "./Samples/Android/Sample.Android.sln", "Any" },
-	{ "./Samples/iOS/Sample.iOS.sln", "Any" },
+	{ "./Samples/iOS/Sample.iOS.sln", "Mac" },
 	{ "./Samples/WindowsPhone/Sample.WindowsPhone.sln", "Win" },
 	{ "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", "Win" },
 	{ "./Samples/Forms/Sample.Forms.sln", "Win" },
@@ -73,7 +73,7 @@ Task ("nuget").IsDependentOn ("libs").Does (() =>
 });
 
 Task ("component")
-	.IsDependentOn ("samples")
+	//.IsDependentOn ("samples")
 	.IsDependentOn ("nuget")
 	.Does (() => 
 {
