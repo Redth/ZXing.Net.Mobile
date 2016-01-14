@@ -19,8 +19,7 @@ namespace ZXing.Mobile
 		{
 			frame = (FrameLayout)layoutInflater.Inflate(Resource.Layout.zxingscannerfragmentlayout, viewGroup, false);
 
-            var layoutParams = new LinearLayout.LayoutParams (ViewGroup.LayoutParams.FillParent, ViewGroup.LayoutParams.FillParent);
-            layoutParams.Weight = 1;
+            var layoutParams = getChildLayoutParams();
 
             try
             {
@@ -50,9 +49,22 @@ namespace ZXing.Mobile
             Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "ZXingScannerFragment->OnResume exit");
 
 			return frame;
-		}
+        }
 
-        public override void OnStop ()
+        public override void OnStart()
+        {
+            base.OnStart();
+            // won't be 0 if OnCreateView has been called before.
+            if (frame.ChildCount == 0)
+            {
+                var layoutParams = getChildLayoutParams();
+                // reattach scanner and overlay views.
+                frame.AddView(scanner, layoutParams);
+                frame.AddView(zxingOverlay, layoutParams);
+            }
+        }
+
+        public override void OnStop()
         {
             if (scanner != null)
             {
@@ -61,17 +73,22 @@ namespace ZXing.Mobile
                 frame.RemoveView(scanner);
             }
 
-            scanner = null;
-
             if (!UseCustomOverlayView)
-                frame.RemoveView (zxingOverlay);
+                frame.RemoveView(zxingOverlay);
             else if (CustomOverlayView != null)
-                frame.RemoveView (CustomOverlayView);
-            
-            base.OnStop ();
+                frame.RemoveView(CustomOverlayView);
+
+            base.OnStop();
         }
 
-		public View CustomOverlayView { get;set; }
+        private LinearLayout.LayoutParams getChildLayoutParams()
+        {
+            var layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
+            layoutParams.Weight = 1;
+            return layoutParams;
+        }
+
+        public View CustomOverlayView { get;set; }
         public bool UseCustomOverlayView { get; set ; }
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public string TopText { get;set; }
