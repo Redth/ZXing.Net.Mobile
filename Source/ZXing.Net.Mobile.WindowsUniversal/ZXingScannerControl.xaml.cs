@@ -342,9 +342,16 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x = -1, int y = -1)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
-                if (mediaCapture.VideoDeviceController.FocusControl.Supported)
-                    await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();            
+            try
+            {
+                if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
+                    if (mediaCapture.VideoDeviceController.FocusControl.Supported)
+                        await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+            }
         }
 
         public async Task StopScanningAsync()
