@@ -57,6 +57,7 @@ namespace ZXing.Mobile
 		//BarcodeReader barcodeReader;
 
 		volatile bool foundResult = false;
+		CaptureDelegate captureDelegate;
 
 		UIView layerView;
 		UIView overlayView = null;
@@ -206,7 +207,7 @@ namespace ZXing.Mobile
 			//Detect barcodes with built in avcapture stuff
 			AVCaptureMetadataOutput metadataOutput = new AVCaptureMetadataOutput();
 
-			var dg = new CaptureDelegate (metaDataObjects =>
+			captureDelegate = new CaptureDelegate (metaDataObjects =>
 				{
                     if (!analyzing)
                         return;
@@ -248,7 +249,7 @@ namespace ZXing.Mobile
                     working = false;
 				});
 
-			metadataOutput.SetDelegate (dg, DispatchQueue.MainQueue);
+			metadataOutput.SetDelegate (captureDelegate, DispatchQueue.MainQueue);
 			session.AddOutput (metadataOutput);
 
 			//Setup barcode formats
