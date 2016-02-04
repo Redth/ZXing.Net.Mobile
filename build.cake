@@ -31,6 +31,9 @@ var buildAction = new Action<Dictionary<string, string>> (solutions => {
 			
 			// Bit of a hack to use nuget3 to restore packages for project.json
 			if (IsRunningOnWindows ()) {
+				
+				Information ("RunningOn: {0}", "Windows");
+
 				NuGetRestore (sln.Key, new NuGetRestoreSettings {
 					ToolPath = "./tools/nuget3.exe"
 				});
@@ -38,7 +41,7 @@ var buildAction = new Action<Dictionary<string, string>> (solutions => {
 				// Windows Phone / Universal projects require not using the amd64 msbuild
 				MSBuild (sln.Key, c => { 
 					c.Configuration = "Release";
-					c.MSBuildPlatform = MSBuildPlatform.x86;
+					c.MSBuildPlatform = Cake.Common.Tools.MSBuild.MSBuildPlatform.x86;
 				});
 			} else {
 
@@ -73,7 +76,7 @@ Task ("nuget").IsDependentOn ("libs").Does (() =>
 });
 
 Task ("component")
-	//.IsDependentOn ("samples")
+	.IsDependentOn ("samples")
 	.IsDependentOn ("nuget")
 	.Does (() => 
 {
