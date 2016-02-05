@@ -59,7 +59,7 @@ Task ("libs").Does (() =>
 	buildAction (libs);
 });
 
-Task ("samples").Does (() => 
+Task ("samples").IsDependentOn ("libs").Does (() => 
 {
 	buildAction (samples);
 });
