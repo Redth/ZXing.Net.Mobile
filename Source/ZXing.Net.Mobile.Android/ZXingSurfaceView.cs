@@ -31,7 +31,7 @@ namespace ZXing.Mobile
 		CancellationTokenSource tokenSource;
 		ISurfaceHolder surface_holder;
 		Android.Hardware.Camera camera;
-		MobileBarcodeScanningOptions options;
+		MobileBarcodeScanningOptions Options;
 		Action<ZXing.Result> callback;
 		Activity activity;
         bool isAnalyzing = false;
@@ -108,7 +108,7 @@ namespace ZXing.Mobile
             }
 
             // Try and get a desired resolution from the options selector
-            var resolution = options.GetResolution (availableResolutions);
+            var resolution = Options.GetResolution (availableResolutions);
 
             // If the user did not specify a resolution, let's try and find a suitable one
             if (resolution == null) {
@@ -187,11 +187,11 @@ namespace ZXing.Mobile
 			if (processingTask != null && !processingTask.IsCompleted)
 				return;
             
-			if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
+			if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < Options.DelayBetweenAnalyzingFrames)
 				return;
 
             // Delay a minimum between scans
-            if (wasScanned && ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenContinuousScans))
+            if (wasScanned && ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < Options.DelayBetweenContinuousScans))
                 return;
 
             wasScanned = false;
@@ -213,20 +213,20 @@ namespace ZXing.Mobile
 					                                  new PlanarYUVLuminanceSource (p, w, h, 0, 0, w, h, false));
 						//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
 					
-						if (this.options.TryHarder.HasValue)
-							barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
-						if (this.options.PureBarcode.HasValue)
-							barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
-						if (!string.IsNullOrEmpty (this.options.CharacterSet))
-							barcodeReader.Options.CharacterSet = this.options.CharacterSet;
-						if (this.options.TryInverted.HasValue)
-							barcodeReader.TryInverted = this.options.TryInverted.Value;
+						if (this.Options.TryHarder.HasValue)
+							barcodeReader.Options.TryHarder = this.Options.TryHarder.Value;
+						if (this.Options.PureBarcode.HasValue)
+							barcodeReader.Options.PureBarcode = this.Options.PureBarcode.Value;
+						if (!string.IsNullOrEmpty (this.Options.CharacterSet))
+							barcodeReader.Options.CharacterSet = this.Options.CharacterSet;
+						if (this.Options.TryInverted.HasValue)
+							barcodeReader.TryInverted = this.Options.TryInverted.Value;
 					
-						if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
+						if (this.Options.PossibleFormats != null && this.Options.PossibleFormats.Count > 0)
 						{
 							barcodeReader.Options.PossibleFormats = new List<BarcodeFormat> ();
 						
-							foreach (var pf in this.options.PossibleFormats)
+							foreach (var pf in this.Options.PossibleFormats)
 								barcodeReader.Options.PossibleFormats.Add (pf);
 						}
 					}
@@ -482,9 +482,9 @@ namespace ZXing.Mobile
         public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {           
             this.callback = scanResultCallback;
-            this.options = options ?? MobileBarcodeScanningOptions.Default;
+            this.Options = options ?? MobileBarcodeScanningOptions.Default;
 
-            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
+            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(this.Options.InitialDelayBeforeAnalyzingFrames);
             isAnalyzing = true;
 
             Console.WriteLine ("StartScanning");
@@ -510,7 +510,7 @@ namespace ZXing.Mobile
 
                     var whichCamera = CameraFacing.Back;
 
-                    if (options.UseFrontCameraIfAvailable.HasValue && options.UseFrontCameraIfAvailable.Value)
+                    if (this.Options.UseFrontCameraIfAvailable.HasValue && this.Options.UseFrontCameraIfAvailable.Value)
                         whichCamera = CameraFacing.Front;
 
                     for (int i = 0; i < numCameras; i++)
@@ -626,7 +626,7 @@ namespace ZXing.Mobile
             Torch (!isTorchOn);
         }
         public MobileBarcodeScanningOptions ScanningOptions {
-            get { return options; }
+            get { return Options; }
         }
         public bool IsTorchOn {
             get { return isTorchOn; }
