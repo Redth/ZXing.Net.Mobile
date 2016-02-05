@@ -1,6 +1,8 @@
 ﻿using System;
 using Xamarin.Forms;
 using ZXing.Mobile;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ZXing.Net.Mobile.Forms
 {
@@ -9,7 +11,23 @@ namespace ZXing.Net.Mobile.Forms
         public delegate void ScanResultDelegate (ZXing.Result result);
         public event ScanResultDelegate OnScanResult;
 
-        public IScannerView InternalNativeScannerImplementation { get; set; }
+        SemaphoreSlim waitNativeScanner = new SemaphoreSlim (0);
+        IScannerView internalNativeScannerImplementation;
+        public IScannerView InternalNativeScannerImplementation { 
+            get { return internalNativeScannerImplementation; }
+            set {
+                internalNativeScannerImplementation = value;
+                waitNativeScanner.Release ();
+            }
+        }
+
+        internal async Task WaitForRenderer ()
+        {
+            if (internalNativeScannerImplementation != null)
+                return;
+            
+            await waitNativeScanner.WaitAsync ();
+        }
 
         public ZXingScannerView ()
         {
@@ -60,12 +78,15 @@ namespace ZXing.Net.Mobile.Forms
                 p => p.IsScanning, 
                 defaultValue: false, 
                 defaultBindingMode: BindingMode.TwoWay,
-                propertyChanged: (bindable, oldValue, newValue) => {
+                propertyChanged: async (bindable, oldValue, newValue) => {
                     try {
                         if (bindable == null)
                             return;
                         var scannerView = (ZXingScannerView)bindable;
                         if (newValue && !scannerView.isScanning) {
+
+                            await scannerView.WaitForRenderer ();
+
                             if (scannerView.InternalNativeScannerImplementation != null) {
                                 scannerView.isScanning = true;
 
@@ -92,11 +113,14 @@ namespace ZXing.Net.Mobile.Forms
                 p => p.IsTorchOn, 
                 defaultValue: false, 
                 defaultBindingMode: BindingMode.TwoWay,
-                propertyChanged: (bindable, oldValue, newValue) => {
+                propertyChanged: async (bindable, oldValue, newValue) => {
                     try {
                         if (bindable == null)
                             return;
                         var scannerView = (ZXingScannerView)bindable;
+
+                        await scannerView.WaitForRenderer ();
+
                         if (scannerView.InternalNativeScannerImplementation != null)
                             scannerView.InternalNativeScannerImplementation.Torch (newValue);
                     } catch { }
@@ -125,11 +149,14 @@ namespace ZXing.Net.Mobile.Forms
                 defaultValue: false,
                 defaultBindingMode: BindingMode.TwoWay,
                 propertyChanged: 
-                (bindable, oldValue, newValue) => {
+                async (bindable, oldValue, newValue) => {
                     try { 
                         if (bindable == null)
                             return;
                         var scannerView = (ZXingScannerView)bindable;
+
+                        await scannerView.WaitForRenderer ();
+
                         if (scannerView.InternalNativeScannerImplementation != null) {
                             if (newValue && !scannerView.InternalNativeScannerImplementation.IsAnalyzing)
                                 scannerView.InternalNativeScannerImplementation.ResumeAnalysis ();
