@@ -18,6 +18,11 @@ namespace ZXing.Net.Mobile.Forms.Android
     [Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingSurfaceView>
     {       
+        public ZXingScannerViewRenderer () : base ()
+        {
+            finishedSetup = new TaskCompletionSource<bool> ();
+        }
+
         public static void Init ()
         {
             var temp = DateTime.Now;
@@ -38,7 +43,6 @@ namespace ZXing.Net.Mobile.Forms.Android
             formsView = Element;
 
             if (zxingSurface == null) {
-                finishedSetup = new TaskCompletionSource<bool> ();
 
                 // We'll proxy our requests through an intermediate layer that can intercept
                 // the scanning so it can ask for permission
@@ -83,7 +87,7 @@ namespace ZXing.Net.Mobile.Forms.Android
                     await Parent.finishedSetup.Task;
 
                 if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.StartScanning (scanResultHandler, options);                
+                    Parent.zxingSurface.StartScanning (scanResultHandler, options);
             }
 
             public void StopScanning ()
