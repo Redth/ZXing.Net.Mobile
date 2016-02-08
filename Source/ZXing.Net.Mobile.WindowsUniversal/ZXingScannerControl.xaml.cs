@@ -303,18 +303,20 @@ namespace ZXing.Mobile
 
         public void Torch(bool on)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
+            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null)
             {
-                if (mediaCapture.VideoDeviceController.FlashControl.Supported)
-                    mediaCapture.VideoDeviceController.FlashControl.Enabled = on;
+                if (mediaCapture.VideoDeviceController.TorchControl.Supported)
+                {
+                    mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
+                }
             }
         }
 
         public void ToggleTorch()
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
+            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null)
             {
-                if (mediaCapture.VideoDeviceController.FlashControl.Supported)
+                if (mediaCapture.VideoDeviceController.TorchControl.Supported)
                 {
                     Torch(!IsTorchOn);
                 }
@@ -325,8 +327,8 @@ namespace ZXing.Mobile
         {
             get
             {
-                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null
-                    && mediaCapture.VideoDeviceController.FlashControl.Supported;
+                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null
+                    && mediaCapture.VideoDeviceController.TorchControl.Supported;
             }
         }
 
