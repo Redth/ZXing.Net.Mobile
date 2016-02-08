@@ -20,194 +20,190 @@ using System.Linq;
 
 namespace ZXing.Mobile
 {
-	[Activity (Label = "Scanner", ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden|ConfigChanges.ScreenLayout)]
-	public class ZxingActivity : FragmentActivity 
-	{
+    [Activity (Label = "Scanner", ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.KeyboardHidden | ConfigChanges.ScreenLayout)]
+    public class ZxingActivity : FragmentActivity
+    {
         public static readonly string[] RequiredPermissions = new[] {
             Android.Manifest.Permission.Camera,
             Android.Manifest.Permission.Flashlight
         };
 
-		public static Action<ZXing.Result> ScanCompletedHandler;
-		public static Action CanceledHandler;
+        public static Action<ZXing.Result> ScanCompletedHandler;
+        public static Action CanceledHandler;
 
-		public static Action CancelRequestedHandler;
-		public static Action<bool> TorchRequestedHandler;
-		public static Action AutoFocusRequestedHandler;
+        public static Action CancelRequestedHandler;
+        public static Action<bool> TorchRequestedHandler;
+        public static Action AutoFocusRequestedHandler;
         public static Action PauseAnalysisHandler;
         public static Action ResumeAnalysisHandler;
 
-		public static void RequestCancel ()
-		{
+        public static void RequestCancel ()
+        {
             var h = CancelRequestedHandler;
-			if (h != null)
-				h();
-		}
+            if (h != null)
+                h ();
+        }
 
-		public static void RequestTorch (bool torchOn)
-		{
+        public static void RequestTorch (bool torchOn)
+        {
             var h = TorchRequestedHandler;
-			if (h != null)
-				h(torchOn);
-		}
+            if (h != null)
+                h (torchOn);
+        }
 
-		public static void RequestAutoFocus ()
-		{
+        public static void RequestAutoFocus ()
+        {
             var h = AutoFocusRequestedHandler;
-			if (h != null)
-				h();
-		}
+            if (h != null)
+                h ();
+        }
 
         public static void RequestPauseAnalysis ()
         {
             var h = PauseAnalysisHandler;
             if (h != null)
-                h();
+                h ();
         }
 
         public static void RequestResumeAnalysis ()
         {
             var h = ResumeAnalysisHandler;
             if (h != null)
-                h();
+                h ();
         }
 
-		public static View CustomOverlayView { get;set; }
-		public static bool UseCustomOverlayView { get; set; }
-		public static MobileBarcodeScanningOptions ScanningOptions { get;set; }
-		public static string TopText { get;set; }
-		public static string BottomText { get;set; }
-        public static bool ScanContinuously { get;set; }
+        public static View CustomOverlayView { get; set; }
 
-		ZXingScannerFragment scannerFragment;
+        public static bool UseCustomOverlayView { get; set; }
 
-		protected override void OnCreate (Bundle bundle)
-		{
-			base.OnCreate (bundle);
+        public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
-			this.RequestWindowFeature (WindowFeatures.NoTitle);
+        public static string TopText { get; set; }
 
-			this.Window.AddFlags (WindowManagerFlags.Fullscreen); //to show
-			this.Window.AddFlags (WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
+        public static string BottomText { get; set; }
 
-			if (ScanningOptions.AutoRotate.HasValue && !ScanningOptions.AutoRotate.Value)
-				RequestedOrientation = ScreenOrientation.Nosensor;
+        public static bool ScanContinuously { get; set; }
 
-			SetContentView(Resource.Layout.zxingscanneractivitylayout);
+        ZXingScannerFragment scannerFragment;
+        bool waitingForPermission = false;
+        bool canScan = true;
+
+        protected override void OnCreate (Bundle bundle)
+        {
+            base.OnCreate (bundle);
+
+            this.RequestWindowFeature (WindowFeatures.NoTitle);
+
+            this.Window.AddFlags (WindowManagerFlags.Fullscreen); //to show
+            this.Window.AddFlags (WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
+
+            if (ScanningOptions.AutoRotate.HasValue && !ScanningOptions.AutoRotate.Value)
+                RequestedOrientation = ScreenOrientation.Nosensor;
+
+            SetContentView (Resource.Layout.zxingscanneractivitylayout);
 
             scannerFragment = new ZXingScannerFragment ();
-			scannerFragment.CustomOverlayView = CustomOverlayView;
-			scannerFragment.UseCustomOverlayView = UseCustomOverlayView;
-			scannerFragment.TopText = TopText;
-			scannerFragment.BottomText = BottomText;
+            scannerFragment.CustomOverlayView = CustomOverlayView;
+            scannerFragment.UseCustomOverlayView = UseCustomOverlayView;
+            scannerFragment.TopText = TopText;
+            scannerFragment.BottomText = BottomText;
 
-			SupportFragmentManager.BeginTransaction()
-				.Replace(Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
-				.Commit();
+            SupportFragmentManager.BeginTransaction ()
+				.Replace (Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
+				.Commit ();
             
             CancelRequestedHandler = CancelScan;
             AutoFocusRequestedHandler = AutoFocus;
-			TorchRequestedHandler = SetTorch;
+            TorchRequestedHandler = SetTorch;
             PauseAnalysisHandler = scannerFragment.PauseAnalysis;
             ResumeAnalysisHandler = scannerFragment.ResumeAnalysis;
 
-            var permissionsToRequest = new List<string>();
+            var permissionsToRequest = new List<string> ();
 
             // Check and request any permissions
             foreach (var permission in RequiredPermissions) {
                 if (PlatformChecks.IsPermissionInManifest (this, permission)) {
-                    if (!PlatformChecks.IsPermissionGranted(this, permission))
-                        permissionsToRequest.Add(permission);                        
+                    if (!PlatformChecks.IsPermissionGranted (this, permission))
+                        permissionsToRequest.Add (permission);                        
                 }
             }
 
-            if (permissionsToRequest.Any())
-            {
-                waitingForPermission = PlatformChecks.RequestPermissions(this, permissionsToRequest.ToArray (), 101);
+            if (permissionsToRequest.Any ()) {
+                waitingForPermission = PlatformChecks.RequestPermissions (this, permissionsToRequest.ToArray (), 101);
             }
-		}
-
-        bool waitingForPermission = false;
+        }
 
         protected override void OnResume ()
         {
             base.OnResume ();
 
-            if (!waitingForPermission)
-                StartScanning();
-            
+            if (!waitingForPermission && canScan)
+                StartScanning ();
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        public override void OnRequestPermissionsResult (int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         { 
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            base.OnRequestPermissionsResult (requestCode, permissions, grantResults);
 
             if (waitingForPermission) {
-                waitingForPermission = false;
-
-                var canScan = false;
-
-                for (int i =0; i < permissions.Length; i++)
-                {
-                    if (permissions[i] == Android.Manifest.Permission.Camera && grantResults[i] == Permission.Granted)
+                canScan = false;
+                for (int i = 0; i < permissions.Length; i++) {
+                    if (permissions [i] == Android.Manifest.Permission.Camera && grantResults [i] == Permission.Granted)
                         canScan = true;
                 }
-
-                if (canScan)
-                    StartScanning();
+                waitingForPermission = false;
             }
         }
 
         void StartScanning ()
         {
-            scannerFragment.StartScanning(result => {
+            scannerFragment.StartScanning (result => {
                 var h = ScanCompletedHandler;
                 if (h != null)
                     h (result);
 
                 if (!ZxingActivity.ScanContinuously)
-                    this.Finish();
+                    this.Finish ();
             }, ScanningOptions);
         }
 
-		public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
-		{
-			base.OnConfigurationChanged (newConfig);
+        public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
+        {
+            base.OnConfigurationChanged (newConfig);
 
-            Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Configuration Changed");
-		}
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Configuration Changed");
+        }
 
-		public void SetTorch(bool on)
-		{
-			scannerFragment.Torch(on);
-		}
+        public void SetTorch (bool on)
+        {
+            scannerFragment.Torch (on);
+        }
 
-		public void AutoFocus()
-		{
-			scannerFragment.AutoFocus();
-		}
+        public void AutoFocus ()
+        {
+            scannerFragment.AutoFocus ();
+        }
 
-		public void CancelScan ()
-		{
-			Finish ();
-			var h = CanceledHandler;
-			if (h !=null)
+        public void CancelScan ()
+        {
+            Finish ();
+            var h = CanceledHandler;
+            if (h != null)
                 h ();
-		}
+        }
 
-		public override bool OnKeyDown (Keycode keyCode, KeyEvent e)
-		{
-			switch (keyCode)
-			{
-			case Keycode.Back:
-				CancelScan();
-				break;
-			case Keycode.Focus:
-				return true;
-			}
+        public override bool OnKeyDown (Keycode keyCode, KeyEvent e)
+        {
+            switch (keyCode) {
+            case Keycode.Back:
+                CancelScan ();
+                break;
+            case Keycode.Focus:
+                return true;
+            }
 
-			return base.OnKeyDown (keyCode, e);
-		}
-	}
+            return base.OnKeyDown (keyCode, e);
+        }
+    }
 
 }
