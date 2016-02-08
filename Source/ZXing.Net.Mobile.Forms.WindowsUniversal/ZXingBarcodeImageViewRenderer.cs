@@ -56,9 +56,12 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 
                 var value = formsView != null ? formsView.BarcodeValue : string.Empty;
 
-                var image = writer.Write(value);
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    var image = writer.Write(value);
 
-                imageView.Source = image;
+                    imageView.Source = image;
+                });
             }
         }
     }
