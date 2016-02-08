@@ -66,6 +66,16 @@ Task ("samples")
 	buildAction (samples);
 });
 
+Task ("nuget").IsDependentOn ("samples").Does (() => 
+{
+	// Make sure our output path is there
+	if (!DirectoryExists ("./Build/nuget/"))
+		CreateDirectory ("./Build/nuget");
+
+	// Package our nuget
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = version });	
+	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = version });	
+});
 
 Task ("component")
 	.IsDependentOn ("samples")
