@@ -4,10 +4,10 @@
 var target = Argument("target", "Default");
 var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
 
-// var libs = new Dictionary<string, string> {
-// 	{ "./ZXing.Net.Mobile.sln", "Any" },
-// 	{ "./ZXing.Net.Mobile.Forms.sln", "Any" }
-// };
+var libs = new Dictionary<string, string> {
+ 	{ "./ZXing.Net.Mobile.sln", "Any" },
+ 	{ "./ZXing.Net.Mobile.Forms.sln", "Any" }
+};
 
 var samples = new Dictionary<string, string> {
 	{ "./Samples/Android/Sample.Android.sln", "Any" },
@@ -54,13 +54,13 @@ var buildAction = new Action<Dictionary<string, string>> (solutions => {
 	}
 });
 
-// Task ("libs").Does (() => 
-// {
-// 	buildAction (libs);
-// });
+Task ("libs").Does (() => 
+{
+	buildAction (libs);
+});
 
 Task ("samples")
-	//.IsDependentOn ("libs")
+	.IsDependentOn ("libs")
 	.Does (() => 
 {
 	buildAction (samples);
