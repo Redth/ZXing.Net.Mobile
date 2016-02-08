@@ -30,6 +30,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
                 formsView.AutoFocusRequested += FormsView_AutoFocusRequested;
 
                 zxingControl = new ZXing.Mobile.ZXingScannerControl();
+                zxingControl.ContinuousScanning = true;
                 zxingControl.UseCustomOverlay = true;
 
                 base.SetNativeControl(zxingControl);

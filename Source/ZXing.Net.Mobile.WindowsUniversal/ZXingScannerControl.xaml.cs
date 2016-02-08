@@ -184,14 +184,15 @@ namespace ZXing.Mobile
             var zxing = ScanningOptions.BuildBarcodeReader();
 
             timerPreview = new Timer(async (state) => {
-                if (stopping)
-                    return;                               
-                if (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming)
+
+                var delay = ScanningOptions.DelayBetweenAnalyzingFrames;
+
+                if (stopping || processing || !isAnalyzing
+                || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
+                {
+                    timerPreview.Change(delay, Timeout.Infinite);
                     return;
-                if (processing)
-                    return;
-                if (!isAnalyzing)
-                    return;
+                }
 
                 processing = true;
 
@@ -228,14 +229,24 @@ namespace ZXing.Mobile
                 if (result != null && !string.IsNullOrEmpty (result.Text))
                 {
                     if (!ContinuousScanning)
+                    {
+                        delay = Timeout.Infinite;
                         await StopScanningAsync();
+                    }
+                    else
+                    {
+                        delay = ScanningOptions.DelayBetweenContinuousScans;
+                    }
+
                     LastScanResult = result;
-                    ScanCallback(result);                    
+                    ScanCallback(result);
                 }
 
                 processing = false;
+
+                timerPreview.Change(delay, Timeout.Infinite);
                          
-            }, null, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(200));           
+            }, null, ScanningOptions.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
         }
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(MobileBarcodeScanningOptions options)
@@ -262,7 +273,6 @@ namespace ZXing.Mobile
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
             await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y);
-
         }
 
         Timer timerPreview;
