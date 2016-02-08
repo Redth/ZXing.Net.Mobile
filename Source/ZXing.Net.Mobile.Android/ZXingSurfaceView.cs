@@ -21,7 +21,7 @@ using Camera = Android.Hardware.Camera;
 namespace ZXing.Mobile
 {
     // based on https://github.com/xamarin/monodroid-samples/blob/master/ApiDemo/Graphics/CameraPreview.cs
-    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Android.Hardware.Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback, IScannerView
+    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback, IScannerView
     {
         const int MIN_FRAME_WIDTH = 240;
         const int MIN_FRAME_HEIGHT = 240;
@@ -37,11 +37,13 @@ namespace ZXing.Mobile
         bool isAnalyzing = false;
         bool wasScanned = false;
         bool isTorchOn = false;
+        bool surfaceChanged = false;
         int cameraId = 0;
 
         DateTime lastPreviewAnalysis = DateTime.UtcNow;
         BarcodeReader barcodeReader = null;
         Task processingTask;
+        SemaphoreSlim waitSurface = new SemaphoreSlim (0);
 
         static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim (true);
 
@@ -74,69 +76,8 @@ namespace ZXing.Mobile
 
         public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
         {
-            if (camera == null)
-                return;
-
-            var perf = PerformanceCounter.Start ();
-
-            var parameters = camera.GetParameters ();
-            parameters.PreviewFormat = ImageFormatType.Nv21;
-
-
-            var availableResolutions = new List<CameraResolution> ();
-            foreach (var sps in parameters.SupportedPreviewSizes) {
-                availableResolutions.Add (new CameraResolution {
-                    Width = sps.Width,
-                    Height = sps.Height
-                });
-            }
-
-            // Try and get a desired resolution from the options selector
-            var resolution = scanningOptions.GetResolution (availableResolutions);
-
-            // If the user did not specify a resolution, let's try and find a suitable one
-            if (resolution == null) {
-                // Loop through all supported sizes
-                foreach (var sps in parameters.SupportedPreviewSizes) {
-
-                    // Find one that's >= 640x360 but <= 1000x1000
-                    // This will likely pick the *smallest* size in that range, which should be fine
-                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000) {
-                        resolution = new CameraResolution {
-                            Width = sps.Width,
-                            Height = sps.Height
-                        };
-                        break;
-                    }
-                }
-            }
-
-            // Google Glass requires this fix to display the camera output correctly
-            if (Build.Model.Contains ("Glass")) {
-                resolution = new CameraResolution {
-                    Width = 640,
-                    Height = 360
-                };
-                // Glass requires 30fps
-                parameters.SetPreviewFpsRange (30000, 30000);
-            }
-
-            // Hopefully a resolution was selected at some point
-            if (resolution != null) {
-                Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
-                parameters.SetPreviewSize (resolution.Width, resolution.Height);
-            }
-
-            camera.SetParameters (parameters);
-
-            SetCameraDisplayOrientation (this.activity);
-
-            camera.SetPreviewDisplay (this.Holder);
-            camera.StartPreview ();
-
-            PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
-
-            AutoFocus ();
+            surfaceChanged = true;
+            waitSurface.Release ();
         }
 
         public void SurfaceDestroyed (ISurfaceHolder holder)
@@ -395,6 +336,11 @@ namespace ZXing.Mobile
 
         public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {
+            StartScanningAsync (scanResultCallback, options);
+        }
+
+        public async Task StartScanningAsync (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
+        {
             this.callback = scanResultCallback;
             this.scanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
@@ -457,6 +403,74 @@ namespace ZXing.Mobile
             }
 
             PerformanceCounter.Stop (perf, "Camera took {0}ms");
+
+            if (!surfaceChanged)
+                await waitSurface.WaitAsync ();
+            
+            if (camera == null)
+                return;
+
+            perf = PerformanceCounter.Start ();
+
+            var parameters = camera.GetParameters ();
+            parameters.PreviewFormat = ImageFormatType.Nv21;
+
+
+            var availableResolutions = new List<CameraResolution> ();
+            foreach (var sps in parameters.SupportedPreviewSizes) {
+                availableResolutions.Add (new CameraResolution {
+                    Width = sps.Width,
+                    Height = sps.Height
+                });
+            }
+
+            // Try and get a desired resolution from the options selector
+            var resolution = scanningOptions.GetResolution (availableResolutions);
+
+            // If the user did not specify a resolution, let's try and find a suitable one
+            if (resolution == null) {
+                // Loop through all supported sizes
+                foreach (var sps in parameters.SupportedPreviewSizes) {
+
+                    // Find one that's >= 640x360 but <= 1000x1000
+                    // This will likely pick the *smallest* size in that range, which should be fine
+                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000) {
+                        resolution = new CameraResolution {
+                            Width = sps.Width,
+                            Height = sps.Height
+                        };
+                        break;
+                    }
+                }
+            }
+
+            // Google Glass requires this fix to display the camera output correctly
+            if (Build.Model.Contains ("Glass")) {
+                resolution = new CameraResolution {
+                    Width = 640,
+                    Height = 360
+                };
+                // Glass requires 30fps
+                parameters.SetPreviewFpsRange (30000, 30000);
+            }
+
+            // Hopefully a resolution was selected at some point
+            if (resolution != null) {
+                Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+                parameters.SetPreviewSize (resolution.Width, resolution.Height);
+            }
+
+            camera.SetParameters (parameters);
+
+            SetCameraDisplayOrientation (this.activity);
+
+            camera.SetPreviewDisplay (this.Holder);
+            camera.StartPreview ();
+
+            PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
+
+            AutoFocus ();
+
         }
 
         public void StopScanning ()
