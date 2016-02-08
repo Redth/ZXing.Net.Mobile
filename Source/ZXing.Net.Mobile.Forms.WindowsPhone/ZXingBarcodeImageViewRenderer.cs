@@ -20,6 +20,13 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
         ZXingBarcodeImageView formsView;
         System.Windows.Controls.Image imageView;
 
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            regenerate();
+
+            base.OnElementPropertyChanged(sender, e);
+        }
+
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
         {
             formsView = Element;
@@ -32,6 +39,13 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
                 base.SetNativeControl(imageView);
             }
 
+            regenerate();
+
+            base.OnElementChanged(e);
+        }
+
+        void regenerate ()
+        {
             if (formsView != null)
             {
                 var writer = new ZXing.Mobile.BarcodeWriter();
@@ -47,8 +61,6 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
 
                 imageView.Source = image;
             }
-
-            base.OnElementChanged(e);
         }
     }
 }
