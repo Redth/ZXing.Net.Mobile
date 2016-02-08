@@ -100,6 +100,7 @@
     <ImageAsset Include="Resources\Images.xcassets\AppIcons.appiconset\Contents.json">
       <InProject>false</InProject>
     </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\LaunchImage.launchimage\Contents.json" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.xib" />
@@ -137,8 +138,12 @@
       <Name>zxing.portable</Name>
     </ProjectReference>
     <ProjectReference Include="..\Core\FormsSample.csproj">
-      <Project>{0daf97ca-02db-4e4f-9163-b8f14eae2d90}</Project>
+      <Project>{0DAF97CA-02DB-4E4F-9163-B8F14EAE2D90}</Project>
       <Name>FormsSample</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\Icon.png" />
+    <BundleResource Include="Resources\Icon%402x.png" />
   </ItemGroup>
 </Project>
