@@ -2457,6 +2457,12 @@ namespace ZXing.Net.Mobile.Forms.Android
 		public partial class String
 		{
 			
+			// aapt resource value: 0x7f05001f
+			public static int ApplicationName = 2131034143;
+			
+			// aapt resource value: 0x7f05001e
+			public static int Hello = 2131034142;
+			
 			// aapt resource value: 0x7f05000b
 			public static int abc_action_bar_home_description = 2131034123;
 			
@@ -2511,8 +2517,8 @@ namespace ZXing.Net.Mobile.Forms.Android
 			// aapt resource value: 0x7f05001d
 			public static int appbar_scrolling_view_behavior = 2131034141;
 			
-			// aapt resource value: 0x7f05001e
-			public static int library_name = 2131034142;
+			// aapt resource value: 0x7f050020
+			public static int library_name = 2131034144;
 			
 			// aapt resource value: 0x7f050000
 			public static int mr_media_route_button_content_description = 2131034112;
