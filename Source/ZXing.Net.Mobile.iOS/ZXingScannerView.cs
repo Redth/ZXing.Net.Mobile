@@ -505,7 +505,7 @@ namespace ZXing.Mobile
 			{
                 var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
                     
-				if ((DateTime.UtcNow - lastAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames 
+                if (msSinceLastPreview < options.DelayBetweenAnalyzingFrames
                     || (wasScanned && msSinceLastPreview < options.DelayBetweenContinuousScans)
                     || working
 				    || CancelTokenSource.IsCancellationRequested)

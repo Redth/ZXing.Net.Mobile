@@ -20,80 +20,397 @@ using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile
 {
-	// based on https://github.com/xamarin/monodroid-samples/blob/master/ApiDemo/Graphics/CameraPreview.cs
-    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Android.Hardware.Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback, IScannerView
-	{
-		private const int MIN_FRAME_WIDTH = 240;
-		private const int MIN_FRAME_HEIGHT = 240;
-		private const int MAX_FRAME_WIDTH = 600;
-		private const int MAX_FRAME_HEIGHT = 400;
+    // based on https://github.com/xamarin/monodroid-samples/blob/master/ApiDemo/Graphics/CameraPreview.cs
+    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback, IScannerView
+    {
+        const int MIN_FRAME_WIDTH = 240;
+        const int MIN_FRAME_HEIGHT = 240;
+        const int MAX_FRAME_WIDTH = 600;
+        const int MAX_FRAME_HEIGHT = 400;
 	
-		CancellationTokenSource tokenSource;
-		ISurfaceHolder surface_holder;
-		Android.Hardware.Camera camera;
-		MobileBarcodeScanningOptions options;
-		Action<ZXing.Result> callback;
-		Activity activity;
+        CancellationTokenSource tokenSource;
+        ISurfaceHolder surfaceHolder;
+        Camera camera;
+        MobileBarcodeScanningOptions scanningOptions;
+        Action<Result> callback;
+        Activity activity;
         bool isAnalyzing = false;
         bool wasScanned = false;
         bool isTorchOn = false;
+        bool surfaceChanged = false;
         int cameraId = 0;
 
-        static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim(true);
+        DateTime lastPreviewAnalysis = DateTime.UtcNow;
+        BarcodeReader barcodeReader = null;
+        Task processingTask;
+        SemaphoreSlim waitSurface = new SemaphoreSlim (0);
 
-		public ZXingSurfaceView (Activity activity)
-			: base (activity)
-		{			
-			this.activity = activity;
+        static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim (true);
+
+        public ZXingSurfaceView (Activity activity)
+            : base (activity)
+        {
+            this.activity = activity;
 
             Init ();
-		}
+        }
 
-	    protected ZXingSurfaceView(IntPtr javaReference, JniHandleOwnership transfer) 
-            : base(javaReference, transfer) 
+        protected ZXingSurfaceView (IntPtr javaReference, JniHandleOwnership transfer)
+            : base (javaReference, transfer)
         {
             Init ();
-	    }
+        }
 
         void Init ()
         {
-            CheckPermissions ();
+            this.surfaceHolder = Holder;
+            this.surfaceHolder.AddCallback (this);
+            this.surfaceHolder.SetType (SurfaceType.PushBuffers);
 
-            this.surface_holder = Holder;
-            this.surface_holder.AddCallback (this);
-            this.surface_holder.SetType (SurfaceType.PushBuffers);
-
-            this.tokenSource = new System.Threading.CancellationTokenSource();
+            this.tokenSource = new CancellationTokenSource ();
         }
 
-		void CheckPermissions()
-		{
-			var perf = PerformanceCounter.Start ();
+        public void SurfaceCreated (ISurfaceHolder holder)
+        {
+        }
 
-            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking Camera Permissions...");
+        public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
+        {
+            surfaceChanged = true;
+            waitSurface.Release ();
+        }
 
-			if (!PlatformChecks.IsPermissionInManifest (this.Context, Android.Manifest.Permission.Camera)
-                || !PlatformChecks.IsPermissionGranted (this.Context, Android.Manifest.Permission.Camera))
-			{
-				var msg = "ZXing.Net.Mobile requires permission to use the Camera (" + Android.Manifest.Permission.Camera + "), but was not found in your AndroidManifest.xml file.";
-				Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
+        public void SurfaceDestroyed (ISurfaceHolder holder)
+        {
+        }
 
-				throw new UnauthorizedAccessException (msg);
-			}
 
-			PerformanceCounter.Stop (perf, "CheckPermissions took {0}ms");
-		}
+        public byte[] rotateCounterClockwise (byte[] data, int width, int height)
+        {
+            var rotatedData = new byte[data.Length];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++)
+                    rotatedData [x * height + height - y - 1] = data [x + y * width];
+            }
+            return rotatedData;
+        }
 
-	    public void SurfaceCreated (ISurfaceHolder holder)
-		{
-		}
-		
-		public void SurfaceChanged (ISurfaceHolder holder, Format format, int w, int h)
-		{  
+        public void OnPreviewFrame (byte[] bytes, Android.Hardware.Camera camera)
+        {
+            if (!isAnalyzing)
+                return;
+            
+            //Check and see if we're still processing a previous frame
+            if (processingTask != null && !processingTask.IsCompleted)
+                return;
+            
+            if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < scanningOptions.DelayBetweenAnalyzingFrames)
+                return;
+
+            // Delay a minimum between scans
+            if (wasScanned && ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < scanningOptions.DelayBetweenContinuousScans))
+                return;
+
+            wasScanned = false;
+
+            var cameraParameters = camera.GetParameters ();
+            var width = cameraParameters.PreviewSize.Width;
+            var height = cameraParameters.PreviewSize.Height;
+            //var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
+            lastPreviewAnalysis = DateTime.UtcNow;
+
+            processingTask = Task.Factory.StartNew (() => {
+                try {
+
+                    if (barcodeReader == null) {
+                        barcodeReader = new BarcodeReader (null, null, null, (p, w, h, f) => 
+                                              new PlanarYUVLuminanceSource (p, w, h, 0, 0, w, h, false));
+                        //new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
+
+                        if (this.scanningOptions.TryHarder.HasValue)
+                            barcodeReader.Options.TryHarder = this.scanningOptions.TryHarder.Value;
+                        if (this.scanningOptions.PureBarcode.HasValue)
+                            barcodeReader.Options.PureBarcode = this.scanningOptions.PureBarcode.Value;
+                        if (!string.IsNullOrEmpty (this.scanningOptions.CharacterSet))
+                            barcodeReader.Options.CharacterSet = this.scanningOptions.CharacterSet;
+                        if (this.scanningOptions.TryInverted.HasValue)
+                            barcodeReader.TryInverted = this.scanningOptions.TryInverted.Value;
+
+                        if (this.scanningOptions.PossibleFormats != null && this.scanningOptions.PossibleFormats.Count > 0) {
+                            barcodeReader.Options.PossibleFormats = new List<BarcodeFormat> ();
+
+                            foreach (var pf in this.scanningOptions.PossibleFormats)
+                                barcodeReader.Options.PossibleFormats.Add (pf);
+                        }
+                    }
+
+                    bool rotate = false;
+                    int newWidth = width;
+                    int newHeight = height;
+
+                    var cDegrees = getCameraDisplayOrientation (this.activity);
+
+                    if (cDegrees == 90 || cDegrees == 270) {
+                        rotate = true;
+                        newWidth = height;
+                        newHeight = width;
+                    }
+
+                    var start = PerformanceCounter.Start ();
+
+                    if (rotate)
+                        bytes = rotateCounterClockwise (bytes, width, height);
+
+                    var result = barcodeReader.Decode (bytes, newWidth, newHeight, RGBLuminanceSource.BitmapFormat.Unknown);
+
+                    PerformanceCounter.Stop (start, "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " + rotate + ")");
+
+                    if (result == null || string.IsNullOrEmpty (result.Text))
+                        return;
+
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
+
+                    wasScanned = true;
+                    callback (result);
+                } catch (ReaderException) {
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "No barcode Found");
+                    // ignore this exception; it happens every time there is a failed scan
+                } catch (Exception) {
+                    // TODO: this one is unexpected.. log or otherwise handle it
+                    throw;
+                }
+
+            });
+        }
+
+
+        public void OnAutoFocus (bool success, Camera camera)
+        {
+            
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocused");
+
+            Task.Factory.StartNew (() => {
+                int slept = 0;
+
+                while (!tokenSource.IsCancellationRequested && slept < 2000) {
+                    Thread.Sleep (100);
+                    slept += 100;
+                }
+
+                if (!tokenSource.IsCancellationRequested)
+                    AutoFocus ();
+            });
+        }
+
+        public override bool OnTouchEvent (MotionEvent e)
+        {
+            var r = base.OnTouchEvent (e);
+
+            AutoFocus ();
+
+            return r;
+        }
+
+        public void AutoFocus ()
+        {
+            AutoFocus (-1, -1);
+        }
+
+        public void AutoFocus (int x, int y)
+        {
+            if (camera != null) {
+                if (!tokenSource.IsCancellationRequested) {
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Requested");
+                    try {                         
+                        camera.AutoFocus (this); 
+                    } catch (Exception ex) {
+                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
+                    }
+                }
+            }
+        }
+
+        int getCameraDisplayOrientation (Activity context)
+        {
+            var degrees = 0;
+
+            var display = context.WindowManager.DefaultDisplay;
+
+            var rotation = display.Rotation;
+
+            switch (rotation) {
+            case SurfaceOrientation.Rotation0:
+                degrees = 0;
+                break;
+            case SurfaceOrientation.Rotation90:
+                degrees = 90;
+                break;
+            case SurfaceOrientation.Rotation180:
+                degrees = 180;
+                break;
+            case SurfaceOrientation.Rotation270:
+                degrees = 270;
+                break;
+            }
+
+
+            Camera.CameraInfo info = new Camera.CameraInfo ();
+
+            Camera.GetCameraInfo (cameraId, info);
+
+            int correctedDegrees = (360 + info.Orientation - degrees) % 360;
+
+            return correctedDegrees;
+        }
+
+        public void SetCameraDisplayOrientation (Activity context)
+        {
+            var degrees = getCameraDisplayOrientation (context);
+
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Changing Camera Orientation to: " + degrees);
+
+            try {
+                camera.SetDisplayOrientation (degrees);
+            } catch (Exception ex) {
+                Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
+            }
+        }
+
+        public void ShutdownCamera ()
+        {
+            tokenSource.Cancel ();
+
+            var theCamera = camera;
+            camera = null;
+
+            // make this asyncronous so that we can return from the view straight away instead of waiting for the camera to release.
+            Task.Factory.StartNew (() => {
+                try {
+                    if (theCamera != null) {
+                        try {
+                            theCamera.SetPreviewCallback (null);
+                            theCamera.StopPreview ();
+                        } catch (Exception ex) {
+                            Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
+                        }
+                        theCamera.Release ();
+                    }
+                } catch (Exception e) {
+                    Android.Util.Log.Error (MobileBarcodeScanner.TAG, e.ToString ());
+                } finally {
+                    ReleaseExclusiveAccess ();
+                }
+            });
+        }
+
+
+        public Size FindBestPreviewSize (Camera.Parameters p, Size screenRes)
+        {
+            var max = p.SupportedPreviewSizes.Count;
+
+            var s = p.SupportedPreviewSizes [max - 1];
+
+            return new Size (s.Width, s.Height);
+        }
+
+        private void GetExclusiveAccess ()
+        {
+            Console.WriteLine ("Getting Camera Exclusive access");
+            var result = _cameraLockEvent.Wait (TimeSpan.FromSeconds (10));
+            if (!result)
+                throw new Exception ("Couldn't get exclusive access to the camera");
+
+            _cameraLockEvent.Reset ();
+            Console.WriteLine ("Got Camera Exclusive access");
+        }
+
+        private void ReleaseExclusiveAccess ()
+        {
+            if (_cameraLockEvent.IsSet)
+                return;
+
+            // release the camera exclusive access allowing it to be used again.
+            Console.WriteLine ("Releasing Exclusive access to camera");
+            _cameraLockEvent.Set ();
+        }
+
+        public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
+        {
+            StartScanningAsync (scanResultCallback, options);
+        }
+
+        public async Task StartScanningAsync (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
+        {
+            this.callback = scanResultCallback;
+            this.scanningOptions = options ?? MobileBarcodeScanningOptions.Default;
+
+            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds (this.scanningOptions.InitialDelayBeforeAnalyzingFrames);
+            isAnalyzing = true;
+
+            Console.WriteLine ("StartScanning");
+
+            CheckCameraPermissions ();
+
+            var perf = PerformanceCounter.Start ();
+
+            GetExclusiveAccess ();
+
+            try {
+                var version = Build.VERSION.SdkInt;
+
+                if (version >= BuildVersionCodes.Gingerbread) {
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking Number of cameras...");
+
+                    var numCameras = Camera.NumberOfCameras;
+                    var camInfo = new Camera.CameraInfo ();
+                    var found = false;
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + numCameras + " cameras...");
+
+                    var whichCamera = CameraFacing.Back;
+
+                    if (this.scanningOptions.UseFrontCameraIfAvailable.HasValue && this.scanningOptions.UseFrontCameraIfAvailable.Value)
+                        whichCamera = CameraFacing.Front;
+
+                    for (int i = 0; i < numCameras; i++) {
+                        Camera.GetCameraInfo (i, camInfo);
+                        if (camInfo.Facing == whichCamera) {
+                            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + whichCamera + " Camera, opening...");
+                            camera = Camera.Open (i);
+                            cameraId = i;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Finding " + whichCamera + " camera failed, opening camera 0...");
+                        camera = Camera.Open (0);
+                        cameraId = 0;
+                    }
+                } else {
+                    camera = Camera.Open ();
+                }
+
+                if (camera == null)
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Camera is null :(");
+
+                camera.SetPreviewCallback (this);
+
+            } catch (Exception ex) {
+                ShutdownCamera ();
+
+                Console.WriteLine ("Setup Error: " + ex);
+            }
+
+            PerformanceCounter.Stop (perf, "Camera took {0}ms");
+
+            if (!surfaceChanged)
+                await waitSurface.WaitAsync ();
+            
             if (camera == null)
                 return;
 
-            var perf = PerformanceCounter.Start ();
+            perf = PerformanceCounter.Start ();
 
             var parameters = camera.GetParameters ();
             parameters.PreviewFormat = ImageFormatType.Nv21;
@@ -108,7 +425,7 @@ namespace ZXing.Mobile
             }
 
             // Try and get a desired resolution from the options selector
-            var resolution = options.GetResolution (availableResolutions);
+            var resolution = scanningOptions.GetResolution (availableResolutions);
 
             // If the user did not specify a resolution, let's try and find a suitable one
             if (resolution == null) {
@@ -139,7 +456,7 @@ namespace ZXing.Mobile
 
             // Hopefully a resolution was selected at some point
             if (resolution != null) {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+                Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
                 parameters.SetPreviewSize (resolution.Width, resolution.Height);
             }
 
@@ -147,408 +464,13 @@ namespace ZXing.Mobile
 
             SetCameraDisplayOrientation (this.activity);
 
-            camera.SetPreviewDisplay (holder);
+            camera.SetPreviewDisplay (this.Holder);
             camera.StartPreview ();
-
-            //cameraResolution = new Size(parameters.PreviewSize.Width, parameters.PreviewSize.Height);
 
             PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
 
-            AutoFocus();
-		}
-		
-		public void SurfaceDestroyed (ISurfaceHolder holder)
-		{
-			//ShutdownCamera ();
-		}
+            AutoFocus ();
 
-
-		public byte[] rotateCounterClockwise(byte[] data, int width, int height)
-		{
-			var rotatedData = new byte[data.Length];
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++)
-					rotatedData[x * height + height - y - 1] = data[x + y * width];
-			}
-			return rotatedData;
-		}
-		
-        DateTime lastPreviewAnalysis = DateTime.UtcNow;
-		BarcodeReader barcodeReader = null;
-
-		Task processingTask;
-
-		public void OnPreviewFrame (byte [] bytes, Android.Hardware.Camera camera)
-		{
-            if (!isAnalyzing)
-                return;
-            
-			//Check and see if we're still processing a previous frame
-			if (processingTask != null && !processingTask.IsCompleted)
-				return;
-            
-			if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenAnalyzingFrames)
-				return;
-
-            // Delay a minimum between scans
-            if (wasScanned && ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < options.DelayBetweenContinuousScans))
-                return;
-
-            wasScanned = false;
-
-			var cameraParameters = camera.GetParameters();
-			var width = cameraParameters.PreviewSize.Width;
-			var height = cameraParameters.PreviewSize.Height;
-			//var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
-			lastPreviewAnalysis = DateTime.UtcNow;
-
-			processingTask = Task.Factory.StartNew (() =>
-			{
-				try
-				{
-
-					if (barcodeReader == null)
-					{
-						barcodeReader = new BarcodeReader (null, null, null, (p, w, h, f) => 
-					                                  new PlanarYUVLuminanceSource (p, w, h, 0, 0, w, h, false));
-						//new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
-					
-						if (this.options.TryHarder.HasValue)
-							barcodeReader.Options.TryHarder = this.options.TryHarder.Value;
-						if (this.options.PureBarcode.HasValue)
-							barcodeReader.Options.PureBarcode = this.options.PureBarcode.Value;
-						if (!string.IsNullOrEmpty (this.options.CharacterSet))
-							barcodeReader.Options.CharacterSet = this.options.CharacterSet;
-						if (this.options.TryInverted.HasValue)
-							barcodeReader.TryInverted = this.options.TryInverted.Value;
-					
-						if (this.options.PossibleFormats != null && this.options.PossibleFormats.Count > 0)
-						{
-							barcodeReader.Options.PossibleFormats = new List<BarcodeFormat> ();
-						
-							foreach (var pf in this.options.PossibleFormats)
-								barcodeReader.Options.PossibleFormats.Add (pf);
-						}
-					}
-
-					bool rotate = false;
-					int newWidth = width;
-					int newHeight = height;
-
-					var cDegrees = getCameraDisplayOrientation(this.activity);
-
-					if (cDegrees == 90 || cDegrees == 270)
-					{
-						rotate = true;
-						newWidth = height;
-						newHeight = width;
-					}
-					
-					var start = PerformanceCounter.Start();
-					
-					if (rotate)
-						bytes = rotateCounterClockwise(bytes, width, height);
-										
-					var result = barcodeReader.Decode (bytes, newWidth, newHeight, RGBLuminanceSource.BitmapFormat.Unknown);
-
-						PerformanceCounter.Stop(start, "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " + rotate + ")");
-				
-					if (result == null || string.IsNullOrEmpty (result.Text))
-						return;
-				
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
-				
-                    wasScanned = true;
-					callback (result);
-				}
-				catch (ReaderException)
-				{
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "No barcode Found");
-					// ignore this exception; it happens every time there is a failed scan
-				
-				}
-				catch (Exception)
-				{
-					// TODO: this one is unexpected.. log or otherwise handle it
-					throw;
-				}
-
-			});
-		}
-		
-		
-		public void OnAutoFocus (bool success, Android.Hardware.Camera camera)
-		{
-            Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocused");
-			
-			Task.Factory.StartNew(() => 
-			                                             {
-				int slept = 0;
-				
-				while (!tokenSource.IsCancellationRequested && slept < 2000)
-				{
-					System.Threading.Thread.Sleep(100);
-					slept += 100;
-				}
-				
-				if (!tokenSource.IsCancellationRequested)
-					AutoFocus();
-			});
-		}
-		
-		public override bool OnTouchEvent (MotionEvent e)
-		{
-			var r = base.OnTouchEvent(e);
-			
-			AutoFocus();
-			
-			return r;
-		}
-		
-        public void AutoFocus ()
-        {
-            AutoFocus (-1, -1);
-        }
-
-        public void AutoFocus(int x, int y)
-		{
-			if (camera != null)
-			{
-				if (!tokenSource.IsCancellationRequested)
-				{
-                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
-                    try {                         
-                        camera.AutoFocus(this); 
-                    } catch (Exception ex) {
-                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
-                    }
-				}
-			}
-		}
-		
-		//int cameraDegrees = 0;
-
-		int getCameraDisplayOrientation(Activity context)
-		{
-			var degrees = 0;
-
-			var display = context.WindowManager.DefaultDisplay;
-
-			var rotation = display.Rotation;
-
-			switch(rotation)
-			{
-			case SurfaceOrientation.Rotation0:
-				degrees = 0;
-				break;
-			case SurfaceOrientation.Rotation90:
-				degrees = 90;
-				break;
-			case SurfaceOrientation.Rotation180:
-				degrees = 180;
-				break;
-			case SurfaceOrientation.Rotation270:
-				degrees = 270;
-				break;
-			}
-
-
-			Camera.CameraInfo info = new Camera.CameraInfo();
-            
-			Camera.GetCameraInfo(cameraId, info);
-
-			int correctedDegrees = (360 + info.Orientation - degrees) % 360;
-
-			return correctedDegrees;
-		}
-
-		public void SetCameraDisplayOrientation(Activity context) 
-		{
-			var degrees = getCameraDisplayOrientation (context);
-
-            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Changing Camera Orientation to: " + degrees);
-			//cameraDegrees = degrees;
-
-			try { camera.SetDisplayOrientation (degrees); }
-			catch (Exception ex) {
-                Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
-			}
-		}
-		
-		public void ShutdownCamera ()
-		{
-			tokenSource.Cancel();
-			
-            var theCamera = camera;
-            camera = null;
-
-            // make this asyncronous so that we can return from the view straight away instead of waiting for the camera to release.
-            Task.Factory.StartNew(() => {
-                try {
-                    if (theCamera != null) {
-                        try {
-                            theCamera.SetPreviewCallback(null);
-                            theCamera.StopPreview();
-                        } catch (Exception ex) {
-                            Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
-                        }
-                        theCamera.Release();
-                    }
-                } catch (Exception e) {
-                    Android.Util.Log.Error(MobileBarcodeScanner.TAG, e.ToString());
-                } finally {
-                    ReleaseExclusiveAccess();
-                }
-            });
-		}
-		
-		
-		private void drawResultPoints(Bitmap barcode, ZXing.Result rawResult) 
-		{
-			var points = rawResult.ResultPoints;
-			
-			if (points != null && points.Length > 0)
-			{
-				var canvas = new Canvas(barcode);
-				Paint paint = new Paint();
-				paint.Color = Android.Graphics.Color.White;
-				paint.StrokeWidth = 3.0f;
-				paint.SetStyle(Paint.Style.Stroke);
-				
-				var border = new RectF(2, 2, barcode.Width - 2, barcode.Height - 2);
-				canvas.DrawRect(border, paint);
-				
-				paint.Color = Android.Graphics.Color.Purple;
-				
-				if (points.Length == 2) 
-				{
-					paint.StrokeWidth = 4.0f;
-					drawLine(canvas, paint, points[0], points[1]);
-				} 
-				else if (points.Length == 4 &&
-				         (rawResult.BarcodeFormat == BarcodeFormat.UPC_A ||
-				 rawResult.BarcodeFormat == BarcodeFormat.EAN_13)) 
-				{
-					// Hacky special case -- draw two lines, for the barcode and metadata
-					drawLine(canvas, paint, points[0], points[1]);
-					drawLine(canvas, paint, points[2], points[3]);
-				}
-				else 
-				{
-					paint.StrokeWidth = 10.0f;
-					
-					foreach (ResultPoint point in points)
-						canvas.DrawPoint(point.X, point.Y, paint);
-				}
-			}
-		}
-		
-		private void drawLine(Canvas canvas, Paint paint, ResultPoint a, ResultPoint b) 
-		{
-			canvas.DrawLine(a.X, a.Y, b.X, b.Y, paint);
-		}
-
-		public Size FindBestPreviewSize(Android.Hardware.Camera.Parameters p, Size screenRes)
-		{
-			var max = p.SupportedPreviewSizes.Count;
-			
-			var s = p.SupportedPreviewSizes[max - 1];
-			
-			return new Size(s.Width, s.Height);
-		}
-
-        private void GetExclusiveAccess()
-        {
-            Console.WriteLine ("Getting Camera Exclusive access");
-            var result = _cameraLockEvent.Wait(TimeSpan.FromSeconds(10));
-            if (!result)
-                throw new Exception("Couldn't get exclusive access to the camera");
-
-            _cameraLockEvent.Reset();
-            Console.WriteLine ("Got Camera Exclusive access");
-        }
-
-        private void ReleaseExclusiveAccess()
-        {
-            if (_cameraLockEvent.IsSet)
-                return;
-            
-            // release the camera exclusive access allowing it to be used again.
-            Console.WriteLine ("Releasing Exclusive access to camera");
-            _cameraLockEvent.Set();
-        }
-
-        public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
-        {           
-            this.callback = scanResultCallback;
-            this.options = options ?? MobileBarcodeScanningOptions.Default;
-
-            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds(options.InitialDelayBeforeAnalyzingFrames);
-            isAnalyzing = true;
-
-            Console.WriteLine ("StartScanning");
-
-            CheckPermissions ();
-
-            var perf = PerformanceCounter.Start ();
-
-            GetExclusiveAccess();
-
-            try 
-            {
-                var version = Build.VERSION.SdkInt;
-
-                if (version >= BuildVersionCodes.Gingerbread)
-                {
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking Number of cameras...");
-
-                    var numCameras = Android.Hardware.Camera.NumberOfCameras;
-                    var camInfo = new Android.Hardware.Camera.CameraInfo();
-                    var found = false;
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + numCameras + " cameras...");
-
-                    var whichCamera = CameraFacing.Back;
-
-                    if (options.UseFrontCameraIfAvailable.HasValue && options.UseFrontCameraIfAvailable.Value)
-                        whichCamera = CameraFacing.Front;
-
-                    for (int i = 0; i < numCameras; i++)
-                    {
-                        Android.Hardware.Camera.GetCameraInfo(i, camInfo);
-                        if (camInfo.Facing == whichCamera)
-                        {
-                            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + whichCamera + " Camera, opening...");
-                            camera = Android.Hardware.Camera.Open(i);
-							cameraId = i;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Finding " + whichCamera + " camera failed, opening camera 0...");
-                        camera = Android.Hardware.Camera.Open(0);
-                        cameraId = 0;
-                    }
-                }
-                else
-                {
-                    camera = Android.Hardware.Camera.Open();
-                }
-
-                if (camera == null)
-                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Camera is null :(");
-
-                camera.SetPreviewCallback (this);
-
-            } catch (Exception ex) {
-                ShutdownCamera ();
-
-                Console.WriteLine("Setup Error: " + ex);
-            }
-
-            PerformanceCounter.Stop (perf, "SurfaceCreated took {0}ms");
         }
 
         public void StopScanning ()
@@ -569,54 +491,41 @@ namespace ZXing.Mobile
 
         public void Torch (bool on)
         {
-            if (!this.Context.PackageManager.HasSystemFeature(PackageManager.FeatureCameraFlash))
-            {
-                Android.Util.Log.Info(MobileBarcodeScanner.TAG, "Flash not supported on this device");
+            if (!this.Context.PackageManager.HasSystemFeature (PackageManager.FeatureCameraFlash)) {
+                Android.Util.Log.Info (MobileBarcodeScanner.TAG, "Flash not supported on this device");
                 return;
             }
 
-            if (!PlatformChecks.IsPermissionInManifest (this.Context, Android.Manifest.Permission.Flashlight)
-                || !PlatformChecks.IsPermissionGranted (this.Context, Android.Manifest.Permission.Flashlight))
-            {
-                var msg = "ZXing.Net.Mobile requires permission to use the Flash (" + Android.Manifest.Permission.Flashlight + "), but was not found in your AndroidManifest.xml file.";
-                Android.Util.Log.Error (MobileBarcodeScanner.TAG, msg);
+            CheckTorchPermissions ();
 
-                throw new UnauthorizedAccessException (msg);
-            }
-
-            if (camera == null)
-            {
-                Android.Util.Log.Info(MobileBarcodeScanner.TAG, "NULL Camera");
+            if (camera == null) {
+                Android.Util.Log.Info (MobileBarcodeScanner.TAG, "NULL Camera, cannot toggle torch");
                 return;
             }
 
-            var p = camera.GetParameters();
+            var p = camera.GetParameters ();
             var supportedFlashModes = p.SupportedFlashModes;
 
             if (supportedFlashModes == null)
-                supportedFlashModes = new List<string>();
+                supportedFlashModes = new List<string> ();
 
-            var flashMode=  string.Empty;
+            var flashMode = string.Empty;
 
-            if (on)
-            {
-                if (supportedFlashModes.Contains(Android.Hardware.Camera.Parameters.FlashModeTorch))
-                    flashMode = Android.Hardware.Camera.Parameters.FlashModeTorch;
-                else if (supportedFlashModes.Contains(Android.Hardware.Camera.Parameters.FlashModeOn))
-                    flashMode = Android.Hardware.Camera.Parameters.FlashModeOn;
+            if (on) {
+                if (supportedFlashModes.Contains (Camera.Parameters.FlashModeTorch))
+                    flashMode = Camera.Parameters.FlashModeTorch;
+                else if (supportedFlashModes.Contains (Camera.Parameters.FlashModeOn))
+                    flashMode = Camera.Parameters.FlashModeOn;
                 isTorchOn = true;
-            }
-            else 
-            {
-                if ( supportedFlashModes.Contains(Android.Hardware.Camera.Parameters.FlashModeOff))
-                    flashMode = Android.Hardware.Camera.Parameters.FlashModeOff;
+            } else {
+                if (supportedFlashModes.Contains (Camera.Parameters.FlashModeOff))
+                    flashMode = Camera.Parameters.FlashModeOff;
                 isTorchOn = false;
             }
 
-            if (!string.IsNullOrEmpty(flashMode))
-            {
+            if (!string.IsNullOrEmpty (flashMode)) {
                 p.FlashMode = flashMode;
-                camera.SetParameters(p);
+                camera.SetParameters (p);
             }
         }
 
@@ -624,12 +533,15 @@ namespace ZXing.Mobile
         {
             Torch (!isTorchOn);
         }
+
         public MobileBarcodeScanningOptions ScanningOptions {
-            get { return options; }
+            get { return scanningOptions; }
         }
+
         public bool IsTorchOn {
             get { return isTorchOn; }
         }
+
         public bool IsAnalyzing {
             get { return isAnalyzing; }
         }
@@ -641,17 +553,92 @@ namespace ZXing.Mobile
                 if (hasTorch.HasValue)
                     return hasTorch.Value;  
                 
-                var p = camera.GetParameters();
+                var p = camera.GetParameters ();
                 var supportedFlashModes = p.SupportedFlashModes;
 
                 if (supportedFlashModes != null
                     && (supportedFlashModes.Contains (Camera.Parameters.FlashModeTorch)
-                        || supportedFlashModes.Contains (Camera.Parameters.FlashModeOn)))
-                    hasTorch = true;
+                    || supportedFlashModes.Contains (Camera.Parameters.FlashModeOn)))
+                    hasTorch = CheckTorchPermissions (false);
 
                 return hasTorch.Value;
             }
         }
-	}
-}
 
+        bool CheckCameraPermissions ()
+        {
+            return CheckPermissions (Android.Manifest.Permission.Camera);
+        }
+
+        bool CheckTorchPermissions (bool throwOnError = true)
+        {
+            return CheckPermissions (Android.Manifest.Permission.Flashlight);
+        }
+
+        bool CheckPermissions (string permission, bool throwOnError = true)
+        {
+            var result = true;
+            var perf = PerformanceCounter.Start ();
+
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking " + permission + "...");
+
+            if (!PlatformChecks.IsPermissionInManifest (this.Context, permission)
+                || !PlatformChecks.IsPermissionGranted (this.Context, permission)) {
+
+                result = false;
+
+                if (throwOnError) {
+                    var msg = "ZXing.Net.Mobile requires: " + permission + ", but was not found in your AndroidManifest.xml file.";
+                    Android.Util.Log.Error ("ZXing.Net.Mobile", msg);
+
+                    throw new UnauthorizedAccessException (msg);
+                }
+            }
+
+            PerformanceCounter.Stop (perf, "CheckPermissions took {0}ms");
+
+            return result;
+        }
+
+        #region possibl future drawing code
+        //        private void drawResultPoints (Bitmap barcode, ZXing.Result rawResult)
+        //        {
+        //            var points = rawResult.ResultPoints;
+        //          
+        //            if (points != null && points.Length > 0) {
+        //                var canvas = new Canvas (barcode);
+        //                Paint paint = new Paint ();
+        //                paint.Color = Android.Graphics.Color.White;
+        //                paint.StrokeWidth = 3.0f;
+        //                paint.SetStyle (Paint.Style.Stroke);
+        //              
+        //                var border = new RectF (2, 2, barcode.Width - 2, barcode.Height - 2);
+        //                canvas.DrawRect (border, paint);
+        //              
+        //                paint.Color = Android.Graphics.Color.Purple;
+        //              
+        //                if (points.Length == 2) {
+        //                    paint.StrokeWidth = 4.0f;
+        //                    drawLine (canvas, paint, points [0], points [1]);
+        //                } else if (points.Length == 4 &&
+        //                (rawResult.BarcodeFormat == BarcodeFormat.UPC_A ||
+        //                rawResult.BarcodeFormat == BarcodeFormat.EAN_13)) {
+        //                    // Hacky special case -- draw two lines, for the barcode and metadata
+        //                    drawLine (canvas, paint, points [0], points [1]);
+        //                    drawLine (canvas, paint, points [2], points [3]);
+        //                } else {
+        //                    paint.StrokeWidth = 10.0f;
+        //                  
+        //                    foreach (ResultPoint point in points)
+        //                        canvas.DrawPoint (point.X, point.Y, paint);
+        //                }
+        //            }
+        //        }
+
+        //        private void drawLine (Canvas canvas, Paint paint, ResultPoint a, ResultPoint b)
+        //        {
+        //            canvas.DrawLine (a.X, a.Y, b.X, b.Y, paint);
+        //        }
+        #endregion
+    }
+}

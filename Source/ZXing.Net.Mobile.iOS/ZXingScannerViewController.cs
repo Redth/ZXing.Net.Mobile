@@ -107,6 +107,16 @@ namespace ZXing.Mobile
 				scannerView.ToggleTorch ();
 		}
 
+        public void PauseAnalysis ()
+        {
+            scannerView.PauseAnalysis ();
+        }
+
+        public void ResumeAnalysis ()
+        {
+            scannerView.ResumeAnalysis ();
+        }
+
 		public bool IsTorchOn
 		{
 			get { return scannerView.IsTorchOn; }

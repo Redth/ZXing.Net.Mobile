@@ -184,14 +184,15 @@ namespace ZXing.Mobile
             var zxing = ScanningOptions.BuildBarcodeReader();
 
             timerPreview = new Timer(async (state) => {
-                if (stopping)
-                    return;                               
-                if (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming)
+
+                var delay = ScanningOptions.DelayBetweenAnalyzingFrames;
+
+                if (stopping || processing || !isAnalyzing
+                || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
+                {
+                    timerPreview.Change(delay, Timeout.Infinite);
                     return;
-                if (processing)
-                    return;
-                if (!isAnalyzing)
-                    return;
+                }
 
                 processing = true;
 
@@ -228,14 +229,24 @@ namespace ZXing.Mobile
                 if (result != null && !string.IsNullOrEmpty (result.Text))
                 {
                     if (!ContinuousScanning)
+                    {
+                        delay = Timeout.Infinite;
                         await StopScanningAsync();
+                    }
+                    else
+                    {
+                        delay = ScanningOptions.DelayBetweenContinuousScans;
+                    }
+
                     LastScanResult = result;
-                    ScanCallback(result);                    
+                    ScanCallback(result);
                 }
 
                 processing = false;
+
+                timerPreview.Change(delay, Timeout.Infinite);
                          
-            }, null, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(200));           
+            }, null, ScanningOptions.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
         }
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(MobileBarcodeScanningOptions options)
@@ -262,7 +273,6 @@ namespace ZXing.Mobile
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
             await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y);
-
         }
 
         Timer timerPreview;
@@ -303,18 +313,20 @@ namespace ZXing.Mobile
 
         public void Torch(bool on)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
+            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null)
             {
-                if (mediaCapture.VideoDeviceController.FlashControl.Supported)
-                    mediaCapture.VideoDeviceController.FlashControl.Enabled = on;
+                if (mediaCapture.VideoDeviceController.TorchControl.Supported)
+                {
+                    mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
+                }
             }
         }
 
         public void ToggleTorch()
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
+            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null)
             {
-                if (mediaCapture.VideoDeviceController.FlashControl.Supported)
+                if (mediaCapture.VideoDeviceController.TorchControl.Supported)
                 {
                     Torch(!IsTorchOn);
                 }
@@ -325,8 +337,8 @@ namespace ZXing.Mobile
         {
             get
             {
-                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null
-                    && mediaCapture.VideoDeviceController.FlashControl.Supported;
+                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null
+                    && mediaCapture.VideoDeviceController.TorchControl.Supported;
             }
         }
 
@@ -342,9 +354,16 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x = -1, int y = -1)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
-                if (mediaCapture.VideoDeviceController.FocusControl.Supported)
-                    await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();            
+            try
+            {
+                if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
+                    if (mediaCapture.VideoDeviceController.FocusControl.Supported)
+                        await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+            }
         }
 
         public async Task StopScanningAsync()

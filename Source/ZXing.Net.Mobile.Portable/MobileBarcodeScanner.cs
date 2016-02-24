@@ -37,6 +37,16 @@ namespace ZXing.Mobile
             throw ex;
         }
 
+        public override void PauseAnalysis()
+        {
+            throw ex;
+        }
+
+        public override void ResumeAnalysis()
+        {
+            throw ex;
+        }
+
         public override bool IsTorchOn {
             get {
                 throw ex;

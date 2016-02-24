@@ -27,6 +27,9 @@ namespace ZXing.Mobile
 		void AutoFocus();
 		void ToggleTorch();
 
+        void PauseAnalysis ();
+        void ResumeAnalysis ();
+
 		bool UseCustomOverlay { get; }
 		string TopText { get; set; }
 		string BottomText { get; set; }
@@ -78,6 +81,8 @@ namespace ZXing.Mobile
 
 		public abstract void AutoFocus();
 
+        public abstract void PauseAnalysis ();
+        public abstract void ResumeAnalysis ();
 	}
 
 	public class CancelScanRequestEventArgs : EventArgs

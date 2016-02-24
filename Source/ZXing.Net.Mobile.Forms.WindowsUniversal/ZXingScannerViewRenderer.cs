@@ -27,15 +27,57 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 
             if (zxingControl == null)
             {
+                formsView.AutoFocusRequested += FormsView_AutoFocusRequested;
+
                 zxingControl = new ZXing.Mobile.ZXingScannerControl();
+                zxingControl.ContinuousScanning = true;
                 zxingControl.UseCustomOverlay = true;
 
-                formsView.InternalNativeScannerImplementation = zxingControl;
-
                 base.SetNativeControl(zxingControl);
+
+                if (formsView.IsScanning)
+                    zxingControl.StartScanning(formsView.RaiseScanResult, formsView.Options);
+
+                if (!formsView.IsAnalyzing)
+                    zxingControl.PauseAnalysis();
+
+                if (formsView.IsTorchOn)
+                    zxingControl.Torch(formsView.IsTorchOn);
             }
 
             base.OnElementChanged(e);
+        }
+
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            base.OnElementPropertyChanged(sender, e);
+
+            if (zxingControl == null)
+                return;
+
+            switch (e.PropertyName)
+            {
+                case nameof(ZXingScannerView.IsTorchOn):
+                    zxingControl.Torch(formsView.IsTorchOn);
+                    break;
+                case nameof(ZXingScannerView.IsScanning):
+                    if (formsView.IsScanning)
+                        zxingControl.StartScanning(formsView.RaiseScanResult, formsView.Options);
+                    else
+                        zxingControl.StopScanning();
+                    break;
+                case nameof(ZXingScannerView.IsAnalyzing):
+                    if (formsView.IsAnalyzing)
+                        zxingControl.ResumeAnalysis();
+                    else
+                        zxingControl.PauseAnalysis();
+                    break;
+            }
+        }
+
+        private void FormsView_AutoFocusRequested(int x, int y)
+        {
+           zxingControl.AutoFocus(x, y);
         }
     }
 }

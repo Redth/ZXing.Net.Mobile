@@ -18,15 +18,13 @@ namespace ZXing.Mobile
 	{
 		public static bool IsPermissionInManifest(Context context, string permission)
 		{            
-			PermissionInfo pi = null;
+			try {
+                var info = context.PackageManager.GetPackageInfo (context.PackageName, PackageInfoFlags.Permissions);
+                return info.RequestedPermissions.Contains (permission);
+            } catch {
+            }
 
-			try { pi = context.PackageManager.GetPermissionInfo (permission, PackageInfoFlags.Permissions); }
-			catch { }
-
-            if (pi == null)
-                return false;
-            
-            return true;
+            return false;
 		}
 
         public static bool IsPermissionGranted (Context context, string permission)

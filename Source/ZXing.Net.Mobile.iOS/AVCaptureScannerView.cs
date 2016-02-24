@@ -57,6 +57,7 @@ namespace ZXing.Mobile
 		//BarcodeReader barcodeReader;
 
 		volatile bool foundResult = false;
+		CaptureDelegate captureDelegate;
 
 		UIView layerView;
 		UIView overlayView = null;
@@ -114,6 +115,9 @@ namespace ZXing.Mobile
 
 		bool torch = false;
 		bool analyzing = true;
+        DateTime lastAnalysis = DateTime.UtcNow.AddYears (-99);
+        bool wasScanned = false;
+        bool working = false;
 
 
 		bool SetupCaptureSession ()
@@ -203,12 +207,26 @@ namespace ZXing.Mobile
 			//Detect barcodes with built in avcapture stuff
 			AVCaptureMetadataOutput metadataOutput = new AVCaptureMetadataOutput();
 
-			var dg = new CaptureDelegate (metaDataObjects =>
+			captureDelegate = new CaptureDelegate (metaDataObjects =>
 				{
-					if (foundResult)
-						return;
+                    if (!analyzing)
+                        return;
 
 					//Console.WriteLine("Found MetaData Objects");
+
+                    var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
+
+                    if (msSinceLastPreview < options.DelayBetweenAnalyzingFrames 
+                        || (wasScanned && msSinceLastPreview < options.DelayBetweenContinuousScans)
+                        || working)
+                        //|| CancelTokenSource.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    working = true;
+                    wasScanned = false;
+                    lastAnalysis = DateTime.UtcNow;
 
 					var mdo = metaDataObjects.FirstOrDefault();
 
@@ -220,18 +238,18 @@ namespace ZXing.Mobile
 					if (readableObj == null)
 						return;
 
-					foundResult = true;
-
-					//Console.WriteLine("Barcode: " + readableObj.StringValue);
+                    wasScanned = true;
 
 					var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
 					var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
 
 					resultCallback(rs);
+
+                    working = false;
 				});
 
-			metadataOutput.SetDelegate (dg, DispatchQueue.MainQueue);
+			metadataOutput.SetDelegate (captureDelegate, DispatchQueue.MainQueue);
 			session.AddOutput (metadataOutput);
 
 			//Setup barcode formats

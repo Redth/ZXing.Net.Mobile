@@ -11,6 +11,7 @@ using System.Reflection;
 using Android.Widget;
 using ZXing.Mobile;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 [assembly:ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Android
@@ -18,18 +19,20 @@ namespace ZXing.Net.Mobile.Forms.Android
     [Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingSurfaceView>
     {       
+        public ZXingScannerViewRenderer () : base ()
+        {
+        }
+
         public static void Init ()
         {
+            // Keep linker from stripping empty method
             var temp = DateTime.Now;
         }
 
         ZXingScannerView formsView;
-        IntermediaryScanner intermediaryScanner;
 
         internal ZXingSurfaceView zxingSurface;
         internal Task<bool> requestPermissionsTask;
-
-        internal TaskCompletionSource<bool> finishedSetup;
 
         protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
         {
@@ -38,14 +41,16 @@ namespace ZXing.Net.Mobile.Forms.Android
             formsView = Element;
 
             if (zxingSurface == null) {
-                finishedSetup = new TaskCompletionSource<bool> ();
 
-                // We'll proxy our requests through an intermediate layer that can intercept
-                // the scanning so it can ask for permission
-                intermediaryScanner = new IntermediaryScanner {
-                    Parent = this                
+                // Process requests for autofocus
+                formsView.AutoFocusRequested += (x, y) => {
+                    if (zxingSurface != null) {
+                        if (x < 0 && y < 0)
+                            zxingSurface.AutoFocus ();
+                        else
+                            zxingSurface.AutoFocus (x, y);
+                    }
                 };
-                formsView.InternalNativeScannerImplementation = intermediaryScanner;
 
                 var activity = Context as Activity;
 
@@ -54,11 +59,44 @@ namespace ZXing.Net.Mobile.Forms.Android
                 
                 zxingSurface = new ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity);
                 zxingSurface.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
-                  
-                base.SetNativeControl (zxingSurface);     
 
-                finishedSetup.TrySetResult (true);
+                base.SetNativeControl (zxingSurface);
+
+                if (formsView.IsScanning)
+                    await zxingSurface.StartScanningAsync (formsView.RaiseScanResult, formsView.Options);
+                
+                if (!formsView.IsAnalyzing)
+                    zxingSurface.PauseAnalysis ();
+
+                if (formsView.IsTorchOn)
+                    zxingSurface.Torch (true);
             }
+        }
+
+        protected override async void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
+        {
+            base.OnElementPropertyChanged (sender, e);
+
+            if (zxingSurface == null)
+                return;
+            
+            switch (e.PropertyName) {
+            case nameof (ZXingScannerView.IsTorchOn):
+                zxingSurface.Torch (formsView.IsTorchOn);
+                break;
+            case nameof (ZXingScannerView.IsScanning):
+                if (formsView.IsScanning)
+                    await zxingSurface.StartScanningAsync (formsView.RaiseScanResult, formsView.Options);
+                else
+                    zxingSurface.StopScanning ();
+                break;
+            case nameof (ZXingScannerView.IsAnalyzing):
+                if (formsView.IsAnalyzing)
+                    zxingSurface.ResumeAnalysis ();
+                else
+                    zxingSurface.PauseAnalysis ();
+                break;
+            } 
         }
 
         public override bool OnTouchEvent (MotionEvent e)
@@ -66,74 +104,11 @@ namespace ZXing.Net.Mobile.Forms.Android
             var x = e.GetX ();            
             var y = e.GetY ();
 
-            zxingSurface.AutoFocus ();
-            System.Diagnostics.Debug.WriteLine ("Touch: x={0}, y={1}", x, y);
+            if (zxingSurface != null) {
+                zxingSurface.AutoFocus ();
+                System.Diagnostics.Debug.WriteLine ("Touch: x={0}, y={1}", x, y);
+            }
             return base.OnTouchEvent (e);
-        }
-
-        class IntermediaryScanner : IScannerView
-        {
-            public ZXingScannerViewRenderer Parent { get;set; }
-                
-            #region IScannerView implementation
-            public async void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
-            {
-                // Wait for permission request to complete
-                if (Parent.finishedSetup != null)
-                    await Parent.finishedSetup.Task;
-
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.StartScanning (scanResultHandler, options);                
-            }
-
-            public void StopScanning ()
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.StopScanning ();
-            }
-
-            public void PauseAnalysis ()
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.PauseAnalysis ();
-            }
-
-            public void ResumeAnalysis ()
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.ResumeAnalysis ();
-            }
-
-            public void Torch (bool on)
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.Torch (on);
-            }
-
-            public void AutoFocus ()
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.AutoFocus ();
-            }
-
-            public void AutoFocus (int x, int y)
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.AutoFocus (x, y);
-            }
-
-            public void ToggleTorch ()
-            {
-                if (Parent.zxingSurface != null)
-                    Parent.zxingSurface.ToggleTorch ();
-            }
-
-            public bool IsTorchOn { get { return Parent.zxingSurface != null && Parent.zxingSurface.IsTorchOn; } }
-
-            public bool IsAnalyzing { get { return Parent.zxingSurface != null && Parent.zxingSurface.IsAnalyzing; } }
-
-            public bool HasTorch { get { return Parent.zxingSurface != null && Parent.zxingSurface.HasTorch; } }                
-            #endregion
         }
     }
 }

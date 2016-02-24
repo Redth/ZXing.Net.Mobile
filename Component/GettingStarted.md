@@ -3,18 +3,25 @@
 You can use ZXing.Net.Mobile for Forms in your iOS, Android, Windows Phone (Silverlight) and Windows Universal Forms projects.
 
 ### Usage
+
 The simplest example of using ZXing.Net.Mobile looks something like this:
 
-```csharp  
+```csharp
 buttonScan.Click += (sender, e) => {
 	
-	//NOTE: On Android you MUST pass a Context into the Constructor!
 	var scanner = new ZXing.Mobile.MobileBarcodeScanner();
 	var result = await scanner.Scan();
 
 	if (result != null)
     	Console.WriteLine("Scanned Barcode: " + result.Text);
 };
+```
+
+NOTE: On Android you must call the platform specific initializer sometime before trying to scan:
+
+```csharp
+// Somewhere in your app, call the initialization code:
+MobileBarcodeScanner.Initialize (Application);
 ```
 
 ### Android Versions
