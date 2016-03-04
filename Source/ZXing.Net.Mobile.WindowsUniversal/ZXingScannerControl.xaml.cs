@@ -378,6 +378,10 @@ namespace ZXing.Mobile
                     gridCustomOverlay.Children.Remove(CustomOverlay);
             }
             catch { }
+            finally
+            {
+                mediaCapture.Dispose();//second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
+            }
 
             timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
             stopping = false;            
