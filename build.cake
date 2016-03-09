@@ -82,7 +82,7 @@ Task ("component")
 	.IsDependentOn ("nuget")
 	.Does (() => 
 {
-	compVersion = version;
+	var compVersion = version;
 	if (compVersion.Contains ("-"))
 		compVersion = compVersion.Substring (0, compVersion.IndexOf ("-"));
 
