@@ -82,6 +82,10 @@ Task ("component")
 	.IsDependentOn ("nuget")
 	.Does (() => 
 {
+	compVersion = version;
+	if (compVersion.Contains ("-"))
+		compVersion = compVersion.Substring (0, compVersion.IndexOf ("-"));
+
 	// Clear out xml files from build (they interfere with the component packaging)
 	DeleteFiles ("./Build/**/*.xml");
 
@@ -90,7 +94,7 @@ Task ("component")
 	CopyFile ("./Component-Forms/component.template.yaml", "./Component-Forms/component.yaml");
 
 	// Replace version in template files
-	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", version);
+	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", compVersion);
 
 	var xamCompSettings = new XamarinComponentSettings { ToolPath = "./tools/xamarin-component.exe" };
 
