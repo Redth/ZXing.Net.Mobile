@@ -378,6 +378,12 @@ namespace ZXing.Mobile
                     gridCustomOverlay.Children.Remove(CustomOverlay);
             }
             catch { }
+            finally
+            {
+                mediaCapture.Dispose();//second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)             
+            }
+
+            displayInformation.OrientationChanged -= displayInformation_OrientationChanged; //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
 
             timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
             stopping = false;            
