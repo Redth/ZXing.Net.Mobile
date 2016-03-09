@@ -214,24 +214,24 @@ namespace ZXing.Mobile
 			Console.WriteLine ("PERF: Alloc AVCaptureVideoPreviewLayer took {0} ms.", totalAVPreviewLayerAlloc.TotalMilliseconds);
 
 
-			//Framerate set here (15 fps)
-			if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
-			{
-				var perf1 = PerformanceCounter.Start ();
+			// //Framerate set here (15 fps)
+			// if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
+			// {
+			// 	var perf1 = PerformanceCounter.Start ();
 
-				NSError lockForConfigErr = null;
+			// 	NSError lockForConfigErr = null;
 
-				captureDevice.LockForConfiguration (out lockForConfigErr);
-				if (lockForConfigErr == null)
-				{
-					captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
-					captureDevice.UnlockForConfiguration ();
-				}
+			// 	captureDevice.LockForConfiguration (out lockForConfigErr);
+			// 	if (lockForConfigErr == null)
+			// 	{
+			// 		captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
+			// 		captureDevice.UnlockForConfiguration ();
+			// 	}
 
-				PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
-			}
-            else
-                previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+			// 	PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
+			// }
+   //          else
+   //              previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
 
 
 			var perf2 = PerformanceCounter.Start ();

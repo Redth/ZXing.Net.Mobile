@@ -282,27 +282,27 @@ namespace ZXing.Mobile
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
-			//Framerate set here (15 fps)
-            if (previewLayer.RespondsToSelector(new Selector("connection")))
-            {
-				if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
-				{
-					var perf1 = PerformanceCounter.Start ();
+			// //Framerate set here (15 fps)
+   //          if (previewLayer.RespondsToSelector(new Selector("connection")))
+   //          {
+			// 	if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
+			// 	{
+			// 		var perf1 = PerformanceCounter.Start ();
 
-					NSError lockForConfigErr = null;
+			// 		NSError lockForConfigErr = null;
 
-					captureDevice.LockForConfiguration (out lockForConfigErr);
-					if (lockForConfigErr == null)
-					{
-						captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
-						captureDevice.UnlockForConfiguration ();
-					}
+			// 		captureDevice.LockForConfiguration (out lockForConfigErr);
+			// 		if (lockForConfigErr == null)
+			// 		{
+			// 			captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
+			// 			captureDevice.UnlockForConfiguration ();
+			// 		}
 
-					PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
-				}
-                else
-                    previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
-            }
+			// 		PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
+			// 	}
+   //              else
+   //                  previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+   //          }
 
 			#if __UNIFIED__
 			previewLayer.VideoGravity = AVLayerVideoGravity.ResizeAspectFill;
