@@ -71,6 +71,7 @@ namespace ZXing.Mobile
                 ScanPage.CustomOverlay = this.CustomOverlay;
                 ScanPage.TopText = TopText;
                 ScanPage.BottomText = BottomText;
+                ScanPage.ContinuousScanning = false;
 
                 Dispatcher.BeginInvoke(() =>
 				{
