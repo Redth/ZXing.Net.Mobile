@@ -60,7 +60,11 @@ namespace ZXing.Mobile
                 var layoutParams = getChildLayoutParams();
                 // reattach scanner and overlay views.
                 frame.AddView(scanner, layoutParams);
-                frame.AddView(zxingOverlay, layoutParams);
+
+                if (!UseCustomOverlayView)
+                    frame.AddView (zxingOverlay, layoutParams);
+                else if (CustomOverlayView != null)
+                    frame.AddView (CustomOverlayView, layoutParams);
             }
         }
 
