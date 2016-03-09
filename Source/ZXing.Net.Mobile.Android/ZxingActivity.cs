@@ -137,8 +137,13 @@ namespace ZXing.Mobile
         {
             base.OnResume ();
 
-            if (!waitingForPermission && canScan)
-                StartScanning ();
+            try {
+                if (!waitingForPermission && canScan)
+                    StartScanning ();
+            } catch (Exception ex) {
+                Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
+                Finish ();
+            }
         }
 
         public override void OnRequestPermissionsResult (int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
