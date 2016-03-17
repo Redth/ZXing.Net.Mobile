@@ -21,10 +21,14 @@ namespace ZXing.Net.Mobile.Forms
 
         public void RaiseScanResult (Result result)
         {
-            var e = this.OnScanResult;
-            if (e != null)
-                e (result);
+            OnScanResult?.Invoke(result);
+            ScanResultCommand?.Execute(result);
         }
+        // Jason Couture jcouture AT pssproducts.com
+        // Added to allow scans to be handled with data-binding in XAML, since events require code-behind but bindable commands do not.
+        // For compatibility, the event is still raised regardless.
+        public static BindableProperty ScanResultCommandProperty = BindableProperty.Create(nameof(ScanResultCommand), typeof(Command), typeof(ZXingScannerView), null);
+        public Command ScanResultCommand { get { return GetValue(ScanResultCommandProperty) as Command; } set { SetValue(ScanResultCommandProperty, value); } }
 
 
         public void ToggleTorch ()
