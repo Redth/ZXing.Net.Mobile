@@ -63,7 +63,7 @@ namespace ZXing.Net.Mobile.Forms.Android
                 base.SetNativeControl (zxingSurface);
 
                 if (formsView.IsScanning)
-                    await zxingSurface.StartScanningAsync (formsView.RaiseScanResult, formsView.Options);
+                    zxingSurface.StartScanning (formsView.RaiseScanResult, formsView.Options);
                 
                 if (!formsView.IsAnalyzing)
                     zxingSurface.PauseAnalysis ();
@@ -86,7 +86,7 @@ namespace ZXing.Net.Mobile.Forms.Android
                 break;
             case nameof (ZXingScannerView.IsScanning):
                 if (formsView.IsScanning)
-                    await zxingSurface.StartScanningAsync (formsView.RaiseScanResult, formsView.Options);
+                    zxingSurface.StartScanning (formsView.RaiseScanResult, formsView.Options);
                 else
                     zxingSurface.StopScanning ();
                 break;
