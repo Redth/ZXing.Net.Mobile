@@ -13,6 +13,7 @@ using Windows.Media;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Windows.System.Display;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -231,7 +232,7 @@ namespace ZXing.Mobile
                     if (!ContinuousScanning)
                     {
                         delay = Timeout.Infinite;
-                        await StopScanningAsync();
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => { await StopScanningAsync(); });
                     }
                     else
                     {
