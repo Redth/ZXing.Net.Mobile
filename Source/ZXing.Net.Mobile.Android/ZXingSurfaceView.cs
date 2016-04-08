@@ -28,7 +28,7 @@ namespace ZXing.Mobile
         const int MAX_FRAME_WIDTH = 600;
         const int MAX_FRAME_HEIGHT = 400;
 	
-        CancellationTokenSource tokenSource;
+        CancellationTokenSource autoFocusTokenCancelSrc;
         ISurfaceHolder surfaceHolder;
         Camera camera;
         MobileBarcodeScanningOptions scanningOptions;
@@ -67,7 +67,7 @@ namespace ZXing.Mobile
             this.surfaceHolder.AddCallback (this);
             this.surfaceHolder.SetType (SurfaceType.PushBuffers);
 
-            this.tokenSource = new CancellationTokenSource ();
+            this.autoFocusTokenCancelSrc = new CancellationTokenSource ();
         }
 
         public void SurfaceCreated (ISurfaceHolder holder)
@@ -186,19 +186,11 @@ namespace ZXing.Mobile
 
         public void OnAutoFocus (bool success, Camera camera)
         {
-            
             Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocused");
 
-            Task.Factory.StartNew (() => {
-                int slept = 0;
-
-                while (!tokenSource.IsCancellationRequested && slept < 2000) {
-                    Thread.Sleep (100);
-                    slept += 100;
-                }
-
-                if (!tokenSource.IsCancellationRequested)
-                    AutoFocus ();
+            Task.Delay(2000, autoFocusTokenCancelSrc.Token).ContinueWith(t => {
+              if (!t.IsCanceled && !autoFocusTokenCancelSrc.IsCancellationRequested)
+                  AutoFocus();
             });
         }
 
@@ -219,7 +211,7 @@ namespace ZXing.Mobile
         public void AutoFocus (int x, int y)
         {
             if (camera != null) {
-                if (!tokenSource.IsCancellationRequested) {
+                if (!autoFocusTokenCancelSrc.IsCancellationRequested) {
                     Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Requested");
                     try {                         
                         camera.AutoFocus (this); 
@@ -278,7 +270,7 @@ namespace ZXing.Mobile
 
         public void ShutdownCamera ()
         {
-            tokenSource.Cancel ();
+            autoFocusTokenCancelSrc.Cancel ();
 
             var theCamera = camera;
             camera = null;
@@ -468,6 +460,9 @@ namespace ZXing.Mobile
             camera.StartPreview ();
 
             PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
+
+            // Reset cancel token source so we can do things like autofocus
+            autoFocusTokenCancelSrc = new CancellationTokenSource();
 
             AutoFocus ();
 
