@@ -28,6 +28,59 @@ buttonScan.Click += (sender, e) => {
 };
 ```
 
+
+#### Xamarin Forms
+For Xamarin Forms there is a bit more setup needed.  You will need to initialize the library on each platform in your platform specific app project.
+
+
+##### Android 
+
+On Android, in your main `Activity`'s `OnCreate (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.Android.Platform.Init();
+```
+
+ZXing.Net.Mobile for Xamarin.Forms also handles the new Android permission request model for you, but you will need to add the following override implementation to your main `Activity` as well:
+
+```csharp
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+{
+    global::ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult (requestCode, permissions, grantResults);           
+}
+```
+
+The `Camera` permission should be automatically included for you in the `AndroidManifest.xml` however if you would like to use the Torch API's you will still need to add the `Flashlight` permission yourself.  You can do this by using the following assembly level attribute:
+
+```csharp
+[assembly: UsesPermission (Android.Manifest.Permission.Camera)]
+```
+
+##### iOS
+
+In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.Android.Platform.Init();
+```
+
+
+##### Windows Phone
+In your main `Page`'s constructor, you should add:
+
+```csharp
+ZXing.Net.Mobile.Forms.WindowsPhone.ZXingScannerViewRenderer.Init();
+```
+
+##### Windows Universal UWP
+
+In your main `Page`'s constructor, you should add:
+
+```csharp
+ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+```
+
+
 ###Features
 - Xamarin.iOS
 - Xamarin.Android (Including Google Glass)
