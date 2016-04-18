@@ -53,6 +53,15 @@ namespace ZXing.Mobile
             Init ();
         }
 
+        public ZXingSurfaceView (Activity activity, MobileBarcodeScanningOptions options)
+            : base (activity)
+        {
+            this.activity = activity;
+            this.scanningOptions = options;
+
+            Init ();
+        }
+
         protected ZXingSurfaceView (IntPtr javaReference, JniHandleOwnership transfer)
             : base (javaReference, transfer)
         {
