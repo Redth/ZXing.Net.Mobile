@@ -37,13 +37,11 @@ namespace ZXing.Mobile
         bool isAnalyzing = false;
         bool wasScanned = false;
         bool isTorchOn = false;
-        bool surfaceChanged = false;
         int cameraId = 0;
 
         DateTime lastPreviewAnalysis = DateTime.UtcNow;
         BarcodeReader barcodeReader = null;
         Task processingTask;
-        SemaphoreSlim waitSurface = new SemaphoreSlim (0);
 
         static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim (true);
 
@@ -72,16 +70,169 @@ namespace ZXing.Mobile
 
         public void SurfaceCreated (ISurfaceHolder holder)
         {
+            OnSurfaceCreated();
         }
+
+        bool surfaceCreated = false;
+
+        void OnSurfaceCreated ()
+        {
+            surfaceCreated = true;
+            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds (this.scanningOptions.InitialDelayBeforeAnalyzingFrames);
+            isAnalyzing = true;
+
+            Console.WriteLine ("StartScanning");
+
+            CheckCameraPermissions ();
+
+            var perf = PerformanceCounter.Start ();
+
+            GetExclusiveAccess ();
+
+            try {
+                var version = Build.VERSION.SdkInt;
+
+                if (version >= BuildVersionCodes.Gingerbread) {
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking Number of cameras...");
+
+                    var numCameras = Camera.NumberOfCameras;
+                    var camInfo = new Camera.CameraInfo ();
+                    var found = false;
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + numCameras + " cameras...");
+
+                    var whichCamera = CameraFacing.Back;
+
+                    if (this.scanningOptions.UseFrontCameraIfAvailable.HasValue && this.scanningOptions.UseFrontCameraIfAvailable.Value)
+                        whichCamera = CameraFacing.Front;
+
+                    for (int i = 0; i < numCameras; i++) {
+                        Camera.GetCameraInfo (i, camInfo);
+                        if (camInfo.Facing == whichCamera) {
+                            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + whichCamera + " Camera, opening...");
+                            camera = Camera.Open (i);
+                            cameraId = i;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Finding " + whichCamera + " camera failed, opening camera 0...");
+                        camera = Camera.Open (0);
+                        cameraId = 0;
+                    }
+                } else {
+                    camera = Camera.Open ();
+                }
+
+                if (camera == null)
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Camera is null :(");
+
+                camera.SetPreviewCallback (this);
+
+            } catch (Exception ex) {
+                ShutdownCamera ();
+
+                Console.WriteLine ("Setup Error: " + ex);
+            }
+
+            PerformanceCounter.Stop (perf, "Camera took {0}ms");
+        }
+
+        bool surfaceChanged = false;
 
         public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
         {
+            OnSurfaceChanged();
+        }
+
+        void OnSurfaceChanged ()
+        {
             surfaceChanged = true;
-            waitSurface.Release ();
+
+            if (camera == null)
+                return;
+
+            var perf = PerformanceCounter.Start ();
+
+            var parameters = camera.GetParameters ();
+            parameters.PreviewFormat = ImageFormatType.Nv21;
+
+
+            var availableResolutions = new List<CameraResolution> ();
+            foreach (var sps in parameters.SupportedPreviewSizes) {
+                availableResolutions.Add (new CameraResolution {
+                    Width = sps.Width,
+                    Height = sps.Height
+                });
+            }
+
+            // Try and get a desired resolution from the options selector
+            var resolution = scanningOptions.GetResolution (availableResolutions);
+
+            // If the user did not specify a resolution, let's try and find a suitable one
+            if (resolution == null) {
+                // Loop through all supported sizes
+                foreach (var sps in parameters.SupportedPreviewSizes) {
+
+                    // Find one that's >= 640x360 but <= 1000x1000
+                    // This will likely pick the *smallest* size in that range, which should be fine
+                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000) {
+                        resolution = new CameraResolution {
+                            Width = sps.Width,
+                            Height = sps.Height
+                        };
+                        break;
+                    }
+                }
+            }
+
+            // Google Glass requires this fix to display the camera output correctly
+            if (Build.Model.Contains ("Glass")) {
+                resolution = new CameraResolution {
+                    Width = 640,
+                    Height = 360
+                };
+                // Glass requires 30fps
+                parameters.SetPreviewFpsRange (30000, 30000);
+            }
+
+            // Hopefully a resolution was selected at some point
+            if (resolution != null) {
+                Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+                parameters.SetPreviewSize (resolution.Width, resolution.Height);
+            }
+
+            camera.SetParameters (parameters);
+
+            SetCameraDisplayOrientation (this.activity);
+
+            camera.SetPreviewDisplay (this.Holder);
+            camera.StartPreview ();
+
+            PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
+
+            // Reset cancel token source so we can do things like autofocus
+            autoFocusTokenCancelSrc = new CancellationTokenSource();
+
+            AutoFocus ();
         }
 
         public void SurfaceDestroyed (ISurfaceHolder holder)
         {
+            ShutdownCamera();
+
+            autoFocusTokenCancelSrc.Cancel ();
+
+            if (camera != null) {
+                var theCamera = camera;
+                camera = null;
+
+                theCamera.SetPreviewCallback (null);
+                theCamera.StopPreview ();
+                theCamera.Release ();
+            }
+            ReleaseExclusiveAccess ();
         }
 
 
@@ -328,144 +479,14 @@ namespace ZXing.Mobile
 
         public void StartScanning (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {
-            StartScanningAsync (scanResultCallback, options);
-        }
-
-        public async Task StartScanningAsync (Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
-        {
             this.callback = scanResultCallback;
             this.scanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
-            lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds (this.scanningOptions.InitialDelayBeforeAnalyzingFrames);
-            isAnalyzing = true;
+            if (surfaceCreated)
+                OnSurfaceCreated();
 
-            Console.WriteLine ("StartScanning");
-
-            CheckCameraPermissions ();
-
-            var perf = PerformanceCounter.Start ();
-
-            GetExclusiveAccess ();
-
-            try {
-                var version = Build.VERSION.SdkInt;
-
-                if (version >= BuildVersionCodes.Gingerbread) {
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Checking Number of cameras...");
-
-                    var numCameras = Camera.NumberOfCameras;
-                    var camInfo = new Camera.CameraInfo ();
-                    var found = false;
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + numCameras + " cameras...");
-
-                    var whichCamera = CameraFacing.Back;
-
-                    if (this.scanningOptions.UseFrontCameraIfAvailable.HasValue && this.scanningOptions.UseFrontCameraIfAvailable.Value)
-                        whichCamera = CameraFacing.Front;
-
-                    for (int i = 0; i < numCameras; i++) {
-                        Camera.GetCameraInfo (i, camInfo);
-                        if (camInfo.Facing == whichCamera) {
-                            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Found " + whichCamera + " Camera, opening...");
-                            camera = Camera.Open (i);
-                            cameraId = i;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Finding " + whichCamera + " camera failed, opening camera 0...");
-                        camera = Camera.Open (0);
-                        cameraId = 0;
-                    }
-                } else {
-                    camera = Camera.Open ();
-                }
-
-                if (camera == null)
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Camera is null :(");
-
-                camera.SetPreviewCallback (this);
-
-            } catch (Exception ex) {
-                ShutdownCamera ();
-
-                Console.WriteLine ("Setup Error: " + ex);
-            }
-
-            PerformanceCounter.Stop (perf, "Camera took {0}ms");
-
-            if (!surfaceChanged)
-                await waitSurface.WaitAsync ();
-            
-            if (camera == null)
-                return;
-
-            perf = PerformanceCounter.Start ();
-
-            var parameters = camera.GetParameters ();
-            parameters.PreviewFormat = ImageFormatType.Nv21;
-
-
-            var availableResolutions = new List<CameraResolution> ();
-            foreach (var sps in parameters.SupportedPreviewSizes) {
-                availableResolutions.Add (new CameraResolution {
-                    Width = sps.Width,
-                    Height = sps.Height
-                });
-            }
-
-            // Try and get a desired resolution from the options selector
-            var resolution = scanningOptions.GetResolution (availableResolutions);
-
-            // If the user did not specify a resolution, let's try and find a suitable one
-            if (resolution == null) {
-                // Loop through all supported sizes
-                foreach (var sps in parameters.SupportedPreviewSizes) {
-
-                    // Find one that's >= 640x360 but <= 1000x1000
-                    // This will likely pick the *smallest* size in that range, which should be fine
-                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000) {
-                        resolution = new CameraResolution {
-                            Width = sps.Width,
-                            Height = sps.Height
-                        };
-                        break;
-                    }
-                }
-            }
-
-            // Google Glass requires this fix to display the camera output correctly
-            if (Build.Model.Contains ("Glass")) {
-                resolution = new CameraResolution {
-                    Width = 640,
-                    Height = 360
-                };
-                // Glass requires 30fps
-                parameters.SetPreviewFpsRange (30000, 30000);
-            }
-
-            // Hopefully a resolution was selected at some point
-            if (resolution != null) {
-                Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
-                parameters.SetPreviewSize (resolution.Width, resolution.Height);
-            }
-
-            camera.SetParameters (parameters);
-
-            SetCameraDisplayOrientation (this.activity);
-
-            camera.SetPreviewDisplay (this.Holder);
-            camera.StartPreview ();
-
-            PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
-
-            // Reset cancel token source so we can do things like autofocus
-            autoFocusTokenCancelSrc = new CancellationTokenSource();
-
-            AutoFocus ();
-
+            if (surfaceChanged)
+                OnSurfaceChanged();
         }
 
         public void StopScanning ()
