@@ -51,7 +51,7 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 The `Camera` permission should be automatically included for you in the `AndroidManifest.xml` however if you would like to use the Torch API's you will still need to add the `Flashlight` permission yourself.  You can do this by using the following assembly level attribute:
 
 ```csharp
-[assembly: UsesPermission (Android.Manifest.Permission.Camera)]
+[assembly: UsesPermission (Android.Manifest.Permission.Flashlight)]
 ```
 
 ### iOS
