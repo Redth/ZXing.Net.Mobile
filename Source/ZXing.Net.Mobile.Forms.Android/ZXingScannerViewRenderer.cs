@@ -57,14 +57,14 @@ namespace ZXing.Net.Mobile.Forms.Android
                 if (activity != null)                
                     await PermissionsHandler.RequestPermissions (activity);
                 
-                zxingSurface = new ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity);
+                zxingSurface = new ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity, formsView.Options);
                 zxingSurface.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
 
                 base.SetNativeControl (zxingSurface);
 
                 if (formsView.IsScanning)
-                    await zxingSurface.StartScanningAsync (formsView.RaiseScanResult, formsView.Options);
-                
+                    zxingSurface.StartScanning(formsView.RaiseScanResult, formsView.Options);
+
                 if (!formsView.IsAnalyzing)
                     zxingSurface.PauseAnalysis ();
 
@@ -73,7 +73,7 @@ namespace ZXing.Net.Mobile.Forms.Android
             }
         }
 
-        protected override async void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
+        protected override void OnElementPropertyChanged (object sender, PropertyChangedEventArgs e)
         {
             base.OnElementPropertyChanged (sender, e);
 
@@ -86,7 +86,7 @@ namespace ZXing.Net.Mobile.Forms.Android
                 break;
             case nameof (ZXingScannerView.IsScanning):
                 if (formsView.IsScanning)
-                    await zxingSurface.StartScanningAsync (formsView.RaiseScanResult, formsView.Options);
+                    zxingSurface.StartScanning (formsView.RaiseScanResult, formsView.Options);
                 else
                     zxingSurface.StopScanning ();
                 break;

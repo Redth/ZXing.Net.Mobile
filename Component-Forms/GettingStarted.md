@@ -26,7 +26,63 @@ scanPage.OnScanResult += (result) => {
 await Navigation.PushAsync (scanPage);
 ```
 
-If you need more customization, you can also use the `ZXingScannerView` in your own custom page:
+
+## Additional Setup Required
+
+For each platform there is some additional setup required:
+
+### Android 
+
+On Android, in your main `Activity`'s `OnCreate (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.Android.Platform.Init();
+```
+
+ZXing.Net.Mobile for Xamarin.Forms also handles the new Android permission request model for you, but you will need to add the following override implementation to your main `Activity` as well:
+
+```csharp
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+{
+    global::ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult (requestCode, permissions, grantResults);           
+}
+```
+
+The `Camera` permission should be automatically included for you in the `AndroidManifest.xml` however if you would like to use the Torch API's you will still need to add the `Flashlight` permission yourself.  You can do this by using the following assembly level attribute:
+
+```csharp
+[assembly: UsesPermission (Android.Manifest.Permission.Flashlight)]
+```
+
+### iOS
+
+In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.Android.Platform.Init();
+```
+
+
+### Windows Phone
+In your main `Page`'s constructor, you should add:
+
+```csharp
+ZXing.Net.Mobile.Forms.WindowsPhone.ZXingScannerViewRenderer.Init();
+```
+
+### Windows Universal UWP
+
+In your main `Page`'s constructor, you should add:
+
+```csharp
+ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+```
+
+
+
+# Scanning in a View
+
+If you need more customization, or do not want the scanner to take up its own Page, you can also use the `ZXingScannerView` in your own custom page:
 
 ```csharp
 using Xamarin.Forms;
