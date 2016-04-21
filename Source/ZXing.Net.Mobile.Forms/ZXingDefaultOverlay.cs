@@ -67,24 +67,59 @@ namespace ZXing.Net.Mobile.Forms
                 IsVisible = false
             };
             flash.Clicked += (sender, e) => {
-                var h = FlashButtonClicked;
-                if (h != null)
-                    h(flash, e);
+                FlashButtonClicked?.Invoke(flash, e);
             };
 
             Children.Add (flash, 0, 0);
         }
 
-        public string TopText {  get { return topText.Text; } set { topText.Text = value; } }
-        public string BottomText {  get { return botText.Text; } set { botText.Text = value; } }
+        // Jason Couture - jcouture AT pssproducts.com
+        // Make these properties bindable, and proxy them to the target objects instead.
+        // Making this overlay far more useful for MVVM, where we really want to avoid code behind the view (Except in the view model)
+        // while still retaining its usefulness elsewhere.
 
-        public bool ShowFlashButton { 
-            get { 
-                return flash.IsVisible;
-            }
-            set { 
-                flash.IsVisible = value;
-            }
+
+        // New Property: FlashCommand, Proxied to flash.Command
+        public static BindableProperty FlashCommandProperty = BindableProperty.Create(nameof(FlashCommand), typeof(Command), typeof(ZXingDefaultOverlay), null, propertyChanged: OnFlashCommandChanged);
+        public Command FlashCommand { get { return GetValue(FlashCommandProperty) as Command; } set { SetValue(FlashCommandProperty, value); } }
+        private static void OnFlashCommandChanged(BindableObject bindable, object oldvalue, object newValue)
+        {
+            var overlay = bindable as ZXingDefaultOverlay;
+            if (overlay?.flash == null) return;
+            overlay.flash.Command = newValue as Command;
+        }
+
+
+        // Updated property: TopText, was TopText <-> topText.Text
+        public static BindableProperty TopTextProperty = BindableProperty.Create(nameof(TopText), typeof(string), typeof(ZXingDefaultOverlay), null, propertyChanged: OnTopTextChanged);
+        public string TopText { get { return GetValue(TopTextProperty) as string; } set { SetValue(TopTextProperty, value); } }
+        private static void OnTopTextChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SetLabelText((bindable as ZXingDefaultOverlay)?.topText, newValue);
+        }
+
+        // Updated property: TopText, was BottomText <-> botText.Text
+        public static BindableProperty BottomTextProperty = BindableProperty.Create(nameof(BottomText), typeof(string), typeof(ZXingDefaultOverlay), null, propertyChanged: OnBottomTextChanged);
+        public string BottomText { get { return GetValue(BottomTextProperty) as string; } set { SetValue(BottomTextProperty, value); } }
+        private static void OnBottomTextChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SetLabelText((bindable as ZXingDefaultOverlay)?.botText, newValue);
+        }
+
+        private static void SetLabelText(Label label, object newValue)
+        {
+            if (label == null) return;
+            label.Text = newValue as string; // Should this be ?? ""; ?
+        }
+
+        // Updated property: ShowFlashButton, was ShowFlashButton <-> flash.IsVisible
+        public static BindableProperty ShowFlashButtonProperty = BindableProperty.Create(nameof(ShowFlashButton), typeof(bool), typeof(ZXingDefaultOverlay), false, propertyChanged: OnFlashButtonVisibleChanged);
+        public bool ShowFlashButton { get { return (bool)GetValue(ShowFlashButtonProperty); } set { SetValue(ShowFlashButtonProperty, value); } }
+        private static void OnFlashButtonVisibleChanged(BindableObject bindable, object oldvalue, object newvalue)
+        {
+            var overlay = bindable as ZXingDefaultOverlay;
+            if (overlay?.flash == null) return;
+            overlay.flash.IsVisible = overlay.ShowFlashButton;
         }
     }
 }
