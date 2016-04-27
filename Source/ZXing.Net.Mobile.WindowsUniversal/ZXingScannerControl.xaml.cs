@@ -13,6 +13,7 @@ using Windows.Media;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Windows.System.Display;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -231,7 +232,7 @@ namespace ZXing.Mobile
                     if (!ContinuousScanning)
                     {
                         delay = Timeout.Infinite;
-                        await StopScanningAsync();
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => { await StopScanningAsync(); });
                     }
                     else
                     {
@@ -378,6 +379,13 @@ namespace ZXing.Mobile
                     gridCustomOverlay.Children.Remove(CustomOverlay);
             }
             catch { }
+            finally {
+                //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
+                 mediaCapture.Dispose();
+            }
+
+            //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
+            displayInformation.OrientationChanged -= displayInformation_OrientationChanged;
 
             timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
             stopping = false;            

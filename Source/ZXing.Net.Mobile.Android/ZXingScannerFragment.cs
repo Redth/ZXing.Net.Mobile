@@ -23,7 +23,7 @@ namespace ZXing.Mobile
 
             try
             {
-                scanner = new ZXingSurfaceView (this.Activity);
+                scanner = new ZXingSurfaceView (this.Activity, ScanningOptions);
 
                 frame.AddView(scanner, layoutParams);
 
@@ -60,7 +60,11 @@ namespace ZXing.Mobile
                 var layoutParams = getChildLayoutParams();
                 // reattach scanner and overlay views.
                 frame.AddView(scanner, layoutParams);
-                frame.AddView(zxingOverlay, layoutParams);
+
+                if (!UseCustomOverlayView)
+                    frame.AddView (zxingOverlay, layoutParams);
+                else if (CustomOverlayView != null)
+                    frame.AddView (CustomOverlayView, layoutParams);
             }
         }
 

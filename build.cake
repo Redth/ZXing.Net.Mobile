@@ -3,6 +3,7 @@
 
 var target = Argument("target", "Default");
 var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
+var preview = "beta";
 
 var libs = new Dictionary<string, string> {
  	{ "./ZXing.Net.Mobile.sln", "Any" },
@@ -72,9 +73,18 @@ Task ("nuget").IsDependentOn ("samples").Does (() =>
 	if (!DirectoryExists ("./Build/nuget/"))
 		CreateDirectory ("./Build/nuget");
 
+	var nugetVersion = version;
+
+	// Build a semver string out of the preview if it's specified
+	if (!string.IsNullOrEmpty (preview))
+	{
+		var v = Version.Parse (version);
+		nugetVersion = string.Format ("{0}.{1}.{2}-{3}{4}", v.Major, v.Minor, v.Build, preview, v.Revision);
+	}
+
 	// Package our nuget
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = version });	
-	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = version });	
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = nugetVersion });
+	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = nugetVersion });
 });
 
 Task ("component")
@@ -82,6 +92,10 @@ Task ("component")
 	.IsDependentOn ("nuget")
 	.Does (() => 
 {
+	var compVersion = version;
+	if (compVersion.Contains ("-"))
+		compVersion = compVersion.Substring (0, compVersion.IndexOf ("-"));
+
 	// Clear out xml files from build (they interfere with the component packaging)
 	DeleteFiles ("./Build/**/*.xml");
 
@@ -90,7 +104,7 @@ Task ("component")
 	CopyFile ("./Component-Forms/component.template.yaml", "./Component-Forms/component.yaml");
 
 	// Replace version in template files
-	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", version);
+	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", compVersion);
 
 	var xamCompSettings = new XamarinComponentSettings { ToolPath = "./tools/xamarin-component.exe" };
 

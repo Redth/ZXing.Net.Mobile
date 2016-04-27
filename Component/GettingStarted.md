@@ -29,6 +29,14 @@ The component should work on Android 2.2 or higher.  In Xamarin.Android there ar
 
 You must also add a reference to the Component `Android Support Library v4` https://components.xamarin.com/view/xamandroidsupportv4-18 from the Component Store.
 
+### Android Permissions
+
+The `Camera` permission should automatically be added to your `AndroidManifest.xml` for you (it's required for barcode scanning), however the `Flashlight` permission needs to be manually added if you would like to use Torch API's.  You can add it by adding the following assembly level attribute to your app:
+
+```csharp
+ssembly: UsesPermission (Android.Manifest.Permission.Flashlight)]
+```
+
 ###Custom Overlays
 By default, ZXing.Net.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
 
