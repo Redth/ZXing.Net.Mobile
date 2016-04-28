@@ -201,7 +201,6 @@ namespace ZXing.Mobile
 
                 try
                 {
-
                     // Get preview 
                     var frame = await mediaCapture.GetPreviewFrameAsync(destFrame);
 
@@ -221,13 +220,13 @@ namespace ZXing.Mobile
                     if (luminanceSource != null)
                         result = zxing.Decode(luminanceSource);
                 }
-                catch (Exception ex)
+                catch
                 {
                     
                 }
 
                 // Check if a result was found
-                if (result != null && !string.IsNullOrEmpty (result.Text))
+                if (result != null && !string.IsNullOrEmpty(result.Text))
                 {
                     if (!ContinuousScanning)
                     {
@@ -369,26 +368,36 @@ namespace ZXing.Mobile
 
         public async Task StopScanningAsync()
         {
-            stopping = true;
-            isAnalyzing = false;
-
-            try
+            if (!stopping) //Don't attempt to Stop Scanning when alreadying stopping.....
             {
-                await mediaCapture.StopPreviewAsync();
-                if (UseCustomOverlay && CustomOverlay != null)
-                    gridCustomOverlay.Children.Remove(CustomOverlay);
-            }
-            catch { }
-            finally {
-                //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
-                 mediaCapture.Dispose();
-            }
+                stopping = true;
+                isAnalyzing = false;
 
-            //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
-            displayInformation.OrientationChanged -= displayInformation_OrientationChanged;
+                try
+                {
+                    if (mediaCapture != null)
+                        await mediaCapture.StopPreviewAsync();
 
-            timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
-            stopping = false;            
+                    if (UseCustomOverlay && CustomOverlay != null)
+                        gridCustomOverlay.Children.Remove(CustomOverlay);
+                }
+                catch { }
+                finally
+                {
+                    if (mediaCapture != null)
+                    {
+                        //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
+                        mediaCapture.Dispose();
+                        mediaCapture = null;
+                    }
+                }
+
+                //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
+                displayInformation.OrientationChanged -= displayInformation_OrientationChanged;
+
+                timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
+                stopping = false;
+            }   
         }
 
         public async Task Cancel()

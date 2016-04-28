@@ -200,7 +200,7 @@ namespace ZXing.Mobile
             base.OnNavigatingFrom(e);
         }
 
-        void HandleResult(ZXing.Result result)
+        async void HandleResult(ZXing.Result result)
         {
             LastScanResult = result;
 
@@ -210,12 +210,11 @@ namespace ZXing.Mobile
 
             if (!ContinuousScanning)
             {
-                Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
-               {
-                   if (Frame.CanGoBack)
-                       Frame.GoBack();
-               });
-                
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+                {
+                    if (Frame.CanGoBack)
+                        Frame.GoBack();
+                });
             }
         }
     }
