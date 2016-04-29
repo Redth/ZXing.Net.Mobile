@@ -39,9 +39,6 @@ namespace Sample.WindowsUniversal
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
         {
-            this.Frame.Navigate(typeof(SecondPage));
-
-            /*
             //Tell our scanner to use the default overlay
             scanner.UseCustomOverlay = false;
             //We can customize the top and bottom text of our default overlay
@@ -54,7 +51,6 @@ namespace Sample.WindowsUniversal
                 if (t.Result != null)
                     HandleScanResult(t.Result);
             });
-            */
         }
 
         private void buttonScanContinuously_Click(object sender, RoutedEventArgs e)
