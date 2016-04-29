@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Windows.Input;
 using Xamarin.Forms;
 using ZXing.Mobile;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ZXing.Net.Mobile.Forms
 {
@@ -21,9 +20,9 @@ namespace ZXing.Net.Mobile.Forms
 
         public void RaiseScanResult (Result result)
         {
-            var e = this.OnScanResult;
-            if (e != null)
-                e (result);
+            Result = result;
+            OnScanResult?.Invoke( Result );
+            ScanResultCommand?.Execute( Result );
         }
 
 
@@ -43,9 +42,8 @@ namespace ZXing.Net.Mobile.Forms
         }
 
 
-        public static readonly BindableProperty OptionsProperty =
-            BindableProperty.Create<ZXingScannerView, MobileBarcodeScanningOptions> (
-                p => p.Options, MobileBarcodeScanningOptions.Default);
+        public static readonly BindableProperty OptionsProperty = 
+            BindableProperty.Create( nameof( Options ), typeof( MobileBarcodeScanningOptions ), typeof( ZXingScannerView ), MobileBarcodeScanningOptions.Default );
         
         public MobileBarcodeScanningOptions Options {
             get { return (MobileBarcodeScanningOptions)GetValue (OptionsProperty); }
@@ -53,7 +51,7 @@ namespace ZXing.Net.Mobile.Forms
         }
 
         public static readonly BindableProperty IsScanningProperty =
-            BindableProperty.Create<ZXingScannerView, bool> (p => p.IsScanning, false);
+            BindableProperty.Create( nameof( IsScanning ), typeof( bool ), typeof( ZXingScannerView ), false );
 
         public bool IsScanning {
             get { return (bool)GetValue (IsScanningProperty); }
@@ -61,26 +59,40 @@ namespace ZXing.Net.Mobile.Forms
         }
 
         public static readonly BindableProperty IsTorchOnProperty =
-            BindableProperty.Create<ZXingScannerView, bool> (p => p.IsTorchOn, false);
+            BindableProperty.Create( nameof( IsTorchOn ), typeof( bool ), typeof( ZXingScannerView ), false );
         public bool IsTorchOn {
             get { return (bool)GetValue (IsTorchOnProperty); }
             set { SetValue (IsTorchOnProperty, value); }                
         }
 
-
         public static readonly BindableProperty HasTorchProperty =
-            BindableProperty.Create<ZXingScannerView, bool> (p => p.HasTorch, false);
+            BindableProperty.Create( nameof( HasTorch ), typeof( bool ), typeof( ZXingScannerView ), false );
         public bool HasTorch {
             get { return (bool)GetValue (HasTorchProperty); }
         }
 
-
-        public static readonly BindableProperty IsAnalyzingProperty = 
-            BindableProperty.Create<ZXingScannerView, bool> (p => p.IsAnalyzing, false);
+        public static readonly BindableProperty IsAnalyzingProperty =
+            BindableProperty.Create( nameof( IsAnalyzing ), typeof( bool ), typeof( ZXingScannerView ), false );
 
         public bool IsAnalyzing {
             get { return (bool)GetValue (IsAnalyzingProperty); }
             set { SetValue (IsAnalyzingProperty, value); }
+        }
+
+        public static readonly BindableProperty ResultProperty =
+            BindableProperty.Create( nameof( Result ), typeof( Result ), typeof( ZXingScannerView ), default( Result ) );
+        public Result Result
+        {
+            get { return ( Result )GetValue( ResultProperty ); }
+            set { SetValue( ResultProperty, value ); }
+        }
+
+        public static readonly BindableProperty ScanResultCommandProperty =
+            BindableProperty.Create( nameof( ScanResultCommand ), typeof( ICommand ), typeof( ZXingScannerView ), default( ICommand ) );
+        public ICommand ScanResultCommand
+        {
+            get { return ( ICommand )GetValue( ScanResultCommandProperty ); }
+            set { SetValue( ScanResultCommandProperty, value ); }
         }
     }
 }
