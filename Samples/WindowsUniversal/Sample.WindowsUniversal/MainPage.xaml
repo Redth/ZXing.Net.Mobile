@@ -15,15 +15,11 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Button Name="buttonScanDefault" Grid.Row="0" Click="buttonScanDefault_Click">Scan with Default View</Button>
             <Button Name="buttonScanCustom" Grid.Row="1" Click="buttonScanCustom_Click">Scan with Custom View</Button>
             <Button Name="buttonScanContinuously" Grid.Row="2" Click="buttonScanContinuously_Click">Scan Continuously</Button>
             <Button Name="buttonGenerate" Grid.Row="3" Click="buttonGenerate_Click">Generate Barcode</Button>
-            <Button Name="buttonTest" Grid.Row="4" Click="buttonSimulateMessage">Simulate Task</Button>
-            <ProgressBar Grid.Row="5" IsIndeterminate="True" Name="progress" Visibility="Collapsed"/>
         </Grid>
         
         <Grid Name="customOverlay" Visibility="Collapsed">

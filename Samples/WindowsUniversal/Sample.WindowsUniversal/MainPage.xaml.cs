@@ -124,20 +124,10 @@ namespace Sample.WindowsUniversal
             Frame.Navigate(typeof(ImagePage));           
         }
 
-        private async void buttonSimulateMessage(object sender, RoutedEventArgs e)
-        {
-            await MessageBox("testing");
-        }
-
         async Task MessageBox(string text)
         {
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
-            {
-                var alert = new MessageDialog("Simulating an await-able task and showing the progress bar.");
-                await alert.ShowAsync();
-                progress.Visibility = Visibility.Visible;
-                await Task.Delay(10000);
-                progress.Visibility = Visibility.Collapsed;
+            {                
                 var dialog = new MessageDialog(text);
                 await dialog.ShowAsync();
             });
