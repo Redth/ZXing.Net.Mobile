@@ -52,7 +52,7 @@ namespace ZXing.Mobile
 			ScanContinuously (null, options, scanHandler);
 		}
 
-		public override void ScanContinuously (Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		public void ScanContinuously (Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
 		{
 			var ctx = GetContext (context);
 			var scanIntent = new Intent(ctx, typeof(ZxingActivity));
@@ -79,7 +79,7 @@ namespace ZXing.Mobile
 		{
 			return Scan (null, options);
 		}
-		public override Task<Result> Scan (Context context, MobileBarcodeScanningOptions options)
+		public Task<Result> Scan (Context context, MobileBarcodeScanningOptions options)
 		{
 			var ctx = GetContext (context);
 
