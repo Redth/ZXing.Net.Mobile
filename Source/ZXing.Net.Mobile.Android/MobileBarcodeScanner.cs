@@ -2,67 +2,99 @@ using System;
 using System.Threading.Tasks;
 using Android.Content;
 using ZXing;
+using Android.OS;
 
 namespace ZXing.Mobile
 {
 
-    public class MobileBarcodeScanner : MobileBarcodeScannerBase
+	public class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-        public const string TAG = "ZXing.Net.Mobile";
+		public const string TAG = "ZXing.Net.Mobile";
 
-        static ActivityLifecycleContextListener lifecycleListener = new ActivityLifecycleContextListener ();
+		static ActivityLifecycleContextListener lifecycleListener = new ActivityLifecycleContextListener ();
 
-        public static void Initialize (Android.App.Application app)
-        {
-            app.RegisterActivityLifecycleCallbacks (lifecycleListener);
-        }
+		public static void Initialize (Android.App.Application app)
+		{
+			var version = Build.VERSION.SdkInt;
 
-        public static void Uninitialize (Android.App.Application app)
-        {
-            app.UnregisterActivityLifecycleCallbacks (lifecycleListener);
-        }
+			if (version >= BuildVersionCodes.IceCreamSandwich) 
+				app.RegisterActivityLifecycleCallbacks (lifecycleListener);
+		}
+
+		public static void Uninitialize (Android.App.Application app)
+		{
+			var version = Build.VERSION.SdkInt;
+
+			if (version >= BuildVersionCodes.IceCreamSandwich)
+				app.UnregisterActivityLifecycleCallbacks (lifecycleListener);
+		}
 
 		public Android.Views.View CustomOverlay { get; set; }
 		//public int CaptureSound { get;set; }
-			
+
 		bool torch = false;
 
-        public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<Result> scanHandler)
-        {                
-            var scanIntent = new Intent(lifecycleListener.Context, typeof(ZxingActivity));
-
-            scanIntent.AddFlags(ActivityFlags.NewTask);
-
-            ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
-            ZxingActivity.CustomOverlayView = this.CustomOverlay;
-            ZxingActivity.ScanningOptions = options;
-            ZxingActivity.ScanContinuously = true;
-            ZxingActivity.TopText = TopText;
-            ZxingActivity.BottomText = BottomText;
-
-            ZxingActivity.ScanCompletedHandler = (Result result) => 
-            {
-                if (scanHandler != null)
-                    scanHandler (result);
-            };
-
-            lifecycleListener.Context.StartActivity(scanIntent);
-        }
-
-		public override Task<Result> Scan(MobileBarcodeScanningOptions options)
+		Context GetContext (Context context)
 		{
+			if (context != null)
+				return context;
+			
+			var version = Build.VERSION.SdkInt;
+
+			if (version >= BuildVersionCodes.IceCreamSandwich)
+				return lifecycleListener.Context;
+			else
+				return Android.App.Application.Context;
+		}
+
+		public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		{
+			ScanContinuously (null, options, scanHandler);
+		}
+
+		public override void ScanContinuously (Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		{
+			var ctx = GetContext (context);
+			var scanIntent = new Intent(ctx, typeof(ZxingActivity));
+
+			scanIntent.AddFlags(ActivityFlags.NewTask);
+
+			ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
+			ZxingActivity.CustomOverlayView = this.CustomOverlay;
+			ZxingActivity.ScanningOptions = options;
+			ZxingActivity.ScanContinuously = true;
+			ZxingActivity.TopText = TopText;
+			ZxingActivity.BottomText = BottomText;
+
+			ZxingActivity.ScanCompletedHandler = (Result result) => 
+			{
+				if (scanHandler != null)
+					scanHandler (result);
+			};
+
+			ctx.StartActivity(scanIntent);
+		}
+
+		public override Task<Result> Scan (MobileBarcodeScanningOptions options)
+		{
+			return Scan (null, options);
+		}
+		public override Task<Result> Scan (Context context, MobileBarcodeScanningOptions options)
+		{
+			var ctx = GetContext (context);
+
 			var task = Task.Factory.StartNew(() => {
-			      
+
 				var waitScanResetEvent = new System.Threading.ManualResetEvent(false);
 
-				var scanIntent = new Intent(lifecycleListener.Context, typeof(ZxingActivity));
+				var scanIntent = new Intent(ctx, typeof(ZxingActivity));
 
 				scanIntent.AddFlags(ActivityFlags.NewTask);
 
 				ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
 				ZxingActivity.CustomOverlayView = this.CustomOverlay;
 				ZxingActivity.ScanningOptions = options;
-                ZxingActivity.ScanContinuously = false;
+				ZxingActivity.ScanContinuously = false;
 				ZxingActivity.TopText = TopText;
 				ZxingActivity.BottomText = BottomText;
 
@@ -79,7 +111,7 @@ namespace ZXing.Mobile
 					waitScanResetEvent.Set();
 				};
 
-				lifecycleListener.Context.StartActivity(scanIntent);
+				ctx.StartActivity (scanIntent);
 
 				waitScanResetEvent.WaitOne();
 
@@ -110,22 +142,20 @@ namespace ZXing.Mobile
 			Torch (!torch);
 		}
 
-        public override void PauseAnalysis ()
-        {
-            ZxingActivity.RequestPauseAnalysis ();
-        }
+		public override void PauseAnalysis ()
+		{
+			ZxingActivity.RequestPauseAnalysis ();
+		}
 
-        public override void ResumeAnalysis ()
-        {
-            ZxingActivity.RequestResumeAnalysis ();
-        }
+		public override void ResumeAnalysis ()
+		{
+			ZxingActivity.RequestResumeAnalysis ();
+		}
 
 		public override bool IsTorchOn {
 			get {
 				return torch;
 			}
 		}
-
 	}
-	
 }
