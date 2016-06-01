@@ -231,15 +231,20 @@ namespace ZXing.Mobile
 					var mdo = metaDataObjects.FirstOrDefault();
 
 					if (mdo == null)
+					{
+						working = false;
+				                wasScanned = true;
 						return;
+					}
 
 					var readableObj = mdo as AVMetadataMachineReadableCodeObject;
 
-					if (readableObj == null)
-						return;
-
+					if (readableObj == null) {
+					       working = false;
+					       wasScanned = true;
+					       return;
+					}
                     wasScanned = true;
-
 					var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
 					var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
