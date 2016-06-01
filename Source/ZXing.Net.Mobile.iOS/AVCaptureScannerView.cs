@@ -244,9 +244,7 @@ namespace ZXing.Mobile
 					       wasScanned = true;
 					       return;
 					}
-
                     wasScanned = true;
-
 					var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
 					var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
