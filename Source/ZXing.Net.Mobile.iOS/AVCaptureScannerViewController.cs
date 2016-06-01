@@ -171,8 +171,12 @@ namespace ZXing.Mobile
 			//overlayView.LayoutSubviews();
 		}	
 		public override bool ShouldAutorotate ()
-		{
-			return true;
+		{           
+                    if (ScanningOptions.AutoRotate != null)
+		    {
+		        return (bool)ScanningOptions.AutoRotate;
+		    }
+		   return false;
 		}
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
