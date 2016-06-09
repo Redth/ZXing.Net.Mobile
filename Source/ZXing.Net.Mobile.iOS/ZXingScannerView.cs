@@ -552,7 +552,7 @@ namespace ZXing.Mobile
 				using (var pixelBuffer = sampleBuffer.GetImageBuffer () as CVPixelBuffer)
 				{
 					// Lock the base address
-					pixelBuffer.Lock (0);
+					pixelBuffer.Lock (CVPixelBufferLock.ReadOnly);
 
 					// Get the number of bytes per row for the pixel buffer
 					var baseAddress = pixelBuffer.BaseAddress;
@@ -565,7 +565,7 @@ namespace ZXing.Mobile
 					using (var context = new CGBitmapContext (baseAddress, width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
 					using (var cgImage = context.ToImage ())
 					{
-						pixelBuffer.Unlock (0);
+						pixelBuffer.Unlock (CVPixelBufferLock.ReadOnly);
 
 						img = new UIImage(cgImage);
 					}
