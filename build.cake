@@ -1,97 +1,61 @@
-#addin nuget:https://nuget.org/api/v2/?package=Cake.FileHelpers
-#addin nuget:https://nuget.org/api/v2/?package=Cake.Xamarin
+#tool nuget:?package=XamarinComponent
 
-var target = Argument("target", "Default");
-var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
-var preview = "beta";
+#addin nuget:?package=Cake.XCode
+#addin nuget:?package=Cake.Xamarin
+#addin nuget:?package=Cake.Xamarin.Build
+#addin nuget:?package=Cake.FileHelpers
+#addin nuget:?package=Cake.MonoApiTools
 
-var libs = new Dictionary<string, string> {
- 	{ "./ZXing.Net.Mobile.sln", "Any" },
- 	{ "./ZXing.Net.Mobile.Forms.sln", "Any" }
-};
+var PREVIEW = "beta";
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
+var NUGET_VERSION = VERSION;
 
-var samples = new Dictionary<string, string> {
-	{ "./Samples/Android/Sample.Android.sln", "Any" },
-	{ "./Samples/iOS/Sample.iOS.sln", "Mac" },
-	{ "./Samples/WindowsPhone/Sample.WindowsPhone.sln", "Win" },
-	{ "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", "Win" },
-	{ "./Samples/Forms/Sample.Forms.sln", "Win" },
-};
+var TARGET = Argument ("t", Argument ("target", "Default"));
 
-// Used to build a dictionary of .sln files
-var buildAction = new Action<Dictionary<string, string>> (solutions => {
+// Build a semver string out of the preview if it's specified
+if (!string.IsNullOrEmpty (PREVIEW)) {
+	var v = Version.Parse (VERSION);
+	NUGET_VERSION = string.Format ("{0}.{1}.{2}-{3}{4}", v.Major, v.Minor, v.Build, PREVIEW, v.Revision);
+}
 
-	foreach (var sln in solutions) {
+var buildSpec = new BuildSpec {
 
-		// If the platform is Any build regardless
-		//  If the platform is Win and we are running on windows build
-		//  If the platform is Mac and we are running on Mac, build
-		if ((sln.Value == "Any")
-				|| (sln.Value == "Win" && IsRunningOnWindows ())
-				|| (sln.Value == "Mac" && IsRunningOnUnix ())) {
-			
-			// Bit of a hack to use nuget3 to restore packages for project.json
-			if (IsRunningOnWindows ()) {
-				
-				Information ("RunningOn: {0}", "Windows");
-
-				NuGetRestore (sln.Key, new NuGetRestoreSettings {
-					ToolPath = "./tools/nuget3.exe"
-				});
-
-				// Windows Phone / Universal projects require not using the amd64 msbuild
-				MSBuild (sln.Key, c => { 
-					c.Configuration = "Release";
-					c.MSBuildPlatform = Cake.Common.Tools.MSBuild.MSBuildPlatform.x86;
-				});
-			} else {
-
-				// Mac is easy ;)
-				NuGetRestore (sln.Key);
-
-				DotNetBuild (sln.Key, c => c.Configuration = "Release");
-			}
+	Libs = new [] {
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.sln",
+			BuildsOn = BuildPlatforms.Windows,
+		},
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			BuildsOn = BuildPlatforms.Windows,
 		}
+	},
+
+	Samples = new [] {
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/Android/Sample.Android.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
+		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsPhone/Sample.WindowsPhone.sln", BuildsOn = BuildPlatforms.Windows },
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", BuildsOn = BuildPlatforms.Windows },
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
+	},
+
+	NuGets = new [] {
+		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
+		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
+	},
+
+	Components = new [] {
+		new Component { ManifestDirectory = "./Component" },
+		new Component { ManifestDirectory = "./Component-Forms" },
 	}
-});
+};
 
-Task ("libs").Does (() => 
-{
-	buildAction (libs);
-});
-
-Task ("samples")
-	.IsDependentOn ("libs")
-	.Does (() => 
-{
-	buildAction (samples);
-});
-
-Task ("nuget").IsDependentOn ("samples").Does (() => 
-{
-	// Make sure our output path is there
-	EnsureDirectoryExists ("./Build/nuget");
-
-	var nugetVersion = version;
-
-	// Build a semver string out of the preview if it's specified
-	if (!string.IsNullOrEmpty (preview))
-	{
-		var v = Version.Parse (version);
-		nugetVersion = string.Format ("{0}.{1}.{2}-{3}{4}", v.Major, v.Minor, v.Build, preview, v.Revision);
-	}
-
-	// Package our nuget
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget", Version = nugetVersion });
-	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget", Version = nugetVersion });
-});
-
-Task ("component")
+Task ("component-setup")
 	.IsDependentOn ("samples")
 	.IsDependentOn ("nuget")
 	.Does (() => 
 {
-	var compVersion = version;
+	var compVersion = VERSION;
 	if (compVersion.Contains ("-"))
 		compVersion = compVersion.Substring (0, compVersion.IndexOf ("-"));
 
@@ -104,25 +68,21 @@ Task ("component")
 
 	// Replace version in template files
 	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", compVersion);
-
-	var xamCompSettings = new XamarinComponentSettings { ToolPath = "./tools/xamarin-component.exe" };
-
-	// Package both components
-	PackageComponent ("./Component/", xamCompSettings);
-	PackageComponent ("./Component-Forms/", xamCompSettings);
 });
+
+Task ("component").IsDependentOn ("component-setup").IsDependentOn ("component-base");
 
 Task ("Default").IsDependentOn ("component");
 
-Task ("clean").Does (() => 
+Task ("clean").IsDependentOn ("clean-base").Does (() => 
 {
-
-	CleanDirectory ("./Component/tools/");
-
 	CleanDirectories ("./Build/");
 
 	CleanDirectories ("./**/bin");
 	CleanDirectories ("./**/obj");
 });
 
-RunTarget (target);
+SetupXamarinBuildTasks (buildSpec, Tasks, Task);
+
+RunTarget (TARGET);
+
