@@ -1,5 +1,5 @@
-#addin nuget:https://nuget.org/api/v2/?package=Cake.FileHelpers&version=1.0.3.2
-#addin nuget:https://nuget.org/api/v2/?package=Cake.Xamarin&version=1.2.3
+#addin nuget:https://nuget.org/api/v2/?package=Cake.FileHelpers
+#addin nuget:https://nuget.org/api/v2/?package=Cake.Xamarin
 
 var target = Argument("target", "Default");
 var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
@@ -70,8 +70,7 @@ Task ("samples")
 Task ("nuget").IsDependentOn ("samples").Does (() => 
 {
 	// Make sure our output path is there
-	if (!DirectoryExists ("./Build/nuget/"))
-		CreateDirectory ("./Build/nuget");
+	EnsureDirectoryExists ("./Build/nuget");
 
 	var nugetVersion = version;
 
@@ -83,8 +82,8 @@ Task ("nuget").IsDependentOn ("samples").Does (() =>
 	}
 
 	// Package our nuget
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = nugetVersion });
-	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/", Version = nugetVersion });
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget", Version = nugetVersion });
+	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget", Version = nugetVersion });
 });
 
 Task ("component")
