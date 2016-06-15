@@ -61,7 +61,7 @@ The `Camera` permission should be automatically included for you in the `Android
 In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
 
 ```csharp
-ZXing.Net.Mobile.Forms.Android.Platform.Init();
+ZXing.Net.Mobile.Forms.iOS.Platform.Init();
 ```
 
 
