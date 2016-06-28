@@ -25,7 +25,12 @@ namespace ZXing.Mobile
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
             //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
+
+            // Too much problem on it, such like: can't return correctly after finish. So I decide use new frame.
+            //var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
+
+            ScanPage.LastFrame = Window.Current.Content;
+            var rootFrame = RootFrame ?? (Window.Current.Content = new Frame()) as Frame;
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             ScanPage.ScanningOptions = options;
@@ -35,17 +40,23 @@ namespace ZXing.Mobile
             ScanPage.CustomOverlay = this.CustomOverlay;
             ScanPage.TopText = TopText;
             ScanPage.BottomText = BottomText;
+            ScanPage.CancelButtonText = CancelButtonText;
             ScanPage.ContinuousScanning = true;
             
             dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 rootFrame.Navigate(typeof(ScanPage));
             });
+
         }
 
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
-            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
+            // Too much problem on it, such like: can't return correctly after finish. So I decide use new frame.
+            //var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
+
+            ScanPage.LastFrame = Window.Current.Content;
+            var rootFrame = RootFrame ?? (Window.Current.Content = new Frame()) as Frame;
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             return Task.Factory.StartNew(new Func<Result>(() =>
@@ -65,6 +76,7 @@ namespace ZXing.Mobile
                 ScanPage.CustomOverlay = this.CustomOverlay;
                 ScanPage.TopText = TopText;
                 ScanPage.BottomText = BottomText;
+                ScanPage.CancelButtonText = CancelButtonText;
 
                 dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
@@ -72,6 +84,8 @@ namespace ZXing.Mobile
                 });
                 
                 scanResultResetEvent.WaitOne();
+
+               
 
                 return result;
             }));            

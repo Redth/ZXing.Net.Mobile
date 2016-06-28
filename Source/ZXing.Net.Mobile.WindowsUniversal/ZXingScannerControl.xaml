@@ -40,6 +40,7 @@
             <Border Grid.Row="0" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="80">
                 <Button x:Name="buttonToggleFlash" Click="buttonToggleFlash_Click">Flash</Button>
             </Border>
+
             <Border Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <TextBlock x:Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
             </Border>
@@ -51,7 +52,14 @@
             <Rectangle Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Fill="Black" Opacity="0.3"></Rectangle>
 
             <Border Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock x:Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
+                    <Button Grid.Row="1" x:Name="buttonBack" Visibility="Collapsed"  HorizontalAlignment="Center"  Click="buttonBack_Click" Foreground="White">Back</Button>
+                </Grid>
             </Border>
 
         </Grid>

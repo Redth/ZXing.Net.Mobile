@@ -96,6 +96,13 @@ namespace ZXing.Mobile
             topText.Text = TopText ?? string.Empty;
             bottomText.Text = BottomText ?? string.Empty;
 
+            // Show on the back(return) button when set the CancelButtonText
+            if (!string.IsNullOrEmpty(CancelButtonText))
+            {
+                buttonBack.Content = CancelButtonText;
+                buttonBack.Visibility = Visibility.Visible;
+            }
+
             if (UseCustomOverlay)
             {
                 gridCustomOverlay.Children.Clear();
@@ -289,6 +296,7 @@ namespace ZXing.Mobile
         public MobileBarcodeScannerBase Scanner { get; set; }
         public UIElement CustomOverlay { get; set; }
         public string TopText { get; set; }
+        public string CancelButtonText { get; set; }
         public string BottomText { get; set; }
         public bool UseCustomOverlay { get; set; }
         public bool ContinuousScanning { get; set; }
@@ -372,16 +380,27 @@ namespace ZXing.Mobile
             stopping = true;
             isAnalyzing = false;
 
+            
+
             try
             {
-                await mediaCapture.StopPreviewAsync();
+                // Avoid it stop preview more than once
+                if (null != mediaCapture)
+                    await mediaCapture.StopPreviewAsync();
+
                 if (UseCustomOverlay && CustomOverlay != null)
                     gridCustomOverlay.Children.Remove(CustomOverlay);
             }
             catch { }
             finally {
-                //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
-                 mediaCapture.Dispose();
+                // Avoid it stop preview more than once
+                if (null != mediaCapture)
+                {
+                    //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
+                    mediaCapture.Dispose();
+                    mediaCapture = null;
+                }
+               
             }
 
             //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
@@ -429,6 +448,15 @@ namespace ZXing.Mobile
             ToggleTorch();
         }
 
+        /// <summary>
+        /// Button for cancel and return to last page(only invalid when set CancelButtonText property.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void buttonBack_Click(object sender, RoutedEventArgs e)
+        {
+            await Cancel();
+        }
 
         /// <summary>
         /// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview
