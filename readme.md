@@ -61,7 +61,7 @@ The `Camera` permission should be automatically included for you in the `Android
 In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
 
 ```csharp
-ZXing.Net.Mobile.Forms.Android.Platform.Init();
+ZXing.Net.Mobile.Forms.iOS.Platform.Init();
 ```
 
 
@@ -80,7 +80,7 @@ In your main `Page`'s constructor, you should add:
 ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
 ```
 
-If you notice that finishing scanning or pressing the back button is causing your Page to jump back further than you'd like, or if you're having trouble updating the UI of a Page after scanning is completed, you may need to set `NavigationCacheMode="Enabled"` within your Page's XAML `<Page ... />` element.
+If you want to show the Return button, just use: `scan.CancelButtonText = "Return";`, There is will show a button for return to your original Page, Of course you could change the button text to anything.
 
 
 ###Features
