@@ -39,16 +39,22 @@ var buildSpec = new BuildSpec {
 		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
 	},
 
-	NuGets = new [] {
+	// These should only get populated on windows where all the binaries will exist
+	NuGets = new NuGetInfo [] {},
+	Components = new Component [] {},
+};
+
+if (IsRunningOnWindows ()) {
+	buildSpec.NuGets = new [] {
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
-	},
+	};
 
-	Components = new [] {
+	buildSpec.Components = new [] {
 		new Component { ManifestDirectory = "./Component" },
 		new Component { ManifestDirectory = "./Component-Forms" },
-	}
-};
+	};
+}
 
 Task ("component-setup")
 	.IsDependentOn ("samples")
