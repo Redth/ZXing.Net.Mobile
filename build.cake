@@ -21,11 +21,11 @@ if (!string.IsNullOrEmpty (PREVIEW)) {
 var buildSpec = new BuildSpec {
 
 	Libs = new [] {
-		new DefaultSolutionBuilder {
+		new WpSolutionBuilder {
 			SolutionPath = "./ZXing.Net.Mobile.sln",
 			BuildsOn = BuildPlatforms.Windows,
 		},
-		new DefaultSolutionBuilder {
+		new WpSolutionBuilder {
 			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
 			BuildsOn = BuildPlatforms.Windows,
 		}
@@ -53,7 +53,7 @@ var buildSpec = new BuildSpec {
 Task ("component-setup")
 	.IsDependentOn ("samples")
 	.IsDependentOn ("nuget")
-	.Does (() => 
+	.Does (() =>
 {
 	var compVersion = VERSION;
 	if (compVersion.Contains ("-"))
@@ -74,7 +74,7 @@ Task ("component").IsDependentOn ("component-setup").IsDependentOn ("component-b
 
 Task ("Default").IsDependentOn ("component");
 
-Task ("clean").IsDependentOn ("clean-base").Does (() => 
+Task ("clean").IsDependentOn ("clean-base").Does (() =>
 {
 	CleanDirectories ("./Build/");
 
@@ -85,4 +85,3 @@ Task ("clean").IsDependentOn ("clean-base").Does (() =>
 SetupXamarinBuildTasks (buildSpec, Tasks, Task);
 
 RunTarget (TARGET);
-
