@@ -4,11 +4,11 @@ id: zxing.net.mobile
 publisher: Redth
 license: License.md
 skip_docs: true
-icons: 
+icons:
   - ./icons/zxing.net.mobile_128x128.png
   - ./icons/zxing.net.mobile_512x512.png
 publisher-url: "https://github.com/Redth/ZXing.Net.Mobile"
-libraries: 
+libraries:
   ios-unified:
     - ../Build/Release/ios-unified/zxing.portable.dll
     - ../Build/Release/ios-unified/ZXingNetMobile.dll
@@ -42,54 +42,54 @@ packages:
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library"
 details: ./Details.md
 getting-started: ./GettingStarted.md
-samples: 
+samples:
   - name: Xamarin.iOS Unified API Sample
     path: "../Samples/iOS/Sample.iOS.sln"
-    removeProjects: 
+    removeProjects:
       - ZXing.Net.Mobile.iOS
       - ZXing.Net.Mobile.Core
       - zxing.portable
     installNuGets:
       - project: Sample.iOS
-        packages: 
+        packages:
           - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
   - name: Xamarin.Android Sample
     path: "../Samples/Android/Sample.Android.sln"
-    removeProjects: 
+    removeProjects:
       - ZXing.Net.Mobile.Android
       - ZXing.Net.Mobile.Core
       - zxing.portable
     installNuGets:
       - project: Sample.Android
-        packages: 
+        packages:
           - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
   - name: Windows Phone Sample
     path: "../Samples/WindowsPhone/Sample.WindowsPhone.sln"
-    removeProjects: 
+    removeProjects:
       - ZXing.Net.Mobile.WindowsPhone
       - ZXing.Net.Mobile.Core
       - zxing.portable
     installNuGets:
       - project: Sample.WindowsPhone
-        packages: 
+        packages:
           - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
   - name: Windows Universal Sample
     path: "../Samples/WindowsUniversal/Sample.WindowsUniversal.sln"
-    removeProjects: 
+    removeProjects:
       - ZXing.Net.Mobile.WindowsUniversal
       - ZXing.Net.Mobile.Core
       - zxing.portable
     installNuGets:
       - project: Sample.WindowsUniversal
-        packages: 
+        packages:
           - ZXing.Net.Mobile
     no_build: true
     skip_docs: true
-local-nuget-repo: ../Build/nuget
+local-nuget-repo: ../output
 no_build: true
