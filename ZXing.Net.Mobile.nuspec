@@ -18,11 +18,11 @@
         	<group targetFramework="MonoAndroid403">
         		<dependency id="Xamarin.Android.Support.v4" version="23.0.1.3" />
         	</group>
-            
+
             <group targetFramework="wp8">
                 <dependency id="WriteableBitmapEx" version="1.5.0" />
             </group>
-            
+
         </dependencies>
     </metadata>
     <files>
@@ -35,14 +35,14 @@
         <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />
         <file src="Build/Release/ios-unified/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS10\ZXingNetMobile.dll" />
-        
+
         <!-- Windows Phone  -->
         <file src="Build/Release/wp8.0/zxing.portable.dll" target="lib\wp8\zxing.portable.dll" />
         <file src="Build/Release/wp8.0/ZXing.Net.Mobile.Core.dll" target="lib\wp8\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wp8\ZXingNetMobile.dll" />
 
         <!-- Windows RT / Store  -->
-        <!-- Not supported -->
+        <!-- Not supported, the PCL's will get installed for this platform and throw implementation errors at runtime -->
 
         <!-- Windows Universal  -->
         <file src="Build/Release/uwp/zxing.portable.dll" target="lib\UAP10\zxing.portable.dll" />
@@ -52,8 +52,8 @@
         <file src="Build/Release/uwp/ZXingNetMobile.xr.xml" target="lib\UAP10\ZXingNetMobile\ZXingNetMobile.xr.xml" />
 
         <!-- Portable PCL -->
-        <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wp8+UAP10+MonoAndroid403+MonoTouch10+Xamarin.iOS10\zxing.portable.dll" />
-        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\portable-net45+netcore45+wp8+UAP10+MonoAndroid403+MonoTouch10+Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\portable-net45+netcore45+wp8+UAP10+MonoAndroid403+MonoTouch10+Xamarin.iOS10\ZXingNetMobile.dll" />
+        <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wpa81+wp8\zxing.portable.dll" />
+        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXingNetMobile.dll" />
     </files>
 </package>
