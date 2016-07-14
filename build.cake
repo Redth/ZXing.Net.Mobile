@@ -19,18 +19,6 @@ if (!string.IsNullOrEmpty (PREVIEW)) {
 }
 
 var buildSpec = new BuildSpec {
-
-	Libs = new [] {
-		new WpSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.sln",
-			BuildsOn = BuildPlatforms.Windows,
-		},
-		new WpSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
-			BuildsOn = BuildPlatforms.Windows,
-		}
-	},
-
 	Samples = new [] {
 		new DefaultSolutionBuilder { SolutionPath = "./Samples/Android/Sample.Android.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
 		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
@@ -45,6 +33,17 @@ var buildSpec = new BuildSpec {
 };
 
 if (IsRunningOnWindows ()) {
+	buildSpec.Libs = new [] {
+		new WpSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.sln",
+			BuildsOn = BuildPlatforms.Windows,
+		},
+		new WpSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			BuildsOn = BuildPlatforms.Windows,
+		}
+	};
+	
 	buildSpec.NuGets = new [] {
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
@@ -53,6 +52,17 @@ if (IsRunningOnWindows ()) {
 	buildSpec.Components = new [] {
 		new Component { ManifestDirectory = "./Component" },
 		new Component { ManifestDirectory = "./Component-Forms" },
+	};
+} else {
+	buildSpec.Libs = new [] {
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Mac.sln",
+			BuildsOn = BuildPlatforms.Mac,
+		},
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.Mac.sln",
+			BuildsOn = BuildPlatforms.Mac,
+		}
 	};
 }
 
