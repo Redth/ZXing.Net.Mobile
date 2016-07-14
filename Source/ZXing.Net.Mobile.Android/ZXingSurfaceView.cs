@@ -166,8 +166,8 @@ namespace ZXing.Mobile
 
             var parameters = camera.GetParameters ();
             parameters.PreviewFormat = ImageFormatType.Nv21;
-
-
+            parameters.SetPreviewFpsRange(15, 30);
+            
             var availableResolutions = new List<CameraResolution> ();
             foreach (var sps in parameters.SupportedPreviewSizes) {
                 availableResolutions.Add (new CameraResolution {
