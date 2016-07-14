@@ -294,51 +294,35 @@ namespace ZXing.Mobile
         public bool ContinuousScanning { get; set; }
 
         public Result LastScanResult { get; set; }
-        
+
 
         public bool IsTorchOn
         {
             get
             {
-                if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
-                {
-                    if (!mediaCapture.VideoDeviceController.FlashControl.Supported)
-                        return false;
-
-                    return mediaCapture.VideoDeviceController.FlashControl.Enabled;
-                }
-
-                return false;
+                return HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
             }
         }
 
         public void Torch(bool on)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null)
-            {
-                if (mediaCapture.VideoDeviceController.TorchControl.Supported)
-                {
-                    mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
-                }
-            }
+            if (HasTorch)
+                mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
         }
 
         public void ToggleTorch()
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null)
-            {
-                if (mediaCapture.VideoDeviceController.TorchControl.Supported)
-                {
-                    Torch(!IsTorchOn);
-                }
-            }            
+            if (HasTorch)
+                Torch(!IsTorchOn);
         }
 
         public bool HasTorch
         {
             get
             {
-                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.TorchControl != null
+                return mediaCapture != null
+                    && mediaCapture.VideoDeviceController != null
+                    && mediaCapture.VideoDeviceController.TorchControl != null
                     && mediaCapture.VideoDeviceController.TorchControl.Supported;
             }
         }
