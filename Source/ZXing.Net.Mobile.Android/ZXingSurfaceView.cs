@@ -21,7 +21,7 @@ using Camera = Android.Hardware.Camera;
 namespace ZXing.Mobile
 {
     // based on https://github.com/xamarin/monodroid-samples/blob/master/ApiDemo/Graphics/CameraPreview.cs
-    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Camera.IPreviewCallback, Android.Hardware.Camera.IAutoFocusCallback, IScannerView
+    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, Camera.IPreviewCallback, IScannerView, Camera.IAutoFocusCallback
     {
         const int MIN_FRAME_WIDTH = 240;
         const int MIN_FRAME_HEIGHT = 240;
@@ -166,8 +166,29 @@ namespace ZXing.Mobile
 
             var parameters = camera.GetParameters ();
             parameters.PreviewFormat = ImageFormatType.Nv21;
-            parameters.SetPreviewFpsRange(15, 30);
-            
+
+            // First try continuous video, then auto focus, then fixed
+            var supportedFocusModes = parameters.SupportedFocusModes;
+            if (supportedFocusModes.Contains (Camera.Parameters.FocusModeAuto))
+                parameters.FocusMode = Camera.Parameters.FocusModeAuto;
+            else if (supportedFocusModes.Contains (Camera.Parameters.FocusModeContinuousVideo))
+                parameters.FocusMode = Camera.Parameters.FocusModeContinuousVideo;
+            else if (supportedFocusModes.Contains (Camera.Parameters.FocusModeFixed))
+                parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+
+            var selectedFps = parameters.SupportedPreviewFpsRange.FirstOrDefault ();
+            if (selectedFps != null) {
+                // This will make sure we select a range with the lowest minimum FPS
+                // and maximum FPS which still has the lowest minimum
+                // This should help maximize performance / support for hardware
+                foreach (var fpsRange in parameters.SupportedPreviewFpsRange) {
+                    if (fpsRange [0] <= selectedFps [0]
+                        && fpsRange [1] > selectedFps [1])
+                        selectedFps = fpsRange;
+                }
+                parameters.SetPreviewFpsRange (selectedFps [0], selectedFps [1]);
+            }
+
             var availableResolutions = new List<CameraResolution> ();
             foreach (var sps in parameters.SupportedPreviewSizes) {
                 availableResolutions.Add (new CameraResolution {
@@ -224,7 +245,11 @@ namespace ZXing.Mobile
             // Reset cancel token source so we can do things like autofocus
             autoFocusTokenCancelSrc = new CancellationTokenSource();
 
-            AutoFocus ();
+            // Docs suggest if Auto or Macro modes, we should invoke AutoFocus at least once
+            var currentFocusMode = camera.GetParameters ().FocusMode;
+            if (currentFocusMode == Camera.Parameters.FocusModeAuto 
+               || currentFocusMode == Camera.Parameters.FocusModeMacro)
+                AutoFocus ();
         }
 
         public void SurfaceDestroyed (ISurfaceHolder holder)
@@ -343,38 +368,89 @@ namespace ZXing.Mobile
             });
         }
 
-
         public void OnAutoFocus (bool success, Camera camera)
         {
-            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocused");
-
-            Task.Delay(2000, autoFocusTokenCancelSrc.Token).ContinueWith(t => {
-              if (!t.IsCanceled && !autoFocusTokenCancelSrc.IsCancellationRequested)
-                  AutoFocus();
-            });
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus {0}", success ? "Succeeded" : "Failed");
         }
 
         public override bool OnTouchEvent (MotionEvent e)
         {
             var r = base.OnTouchEvent (e);
 
-            AutoFocus ();
+            // Get the last 'touch' coordinate from the touch event
+            // (could be multiple coordinates on a drag event)
+            // We only care about where the finger was lifted
+            var mostRecentPointer = e.GetPointerId (e.PointerCount - 1);
+
+            // Get our X / Y coordinates for the most recent pointer
+            var touchX = e.GetX (mostRecentPointer);
+            var touchY = e.GetY (mostRecentPointer);
+
+            // The bounds for focus areas are actually -1000 to 1000
+            // So we need to translate the touch coordinates to this scale
+            var focusX = (touchX / Width * 2000) - 1000;
+            var focusY = (touchY / Height * 2000) - 1000;
+
+            // Call the autofocus with our coords
+            AutoFocus ((int)focusX, (int)focusY, true);
 
             return r;
         }
 
         public void AutoFocus ()
         {
-            AutoFocus (-1, -1);
+            AutoFocus (0, 0, false);
         }
 
         public void AutoFocus (int x, int y)
         {
+            AutoFocus (x, y, true);
+        }
+
+        void AutoFocus (int x, int y, bool useCoordinates)
+        {
             if (camera != null) {
+                var cameraParams = camera.GetParameters ();
+
                 if (!autoFocusTokenCancelSrc.IsCancellationRequested) {
                     Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Requested");
-                    try {                         
-                        camera.AutoFocus (this); 
+
+                    // Cancel any previous requests
+                    camera.CancelAutoFocus ();
+
+                    try {
+                        // If we want to use coordinates
+                        // Also only if our camera supports Auto focus mode
+                        // Since FocusAreas only really work with FocusModeAuto set
+                        if (useCoordinates 
+                            && cameraParams.SupportedFocusModes.Contains (Camera.Parameters.FocusModeAuto)) {
+                            // Let's give the touched area a 20 x 20 minimum size rect to focus on
+                            // So we'll offset -10 from the center of the touch and then 
+                            // make a rect of 20 to give an area to focus on based on the center of the touch
+                            x = x - 10;
+                            y = y - 10;
+
+                            // Ensure we don't go over the -1000 to 1000 limit of focus area
+                            if (x >= 1000)
+                                x = 980;
+                            if (x < -1000)
+                                x = -1000;
+                            if (y >= 1000)
+                                y = 980;
+                            if (y < -1000)
+                                y = -1000;
+
+                            // Explicitly set FocusModeAuto since Focus areas only work with this setting
+                            cameraParams.FocusMode = Camera.Parameters.FocusModeAuto;
+                            // Add our focus area
+                            cameraParams.FocusAreas = new List<Camera.Area> {
+                                new Camera.Area (new Rect (x, y, x + 20, y + 20), 1000)
+                            };
+                            camera.SetParameters (cameraParams);
+                        }
+
+                        // Finally autofocus (weather we used focus areas or not)
+                        camera.AutoFocus (this);
                     } catch (Exception ex) {
                         Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
                     }
