@@ -1,5 +1,4 @@
-﻿using System;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 using ZXing.Common;
 
 namespace ZXing.Net.Mobile.Forms
@@ -12,10 +11,9 @@ namespace ZXing.Net.Mobile.Forms
         }
 
         public static readonly BindableProperty BarcodeFormatProperty =
-            BindableProperty.Create<ZXingBarcodeImageView, BarcodeFormat> (
-                p => p.BarcodeFormat,
+            BindableProperty.Create( nameof( BarcodeFormat ), typeof( BarcodeFormat ), typeof( ZXingBarcodeImageView ), 
                 defaultValue: BarcodeFormat.QR_CODE, 
-                defaultBindingMode: BindingMode.TwoWay);
+                defaultBindingMode: BindingMode.TwoWay );
         
         public BarcodeFormat BarcodeFormat {
             get { return (BarcodeFormat)GetValue (BarcodeFormatProperty); }
@@ -24,8 +22,7 @@ namespace ZXing.Net.Mobile.Forms
 
 
         public static readonly BindableProperty BarcodeValueProperty =
-            BindableProperty.Create<ZXingBarcodeImageView, string> (
-                p => p.BarcodeValue, 
+            BindableProperty.Create( nameof(BarcodeValue), typeof(string), typeof(ZXingBarcodeImageView),
                 defaultValue: string.Empty, 
                 defaultBindingMode: BindingMode.TwoWay);
         
@@ -36,8 +33,7 @@ namespace ZXing.Net.Mobile.Forms
 
 
         public static readonly BindableProperty BarcodeOptionsProperty =
-            BindableProperty.Create<ZXingBarcodeImageView, EncodingOptions> (
-                p => p.BarcodeOptions, 
+            BindableProperty.Create( nameof(BarcodeOptions), typeof(EncodingOptions), typeof(ZXingBarcodeImageView),
                 defaultValue: new EncodingOptions (), 
                 defaultBindingMode: BindingMode.TwoWay);
 
