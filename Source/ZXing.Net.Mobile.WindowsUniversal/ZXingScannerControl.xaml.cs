@@ -419,25 +419,35 @@ namespace ZXing.Mobile
         /// </summary>
         private void SetPreviewRotation()
         {
-            switch (displayOrientation)
+            if (mediaCapture == null)
+                return;
+
+            try
             {
-                case DisplayOrientations.Portrait:
-                    mediaCapture.SetPreviewRotation(VideoRotation.Clockwise90Degrees);
-                    mediaCapture.SetRecordRotation(VideoRotation.Clockwise90Degrees);
-                    break;
-                case DisplayOrientations.LandscapeFlipped:
-                    mediaCapture.SetPreviewRotation(VideoRotation.Clockwise180Degrees);
-                    mediaCapture.SetRecordRotation(VideoRotation.Clockwise180Degrees);
-                    break;
-                case DisplayOrientations.PortraitFlipped:
-                    mediaCapture.SetPreviewRotation(VideoRotation.Clockwise270Degrees);
-                    mediaCapture.SetRecordRotation(VideoRotation.Clockwise270Degrees);
-                    break;
-                case DisplayOrientations.Landscape:
-                default:
-                    mediaCapture.SetPreviewRotation(VideoRotation.None);
-                    mediaCapture.SetRecordRotation(VideoRotation.None);
-                    break;
+                switch (displayOrientation)
+                {
+                    case DisplayOrientations.Portrait:
+                        mediaCapture.SetPreviewRotation(VideoRotation.Clockwise90Degrees);
+                        mediaCapture.SetRecordRotation(VideoRotation.Clockwise90Degrees);
+                        break;
+                    case DisplayOrientations.LandscapeFlipped:
+                        mediaCapture.SetPreviewRotation(VideoRotation.Clockwise180Degrees);
+                        mediaCapture.SetRecordRotation(VideoRotation.Clockwise180Degrees);
+                        break;
+                    case DisplayOrientations.PortraitFlipped:
+                        mediaCapture.SetPreviewRotation(VideoRotation.Clockwise270Degrees);
+                        mediaCapture.SetRecordRotation(VideoRotation.Clockwise270Degrees);
+                        break;
+                    case DisplayOrientations.Landscape:
+                    default:
+                        mediaCapture.SetPreviewRotation(VideoRotation.None);
+                        mediaCapture.SetRecordRotation(VideoRotation.None);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MobileBarcodeScanner.Log("SetPreviewRotation Failed: {0}", ex);
             }
         }
 
