@@ -36,7 +36,10 @@ namespace ZXing.Mobile
         public static MobileBarcodeScannerBase Scanner { get; set; }
         public static UIElement CustomOverlay { get; set; }
         public static string TopText { get; set; }
+
+        public static UIElement LastFrame { get; set; }
         public static string BottomText { get; set; }
+        public static string CancelButtonText { get; set; }
         public static bool UseCustomOverlay { get; set; }
         public static bool ContinuousScanning { get; set; }
 
@@ -148,6 +151,8 @@ namespace ZXing.Mobile
         {
             scannerControl.TopText = TopText;
             scannerControl.BottomText = BottomText;
+            scannerControl.CancelButtonText = CancelButtonText;
+
 
             scannerControl.CustomOverlay = CustomOverlay;
             scannerControl.UseCustomOverlay = UseCustomOverlay;
@@ -165,8 +170,12 @@ namespace ZXing.Mobile
 
             await scannerControl.StartScanningAsync(HandleResult, ScanningOptions);
 
-            if (!isNewInstance && Frame.CanGoBack)
-                Frame.GoBack();
+            // Too much problem on it in original way, So I decide use replace way
+            //if (!isNewInstance && Frame.CanGoBack)
+            //    Frame.GoBack();
+
+            if (!isNewInstance)
+                Window.Current.Content = LastFrame;
 
             isNewInstance = false;
 
@@ -212,8 +221,11 @@ namespace ZXing.Mobile
             {
                 Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
                {
-                   if (Frame.CanGoBack)
-                       Frame.GoBack();
+                   // Too much problem on it, So I decide use replace way
+                   //if (!isNewInstance && Frame.CanGoBack)
+                   //    Frame.GoBack();
+                   if (!isNewInstance)
+                    Window.Current.Content = LastFrame;
                });
                 
             }
