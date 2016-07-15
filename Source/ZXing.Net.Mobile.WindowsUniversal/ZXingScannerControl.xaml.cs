@@ -37,10 +37,10 @@ namespace ZXing.Mobile
             displayInformation.OrientationChanged += displayInformation_OrientationChanged; 
         }
 
-        async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
+        void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
             displayOrientation = sender.CurrentOrientation;
-            await SetPreviewRotationAsync();
+            SetPreviewRotation();
         }
 
         // Receive notifications about rotation of the UI and apply any necessary rotation to the preview stream
@@ -172,7 +172,7 @@ namespace ZXing.Mobile
             // Set the selected resolution
             await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, chosenProp);
 
-            await SetPreviewRotationAsync();
+            SetPreviewRotationa();
 
             captureElement.Stretch = Stretch.UniformToFill;
 
@@ -417,24 +417,28 @@ namespace ZXing.Mobile
         /// <summary>
         /// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview
         /// </summary>
-        private async Task SetPreviewRotationAsync()
+        private void SetPreviewRotation()
         {
-            // Only need to update the orientation if the camera is mounted on the device
-            //if (_externalCamera) return;
-
-            // Calculate which way and how far to rotate the preview
-            int rotationDegrees = ConvertDisplayOrientationToDegrees(displayOrientation);
-
-            // The rotation direction needs to be inverted if the preview is being mirrored
-            //if (_mirroringPreview)
-            //{
-            //    rotationDegrees = (360 - rotationDegrees) % 360;
-            //}
-
-            // Add rotation metadata to the preview stream to make sure the aspect ratio / dimensions match when rendering and getting preview frames
-            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
-            props.Properties.Add(RotationKey, rotationDegrees);
-            await mediaCapture.SetEncodingPropertiesAsync(MediaStreamType.VideoPreview, props, null);
+            switch (displayOrientation)
+            {
+                case DisplayOrientations.Portrait:
+                    mediaCapture.SetPreviewRotation(VideoRotation.Clockwise90Degrees);
+                    mediaCapture.SetRecordRotation(VideoRotation.Clockwise90Degrees);
+                    break;
+                case DisplayOrientations.LandscapeFlipped:
+                    mediaCapture.SetPreviewRotation(VideoRotation.Clockwise180Degrees);
+                    mediaCapture.SetRecordRotation(VideoRotation.Clockwise180Degrees);
+                    break;
+                case DisplayOrientations.PortraitFlipped:
+                    mediaCapture.SetPreviewRotation(VideoRotation.Clockwise270Degrees);
+                    mediaCapture.SetRecordRotation(VideoRotation.Clockwise270Degrees);
+                    break;
+                case DisplayOrientations.Landscape:
+                default:
+                    mediaCapture.SetPreviewRotation(VideoRotation.None);
+                    mediaCapture.SetRecordRotation(VideoRotation.None);
+                    break;
+            }
         }
 
         /// <summary>
