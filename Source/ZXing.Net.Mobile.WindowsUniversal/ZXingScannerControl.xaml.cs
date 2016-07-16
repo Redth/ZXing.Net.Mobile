@@ -11,6 +11,7 @@ using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.Media;
 using Windows.Media.Capture;
+using Windows.Media.Devices;
 using Windows.Media.MediaProperties;
 using Windows.System.Display;
 using Windows.UI.Core;
@@ -112,15 +113,37 @@ namespace ZXing.Mobile
             }
 
             // Find which device to use
-            var preferredCamera = await this.GetFilteredCameraOrDefaultAsync(ScanningOptions);            
-            mediaCapture = new MediaCapture();
-            
-            // Initialize the capture with the settings above
-            await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings()
+            var preferredCamera = await GetFilteredCameraOrDefaultAsync(ScanningOptions);
+            if (preferredCamera == null)
             {
-                StreamingCaptureMode = StreamingCaptureMode.Video,
-                VideoDeviceId = preferredCamera.Id
-            });
+                System.Diagnostics.Debug.WriteLine("No camera available");
+                isMediaCaptureInitialized = false;
+                return;
+            }
+
+            mediaCapture = new MediaCapture();
+
+            // Initialize the capture with the settings above
+            try
+            {
+                await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
+                {
+                    StreamingCaptureMode = StreamingCaptureMode.Video,
+                    VideoDeviceId = preferredCamera.Id
+                });
+                isMediaCaptureInitialized = true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                System.Diagnostics.Debug.WriteLine("Denied access to the camera");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Exception when init MediaCapture: {0}", ex);
+            }
+
+            if (!isMediaCaptureInitialized)
+                return;
 
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
@@ -173,6 +196,8 @@ namespace ZXing.Mobile
             await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, chosenProp);
 
             await SetPreviewRotationAsync();
+
+            await SetupAutoFocus();
 
             captureElement.Stretch = Stretch.UniformToFill;
 
@@ -263,9 +288,13 @@ namespace ZXing.Mobile
 
             // we fall back to the first camera that we can find.  
             if (selectedCamera == null)
+            {
+                var whichCamera = useFront ? "front" : "back";
+                System.Diagnostics.Debug.WriteLine("Finding " + whichCamera + " camera failed, opening first available camera");
                 selectedCamera = videoCaptureDevices.FirstOrDefault();
+            }
 
-            return (selectedCamera);
+            return selectedCamera;
         }
 
         protected override async void OnPointerPressed(PointerRoutedEventArgs e)
@@ -273,13 +302,14 @@ namespace ZXing.Mobile
             System.Diagnostics.Debug.WriteLine("AutoFocus requested");
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
-            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y);
+            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true);
         }
 
         Timer timerPreview;
         MediaCapture mediaCapture;
 
         bool stopping = false;
+        bool isMediaCaptureInitialized = false;
 
         volatile bool processing = false;
         volatile bool isAnalyzing = false;
@@ -301,6 +331,48 @@ namespace ZXing.Mobile
             get
             {
                 return HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
+            }
+        }
+
+        public bool IsFocusSupported
+        {
+            get
+            {
+                return mediaCapture != null
+                    && mediaCapture.VideoDeviceController != null
+                    && mediaCapture.VideoDeviceController.FocusControl != null
+                    && mediaCapture.VideoDeviceController.FocusControl.Supported;
+            }
+        }
+
+        private async Task SetupAutoFocus()
+        {
+            if (IsFocusSupported)
+            {
+                var focusControl = mediaCapture.VideoDeviceController.FocusControl;
+
+                var focusSettings = new FocusSettings();
+                focusSettings.AutoFocusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
+                    ? AutoFocusRange.FullRange
+                    : focusControl.SupportedFocusRanges.FirstOrDefault();
+
+                var supportedFocusModes = focusControl.SupportedFocusModes;
+                if (supportedFocusModes.Contains(FocusMode.Continuous))
+                {
+                    focusSettings.Mode = FocusMode.Continuous;
+                }
+                else if (supportedFocusModes.Contains(FocusMode.Auto))
+                {
+                    focusSettings.Mode = FocusMode.Auto;
+                }
+
+                if (focusSettings.Mode == FocusMode.Continuous || focusSettings.Mode == FocusMode.Auto)
+                {
+                    //await focusControl.UnlockAsync();
+                    focusSettings.WaitForFocus = false;
+                    focusControl.Configure(focusSettings);
+                    await focusControl.FocusAsync();
+                }
             }
         }
 
@@ -329,25 +401,56 @@ namespace ZXing.Mobile
 
         public async void AutoFocus ()
         {
-            await AutoFocusAsync(-1, -1);
+            await AutoFocusAsync(0, 0, false);
         }
 
-        public async void AutoFocus (int x = -1, int y = -1)
+        public async void AutoFocus (int x, int y)
         {
-            await AutoFocusAsync(x, y);
+            await AutoFocusAsync(x, y, true);
         }
 
-        public async Task AutoFocusAsync(int x = -1, int y = -1)
+        public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
-            try
+            if (IsFocusSupported)
             {
-                if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
-                    if (mediaCapture.VideoDeviceController.FocusControl.Supported)
-                        await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+                var focusControl = mediaCapture.VideoDeviceController.FocusControl;
+
+                try
+                {
+                    // todo
+                    //await focusControl.LockAsync();
+                    //var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
+                    //if (useCoordinates)
+                    //{
+                    //    await roiControl.SetRegionsAsync(new[] { region }, true);
+
+                    //    var focusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
+                    //        ? AutoFocusRange.FullRange
+                    //        : focusControl.SupportedFocusRanges.FirstOrDefault();
+
+                    //    var focusMode = focusControl.SupportedFocusModes.Contains(FocusMode.Single)
+                    //        ? FocusMode.Single
+                    //        : focusControl.SupportedFocusModes.FirstOrDefault();
+                    //    var settings = new FocusSettings
+                    //    {
+                    //        Mode = focusMode,
+                    //        AutoFocusRange = focusRange
+                    //    };
+
+                    //    focusControl.Configure(settings);
+                    //}
+                    //else
+                    //{
+                    //    // If no region provided, clear any regions and reset focus
+                    //    await roiControl.ClearRegionsAsync();
+                    //}
+
+                    await focusControl.FocusAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+                }
             }
         }
 
@@ -358,20 +461,23 @@ namespace ZXing.Mobile
 
             try
             {
-                await mediaCapture.StopPreviewAsync();
+                if (isMediaCaptureInitialized)
+                    await mediaCapture.StopPreviewAsync();
                 if (UseCustomOverlay && CustomOverlay != null)
                     gridCustomOverlay.Children.Remove(CustomOverlay);
             }
             catch { }
             finally {
                 //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
-                 mediaCapture.Dispose();
+                 if (mediaCapture != null)
+                    mediaCapture.Dispose();
             }
 
             //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
             displayInformation.OrientationChanged -= displayInformation_OrientationChanged;
 
-            timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
+            if (timerPreview != null)
+                timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
             stopping = false;            
         }
 
