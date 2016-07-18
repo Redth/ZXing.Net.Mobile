@@ -16,8 +16,7 @@ var TARGET = Argument ("t", Argument ("target", "Default"));
 // Build a semver string out of the preview if it's specified
 if (!string.IsNullOrEmpty (PREVIEW)) {
 	var sv = ParseSemVer (VERSION);
-	sv.Prerelease = PREVIEW;
-	NUGET_VERSION = sv.ToString ();
+	NUGET_VERSION = CreateSemVer (sv.Major, sv.Minor, sv.Patch, PREVIEW).ToString ();
 }
 
 var buildSpec = new BuildSpec {
