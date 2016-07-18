@@ -38,16 +38,20 @@ namespace ZXing.Mobile
             displayInformation.OrientationChanged += displayInformation_OrientationChanged; 
         }
 
-        void displayInformation_OrientationChanged(DisplayInformation sender, object args)
+        async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
             displayOrientation = sender.CurrentOrientation;
-            SetPreviewRotation();
+            await SetPreviewRotationAsync();
         }
 
         // Receive notifications about rotation of the UI and apply any necessary rotation to the preview stream
         readonly DisplayInformation displayInformation = DisplayInformation.GetForCurrentView();
         DisplayOrientations displayOrientation = DisplayOrientations.Portrait;
         VideoFrame videoFrame;
+
+        // Information about the camera device.
+        bool mirroringPreview = false;
+        bool externalCamera = false;
 
         // Rotation metadata to apply to the preview stream (MF_MT_VIDEO_ROTATION)
         // Reference: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
@@ -124,6 +128,20 @@ namespace ZXing.Mobile
                 return;
             }
 
+            if (preferredCamera.EnclosureLocation == null || preferredCamera.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Unknown)
+            {
+                // No information on the location of the camera, assume it's an external camera, not integrated on the device.
+                externalCamera = true;
+            }
+            else
+            {
+                // Camera is fixed on the device.
+                externalCamera = false;
+
+                // Only mirror the preview if the camera is on the front panel.
+                mirroringPreview = preferredCamera.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Front;
+            }
+
             mediaCapture = new MediaCapture();
 
             // Initialize the capture with the settings above
@@ -198,7 +216,7 @@ namespace ZXing.Mobile
             // Set the selected resolution
             await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, chosenProp);
 
-            SetPreviewRotation();
+            await SetPreviewRotationAsync();
 
             await SetupAutoFocus();
 
@@ -528,42 +546,27 @@ namespace ZXing.Mobile
             ToggleTorch();
         }
 
-
         /// <summary>
         /// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview
         /// </summary>
-        private void SetPreviewRotation()
+        private async Task SetPreviewRotationAsync()
         {
-            if (mediaCapture == null)
+            // Only need to update the orientation if the camera is mounted on the device.
+            if (mediaCapture == null || externalCamera)
                 return;
 
-            try
-            {
-                switch (displayOrientation)
-                {
-                    case DisplayOrientations.Portrait:
-                        mediaCapture.SetPreviewRotation(VideoRotation.Clockwise90Degrees);
-                        mediaCapture.SetRecordRotation(VideoRotation.Clockwise90Degrees);
-                        break;
-                    case DisplayOrientations.LandscapeFlipped:
-                        mediaCapture.SetPreviewRotation(VideoRotation.Clockwise180Degrees);
-                        mediaCapture.SetRecordRotation(VideoRotation.Clockwise180Degrees);
-                        break;
-                    case DisplayOrientations.PortraitFlipped:
-                        mediaCapture.SetPreviewRotation(VideoRotation.Clockwise270Degrees);
-                        mediaCapture.SetRecordRotation(VideoRotation.Clockwise270Degrees);
-                        break;
-                    case DisplayOrientations.Landscape:
-                    default:
-                        mediaCapture.SetPreviewRotation(VideoRotation.None);
-                        mediaCapture.SetRecordRotation(VideoRotation.None);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                MobileBarcodeScanner.Log("SetPreviewRotation Failed: {0}", ex);
-            }
+            // Calculate which way and how far to rotate the preview.
+            int rotationDegrees;
+            VideoRotation sourceRotation;
+            CalculatePreviewRotation(out sourceRotation, out rotationDegrees);
+
+            // Set preview rotation in the preview source.
+            mediaCapture.SetPreviewRotation(sourceRotation);
+
+            // Add rotation metadata to the preview stream to make sure the aspect ratio / dimensions match when rendering and getting preview frames
+            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+            props.Properties.Add(RotationKey, rotationDegrees);
+            await mediaCapture.SetEncodingPropertiesAsync(MediaStreamType.VideoPreview, props, null);
 
             var currentPreviewResolution = GetPreviewResolution();
             // Setup a frame to use as the input settings
@@ -590,6 +593,56 @@ namespace ZXing.Mobile
             }
 
             return default(Size);
+        }
+
+        /// <summary>
+        /// Reads the current orientation of the app and calculates the VideoRotation necessary to ensure the preview is rendered in the correct orientation.
+        /// </summary>
+        /// <param name="sourceRotation">The rotation value to use in MediaCapture.SetPreviewRotation.</param>
+        /// <param name="rotationDegrees">The accompanying rotation metadata with which to tag the preview stream.</param>
+        private void CalculatePreviewRotation(out VideoRotation sourceRotation, out int rotationDegrees)
+        {
+            // Note that in some cases, the rotation direction needs to be inverted if the preview is being mirrored.
+            switch (displayInformation.CurrentOrientation)
+            {
+                case DisplayOrientations.Portrait:
+                    if (mirroringPreview)
+                    {
+                        rotationDegrees = 270;
+                        sourceRotation = VideoRotation.Clockwise270Degrees;
+                    }
+                    else
+                    {
+                        rotationDegrees = 90;
+                        sourceRotation = VideoRotation.Clockwise90Degrees;
+                    }
+                    break;
+
+                case DisplayOrientations.LandscapeFlipped:
+                    // No need to invert this rotation, as rotating 180 degrees is the same either way.
+                    rotationDegrees = 180;
+                    sourceRotation = VideoRotation.Clockwise180Degrees;
+                    break;
+
+                case DisplayOrientations.PortraitFlipped:
+                    if (mirroringPreview)
+                    {
+                        rotationDegrees = 90;
+                        sourceRotation = VideoRotation.Clockwise90Degrees;
+                    }
+                    else
+                    {
+                        rotationDegrees = 270;
+                        sourceRotation = VideoRotation.Clockwise270Degrees;
+                    }
+                    break;
+
+                case DisplayOrientations.Landscape:
+                default:
+                    rotationDegrees = 0;
+                    sourceRotation = VideoRotation.None;
+                    break;
+            }
         }
 
         /// <summary>
