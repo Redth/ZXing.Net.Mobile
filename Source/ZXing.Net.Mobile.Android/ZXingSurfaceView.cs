@@ -82,11 +82,11 @@ namespace ZXing.Mobile
             OnSurfaceCreated();
         }
 
-        bool surfaceCreated = false;
-
         void OnSurfaceCreated ()
         {
-            surfaceCreated = true;
+            if (camera != null)
+                return;
+
             lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds (this.scanningOptions.InitialDelayBeforeAnalyzingFrames);
             isAnalyzing = true;
 
@@ -134,10 +134,14 @@ namespace ZXing.Mobile
                     camera = Camera.Open ();
                 }
 
-                if (camera == null)
+                if (camera != null)
+                {
+                    camera.SetPreviewCallback(this);
+                }
+                else
+                {
                     Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Camera is null :(");
-
-                camera.SetPreviewCallback (this);
+                }
 
             } catch (Exception ex) {
                 ShutdownCamera ();
@@ -148,8 +152,7 @@ namespace ZXing.Mobile
             PerformanceCounter.Stop (perf, "Camera took {0}ms");
         }
 
-        bool surfaceChanged = false;
-
+        bool isSurfaceChanged;
         public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
         {
             OnSurfaceChanged();
@@ -157,11 +160,10 @@ namespace ZXing.Mobile
 
         void OnSurfaceChanged ()
         {
-            surfaceChanged = true;
-
             if (camera == null)
                 return;
 
+            isSurfaceChanged = true;
             var perf = PerformanceCounter.Start ();
 
             var parameters = camera.GetParameters ();
@@ -491,10 +493,8 @@ namespace ZXing.Mobile
             this.callback = scanResultCallback;
             this.scanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
-            if (surfaceCreated)
-                OnSurfaceCreated();
-
-            if (surfaceChanged)
+            OnSurfaceCreated();
+            if (isSurfaceChanged)
                 OnSurfaceChanged();
         }
 
@@ -586,7 +586,7 @@ namespace ZXing.Mobile
                     || supportedFlashModes.Contains (Camera.Parameters.FlashModeOn)))
                     hasTorch = CheckTorchPermissions (false);
 
-                return hasTorch.Value;
+                return hasTorch != null && hasTorch.Value;
             }
         }
 
