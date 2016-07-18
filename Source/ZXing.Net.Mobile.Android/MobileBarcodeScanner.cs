@@ -157,5 +157,22 @@ namespace ZXing.Mobile
 				return torch;
 			}
 		}
+
+        internal static void LogDebug (string format, params object [] args)
+        {
+            Android.Util.Log.Debug ("ZXING", format, args);
+        }
+        internal static void LogError (string format, params object [] args)
+        {
+            Android.Util.Log.Error ("ZXING", format, args);
+        }
+        internal static void LogInfo (string format, params object [] args)
+        {
+            Android.Util.Log.Info ("ZXING", format, args);
+        }
+        internal static void LogWarn (string format, params object [] args)
+        {
+            Android.Util.Log.Warn ("ZXING", format, args);
+        }
 	}
 }

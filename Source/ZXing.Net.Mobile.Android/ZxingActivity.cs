@@ -17,6 +17,7 @@ using Android.Widget;
 using ZXing;
 using Android.Support.V4.App;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ZXing.Mobile
 {
@@ -85,8 +86,6 @@ namespace ZXing.Mobile
         public static bool ScanContinuously { get; set; }
 
         ZXingScannerFragment scannerFragment;
-        bool waitingForPermission = false;
-        bool canScan = true;
 
         protected override void OnCreate (Bundle bundle)
         {
@@ -117,6 +116,11 @@ namespace ZXing.Mobile
             TorchRequestedHandler = SetTorch;
             PauseAnalysisHandler = scannerFragment.PauseAnalysis;
             ResumeAnalysisHandler = scannerFragment.ResumeAnalysis;
+        }
+
+        protected override void OnResume ()
+        {
+            base.OnResume ();
 
             var permissionsToRequest = new List<string> ();
 
@@ -124,25 +128,14 @@ namespace ZXing.Mobile
             foreach (var permission in RequiredPermissions) {
                 if (PlatformChecks.IsPermissionInManifest (this, permission)) {
                     if (!PlatformChecks.IsPermissionGranted (this, permission))
-                        permissionsToRequest.Add (permission);                        
+                        permissionsToRequest.Add (permission);
                 }
             }
 
             if (permissionsToRequest.Any ()) {
-                waitingForPermission = PlatformChecks.RequestPermissions (this, permissionsToRequest.ToArray (), 101);
-            }
-        }
-
-        protected override void OnResume ()
-        {
-            base.OnResume ();
-
-            try {
-                if (!waitingForPermission && canScan)
-                    StartScanning ();
-            } catch (Exception ex) {
-                Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
-                Finish ();
+                PlatformChecks.RequestPermissions (this, permissionsToRequest.ToArray (), 101);
+            } else {
+                StartScanning ();
             }
         }
 
@@ -150,13 +143,17 @@ namespace ZXing.Mobile
         { 
             base.OnRequestPermissionsResult (requestCode, permissions, grantResults);
 
-            if (waitingForPermission) {
-                canScan = false;
+            if (requestCode == 101) {
+                var canScan = false;
                 for (int i = 0; i < permissions.Length; i++) {
                     if (permissions [i] == Android.Manifest.Permission.Camera && grantResults [i] == Permission.Granted)
                         canScan = true;
                 }
-                waitingForPermission = false;
+
+                if (!canScan) {
+                    Toast.MakeText (this, "Camera Permissions not Granted", ToastLength.Long).Show ();
+                    Finish ();
+                }
             }
         }
 

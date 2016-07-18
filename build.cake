@@ -3,19 +3,20 @@
 #addin nuget:?package=Cake.XCode
 #addin nuget:?package=Cake.Xamarin
 #addin nuget:?package=Cake.Xamarin.Build
+#addin nuget:?package=Cake.SemVer
 #addin nuget:?package=Cake.FileHelpers
 #addin nuget:?package=Cake.MonoApiTools
 
 var PREVIEW = "beta";
-var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.1.9999");
 var NUGET_VERSION = VERSION;
 
 var TARGET = Argument ("t", Argument ("target", "Default"));
 
 // Build a semver string out of the preview if it's specified
 if (!string.IsNullOrEmpty (PREVIEW)) {
-	var v = Version.Parse (VERSION);
-	NUGET_VERSION = string.Format ("{0}.{1}.{2}-{3}{4}", v.Major, v.Minor, v.Build, PREVIEW, v.Revision);
+	var sv = ParseSemVer (VERSION);
+	NUGET_VERSION = CreateSemVer (sv.Major, sv.Minor, sv.Patch, PREVIEW).ToString ();
 }
 
 var buildSpec = new BuildSpec {
@@ -101,3 +102,4 @@ Task ("clean").IsDependentOn ("clean-base").Does (() =>
 SetupXamarinBuildTasks (buildSpec, Tasks, Task);
 
 RunTarget (TARGET);
+

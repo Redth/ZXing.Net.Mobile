@@ -113,7 +113,7 @@ namespace ZXing.Mobile
 
         public void AutoFocus(int x, int y)
 		{
-			scanner.AutoFocus();
+			scanner.AutoFocus(x, y);
 		}
 
         Action<Result> scanCallback;
