@@ -410,7 +410,17 @@ namespace ZXing.Mobile
 
             Camera.GetCameraInfo (cameraId, info);
 
-            int correctedDegrees = (360 + info.Orientation - degrees) % 360;
+            int correctedDegrees;
+            if (info.Facing == CameraFacing.Front)
+            {
+                correctedDegrees = (info.Orientation + degrees) % 360;
+                correctedDegrees = (360 - correctedDegrees) % 360; // compensate the mirror
+            }
+            else
+            {
+                // back-facing
+                correctedDegrees = (info.Orientation - degrees + 360) % 360;
+            }
 
             return correctedDegrees;
         }
