@@ -47,6 +47,7 @@ namespace ZXing.Mobile
         // Receive notifications about rotation of the UI and apply any necessary rotation to the preview stream
         readonly DisplayInformation displayInformation = DisplayInformation.GetForCurrentView();
         DisplayOrientations displayOrientation = DisplayOrientations.Portrait;
+        VideoFrame videoFrame;
 
         // Rotation metadata to apply to the preview stream (MF_MT_VIDEO_ROTATION)
         // Reference: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
@@ -202,13 +203,7 @@ namespace ZXing.Mobile
             await SetupAutoFocus();
 
             captureElement.Stretch = Stretch.UniformToFill;
-
-            // Get our preview properties
-            var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
             
-            // Setup a frame to use as the input settings
-            var destFrame = new VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
-
             var zxing = ScanningOptions.BuildBarcodeReader();
 
             timerPreview = new Timer(async (state) => {
@@ -228,9 +223,8 @@ namespace ZXing.Mobile
 
                 try
                 {
-
                     // Get preview 
-                    var frame = await mediaCapture.GetPreviewFrameAsync(destFrame);
+                    var frame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
 
                     // Create our luminance source
                     luminanceSource = new SoftwareBitmapLuminanceSource(frame.SoftwareBitmap);
@@ -422,8 +416,8 @@ namespace ZXing.Mobile
                     {
                         if (useCoordinates)
                         {
-                            var previewEncodingProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
-                            var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, captureElement, displayOrientation);
+                            var previewEncodingProperties = GetPreviewResolution();
+                            var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, captureElement);
                             var focusPreview = ConvertUiTapToPreviewRect(new Point(x, y), new Size(20, 20), previewRect);
                             var regionOfInterest = new RegionOfInterest
                             {
@@ -570,6 +564,32 @@ namespace ZXing.Mobile
             {
                 MobileBarcodeScanner.Log("SetPreviewRotation Failed: {0}", ex);
             }
+
+            var currentPreviewResolution = GetPreviewResolution();
+            // Setup a frame to use as the input settings
+            videoFrame = new VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, (int)currentPreviewResolution.Width, (int)currentPreviewResolution.Height);
+        }
+
+        private Size GetPreviewResolution()
+        {
+            // Get our preview properties
+            var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
+            if (previewProperties != null)
+            {
+                var streamWidth = previewProperties.Width;
+                var streamHeight = previewProperties.Height;
+
+                // For portrait orientations, the width and height need to be swapped
+                if (displayOrientation == DisplayOrientations.Portrait || displayOrientation == DisplayOrientations.PortraitFlipped)
+                {
+                    streamWidth = previewProperties.Height;
+                    streamHeight = previewProperties.Width;
+                }
+
+                return new Size(streamWidth, streamHeight);
+            }
+
+            return default(Size);
         }
 
         /// <summary>
@@ -647,28 +667,20 @@ namespace ZXing.Mobile
         /// </summary>
         /// <param name="previewResolution">The resolution at which the preview is running</param>
         /// <param name="previewControl">The control that is displaying the preview using Uniform as the scaling mode</param>
-        /// <param name="displayOrientation">The orientation of the display, to account for device rotation and changing of the CaptureElement display ratio compared to the camera stream</param>
         /// <returns></returns>
-        public static Rect GetPreviewStreamRectInControl(VideoEncodingProperties previewResolution, CaptureElement previewControl, DisplayOrientations displayOrientation)
+        private static Rect GetPreviewStreamRectInControl(Size previewResolution, CaptureElement previewControl)
         {
             var result = new Rect();
 
             // In case this function is called before everything is initialized correctly, return an empty result
             if (previewControl == null || previewControl.ActualHeight < 1 || previewControl.ActualWidth < 1 ||
-                previewResolution == null || previewResolution.Height == 0 || previewResolution.Width == 0)
+                previewResolution.Height < 1 || previewResolution.Width < 1)
             {
                 return result;
             }
 
             var streamWidth = previewResolution.Width;
             var streamHeight = previewResolution.Height;
-
-            // For portrait orientations, the width and height need to be swapped
-            if (displayOrientation == DisplayOrientations.Portrait || displayOrientation == DisplayOrientations.PortraitFlipped)
-            {
-                streamWidth = previewResolution.Height;
-                streamHeight = previewResolution.Width;
-            }
 
             // Start by assuming the preview display area in the control spans the entire width and height both (this is corrected in the next if for the necessary dimension)
             result.Width = previewControl.ActualWidth;
