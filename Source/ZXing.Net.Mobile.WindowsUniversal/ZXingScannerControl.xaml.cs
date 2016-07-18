@@ -53,7 +53,7 @@ namespace ZXing.Mobile
         static readonly Guid RotationKey = new Guid("C380465D-2271-428C-9B83-ECEA3B4A85C1");
 
         // Prevent the screen from sleeping while the camera is running
-        readonly DisplayRequest _displayRequest = new DisplayRequest();
+        readonly DisplayRequest displayRequest = new DisplayRequest();
 
         // For listening to media property changes
         readonly SystemMediaTransportControls _systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
@@ -89,6 +89,8 @@ namespace ZXing.Mobile
         {
             if (stopping)
                 return;
+
+            displayRequest.RequestActive();
 
             isAnalyzing = true;
             ScanCallback = scanCallback;
@@ -469,6 +471,8 @@ namespace ZXing.Mobile
         {
             stopping = true;
             isAnalyzing = false;
+
+            displayRequest.RequestRelease();
 
             try
             {
