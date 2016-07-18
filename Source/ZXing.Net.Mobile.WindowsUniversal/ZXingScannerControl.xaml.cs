@@ -368,7 +368,6 @@ namespace ZXing.Mobile
 
                 if (focusSettings.Mode == FocusMode.Continuous || focusSettings.Mode == FocusMode.Auto)
                 {
-                    //await focusControl.UnlockAsync();
                     focusSettings.WaitForFocus = false;
                     focusControl.Configure(focusSettings);
                     await focusControl.FocusAsync();
@@ -414,36 +413,48 @@ namespace ZXing.Mobile
             if (IsFocusSupported)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
-
+                var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
                 try
                 {
-                    // todo
-                    //await focusControl.LockAsync();
-                    //var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
-                    //if (useCoordinates)
-                    //{
-                    //    await roiControl.SetRegionsAsync(new[] { region }, true);
+                    if (roiControl.AutoFocusSupported && roiControl.MaxRegions > 0)
+                    {
+                        if (useCoordinates)
+                        {
+                            var previewEncodingProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
+                            var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, captureElement, displayOrientation);
+                            var focusPreview = ConvertUiTapToPreviewRect(new Point(x, y), new Size(20, 20), previewRect);
+                            var regionOfInterest = new RegionOfInterest
+                            {
+                                AutoFocusEnabled = true,
+                                BoundsNormalized = true,
+                                Bounds = focusPreview,
+                                Type = RegionOfInterestType.Unknown,
+                                Weight = 100
+                            };
+                            await roiControl.SetRegionsAsync(new[] { regionOfInterest }, true);
 
-                    //    var focusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
-                    //        ? AutoFocusRange.FullRange
-                    //        : focusControl.SupportedFocusRanges.FirstOrDefault();
+                            var focusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
+                                ? AutoFocusRange.FullRange
+                                : focusControl.SupportedFocusRanges.FirstOrDefault();
 
-                    //    var focusMode = focusControl.SupportedFocusModes.Contains(FocusMode.Single)
-                    //        ? FocusMode.Single
-                    //        : focusControl.SupportedFocusModes.FirstOrDefault();
-                    //    var settings = new FocusSettings
-                    //    {
-                    //        Mode = focusMode,
-                    //        AutoFocusRange = focusRange
-                    //    };
+                            var focusMode = focusControl.SupportedFocusModes.Contains(FocusMode.Single)
+                                ? FocusMode.Single
+                                : focusControl.SupportedFocusModes.FirstOrDefault();
 
-                    //    focusControl.Configure(settings);
-                    //}
-                    //else
-                    //{
-                    //    // If no region provided, clear any regions and reset focus
-                    //    await roiControl.ClearRegionsAsync();
-                    //}
+                            var settings = new FocusSettings
+                            {
+                                Mode = focusMode,
+                                AutoFocusRange = focusRange,
+                            };
+
+                            focusControl.Configure(settings);
+                        }
+                        else
+                        {
+                            // If no region provided, clear any regions and reset focus
+                            await roiControl.ClearRegionsAsync();
+                        }
+                    }
 
                     await focusControl.FocusAsync();
                 }
@@ -558,24 +569,126 @@ namespace ZXing.Mobile
         }
 
         /// <summary>
-        /// Converts the given orientation of the app on the screen to the corresponding rotation in degrees
+        /// Applies the necessary rotation to a tap on a CaptureElement (with Stretch mode set to Uniform) to account for device orientation
         /// </summary>
-        /// <param name="orientation">The orientation of the app on the screen</param>
-        /// <returns>An orientation in degrees</returns>
-        private static int ConvertDisplayOrientationToDegrees(DisplayOrientations orientation)
+        /// <param name="tap">The location, in UI coordinates, of the user tap</param>
+        /// <param name="size">The size, in UI coordinates, of the desired focus rectangle</param>
+        /// <param name="previewRect">The area within the CaptureElement that is actively showing the preview, and is not part of the letterboxed area</param>
+        /// <returns>A Rect that can be passed to the MediaCapture Focus and RegionsOfInterest APIs, with normalized bounds in the orientation of the native stream</returns>
+        private Rect ConvertUiTapToPreviewRect(Point tap, Size size, Rect previewRect)
         {
-            switch (orientation)
+            // Adjust for the resulting focus rectangle to be centered around the position
+            double left = tap.X - size.Width / 2, top = tap.Y - size.Height / 2;
+
+            // Get the information about the active preview area within the CaptureElement (in case it's letterboxed)
+            double previewWidth = previewRect.Width, previewHeight = previewRect.Height;
+            double previewLeft = previewRect.Left, previewTop = previewRect.Top;
+
+            // Transform the left and top of the tap to account for rotation
+            switch (displayOrientation)
             {
                 case DisplayOrientations.Portrait:
-                    return 90;
+                    var tempLeft = left;
+
+                    left = top;
+                    top = previewRect.Width - tempLeft;
+                    break;
                 case DisplayOrientations.LandscapeFlipped:
-                    return 180;
+                    left = previewRect.Width - left;
+                    top = previewRect.Height - top;
+                    break;
                 case DisplayOrientations.PortraitFlipped:
-                    return 270;
-                case DisplayOrientations.Landscape:
-                default:
-                    return 0;
+                    var tempTop = top;
+
+                    top = left;
+                    left = previewRect.Width - tempTop;
+                    break;
             }
+
+            // For portrait orientations, the information about the active preview area needs to be rotated
+            if (displayOrientation == DisplayOrientations.Portrait || displayOrientation == DisplayOrientations.PortraitFlipped)
+            {
+                previewWidth = previewRect.Height;
+                previewHeight = previewRect.Width;
+                previewLeft = previewRect.Top;
+                previewTop = previewRect.Left;
+            }
+
+            // Normalize width and height of the focus rectangle
+            var width = size.Width / previewWidth;
+            var height = size.Height / previewHeight;
+
+            // Shift rect left and top to be relative to just the active preview area
+            left -= previewLeft;
+            top -= previewTop;
+
+            // Normalize left and top
+            left /= previewWidth;
+            top /= previewHeight;
+
+            // Ensure rectangle is fully contained within the active preview area horizontally
+            left = Math.Max(left, 0);
+            left = Math.Min(1 - width, left);
+
+            // Ensure rectangle is fully contained within the active preview area vertically
+            top = Math.Max(top, 0);
+            top = Math.Min(1 - height, top);
+
+            // Create and return resulting rectangle
+            return new Rect(left, top, width, height);
+        }
+
+        /// <summary>
+        /// Calculates the size and location of the rectangle that contains the preview stream within the preview control, when the scaling mode is Uniform
+        /// </summary>
+        /// <param name="previewResolution">The resolution at which the preview is running</param>
+        /// <param name="previewControl">The control that is displaying the preview using Uniform as the scaling mode</param>
+        /// <param name="displayOrientation">The orientation of the display, to account for device rotation and changing of the CaptureElement display ratio compared to the camera stream</param>
+        /// <returns></returns>
+        public static Rect GetPreviewStreamRectInControl(VideoEncodingProperties previewResolution, CaptureElement previewControl, DisplayOrientations displayOrientation)
+        {
+            var result = new Rect();
+
+            // In case this function is called before everything is initialized correctly, return an empty result
+            if (previewControl == null || previewControl.ActualHeight < 1 || previewControl.ActualWidth < 1 ||
+                previewResolution == null || previewResolution.Height == 0 || previewResolution.Width == 0)
+            {
+                return result;
+            }
+
+            var streamWidth = previewResolution.Width;
+            var streamHeight = previewResolution.Height;
+
+            // For portrait orientations, the width and height need to be swapped
+            if (displayOrientation == DisplayOrientations.Portrait || displayOrientation == DisplayOrientations.PortraitFlipped)
+            {
+                streamWidth = previewResolution.Height;
+                streamHeight = previewResolution.Width;
+            }
+
+            // Start by assuming the preview display area in the control spans the entire width and height both (this is corrected in the next if for the necessary dimension)
+            result.Width = previewControl.ActualWidth;
+            result.Height = previewControl.ActualHeight;
+
+            // If UI is "wider" than preview, letterboxing will be on the sides
+            if ((previewControl.ActualWidth / previewControl.ActualHeight > streamWidth / (double)streamHeight))
+            {
+                var scale = previewControl.ActualHeight / streamHeight;
+                var scaledWidth = streamWidth * scale;
+
+                result.X = (previewControl.ActualWidth - scaledWidth) / 2.0;
+                result.Width = scaledWidth;
+            }
+            else // Preview stream is "wider" than UI, so letterboxing will be on the top+bottom
+            {
+                var scale = previewControl.ActualWidth / streamWidth;
+                var scaledHeight = streamHeight * scale;
+
+                result.Y = (previewControl.ActualHeight - scaledHeight) / 2.0;
+                result.Height = scaledHeight;
+            }
+
+            return result;
         }
     }
 }
