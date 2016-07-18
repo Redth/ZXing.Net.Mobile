@@ -195,7 +195,7 @@ namespace ZXing.Mobile
             // Set the selected resolution
             await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, chosenProp);
 
-            SetPreviewRotationa();
+            SetPreviewRotation();
 
             await SetupAutoFocus();
 
