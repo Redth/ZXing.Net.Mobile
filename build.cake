@@ -102,3 +102,4 @@ Task ("clean").IsDependentOn ("clean-base").Does (() =>
 SetupXamarinBuildTasks (buildSpec, Tasks, Task);
 
 RunTarget (TARGET);
+
