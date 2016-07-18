@@ -105,7 +105,7 @@ namespace ZXing.Net.Mobile.Forms.Android
             var y = e.GetY ();
 
             if (zxingSurface != null) {
-                zxingSurface.AutoFocus ();
+                zxingSurface.AutoFocus ((int)x, (int)y);
                 System.Diagnostics.Debug.WriteLine ("Touch: x={0}, y={1}", x, y);
             }
             return base.OnTouchEvent (e);
