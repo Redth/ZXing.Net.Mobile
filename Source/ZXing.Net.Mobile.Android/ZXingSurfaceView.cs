@@ -27,8 +27,7 @@ namespace ZXing.Mobile
         const int MIN_FRAME_HEIGHT = 240;
         const int MAX_FRAME_WIDTH = 600;
         const int MAX_FRAME_HEIGHT = 400;
-	
-        CancellationTokenSource autoFocusTokenCancelSrc;
+
         ISurfaceHolder surfaceHolder;
         Camera camera;
         MobileBarcodeScanningOptions scanningOptions;
@@ -36,12 +35,14 @@ namespace ZXing.Mobile
         Activity activity;
         bool isAnalyzing = false;
         bool wasScanned = false;
+        bool wasStarted = false;
         bool isTorchOn = false;
         int cameraId = 0;
 
         DateTime lastPreviewAnalysis = DateTime.UtcNow;
         BarcodeReader barcodeReader = null;
         Task processingTask;
+        TaskCompletionSource<object> tcsSurfaceReady;
 
         static ManualResetEventSlim _cameraLockEvent = new ManualResetEventSlim (true);
 
@@ -57,7 +58,7 @@ namespace ZXing.Mobile
             : base (activity)
         {
             this.activity = activity;
-            this.scanningOptions = options;
+            this.scanningOptions = options ?? new MobileBarcodeScanningOptions ();
 
             Init ();
         }
@@ -70,27 +71,52 @@ namespace ZXing.Mobile
 
         void Init ()
         {
-            this.surfaceHolder = Holder;
-            this.surfaceHolder.AddCallback (this);
-            this.surfaceHolder.SetType (SurfaceType.PushBuffers);
-
-            this.autoFocusTokenCancelSrc = new CancellationTokenSource ();
+            tcsSurfaceReady = new TaskCompletionSource<object> ();
+            Holder.AddCallback (this);
+            Holder.SetType (SurfaceType.PushBuffers);
         }
 
         public void SurfaceCreated (ISurfaceHolder holder)
         {
-            OnSurfaceCreated();
+            
         }
 
-        bool surfaceCreated = false;
-
-        void OnSurfaceCreated ()
+        public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
         {
-            surfaceCreated = true;
+            tcsSurfaceReady.TrySetResult (null);
+
+            if (wasStarted) {
+                SetupCamera ().ContinueWith (t => {
+                    MobileBarcodeScanner.LogError ("SetupCamera Failed: {0}", t.Exception);
+                }, TaskContinuationOptions.OnlyOnFaulted);
+            }
+        }
+
+        public void SurfaceDestroyed (ISurfaceHolder holder)
+        {
+            ShutdownCamera ();
+
+            if (camera != null) {
+                var theCamera = camera;
+                camera = null;
+
+                theCamera.SetPreviewCallback (null);
+                theCamera.StopPreview ();
+                theCamera.Release ();
+            }
+            tcsSurfaceReady = new TaskCompletionSource<object> ();
+            ReleaseExclusiveAccess ();
+        }
+
+        async Task SetupCamera ()
+        {
+            if (camera != null)
+                return;
+
+            await tcsSurfaceReady.Task;
+            
             lastPreviewAnalysis = DateTime.UtcNow.AddMilliseconds (this.scanningOptions.InitialDelayBeforeAnalyzingFrames);
             isAnalyzing = true;
-
-            Console.WriteLine ("StartScanning");
 
             CheckCameraPermissions ();
 
@@ -134,35 +160,21 @@ namespace ZXing.Mobile
                     camera = Camera.Open ();
                 }
 
-                if (camera == null)
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Camera is null :(");
-
-                camera.SetPreviewCallback (this);
-
+                if (camera != null)
+                    camera.SetPreviewCallback (this);
+                else {
+                    MobileBarcodeScanner.LogWarn (MobileBarcodeScanner.TAG, "Camera is null :(");
+                    return;
+                }
+                
             } catch (Exception ex) {
                 ShutdownCamera ();
-
-                Console.WriteLine ("Setup Error: " + ex);
-            }
-
-            PerformanceCounter.Stop (perf, "Camera took {0}ms");
-        }
-
-        bool surfaceChanged = false;
-
-        public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
-        {
-            OnSurfaceChanged();
-        }
-
-        void OnSurfaceChanged ()
-        {
-            surfaceChanged = true;
-
-            if (camera == null)
+                MobileBarcodeScanner.LogError ("Setup Error: {0}", ex);
                 return;
+            }
+            PerformanceCounter.Stop (perf, "Setup Camera took {0}ms");
 
-            var perf = PerformanceCounter.Start ();
+            perf = PerformanceCounter.Start ();
 
             var parameters = camera.GetParameters ();
             parameters.PreviewFormat = ImageFormatType.Nv21;
@@ -240,10 +252,7 @@ namespace ZXing.Mobile
             camera.SetPreviewDisplay (this.Holder);
             camera.StartPreview ();
 
-            PerformanceCounter.Stop (perf, "SurfaceChanged took {0}ms");
-
-            // Reset cancel token source so we can do things like autofocus
-            autoFocusTokenCancelSrc = new CancellationTokenSource();
+            PerformanceCounter.Stop (perf, "Setup Camera Parameters took {0}ms");
 
             // Docs suggest if Auto or Macro modes, we should invoke AutoFocus at least once
             var currentFocusMode = camera.GetParameters ().FocusMode;
@@ -252,33 +261,7 @@ namespace ZXing.Mobile
                 AutoFocus ();
         }
 
-        public void SurfaceDestroyed (ISurfaceHolder holder)
-        {
-            ShutdownCamera();
 
-            autoFocusTokenCancelSrc.Cancel ();
-
-            if (camera != null) {
-                var theCamera = camera;
-                camera = null;
-
-                theCamera.SetPreviewCallback (null);
-                theCamera.StopPreview ();
-                theCamera.Release ();
-            }
-            ReleaseExclusiveAccess ();
-        }
-
-
-        public byte[] rotateCounterClockwise (byte[] data, int width, int height)
-        {
-            var rotatedData = new byte[data.Length];
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++)
-                    rotatedData [x * height + height - y - 1] = data [x + y * width];
-            }
-            return rotatedData;
-        }
 
         public void OnPreviewFrame (byte[] bytes, Android.Hardware.Camera camera)
         {
@@ -386,13 +369,7 @@ namespace ZXing.Mobile
             var touchX = e.GetX (mostRecentPointer);
             var touchY = e.GetY (mostRecentPointer);
 
-            // The bounds for focus areas are actually -1000 to 1000
-            // So we need to translate the touch coordinates to this scale
-            var focusX = (touchX / Width * 2000) - 1000;
-            var focusY = (touchY / Height * 2000) - 1000;
-
-            // Call the autofocus with our coords
-            AutoFocus ((int)focusX, (int)focusY, true);
+            AutoFocus ((int)touchX, (int)touchY);
 
             return r;
         }
@@ -404,7 +381,13 @@ namespace ZXing.Mobile
 
         public void AutoFocus (int x, int y)
         {
-            AutoFocus (x, y, true);
+            // The bounds for focus areas are actually -1000 to 1000
+            // So we need to translate the touch coordinates to this scale
+            var focusX = (x / Width * 2000) - 1000;
+            var focusY = (y / Height * 2000) - 1000;
+
+            // Call the autofocus with our coords
+            AutoFocus ((int)focusX, (int)focusY, true);
         }
 
         void AutoFocus (int x, int y, bool useCoordinates)
@@ -412,48 +395,46 @@ namespace ZXing.Mobile
             if (camera != null) {
                 var cameraParams = camera.GetParameters ();
 
-                if (!autoFocusTokenCancelSrc.IsCancellationRequested) {
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Requested");
+            Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Requested");
 
-                    // Cancel any previous requests
-                    camera.CancelAutoFocus ();
+                // Cancel any previous requests
+                camera.CancelAutoFocus ();
 
-                    try {
-                        // If we want to use coordinates
-                        // Also only if our camera supports Auto focus mode
-                        // Since FocusAreas only really work with FocusModeAuto set
-                        if (useCoordinates 
-                            && cameraParams.SupportedFocusModes.Contains (Camera.Parameters.FocusModeAuto)) {
-                            // Let's give the touched area a 20 x 20 minimum size rect to focus on
-                            // So we'll offset -10 from the center of the touch and then 
-                            // make a rect of 20 to give an area to focus on based on the center of the touch
-                            x = x - 10;
-                            y = y - 10;
+                try {
+                    // If we want to use coordinates
+                    // Also only if our camera supports Auto focus mode
+                    // Since FocusAreas only really work with FocusModeAuto set
+                    if (useCoordinates 
+                        && cameraParams.SupportedFocusModes.Contains (Camera.Parameters.FocusModeAuto)) {
+                        // Let's give the touched area a 20 x 20 minimum size rect to focus on
+                        // So we'll offset -10 from the center of the touch and then 
+                        // make a rect of 20 to give an area to focus on based on the center of the touch
+                        x = x - 10;
+                        y = y - 10;
 
-                            // Ensure we don't go over the -1000 to 1000 limit of focus area
-                            if (x >= 1000)
-                                x = 980;
-                            if (x < -1000)
-                                x = -1000;
-                            if (y >= 1000)
-                                y = 980;
-                            if (y < -1000)
-                                y = -1000;
+                        // Ensure we don't go over the -1000 to 1000 limit of focus area
+                        if (x >= 1000)
+                            x = 980;
+                        if (x < -1000)
+                            x = -1000;
+                        if (y >= 1000)
+                            y = 980;
+                        if (y < -1000)
+                            y = -1000;
 
-                            // Explicitly set FocusModeAuto since Focus areas only work with this setting
-                            cameraParams.FocusMode = Camera.Parameters.FocusModeAuto;
-                            // Add our focus area
-                            cameraParams.FocusAreas = new List<Camera.Area> {
-                                new Camera.Area (new Rect (x, y, x + 20, y + 20), 1000)
-                            };
-                            camera.SetParameters (cameraParams);
-                        }
-
-                        // Finally autofocus (weather we used focus areas or not)
-                        camera.AutoFocus (this);
-                    } catch (Exception ex) {
-                        Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
+                        // Explicitly set FocusModeAuto since Focus areas only work with this setting
+                        cameraParams.FocusMode = Camera.Parameters.FocusModeAuto;
+                        // Add our focus area
+                        cameraParams.FocusAreas = new List<Camera.Area> {
+                            new Camera.Area (new Rect (x, y, x + 20, y + 20), 1000)
+                        };
+                        camera.SetParameters (cameraParams);
                     }
+
+                    // Finally autofocus (weather we used focus areas or not)
+                    camera.AutoFocus (this);
+                } catch (Exception ex) {
+                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
                 }
             }
         }
@@ -461,9 +442,7 @@ namespace ZXing.Mobile
         int getCameraDisplayOrientation (Activity context)
         {
             var degrees = 0;
-
             var display = context.WindowManager.DefaultDisplay;
-
             var rotation = display.Rotation;
 
             switch (rotation) {
@@ -481,9 +460,7 @@ namespace ZXing.Mobile
                 break;
             }
 
-
-            Camera.CameraInfo info = new Camera.CameraInfo ();
-
+            var info = new Camera.CameraInfo ();
             Camera.GetCameraInfo (cameraId, info);
 
             int correctedDegrees;
@@ -496,6 +473,16 @@ namespace ZXing.Mobile
             }
 
             return correctedDegrees;
+        }
+
+        public byte [] rotateCounterClockwise (byte [] data, int width, int height)
+        {
+            var rotatedData = new byte [data.Length];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++)
+                    rotatedData [x * height + height - y - 1] = data [x + y * width];
+            }
+            return rotatedData;
         }
 
         public void SetCameraDisplayOrientation (Activity context)
@@ -513,8 +500,6 @@ namespace ZXing.Mobile
 
         public void ShutdownCamera ()
         {
-            autoFocusTokenCancelSrc.Cancel ();
-
             var theCamera = camera;
             camera = null;
 
@@ -524,6 +509,7 @@ namespace ZXing.Mobile
                     if (theCamera != null) {
                         try {
                             theCamera.SetPreviewCallback (null);
+                            theCamera.SetPreviewDisplay (null);
                             theCamera.StopPreview ();
                         } catch (Exception ex) {
                             Android.Util.Log.Error (MobileBarcodeScanner.TAG, ex.ToString ());
@@ -573,18 +559,19 @@ namespace ZXing.Mobile
         {
             this.callback = scanResultCallback;
             this.scanningOptions = options ?? MobileBarcodeScanningOptions.Default;
+            wasStarted = true;
 
-            if (surfaceCreated)
-                OnSurfaceCreated();
-
-            if (surfaceChanged)
-                OnSurfaceChanged();
+            SetupCamera ().ContinueWith (t => {
+                if (t.Exception != null)
+                    MobileBarcodeScanner.LogError ("SetupCamera failed: {0}", t.Exception);
+            }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         public void StopScanning ()
         {
             isAnalyzing = false;
             ShutdownCamera ();
+            wasStarted = false;
         }
 
         public void PauseAnalysis ()
@@ -669,7 +656,7 @@ namespace ZXing.Mobile
                     || supportedFlashModes.Contains (Camera.Parameters.FlashModeOn)))
                     hasTorch = CheckTorchPermissions (false);
 
-                return hasTorch.Value;
+                return hasTorch != null && hasTorch.Value;
             }
         }
 
