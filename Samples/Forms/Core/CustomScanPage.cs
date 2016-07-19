@@ -18,7 +18,8 @@ namespace FormsSample
             zxing = new ZXingScannerView
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                AutomationId = "zxingScannerView",
             };
             zxing.OnScanResult += (result) => 
                 Device.BeginInvokeOnMainThread (async () => {
@@ -38,6 +39,7 @@ namespace FormsSample
                 TopText = "Hold your phone up to the barcode",
                 BottomText = "Scanning will happen automatically",
                 ShowFlashButton = zxing.HasTorch,
+                AutomationId = "zxingDefaultOverlay",
             };
             overlay.FlashButtonClicked += (sender, e) => {
                 zxing.IsTorchOn = !zxing.IsTorchOn;

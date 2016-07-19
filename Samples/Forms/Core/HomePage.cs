@@ -21,6 +21,7 @@ namespace FormsSample
         {
             buttonScanDefaultOverlay = new Button {
                 Text = "Scan with Default Overlay",
+                AutomationId = "scanWithDefaultOverlay",
             };
             buttonScanDefaultOverlay.Clicked += async delegate {
                 scanPage = new ZXingScannerPage ();
@@ -39,6 +40,7 @@ namespace FormsSample
 
             buttonScanCustomOverlay = new Button {
                 Text = "Scan with Custom Overlay",
+                AutomationId = "scanWithCustomOverlay",
             };
             buttonScanCustomOverlay.Clicked += async delegate {
                 // Create our custom overlay
@@ -70,6 +72,7 @@ namespace FormsSample
 
             buttonScanContinuously = new Button {
                 Text = "Scan Continuously",
+                AutomationId = "scanContinuously",
             };
             buttonScanContinuously.Clicked += async delegate {
                 scanPage = new ZXingScannerPage ();
@@ -81,7 +84,8 @@ namespace FormsSample
             };
 
             buttonScanCustomPage = new Button {
-                Text = "Scan Continuously",
+                Text = "Scan with Custom Page",
+                AutomationId = "scanWithCustomPage",
             };
             buttonScanCustomPage.Clicked += async delegate {
                 var customScanPage = new CustomScanPage ();
@@ -90,7 +94,8 @@ namespace FormsSample
 
 
             buttonGenerateBarcode = new Button {
-                Text = "Barcode Generator"
+                Text = "Barcode Generator",
+                AutomationId = "barcodeGenerator",
             };
             buttonGenerateBarcode.Clicked += async delegate {
                 await Navigation.PushAsync (new BarcodePage ());    
@@ -100,6 +105,7 @@ namespace FormsSample
             stack.Children.Add (buttonScanDefaultOverlay);
             stack.Children.Add (buttonScanCustomOverlay);
             stack.Children.Add (buttonScanContinuously);
+            stack.Children.Add (buttonScanCustomPage);
             stack.Children.Add (buttonGenerateBarcode);
 
             Content = stack;

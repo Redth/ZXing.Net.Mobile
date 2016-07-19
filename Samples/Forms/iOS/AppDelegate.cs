@@ -16,6 +16,9 @@ namespace FormsSample.iOS
                        
             global::ZXing.Net.Mobile.Forms.iOS.Platform.Init ();
 
+            // Enable test cloud
+            Xamarin.Calabash.Start();
+
             LoadApplication (new App ());
 
             return base.FinishedLaunching (app, options);
