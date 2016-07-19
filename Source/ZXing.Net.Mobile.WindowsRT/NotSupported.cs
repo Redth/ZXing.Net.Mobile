@@ -34,6 +34,11 @@ namespace ZXing.Mobile
             throw ex;
         }
 
+        public override Task ScanContinuouslyAsync(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            throw ex;
+        }
+
         public override void Cancel()
         {
             throw ex;

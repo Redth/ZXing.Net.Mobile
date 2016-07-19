@@ -35,6 +35,7 @@ namespace ZXing.Mobile
         public static event Action OnRequestToggleTorch;
         public static event Action OnRequestAutoFocus;
         public static event Action OnRequestCancel;
+        public static event Action OnClosed;
         public static event Func<bool> OnRequestIsTorchOn;
         public static Action OnRequestPauseAnalysis;
         public static Action OnRequestResumeAnalysis;
@@ -91,7 +92,14 @@ namespace ZXing.Mobile
 		{
 			InitializeComponent();
 		    isNewInstance = true;
-		}
+
+            this.BackKeyPress += delegate
+            {
+                var evt = OnClosed;
+                if (evt != null)
+                    evt();
+            };
+        }
 
         void RequestAutoFocusHandler() 
         {

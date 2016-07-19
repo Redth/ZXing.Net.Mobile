@@ -47,35 +47,68 @@ namespace ZXing.Mobile
 				return Android.App.Application.Context;
 		}
 
-		public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<Result> scanHandler)
-		{
-			ScanContinuously (null, options, scanHandler);
-		}
+        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            ScanContinuously(null, options, scanHandler);
+        }
 
-		public void ScanContinuously (Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
-		{
-			var ctx = GetContext (context);
-			var scanIntent = new Intent(ctx, typeof(ZxingActivity));
+        public override async Task ScanContinuouslyAsync(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            await ScanContinuouslyAsync(null, options, scanHandler);
+        }
 
-			scanIntent.AddFlags(ActivityFlags.NewTask);
+        public void ScanContinuously(Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            var ctx = GetContext(context);
+            var scanIntent = new Intent(ctx, typeof(ZxingActivity));
 
-			ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
-			ZxingActivity.CustomOverlayView = this.CustomOverlay;
-			ZxingActivity.ScanningOptions = options;
-			ZxingActivity.ScanContinuously = true;
-			ZxingActivity.TopText = TopText;
-			ZxingActivity.BottomText = BottomText;
+            scanIntent.AddFlags(ActivityFlags.NewTask);
 
-			ZxingActivity.ScanCompletedHandler = (Result result) => 
-			{
-				if (scanHandler != null)
-					scanHandler (result);
-			};
+            ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
+            ZxingActivity.CustomOverlayView = this.CustomOverlay;
+            ZxingActivity.ScanningOptions = options;
+            ZxingActivity.ScanContinuously = true;
+            ZxingActivity.TopText = TopText;
+            ZxingActivity.BottomText = BottomText;
 
-			ctx.StartActivity(scanIntent);
-		}
+            ZxingActivity.ScanCompletedHandler = (Result result) =>
+            {
+                if (scanHandler != null)
+                    scanHandler(result);
+            };
 
-		public override Task<Result> Scan (MobileBarcodeScanningOptions options)
+            ctx.StartActivity(scanIntent);
+        }
+
+        public async Task ScanContinuouslyAsync(Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            var ctx = GetContext(context);
+            var scanIntent = new Intent(ctx, typeof(ZxingActivity));
+
+            scanIntent.AddFlags(ActivityFlags.NewTask);
+
+            ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
+            ZxingActivity.CustomOverlayView = this.CustomOverlay;
+            ZxingActivity.ScanningOptions = options;
+            ZxingActivity.ScanContinuously = true;
+            ZxingActivity.TopText = TopText;
+            ZxingActivity.BottomText = BottomText;
+
+            ZxingActivity.ScanCompletedHandler = (Result result) =>
+            {
+                if (scanHandler != null)
+                    scanHandler(result);
+            };
+
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+            ZxingActivity.CanceledHandler = () => tcs.SetResult(null);
+
+            ctx.StartActivity(scanIntent);
+
+            await tcs.Task;
+        }
+
+        public override Task<Result> Scan (MobileBarcodeScanningOptions options)
 		{
 			return Scan (null, options);
 		}

@@ -28,8 +28,9 @@ namespace ZXing.Mobile
 		ZXingScannerView scannerView;
 
 		public event Action<ZXing.Result> OnScannedResult;
+        public event Action OnClosed;
 
-		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
+        public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }
         public bool ContinuousScanning { get;set; }
 
@@ -166,7 +167,11 @@ namespace ZXing.Mobile
 		public override void ViewWillDisappear(bool animated)
 		{
 			UIApplication.SharedApplication.SetStatusBarStyle(originalStatusBarStyle, false);
-		}
+
+            var evt = this.OnClosed;
+            if (evt != null)
+                evt();
+        }
 
 		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
 		{

@@ -25,7 +25,7 @@ namespace ZXing.Mobile
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
             //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
             ScanPage.ScanningOptions = options;
@@ -36,11 +36,40 @@ namespace ZXing.Mobile
             ScanPage.TopText = TopText;
             ScanPage.BottomText = BottomText;
             ScanPage.ContinuousScanning = true;
-            
+
             dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 rootFrame.Navigate(typeof(ScanPage));
             });
+        }
+
+        public override async Task ScanContinuouslyAsync(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
+            var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
+
+            ScanPage.ScanningOptions = options;
+            ScanPage.ResultFoundAction = scanHandler;
+
+            ScanPage.UseCustomOverlay = this.UseCustomOverlay;
+            ScanPage.CustomOverlay = this.CustomOverlay;
+            ScanPage.TopText = TopText;
+            ScanPage.BottomText = BottomText;
+            ScanPage.ContinuousScanning = true;
+
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+            ScanPage.OnClosed += delegate
+            {
+                tcs.SetResult(null);
+            };
+
+            dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                rootFrame.Navigate(typeof(ScanPage));
+            });
+
+            await tcs.Task;
         }
 
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)

@@ -30,6 +30,13 @@ namespace ZXing.Mobile
         {
             isNewInstance = true;
             this.InitializeComponent();
+
+            this.Unloaded += delegate
+            {
+                var evt = OnClosed;
+                if (evt != null)
+                    evt();
+            };
         }
 
         public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
@@ -48,6 +55,7 @@ namespace ZXing.Mobile
         public static event Action OnRequestToggleTorch;
         public static event Action OnRequestAutoFocus;
         public static event Action OnRequestCancel;
+        public static event Action OnClosed;
         public static event Func<bool> OnRequestIsTorchOn;
         public static event Action OnRequestPauseAnalysis;
         public static event Action OnRequestResumeAnalysis;

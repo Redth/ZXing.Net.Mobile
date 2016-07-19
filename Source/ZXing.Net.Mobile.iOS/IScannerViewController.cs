@@ -22,8 +22,9 @@ namespace ZXing.Mobile
         void ResumeAnalysis ();
 
 		event Action<ZXing.Result> OnScannedResult;
+        event Action OnClosed;
 
-		MobileBarcodeScanningOptions ScanningOptions { get;set; }
+        MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		MobileBarcodeScanner Scanner { get;set; }
 
 		UIViewController AsViewController();

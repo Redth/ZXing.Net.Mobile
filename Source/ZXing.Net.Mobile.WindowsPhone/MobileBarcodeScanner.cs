@@ -50,6 +50,37 @@ namespace ZXing.Mobile
             });
         }
 
+        public override async Task ScanContinuouslyAsync(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
+
+            ScanPage.ScanningOptions = options;
+            ScanPage.ResultFoundAction = (r) =>
+            {
+                scanHandler(r);
+            };
+
+            ScanPage.UseCustomOverlay = this.UseCustomOverlay;
+            ScanPage.CustomOverlay = this.CustomOverlay;
+            ScanPage.TopText = TopText;
+            ScanPage.BottomText = BottomText;
+            ScanPage.ContinuousScanning = true;
+
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+            ScanPage.OnClosed += delegate
+            {
+                tcs.SetResult(null);
+            };
+
+            Dispatcher.BeginInvoke(() =>
+            {
+                ((Microsoft.Phone.Controls.PhoneApplicationFrame)Application.Current.RootVisual).Navigate(
+                    new Uri("/ZXingNetMobile;component/ScanPage.xaml", UriKind.Relative));
+            });
+
+            await tcs.Task;
+        }
+
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
             return Task.Factory.StartNew(new Func<Result>(() =>
