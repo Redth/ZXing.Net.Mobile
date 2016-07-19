@@ -43,13 +43,14 @@ namespace ZXing.Net.Mobile.Forms
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 3,
                 BackgroundColor = Color.Red,
-                Opacity = 0.6
+                Opacity = 0.6,
             }, 0, 1);
 
             topText = new Label {
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.Center,
-                TextColor = Color.White
+                TextColor = Color.White,
+                AutomationId = "zxingDefaultOverlay_TopTextLabel",
             };
             topText.SetBinding( Label.TextProperty, new Binding( nameof( TopText ) ) );
             Children.Add (topText, 0, 0);
@@ -57,7 +58,8 @@ namespace ZXing.Net.Mobile.Forms
             botText = new Label {
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.Center,
-                TextColor = Color.White
+                TextColor = Color.White,
+                AutomationId = "zxingDefaultOverlay_BottomTextLabel",
             };
             botText.SetBinding( Label.TextProperty, new Binding( nameof( BottomText ) ) );
             Children.Add (botText, 0, 2);
@@ -67,6 +69,7 @@ namespace ZXing.Net.Mobile.Forms
                 VerticalOptions = LayoutOptions.Start,
                 Text = "Flash",
                 TextColor = Color.White,
+                AutomationId = "zxingDefaultOverlay_FlashButton",
             };
             flash.SetBinding( Button.IsVisibleProperty, new Binding( nameof( ShowFlashButton ) ) );
             flash.Clicked += (sender, e) => {

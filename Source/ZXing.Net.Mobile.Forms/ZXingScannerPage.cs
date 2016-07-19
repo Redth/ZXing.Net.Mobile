@@ -14,7 +14,8 @@ namespace ZXing.Net.Mobile.Forms
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 VerticalOptions = LayoutOptions.FillAndExpand,
-                Options = options
+                Options = options,
+                AutomationId = "zxingScannerView"
             };
 
             zxing.SetBinding( ZXingScannerView.IsTorchOnProperty, new Binding( nameof( IsTorchOn ) ) );
@@ -29,7 +30,7 @@ namespace ZXing.Net.Mobile.Forms
             };
 
             if (customOverlay == null) {
-                defaultOverlay = new ZXingDefaultOverlay();
+                defaultOverlay = new ZXingDefaultOverlay () { AutomationId = "zxingDefaultOverlay" };
 
                 defaultOverlay.SetBinding( ZXingDefaultOverlay.TopTextProperty, new Binding( nameof( DefaultOverlayTopText ) ) );
                 defaultOverlay.SetBinding( ZXingDefaultOverlay.BottomTextProperty, new Binding( nameof( DefaultOverlayBottomText ) ) );
