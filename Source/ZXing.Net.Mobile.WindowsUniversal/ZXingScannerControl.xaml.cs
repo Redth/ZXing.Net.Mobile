@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.Media;
 using Windows.Media.Capture;
@@ -17,12 +14,9 @@ using Windows.System.Display;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-using ZXing.Mobile;
+using ZXing.Net.Mobile;
+using ZXing.Net.Mobile.Presentation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -100,23 +94,22 @@ namespace ZXing.Mobile
             isAnalyzing = true;
             ScanCallback = scanCallback;
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
-
-            topText.Text = TopText ?? string.Empty;
-            bottomText.Text = BottomText ?? string.Empty;
-
-            if (UseCustomOverlay)
+            
+            if (UseCustomOverlay && CustomOverlay != null)
             {
-                gridCustomOverlay.Children.Clear();
-                if (CustomOverlay != null)
-                    gridCustomOverlay.Children.Add(CustomOverlay);
-
-                gridCustomOverlay.Visibility = Visibility.Visible;
-                gridDefaultOverlay.Visibility = Visibility.Collapsed;
+                OverlayContainer.Content = CustomOverlay;
             }
             else
             {
-                gridCustomOverlay.Visibility = Visibility.Collapsed;
-                gridDefaultOverlay.Visibility = Visibility.Visible;
+                OverlayContainer.Content = new DefaultOverlayControl
+                {
+                    TopText = TopText,
+                    BottomText = BottomText,
+                    CancelButtonText = CancelButtonText,
+                    CancelButtonCommand = new Command(async () => await Cancel()),
+                    FlashButtonText = HasTorch ? FlashButtonText : string.Empty,
+                    FlashButtonCommand = new Command(ToggleTorch)
+                };
             }
 
             // Find which device to use
@@ -167,7 +160,7 @@ namespace ZXing.Mobile
                 return;
 
             // Set the capture element's source to show it in the UI
-            captureElement.Source = mediaCapture;
+            CaptureElement.Source = mediaCapture;
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
@@ -220,8 +213,6 @@ namespace ZXing.Mobile
 
             await SetupAutoFocus();
 
-            captureElement.Stretch = Stretch.UniformToFill;
-            
             var zxing = ScanningOptions.BuildBarcodeReader();
 
             timerPreview = new Timer(async (state) => {
@@ -315,7 +306,7 @@ namespace ZXing.Mobile
         {
             System.Diagnostics.Debug.WriteLine("AutoFocus requested");
             base.OnPointerPressed(e);
-            var pt = e.GetCurrentPoint(captureElement);
+            var pt = e.GetCurrentPoint(CaptureElement);
             await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true);
         }
 
@@ -334,6 +325,8 @@ namespace ZXing.Mobile
         public UIElement CustomOverlay { get; set; }
         public string TopText { get; set; }
         public string BottomText { get; set; }
+        public string CancelButtonText { get; set; }
+        public string FlashButtonText { get; set; }
         public bool UseCustomOverlay { get; set; }
         public bool ContinuousScanning { get; set; }
 
@@ -435,7 +428,7 @@ namespace ZXing.Mobile
                         if (useCoordinates)
                         {
                             var previewEncodingProperties = GetPreviewResolution();
-                            var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, captureElement);
+                            var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, CaptureElement);
                             var focusPreview = ConvertUiTapToPreviewRect(new Point(x, y), new Size(20, 20), previewRect);
                             var regionOfInterest = new RegionOfInterest
                             {
@@ -490,8 +483,6 @@ namespace ZXing.Mobile
             {
                 if (isMediaCaptureInitialized)
                     await mediaCapture.StopPreviewAsync();
-                if (UseCustomOverlay && CustomOverlay != null)
-                    gridCustomOverlay.Children.Remove(CustomOverlay);
             }
             catch { }
             finally {
@@ -521,29 +512,6 @@ namespace ZXing.Mobile
         public async void Dispose()
         {
             await StopScanningAsync();
-            this.gridCustomOverlay.Children.Clear();            
-        }
-
-        protected override void OnTapped(TappedRoutedEventArgs e)
-        {
-            base.OnTapped(e);
-
-            //TODO: Focus
-        }
-        //protected override void OnTap(System.Windows.Input.GestureEventArgs e)
-        //{
-        //    base.OnTap(e);
-
-        //    if (_reader != null)
-        //    {
-        //        //var pos = e.GetPosition(this);
-        //        _reader.Focus();
-        //    }
-        //}
-
-        private void buttonToggleFlash_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleTorch();
         }
 
         /// <summary>

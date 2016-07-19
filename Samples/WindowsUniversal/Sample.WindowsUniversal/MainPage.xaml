@@ -8,6 +8,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Enabled"
     mc:Ignorable="d">
+    <Page.Resources>
+        <Style TargetType="Button" x:Key="DemoButtonStyle">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="10" />
+        </Style>
+    </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid>
@@ -17,30 +24,10 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Name="buttonScanDefault" Grid.Row="0" Click="buttonScanDefault_Click">Scan with Default View</Button>
-            <Button Name="buttonScanCustom" Grid.Row="1" Click="buttonScanCustom_Click">Scan with Custom View</Button>
-            <Button Name="buttonScanContinuously" Grid.Row="2" Click="buttonScanContinuously_Click">Scan Continuously</Button>
-            <Button Name="buttonGenerate" Grid.Row="3" Click="buttonGenerate_Click">Generate Barcode</Button>
-        </Grid>
-        
-        <Grid Name="customOverlay" Visibility="Collapsed">
-            <!-- 
-            This UIElement (Grid) is what we'll actually use for our custom overlay 
-            We can even wire up the button events from our mainpage still.
-            -->
-            <Grid Background="Transparent">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Button Background="Black" Grid.Row="1" Grid.Column="0" Name="buttonCancel">Cancel</Button>
-                <Button Background="Black" Grid.Row="1" Grid.Column="1" Name="buttonFlash">Torch</Button>
-            </Grid>
+            <Button Name="buttonScanDefault" Style="{StaticResource DemoButtonStyle}" Grid.Row="0" Click="buttonScanDefault_Click">Scan with Default View</Button>
+            <Button Name="buttonScanCustom" Style="{StaticResource DemoButtonStyle}" Grid.Row="1" Click="buttonScanCustom_Click">Scan with Custom View</Button>
+            <Button Name="buttonScanContinuously" Style="{StaticResource DemoButtonStyle}" Grid.Row="2" Click="buttonScanContinuously_Click">Scan Continuously</Button>
+            <Button Name="buttonGenerate" Style="{StaticResource DemoButtonStyle}" Grid.Row="3" Click="buttonGenerate_Click">Generate Barcode</Button>
         </Grid>
     </Grid>
 </Page>

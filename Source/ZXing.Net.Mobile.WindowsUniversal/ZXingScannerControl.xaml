@@ -9,52 +9,11 @@
     d:DesignWidth="400">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        
-        <CaptureElement  
-            Grid.Row="0"
-            Grid.Column="0"
-            x:Name="captureElement"  
-            Stretch="Fill" />
+        <CaptureElement x:Name="CaptureElement" Stretch="UniformToFill" />
 
-
-        <Grid Visibility="Collapsed" x:Name="gridCustomOverlay" Grid.Row="0" Grid.Column="0">
-
-        </Grid>
-
-        <Grid x:Name="gridDefaultOverlay" Grid.Row="0" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            
-            <Rectangle Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="Black" Opacity="0.3">
-            </Rectangle>
-
-            <Border Grid.Row="0" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="80">
-                <Button x:Name="buttonToggleFlash" Click="buttonToggleFlash_Click">Flash</Button>
-            </Border>
-            <Border Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock x:Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
-            </Border>
-
-
-            <Rectangle Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="4" Fill="Red" Opacity="0.5"></Rectangle>
-            <Line Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="4" Stroke="Red" StrokeThickness="4" Fill="Red"></Line>
-
-            <Rectangle Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Fill="Black" Opacity="0.3"></Rectangle>
-
-            <Border Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock x:Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
-            </Border>
-
-        </Grid>
-
+        <ContentControl 
+            x:Name="OverlayContainer" 
+            VerticalContentAlignment="Stretch" 
+            HorizontalContentAlignment="Stretch" />
     </Grid>
 </UserControl>

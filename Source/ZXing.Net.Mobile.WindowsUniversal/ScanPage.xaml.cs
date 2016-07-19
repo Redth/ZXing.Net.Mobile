@@ -1,19 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using ZXing.Mobile;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -29,7 +18,7 @@ namespace ZXing.Mobile
         public ScanPage()
         {
             isNewInstance = true;
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
@@ -37,6 +26,8 @@ namespace ZXing.Mobile
         public static UIElement CustomOverlay { get; set; }
         public static string TopText { get; set; }
         public static string BottomText { get; set; }
+        public static string CancelButtonText { get; set; }
+        public static string FlashButtonText { get; set; }
         public static bool UseCustomOverlay { get; set; }
         public static bool ContinuousScanning { get; set; }
 
@@ -148,12 +139,14 @@ namespace ZXing.Mobile
         {
             scannerControl.TopText = TopText;
             scannerControl.BottomText = BottomText;
+            scannerControl.CancelButtonText = CancelButtonText;
+            scannerControl.FlashButtonText = FlashButtonText;
 
             scannerControl.CustomOverlay = CustomOverlay;
             scannerControl.UseCustomOverlay = UseCustomOverlay;
 
             scannerControl.ScanningOptions = ScanningOptions;
-            scannerControl.ContinuousScanning = ScanPage.ContinuousScanning;
+            scannerControl.ContinuousScanning = ContinuousScanning;
 
             OnRequestAutoFocus += RequestAutoFocusHandler;
             OnRequestTorch += RequestTorchHandler;
@@ -200,7 +193,7 @@ namespace ZXing.Mobile
             base.OnNavigatingFrom(e);
         }
 
-        void HandleResult(ZXing.Result result)
+        void HandleResult(Result result)
         {
             LastScanResult = result;
 
@@ -208,14 +201,13 @@ namespace ZXing.Mobile
             if (evt != null)
                 evt(LastScanResult);
 
-            if (!ContinuousScanning)
+            if (!ContinuousScanning || result == null)
             {
                 Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
                {
                    if (Frame.CanGoBack)
                        Frame.GoBack();
                });
-                
             }
         }
     }

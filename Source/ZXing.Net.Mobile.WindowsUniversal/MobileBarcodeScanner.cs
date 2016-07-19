@@ -35,8 +35,10 @@ namespace ZXing.Mobile
             ScanPage.CustomOverlay = this.CustomOverlay;
             ScanPage.TopText = TopText;
             ScanPage.BottomText = BottomText;
+            ScanPage.CancelButtonText = CancelButtonText;
+            ScanPage.FlashButtonText = FlashButtonText;
             ScanPage.ContinuousScanning = true;
-            
+
             dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 rootFrame.Navigate(typeof(ScanPage));
@@ -65,6 +67,9 @@ namespace ZXing.Mobile
                 ScanPage.CustomOverlay = this.CustomOverlay;
                 ScanPage.TopText = TopText;
                 ScanPage.BottomText = BottomText;
+                ScanPage.CancelButtonText = CancelButtonText;
+                ScanPage.FlashButtonText = FlashButtonText;
+                ScanPage.ContinuousScanning = false;
 
                 dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
@@ -112,11 +117,7 @@ namespace ZXing.Mobile
             ScanPage.RequestResumeAnalysis();
         }
 
-        public UIElement CustomOverlay
-        {
-            get;
-            set;
-        }
+        public UIElement CustomOverlay { get; set; }
 
         internal static void Log(string message, params object[] args)
         {
