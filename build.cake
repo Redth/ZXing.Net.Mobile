@@ -7,7 +7,7 @@
 #addin nuget:?package=Cake.FileHelpers
 #addin nuget:?package=Cake.MonoApiTools
 
-var PREVIEW = "beta";
+var PREVIEW = "";
 var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.1.9999");
 var NUGET_VERSION = VERSION;
 
