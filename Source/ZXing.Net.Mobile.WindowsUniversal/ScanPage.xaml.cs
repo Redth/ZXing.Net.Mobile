@@ -24,8 +24,6 @@ namespace ZXing.Mobile
         public static UIElement CustomOverlay { get; set; }
         public static string TopText { get; set; }
         public static string BottomText { get; set; }
-        public static string CancelButtonText { get; set; }
-        public static string FlashButtonText { get; set; }
         public static bool UseCustomOverlay { get; set; }
         public static bool ContinuousScanning { get; set; }
 
@@ -137,8 +135,6 @@ namespace ZXing.Mobile
         {
             scannerControl.TopText = TopText;
             scannerControl.BottomText = BottomText;
-            scannerControl.CancelButtonText = CancelButtonText;
-            scannerControl.FlashButtonText = FlashButtonText;
 
             scannerControl.CustomOverlay = CustomOverlay;
             scannerControl.UseCustomOverlay = UseCustomOverlay;

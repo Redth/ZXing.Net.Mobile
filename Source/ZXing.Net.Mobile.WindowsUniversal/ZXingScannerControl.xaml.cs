@@ -15,8 +15,6 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using ZXing.Net.Mobile;
-using ZXing.Net.Mobile.Presentation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -100,14 +98,10 @@ namespace ZXing.Mobile
             }
             else
             {
-                OverlayContainer.Content = new DefaultOverlayControl
+                OverlayContainer.Content = new ZXingScannerOverlayControl
                 {
                     TopText = TopText,
-                    BottomText = BottomText,
-                    CancelButtonText = CancelButtonText,
-                    CancelButtonCommand = new Command(async () => await Cancel()),
-                    FlashButtonText = HasTorch ? FlashButtonText : string.Empty,
-                    FlashButtonCommand = new Command(ToggleTorch)
+                    BottomText = BottomText
                 };
             }
 
@@ -324,8 +318,6 @@ namespace ZXing.Mobile
         public UIElement CustomOverlay { get; set; }
         public string TopText { get; set; }
         public string BottomText { get; set; }
-        public string CancelButtonText { get; set; }
-        public string FlashButtonText { get; set; }
         public bool UseCustomOverlay { get; set; }
         public bool ContinuousScanning { get; set; }
 

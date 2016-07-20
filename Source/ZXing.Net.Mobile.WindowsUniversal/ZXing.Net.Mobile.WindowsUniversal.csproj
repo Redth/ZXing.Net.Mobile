@@ -117,16 +117,14 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BarcodeWriter.cs" />
-    <Compile Include="DefaultOverlayControl.xaml.cs">
-      <DependentUpon>DefaultOverlayControl.xaml</DependentUpon>
+    <Compile Include="ZXingScannerOverlayControl.xaml.cs">
+      <DependentUpon>ZXingScannerOverlayControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="MobileBarcodeScanner.cs" />
-    <Compile Include="Presentation\Command.cs" />
     <Compile Include="ScanPage.xaml.cs">
       <DependentUpon>ScanPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SoftwareBitmapLuminanceSource.cs" />
-    <Compile Include="StringContentToVisibilityConverter.cs" />
     <Compile Include="VisualTreeHelperExt.cs" />
     <Compile Include="WriteableBitmapRenderer.cs" />
     <Compile Include="ZXingScannerControl.xaml.cs">
@@ -145,7 +143,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="DefaultOverlayControl.xaml">
+    <Page Include="ZXingScannerOverlayControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
