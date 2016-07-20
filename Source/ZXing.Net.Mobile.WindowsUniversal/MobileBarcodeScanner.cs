@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Navigation;
 
 namespace ZXing.Mobile
 {
@@ -10,46 +11,64 @@ namespace ZXing.Mobile
     {
         public MobileBarcodeScanner () : base ()
         {
-            //this.Dispatcher = Windows.Current.Dispatcher;
         }
 
         public MobileBarcodeScanner(CoreDispatcher dispatcher) : base()
         {
-            this.Dispatcher = dispatcher;
+            Dispatcher = dispatcher;
         }
 
         public CoreDispatcher Dispatcher { get; set; }
 
         public Frame RootFrame { get; set; }
 
+        private Frame CurrentFrame
+        {
+            get
+            {
+                var currentFrame = RootFrame ??
+                                   Window.Current.Content as Frame ??
+                                   ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
+
+                var currentPage = currentFrame.Content as Page;
+                if (currentPage != null && currentPage.NavigationCacheMode == NavigationCacheMode.Disabled)
+                    Log("WARNING: you may need to set {0}=\"Enabled\" for your Page to solve problems with updating UI after scanning is completed",
+                        nameof(Page.NavigationCacheMode));
+
+                return currentFrame;
+            }
+        }
+
+        private CoreDispatcher CurrentDispatcher
+        {
+            get { return Dispatcher ?? Window.Current.Dispatcher; }
+        }
+
         public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
-            //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
-            var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
+            var frame = CurrentFrame;
 
+            //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
             ScanPage.ScanningOptions = options;
             ScanPage.ResultFoundAction = scanHandler;
 
-            ScanPage.UseCustomOverlay = this.UseCustomOverlay;
-            ScanPage.CustomOverlay = this.CustomOverlay;
+            ScanPage.UseCustomOverlay = UseCustomOverlay;
+            ScanPage.CustomOverlay = CustomOverlay;
             ScanPage.TopText = TopText;
             ScanPage.BottomText = BottomText;
             ScanPage.CancelButtonText = CancelButtonText;
             ScanPage.FlashButtonText = FlashButtonText;
             ScanPage.ContinuousScanning = true;
 
-            dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            CurrentDispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                rootFrame.Navigate(typeof(ScanPage));
+                frame.Navigate(typeof(ScanPage));
             });
         }
 
         public override Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
-            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
-            var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
-
+            var frame = CurrentFrame;
             return Task.Factory.StartNew(new Func<Result>(() =>
             {
                 var scanResultResetEvent = new System.Threading.ManualResetEvent(false);
@@ -63,17 +82,17 @@ namespace ZXing.Mobile
                     scanResultResetEvent.Set();
                 };
 
-                ScanPage.UseCustomOverlay = this.UseCustomOverlay;
-                ScanPage.CustomOverlay = this.CustomOverlay;
+                ScanPage.UseCustomOverlay = UseCustomOverlay;
+                ScanPage.CustomOverlay = CustomOverlay;
                 ScanPage.TopText = TopText;
                 ScanPage.BottomText = BottomText;
                 ScanPage.CancelButtonText = CancelButtonText;
                 ScanPage.FlashButtonText = FlashButtonText;
                 ScanPage.ContinuousScanning = false;
 
-                dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                CurrentDispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    rootFrame.Navigate(typeof(ScanPage));
+                    frame.Navigate(typeof(ScanPage));
                 });
                 
                 scanResultResetEvent.WaitOne();
@@ -121,7 +140,7 @@ namespace ZXing.Mobile
 
         internal static void Log(string message, params object[] args)
         {
-            System.Diagnostics.Debug.WriteLine(message, args);
+            System.Diagnostics.Debug.WriteLine("ZXING: " + message, args);
         }
     }
 }

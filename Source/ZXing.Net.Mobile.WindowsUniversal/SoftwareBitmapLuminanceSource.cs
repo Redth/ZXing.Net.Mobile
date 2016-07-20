@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 
 namespace ZXing.Mobile
@@ -15,7 +11,6 @@ namespace ZXing.Mobile
     {
         void GetBuffer(out byte* buffer, out uint capacity);
     }
-
 
     public class SoftwareBitmapLuminanceSource : BaseLuminanceSource
     {
@@ -48,11 +43,8 @@ namespace ZXing.Mobile
                 using (var buffer = bitmap.LockBuffer(BitmapBufferAccessMode.Read))
                 using (var reference = buffer.CreateReference())
                 {
-
                     if (reference is IMemoryBufferByteAccess)
                     {
-
-
                         try
                         {
                             // Get a pointer to the pixel buffer
@@ -87,7 +79,7 @@ namespace ZXing.Mobile
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine("Luminance Source Failed: {0}", ex);
+                            MobileBarcodeScanner.Log("Luminance Source Failed: {0}", ex);
                         }
                     }
                 }

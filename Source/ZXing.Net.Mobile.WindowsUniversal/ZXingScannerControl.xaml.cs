@@ -75,7 +75,6 @@ namespace ZXing.Mobile
 
         public void ResumeAnalysis ()
         {
-            
             isAnalyzing = true;
         }
 
@@ -116,7 +115,7 @@ namespace ZXing.Mobile
             var preferredCamera = await GetFilteredCameraOrDefaultAsync(ScanningOptions);
             if (preferredCamera == null)
             {
-                System.Diagnostics.Debug.WriteLine("No camera available");
+                MobileBarcodeScanner.Log("No camera available");
                 isMediaCaptureInitialized = false;
                 return;
             }
@@ -149,11 +148,11 @@ namespace ZXing.Mobile
             }
             catch (UnauthorizedAccessException)
             {
-                System.Diagnostics.Debug.WriteLine("Denied access to the camera");
+                MobileBarcodeScanner.Log("Denied access to the camera");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Exception when init MediaCapture: {0}", ex);
+                MobileBarcodeScanner.Log("Exception when init MediaCapture: {0}", ex);
             }
 
             if (!isMediaCaptureInitialized)
@@ -171,7 +170,7 @@ namespace ZXing.Mobile
             foreach (var ap in availableProperties)
             {
                 var vp = (VideoEncodingProperties)ap;
-                System.Diagnostics.Debug.WriteLine("Camera Preview Resolution: {0}x{1}", vp.Width, vp.Height);
+                MobileBarcodeScanner.Log("Camera Preview Resolution: {0}x{1}", vp.Width, vp.Height);
                 availableResolutions.Add(new CameraResolution { Width = (int)vp.Width, Height = (int)vp.Height });                
             }
             CameraResolution previewResolution = null;
@@ -201,7 +200,7 @@ namespace ZXing.Mobile
             if (previewResolution == null)
                 previewResolution = availableResolutions.LastOrDefault();
 
-            System.Diagnostics.Debug.WriteLine("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
+            MobileBarcodeScanner.Log("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
 
             // Find the matching property based on the selection, again
             var chosenProp = availableProperties.FirstOrDefault(ap => ((VideoEncodingProperties)ap).Width == previewResolution.Width && ((VideoEncodingProperties)ap).Height == previewResolution.Height);
@@ -240,7 +239,7 @@ namespace ZXing.Mobile
 
                 } catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("GetPreviewFrame Failed: {0}", ex);
+                    MobileBarcodeScanner.Log("GetPreviewFrame Failed: {0}", ex);
                 }
 
                 ZXing.Result result = null;
@@ -295,7 +294,7 @@ namespace ZXing.Mobile
             if (selectedCamera == null)
             {
                 var whichCamera = useFront ? "front" : "back";
-                System.Diagnostics.Debug.WriteLine("Finding " + whichCamera + " camera failed, opening first available camera");
+                MobileBarcodeScanner.Log("Finding " + whichCamera + " camera failed, opening first available camera");
                 selectedCamera = videoCaptureDevices.FirstOrDefault();
             }
 
@@ -304,7 +303,7 @@ namespace ZXing.Mobile
 
         protected override async void OnPointerPressed(PointerRoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("AutoFocus requested");
+            MobileBarcodeScanner.Log("AutoFocus requested");
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(CaptureElement);
             await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true);
@@ -467,7 +466,7 @@ namespace ZXing.Mobile
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+                    MobileBarcodeScanner.Log("AutoFocusAsync Error: {0}", ex);
                 }
             }
         }

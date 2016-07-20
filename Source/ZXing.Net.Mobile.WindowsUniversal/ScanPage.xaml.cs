@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -13,11 +14,8 @@ namespace ZXing.Mobile
     /// </summary>
     public sealed partial class ScanPage : Page
     {
-        private bool isNewInstance = false;
-
         public ScanPage()
         {
-            isNewInstance = true;
             InitializeComponent();
         }
 
@@ -155,13 +153,9 @@ namespace ZXing.Mobile
             OnRequestIsTorchOn += RequestIsTorchOnHandler;
             OnRequestPauseAnalysis += RequestPauseAnalysisHandler;
             OnRequestResumeAnalysis += RequestResumeAnalysisHandler;
+            SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
 
             await scannerControl.StartScanningAsync(HandleResult, ScanningOptions);
-
-            if (!isNewInstance && Frame.CanGoBack)
-                Frame.GoBack();
-
-            isNewInstance = false;
 
             base.OnNavigatedTo(e);
         }
@@ -182,6 +176,7 @@ namespace ZXing.Mobile
                 OnRequestIsTorchOn -= RequestIsTorchOnHandler;
                 OnRequestPauseAnalysis -= RequestPauseAnalysisHandler;
                 OnRequestResumeAnalysis -= RequestResumeAnalysisHandler;
+                SystemNavigationManager.GetForCurrentView().BackRequested -= OnBackRequested;
 
                 await scannerControl.StopScanningAsync();
             }
@@ -203,12 +198,23 @@ namespace ZXing.Mobile
 
             if (!ContinuousScanning || result == null)
             {
-                Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
-               {
-                   if (Frame.CanGoBack)
-                       Frame.GoBack();
-               });
+                GoBack();
             }
+        }
+
+        private void OnBackRequested(object sender, BackRequestedEventArgs args)
+        {
+            if (!args.Handled)
+            {
+                args.Handled = true;
+                GoBack();
+            }
+        }
+
+        private void GoBack()
+        {
+            if (Frame.CanGoBack)
+                Frame.GoBack();
         }
     }
 }
