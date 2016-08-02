@@ -16,14 +16,17 @@ namespace Sample.Android.UITests
         [SetUp]
         public void BeforeEachTest ()
         {
+            var deviceId = Environment.GetEnvironmentVariable ("XTC_DEVICE_ID") ?? "";
+
             // TODO: If the Android app being tested is included in the solution then open
             // the Unit Tests window, right click Test Apps, select Add App Project
             // and select the app projects that should be tested.
             app = ConfigureApp
                 .Android
-                // TODO: Update this path to point to your Android app and uncomment the
-                // code if the app is not included in the solution.
-                //.ApkFile ("../../../Android/bin/Debug/UITestsAndroid.apk")
+                .EnableLocalScreenshots ()
+                .PreferIdeSettings ()
+                .DeviceSerial (deviceId)
+                .ApkFile ("../../../../Samples/Android/Sample.Android/bin/Release/com.altusapps.zxingnetmobile.apk")
                 .StartApp ();
         }
 

@@ -27,11 +27,15 @@ namespace Sample.iOS.UITests
             //    #if ENABLE_TEST_CLOUD
             //    Xamarin.Calabash.Start();
             //    #endif
+
+            var deviceId = Environment.GetEnvironmentVariable ("XTC_DEVICE_ID") ?? "";
+
             app = ConfigureApp
                 .iOS
-                // TODO: Update this path to point to your iOS app and uncomment the
-                // code if the app is not included in the solution.
-                //.AppBundle ("../../../iOS/bin/iPhoneSimulator/Debug/Sample.iOS.UITests.iOS.app")
+                .EnableLocalScreenshots ()
+                .PreferIdeSettings ()
+                .AppBundle ("../../../../Samples/iOS/Sample.iOS/bin/iPhone/ZXingNetMobileiOSSample.app")
+                .DeviceIdentifier (deviceId)
                 .StartApp ();
         }
 
