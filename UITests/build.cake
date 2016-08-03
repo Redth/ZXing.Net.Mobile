@@ -9,6 +9,8 @@ var NUNIT_PATH = GetFiles ("../packages/**/nunit.framework.dll").FirstOrDefault 
 
 Task ("Samples").Does (() =>
 {
+	EnsureDirectoryExists ("../output");
+
 	var sampleSlns = new [] {
 		"../Samples/Android/Sample.Android.sln",
 		"../Samples/iOS/Sample.iOS.sln",
