@@ -3,14 +3,23 @@
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
 
-var ANDROID_DEVICES = (EnvironmentVariable ("ANDROID_DEVICES") ?? "00c5d6cd1da7d233").Split (';');
+var ANDROID_DEVICES = (EnvironmentVariable ("ANDROID_DEVICES") ?? "").Split (';');
 var IOS_DEVICES = (EnvironmentVariable ("IOS_DEVICES") ?? "").Split (';');
 var NUNIT_PATH = GetFiles ("../packages/**/nunit.framework.dll").FirstOrDefault ();
 
 Task ("Samples").Does (() =>
 {
-	NuGetRestore ("../ZXing.Net.Mobile.UITests.sln");
-	DotNetBuild ("../ZXing.Net.Mobile.UITests.sln", c => c.Configuration = "Debug");
+	var sampleSlns = new [] {
+		"../Samples/Android/Sample.Android.sln",
+		"../Samples/iOS/Sample.iOS.sln",
+		"../Samples/Forms/Sample.Forms.Mac.sln",
+		"../ZXing.Net.Mobile.UITests.sln"
+	};
+	
+	foreach (var sln in sampleSlns) {
+		NuGetRestore (sln);
+		DotNetBuild (sln, c => c.Configuration = "Debug");
+	}
 });
 
 Task ("Android.UITests")
@@ -25,7 +34,7 @@ Task ("Android.UITests")
 	foreach (var device in ANDROID_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
 		Information ("Running Tests on: {0}", device);
-		UITest (uitests, new NUnitSettings { });
+		UITest (uitests, new NUnitSettings { ResultsFile = "./output/UITestResult-Android-" + device + ".xml" });
 	}
 });
 
@@ -41,7 +50,7 @@ Task ("Forms.Android.UITests")
 	foreach (var device in ANDROID_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
 		Information ("Running Tests on: {0}", device);
-		UITest (uitests, new NUnitSettings { });
+		UITest (uitests, new NUnitSettings { ResultsFile = "./output/UITestResult-Forms-" + device + ".xml" });
 	}
 });
 
