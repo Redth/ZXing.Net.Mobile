@@ -12,6 +12,8 @@ Task ("Samples").Does (() =>
 	EnsureDirectoryExists ("../output");
 
 	var sampleSlns = new [] {
+		"../ZXing.Net.Mobile.Mac.sln",
+		"../ZXing.Net.Mobile.Forms.Mac.sln",		
 		"../Samples/Android/Sample.Android.sln",
 		"../Samples/iOS/Sample.iOS.sln",
 		"../Samples/Forms/Sample.Forms.Mac.sln",
