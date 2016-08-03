@@ -34,7 +34,7 @@ Task ("Android.UITests")
 	foreach (var device in ANDROID_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
 		Information ("Running Tests on: {0}", device);
-		UITest (uitests, new NUnitSettings { ResultsFile = "./output/UITestResult-Android-" + device + ".xml" });
+		UITest (uitests, new NUnitSettings { ResultsFile = "../output/UITestResult-Android-" + device + ".xml" });
 	}
 });
 
@@ -50,7 +50,7 @@ Task ("Forms.Android.UITests")
 	foreach (var device in ANDROID_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
 		Information ("Running Tests on: {0}", device);
-		UITest (uitests, new NUnitSettings { ResultsFile = "./output/UITestResult-Forms-" + device + ".xml" });
+		UITest (uitests, new NUnitSettings { ResultsFile = "../output/UITestResult-Forms-" + device + ".xml" });
 	}
 });
 
