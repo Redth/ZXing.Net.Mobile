@@ -551,8 +551,7 @@ namespace ZXing.Mobile
         /// </summary>
         private async Task SetPreviewRotationAsync()
         {
-            // Only need to update the orientation if the camera is mounted on the device.
-            if (mediaCapture == null || externalCamera)
+            if (mediaCapture == null)
                 return;
 
             // Calculate which way and how far to rotate the preview.
