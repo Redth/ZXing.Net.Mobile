@@ -5,11 +5,12 @@ using NUnit.Framework;
 using Xamarin.UITest;
 using Xamarin.UITest.Android;
 using Xamarin.UITest.Queries;
+using UITests.Shared;
 
 namespace Sample.Android.UITests
 {
     [TestFixture]
-    public class Tests
+    public class InitializationTests
     {
         AndroidApp app;
 
@@ -28,6 +29,16 @@ namespace Sample.Android.UITests
                 .DeviceSerial (deviceId)
                 .ApkFile ("../../../../Samples/Android/Sample.Android/bin/Release/com.altusapps.zxingnetmobile.apk")
                 .StartApp ();
+
+            app.DisplayBarcode ("http://redth.ca/barcodes/blank.png");
+        }
+
+        [TearDown]
+        public void AfterEachTest ()
+        {
+            if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
+                app.TakeScreenshot ("Failure", TestContext.CurrentContext.Test.Name);
+            }
         }
 
         //[Test]
@@ -39,65 +50,65 @@ namespace Sample.Android.UITests
         [Test]
         public void DefaultOverlay_Initializes ()
         {
-            app.Screenshot ("App Launches");
+            app.TakeScreenshot ("App Launches");
 
             app.Tap (q => q.Id ("buttonScanDefaultView"));
 
             app.WaitForElement (q => q.Class ("ZXingSurfaceView"));
             app.WaitForElement (q => q.Class ("ZxingOverlayView"));
 
-            app.Screenshot ("View Default Scanner");
+            app.TakeScreenshot ("View Default Scanner");
         }
 
         [Test]
         public void ContinuousScanning_Initializes ()
         {
-            app.Screenshot ("App Launches");
+            app.TakeScreenshot ("App Launches");
 
             app.Tap (q => q.Id ("buttonScanContinuous"));
 
             app.WaitForElement (q => q.Class ("ZXingSurfaceView"));
             app.WaitForElement (q => q.Class ("ZxingOverlayView"));
 
-            app.Screenshot ("View Continuous Scanner");
+            app.TakeScreenshot ("View Continuous Scanner");
         }
 
         [Test]
         public void CustomOverlay_Initializes ()
         {
-            app.Screenshot ("App Launches");
+            app.TakeScreenshot ("App Launches");
 
             app.Tap (q => q.Id ("buttonScanCustomView"));
 
             app.WaitForElement (q => q.Class ("ZXingSurfaceView"));
             app.WaitForElement (q => q.Text ("Place a barcode in the camera viewfinder to scan it.  Barcode will scan Automatically."));
 
-            app.Screenshot ("View Custom Overlay Scanner");
+            app.TakeScreenshot ("View Custom Overlay Scanner");
         }
 
         [Test]
         public void FragmentScanner_Initializes ()
         {
-            app.Screenshot ("App Launches");
+            app.TakeScreenshot ("App Launches");
 
             app.Tap (q => q.Id ("buttonFragment"));
 
             app.WaitForElement (q => q.Class ("ZXingSurfaceView"));
             app.WaitForElement (q => q.Class ("ZxingOverlayView"));
 
-            app.Screenshot ("View Fragment Scanner");
+            app.TakeScreenshot ("View Fragment Scanner");
         }
 
         [Test]
         public void BarcodeGenerator_Initializes ()
         {
-            app.Screenshot ("App Launches");
+            app.TakeScreenshot ("App Launches");
 
             app.Tap (q => q.Id ("buttonGenerate"));
 
             app.WaitForElement (q => q.Class ("ImageView").Id ("imageBarcode"));
 
-            app.Screenshot ("View Barcode Generator");
+            app.TakeScreenshot ("View Barcode Generator");
         }
     }
 }
