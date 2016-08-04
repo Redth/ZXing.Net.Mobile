@@ -17,7 +17,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>ZXing Sample</string>
 	<key>MinimumOSVersion</key>
-	<string>9.0</string>
+	<string>7.0</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
@@ -30,5 +30,7 @@
 	<string>Resources/Images.xcassets/LaunchImage.launchimage</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>CFBundleName</key>
+	<string>ZXing Sample</string>
 </dict>
 </plist>
