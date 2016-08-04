@@ -19,6 +19,8 @@ namespace Sample.Android.UITests
         {
             var deviceId = Environment.GetEnvironmentVariable ("XTC_DEVICE_ID") ?? "";
 
+            Console.WriteLine ("Using Device: " + deviceId);
+
             // TODO: If the Android app being tested is included in the solution then open
             // the Unit Tests window, right click Test Apps, select Add App Project
             // and select the app projects that should be tested.
@@ -40,7 +42,9 @@ namespace Sample.Android.UITests
         [TearDown]
         public void AfterEachTest ()
         {
-            if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
+            var status = TestContext.CurrentContext?.Result?.Status ?? TestStatus.Inconclusive;
+
+            if (status == TestStatus.Failed) {
                 try {
                     app.TakeScreenshot ("Failure", TestContext.CurrentContext.Test.Name);
                 } catch { }
