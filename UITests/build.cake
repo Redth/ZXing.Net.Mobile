@@ -48,10 +48,9 @@ Task ("iOS.UITests")
 {
 	var uitests = "./Sample.iOS.UITests/bin/Debug/Sample.iOS.UITests.dll";
 
-	DotNetBuild ("../Samples/iOS/Sample.iOS/Sample.iOS.csproj", c => {
+	MDToolBuild ("../Samples/iOS/Sample.iOS/Sample.iOS.csproj", c => {
 		c.Configuration = "Release";
-		c.Properties ["Platform"] = new [] { "iPhone" }; 
-	});
+	}); 
 
 	foreach (var device in IOS_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
