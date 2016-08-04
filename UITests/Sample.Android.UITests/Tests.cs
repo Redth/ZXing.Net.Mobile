@@ -31,6 +31,7 @@ namespace Sample.Android.UITests
                 .StartApp ();
 
             app.DisplayBarcode ("http://redth.ca/barcodes/blank.png");
+            app.WakeUpAndroidDevice ();
         }
 
         [TearDown]
