@@ -38,7 +38,9 @@ namespace Sample.Android.UITests
         public void AfterEachTest ()
         {
             if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
-                app.TakeScreenshot ("Failure", TestContext.CurrentContext.Test.Name);
+                try {
+                    app.TakeScreenshot ("Failure", TestContext.CurrentContext.Test.Name);
+                } catch { }
             }
         }
 
