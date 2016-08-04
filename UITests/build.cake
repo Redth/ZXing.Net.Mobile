@@ -48,7 +48,7 @@ Task ("iOS.UITests")
 {
 	var uitests = "./Sample.iOS.UITests/bin/Debug/Sample.iOS.UITests.dll";
 
-	DotNetBuild ("../Samples/iOS/Sample.iOS/Sample.iOS.csproj", false, c => {
+	DotNetBuild ("../Samples/iOS/Sample.iOS/Sample.iOS.csproj", c => {
 			c.Configuration = "Release";
 			c.Platform = "iPhone";
 		});
