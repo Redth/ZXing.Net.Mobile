@@ -52,10 +52,10 @@ namespace UITests.Shared
             //checks if screen is on/off. Two versions for different android versions.
             if (power.Contains ("mScreenOn=false") || power.Contains ("Display Power: state=OFF")) {
                 //Sends keycode for power on
-                RunProcess (adbExe, "shell input keyevent 26");
+                RunProcess (adbExe, "-s " + app.Device.DeviceIdentifier + " shell input keyevent 26");
                 //Sends keycode for menu button. This will unlock stock android lockscreen. 
                 //Does nothing if lockscreen is disabled
-                RunProcess (adbExe, "shell input keyevent 82");
+                RunProcess (adbExe, "-s " + app.Device.DeviceIdentifier + " shell input keyevent 82");
             }
         }
 
