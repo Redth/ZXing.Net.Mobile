@@ -73,7 +73,7 @@ namespace UITests.Shared
         {
             var p = Process.Start (new ProcessStartInfo {
                 RedirectStandardOutput = true,
-                UseShellExecute = true,
+                UseShellExecute = false,
                 FileName = executable,
                 Arguments = args
             });
