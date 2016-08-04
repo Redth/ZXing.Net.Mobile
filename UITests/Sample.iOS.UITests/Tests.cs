@@ -25,8 +25,8 @@ namespace Sample.iOS.UITests
                 .iOS
                 .EnableLocalScreenshots ()
                 .PreferIdeSettings ()
-                .AppBundle ("../../../../Samples/iOS/Sample.iOS/bin/iPhone/Release/ZXingNetMobileiOSSample.app")
                 .DeviceIdentifier (deviceId)
+                .InstalledApp ("com.zxing.net.mobile.sample")
                 .StartApp ();
 
             try {

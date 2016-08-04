@@ -53,6 +53,15 @@ Task ("iOS.UITests")
 		c.Properties ["Platform"] = new [] { "iPhone" }; 
 	});
 
+	// Use ios-deploy app to install the iOS .app to device first
+	// UITest requires it be already installed
+	// To get ios-deploy:
+	//   brew install node
+	//   npm install -g ios-deploy
+	StartProcess ("ios-deploy", new ProcessSettings {
+		Arguments = "--uninstall --bundle \"../Samples/iOS/Sample.iOS/bin/iPhone/Release/ZXingNetMobileiOSSample.app\""
+	});
+
 	foreach (var device in IOS_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
 		Information ("Running Tests on: {0}", device);
