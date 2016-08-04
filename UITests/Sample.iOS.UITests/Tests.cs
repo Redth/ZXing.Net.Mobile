@@ -19,6 +19,8 @@ namespace Sample.iOS.UITests
         {
             var deviceId = Environment.GetEnvironmentVariable ("XTC_DEVICE_ID") ?? "";
 
+            Console.WriteLine ("Using Device: " + deviceId);
+
             app = ConfigureApp
                 .iOS
                 .EnableLocalScreenshots ()
