@@ -31,6 +31,8 @@ namespace UITests.Shared
 
             Directory.CreateDirectory (newDir);
 
+            Console.WriteLine ("Moving Screenshot -> " + fullPath);
+
             file.MoveTo (fullPath);
         }
 
@@ -71,6 +73,8 @@ namespace UITests.Shared
 
         public static string RunProcess (string executable, string args)
         {
+            Console.WriteLine ("RunProcess -> " + executable + " " + args);
+
             var p = Process.Start (new ProcessStartInfo {
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
@@ -85,17 +89,23 @@ namespace UITests.Shared
         public static void DisplayBarcode (this Xamarin.UITest.IApp app, string url)
         {
             var host = Environment.GetEnvironmentVariable ("BARCODE_SERVER_URL") ?? "http://localhost:8158";
+            var fullUrl = host + "?url=" + System.Net.WebUtility.UrlEncode (url);
+
+            Console.WriteLine ("DisplayBarcode -> " + fullUrl);
 
             var webClient = new System.Net.WebClient ();
-            webClient.DownloadString (host + "?url=" + System.Net.WebUtility.UrlEncode (url));
+            webClient.DownloadString (fullUrl);
         }
 
         public static void DisplayBarcode (this Xamarin.UITest.IApp app, string format, string value)
         {
             var host = Environment.GetEnvironmentVariable ("BARCODE_SERVER_URL") ?? "http://localhost:8158";
+            var fullUrl = host + "?format=" + System.Net.WebUtility.UrlEncode (format) + "&value=" + System.Net.WebUtility.UrlEncode (value);
+
+            Console.WriteLine ("DisplayBarcode -> " + fullUrl);
 
             var webClient = new System.Net.WebClient ();
-            webClient.DownloadString (host + "?format=" + System.Net.WebUtility.UrlEncode (format) + "&value=" + System.Net.WebUtility.UrlEncode (value));
+            webClient.DownloadString (fullUrl);
         }
     }
 }

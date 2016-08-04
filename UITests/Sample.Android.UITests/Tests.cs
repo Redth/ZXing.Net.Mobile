@@ -30,7 +30,10 @@ namespace Sample.Android.UITests
                 .ApkFile ("../../../../Samples/Android/Sample.Android/bin/Release/com.altusapps.zxingnetmobile.apk")
                 .StartApp ();
 
-            app.DisplayBarcode ("http://redth.ca/barcodes/blank.png");
+            try {
+                app.DisplayBarcode ("http://redth.ca/barcodes/blank.png");
+            } catch { }
+            
             app.WakeUpAndroidDevice ();
         }
 
