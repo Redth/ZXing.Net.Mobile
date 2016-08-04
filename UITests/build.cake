@@ -42,6 +42,24 @@ Task ("Android.UITests")
 	}
 });
 
+Task ("iOS.UITests")
+	.IsDependentOn ("Samples")
+	.Does (() => 
+{
+	var uitests = "./Sample.iOS.UITests/bin/Debug/Sample.iOS.UITests.dll";
+
+	DotNetBuild ("../Samples/iOS/Sample.iOS/Sample.iOS.csproj", false, c => {
+			c.Configuration = "Release";
+			c.Platform = "iPhone";
+		});
+
+	foreach (var device in IOS_DEVICES) {
+		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
+		Information ("Running Tests on: {0}", device);
+		UITest (uitests, new NUnitSettings { ResultsFile = "../output/UITestResult-iOS-" + device + ".xml" });
+	}
+});
+
 Task ("Forms.Android.UITests")
 	.IsDependentOn ("Samples")
 	.Does (() => 

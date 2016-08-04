@@ -109,7 +109,7 @@ namespace Sample.Android.UITests
             app.TakeScreenshot ("View Fragment Scanner");
         }
 
-        [Test]
+        //[Test]
         public void BarcodeGenerator_Initializes ()
         {
             app.TakeScreenshot ("App Launches");
