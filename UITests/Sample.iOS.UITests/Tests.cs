@@ -92,7 +92,7 @@ namespace Sample.iOS.UITests
             app.TakeScreenshot ("View AVCaptureEngine Scanner");
         }
 
-        //[Test]
+        [Test]
         public void BarcodeGenerator_Initializes ()
         {
             app.TakeScreenshot ("App Launches");
