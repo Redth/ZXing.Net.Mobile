@@ -130,6 +130,8 @@ namespace Sample.iOS
             scanner = new MobileBarcodeScanner (this.NavigationController);
             scanner.UseCustomOverlay = false;
 
+            Console.WriteLine ("Scanning " + expectedFormat);
+
             //Start scanning
             scanner.Scan (opts).ContinueWith (t => {
                 var result = t.Result;

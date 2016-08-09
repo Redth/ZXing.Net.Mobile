@@ -124,6 +124,8 @@ namespace Sample.Android
             };
             var barcodeScanner = new MobileBarcodeScanner ();
 
+            Console.WriteLine ("Scanning " + expectedFormat);
+
             //Start scanning
             barcodeScanner.Scan (opts).ContinueWith (t => {
 
