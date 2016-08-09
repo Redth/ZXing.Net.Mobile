@@ -35,7 +35,7 @@ namespace FormsSample
                 PossibleFormats = new List<ZXing.BarcodeFormat> { expectedFormat }
             };
 
-            Console.WriteLine ("Scanning " + expectedFormat);
+            System.Diagnostics.Debug.WriteLine ("Scanning " + expectedFormat);
 
             var scanPage = new ZXingScannerPage (opts);
             scanPage.OnScanResult += (result) => {
