@@ -11,8 +11,9 @@ namespace UITests
         {
             const BarcodeFormat FORMAT = BarcodeFormat.QR_CODE;
             const string VALUE = "Xamarin";
+            const string URL = "http://redth.ca/barcodes/qrcode_xamarin.png";
 
-            app.DisplayBarcode (FORMAT, VALUE);
+            app.DisplayBarcode (URL);
             app.InvokeScanner (FORMAT, platform);
 
             app.AssertUITestBackdoorResult (FORMAT, VALUE);
