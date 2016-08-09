@@ -118,14 +118,14 @@ namespace UITests.Shared
             webClient.DownloadString (fullUrl);
         }
 
-        public static void DisplayBarcode (this Xamarin.UITest.IApp app, string format, string value)
+        public static void DisplayBarcode (this Xamarin.UITest.IApp app, BarcodeFormat format, string value)
         {
             var host = Environment.GetEnvironmentVariable ("BARCODE_SERVER_URL");
             if (string.IsNullOrEmpty (host)) {
                 Console.WriteLine ("No Barcode Display Server specified, skipping...");
                 return;
             }
-            var fullUrl = host + "?format=" + System.Net.WebUtility.UrlEncode (format) + "&value=" + System.Net.WebUtility.UrlEncode (value);
+            var fullUrl = host + "?format=" + System.Net.WebUtility.UrlEncode (format.ToString ()) + "&value=" + System.Net.WebUtility.UrlEncode (value);
 
             Console.WriteLine ("DisplayBarcode -> " + fullUrl);
 
@@ -133,7 +133,7 @@ namespace UITests.Shared
             webClient.DownloadString (fullUrl);
         }
 
-        public static void InvokeScanner (this Xamarin.UITest.IApp app, string format, Xamarin.UITest.Platform platform)
+        public static void InvokeScanner (this Xamarin.UITest.IApp app, BarcodeFormat format, Xamarin.UITest.Platform platform)
         {
             if (platform == Xamarin.UITest.Platform.iOS)
                 app.Invoke ("UITestBackdoorScan:", "");
@@ -141,7 +141,7 @@ namespace UITests.Shared
                 app.Invoke ("UITestBackdoorScan", "");
         }
 
-        public static void AssertUITestBackdoorResult (this Xamarin.UITest.IApp app, string format, string value)
+        public static void AssertUITestBackdoorResult (this Xamarin.UITest.IApp app, BarcodeFormat format, string value)
         {
             // First wait for the result
             app.WaitForElement (q => q.Marked ("Barcode Result"), "Barcode not scanned, no result found", TimeSpan.FromSeconds (10));
@@ -154,5 +154,30 @@ namespace UITests.Shared
 
             app.Tap (q => q.Marked ("OK"));
         }
+    }
+
+    public enum BarcodeFormat
+    {
+        AZTEC,
+        CODABAR,
+        CODE_39,
+        CODE_93,
+        CODE_128,
+        DATA_MATRIX,
+        EAN_8,
+        EAN_13,
+        ITF,
+        MAXICODE,
+        PDF_417,
+        QR_CODE,
+        RSS_14,
+        RSS_EXPANDED,
+        UPC_A,
+        UPC_E,
+        UPC_EAN_EXTENSION,
+        MSI,
+        PLESSEY,
+        IMB,
+        All_1D
     }
 }

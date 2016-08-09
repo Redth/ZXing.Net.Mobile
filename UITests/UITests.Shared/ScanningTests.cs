@@ -9,11 +9,23 @@ namespace UITests
         [Test]
         public void Scan_QRCode_Succeeds ()
         {
-            const string FORMAT = "QR_CODE";
+            const BarcodeFormat FORMAT = BarcodeFormat.QR_CODE;
             const string VALUE = "Xamarin";
 
             app.DisplayBarcode (FORMAT, VALUE);
-            app.InvokeScanner ("QR_CODE", platform);
+            app.InvokeScanner (FORMAT, platform);
+
+            app.AssertUITestBackdoorResult (FORMAT, VALUE);
+        }
+
+        [Test]
+        public void Scan_PDF417_Succeeds ()
+        {
+            const BarcodeFormat FORMAT = BarcodeFormat.PDF_417;
+            const string VALUE = "Xamarin";
+
+            app.DisplayBarcode (FORMAT, VALUE);
+            app.InvokeScanner (FORMAT, platform);
 
             app.AssertUITestBackdoorResult (FORMAT, VALUE);
         }
