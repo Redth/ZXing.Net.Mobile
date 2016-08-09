@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
 
@@ -27,9 +27,15 @@ namespace FormsSample
             // Handle when your app resumes
         }
 
-        public void UITestBackdoorScan ()
+        public void UITestBackdoorScan (string param)
         {
-            var scanPage = new ZXingScannerPage ();
+            var expectedFormat = ZXing.BarcodeFormat.QR_CODE;
+            Enum.TryParse (param, out expectedFormat);
+            var opts = new ZXing.Mobile.MobileBarcodeScanningOptions {
+                PossibleFormats = new List<ZXing.BarcodeFormat> { expectedFormat }
+            };
+
+            var scanPage = new ZXingScannerPage (opts);
             scanPage.OnScanResult += (result) => {
                 scanPage.IsScanning = false;
 

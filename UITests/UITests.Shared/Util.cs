@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
+using ZXing;
 
 namespace UITests.Shared
 {
@@ -136,9 +137,9 @@ namespace UITests.Shared
         public static void InvokeScanner (this Xamarin.UITest.IApp app, BarcodeFormat format, Xamarin.UITest.Platform platform)
         {
             if (platform == Xamarin.UITest.Platform.iOS)
-                app.Invoke ("UITestBackdoorScan:", "");
+                app.Invoke ("UITestBackdoorScan:", format.ToString ());
             else
-                app.Invoke ("UITestBackdoorScan", "");
+                app.Invoke ("UITestBackdoorScan", format.ToString ());
         }
 
         public static void AssertUITestBackdoorResult (this Xamarin.UITest.IApp app, BarcodeFormat format, string value)
@@ -154,30 +155,5 @@ namespace UITests.Shared
 
             app.Tap (q => q.Marked ("OK"));
         }
-    }
-
-    public enum BarcodeFormat
-    {
-        AZTEC,
-        CODABAR,
-        CODE_39,
-        CODE_93,
-        CODE_128,
-        DATA_MATRIX,
-        EAN_8,
-        EAN_13,
-        ITF,
-        MAXICODE,
-        PDF_417,
-        QR_CODE,
-        RSS_14,
-        RSS_EXPANDED,
-        UPC_A,
-        UPC_E,
-        UPC_EAN_EXTENSION,
-        MSI,
-        PLESSEY,
-        IMB,
-        All_1D
     }
 }

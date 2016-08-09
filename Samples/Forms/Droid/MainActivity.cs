@@ -35,7 +35,7 @@ namespace FormsSample.Droid
         [Java.Interop.Export ("UITestBackdoorScan")]
         public Java.Lang.String UITestBackdoorScan (string param)
         {
-            formsApp.UITestBackdoorScan ();
+            formsApp.UITestBackdoorScan (param);
             return new Java.Lang.String ();
         }
     }

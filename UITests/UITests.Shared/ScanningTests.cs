@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UITests.Shared;
+using ZXing;
 
 namespace UITests
 {
@@ -11,9 +13,8 @@ namespace UITests
         {
             const BarcodeFormat FORMAT = BarcodeFormat.QR_CODE;
             const string VALUE = "Xamarin";
-            const string URL = "http://redth.ca/barcodes/qrcode_xamarin.png";
 
-            app.DisplayBarcode (URL);
+            app.DisplayBarcode (FORMAT, VALUE);
             app.InvokeScanner (FORMAT, platform);
 
             app.AssertUITestBackdoorResult (FORMAT, VALUE);

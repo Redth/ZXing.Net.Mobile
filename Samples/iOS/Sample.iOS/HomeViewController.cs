@@ -13,7 +13,7 @@ using CGRect = System.Drawing.RectangleF;
 
 using ZXing;
 using ZXing.Mobile;
-
+using System.Collections.Generic;
 
 namespace Sample.iOS
 {
@@ -118,14 +118,20 @@ namespace Sample.iOS
 			});
 		}
 
-        public void UITestBackdoorScan ()
+        public void UITestBackdoorScan (string param)
         {
+            var expectedFormat = BarcodeFormat.QR_CODE;
+            Enum.TryParse (param, out expectedFormat);
+            var opts = new MobileBarcodeScanningOptions {
+                PossibleFormats = new List<BarcodeFormat> { expectedFormat }
+            };
+
             //Create a new instance of our scanner
             scanner = new MobileBarcodeScanner (this.NavigationController);
             scanner.UseCustomOverlay = false;
 
             //Start scanning
-            scanner.Scan ().ContinueWith (t => {
+            scanner.Scan (opts).ContinueWith (t => {
                 var result = t.Result;
 
                 var format = result?.BarcodeFormat.ToString () ?? string.Empty;

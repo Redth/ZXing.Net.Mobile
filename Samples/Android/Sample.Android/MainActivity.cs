@@ -6,6 +6,7 @@ using Android.Widget;
 using Android.OS;
 using ZXing;
 using ZXing.Mobile;
+using System;
 
 namespace Sample.Android
 {
@@ -116,10 +117,15 @@ namespace Sample.Android
         [Java.Interop.Export ("UITestBackdoorScan")]
         public Java.Lang.String UITestBackdoorScan (string param)
         {
+            var expectedFormat = BarcodeFormat.QR_CODE;
+            Enum.TryParse (param, out expectedFormat);
+            var opts = new MobileBarcodeScanningOptions {
+                PossibleFormats = new List<BarcodeFormat> { expectedFormat }
+            };
             var barcodeScanner = new MobileBarcodeScanner ();
 
             //Start scanning
-            barcodeScanner.Scan ().ContinueWith (t => {
+            barcodeScanner.Scan (opts).ContinueWith (t => {
 
                 var result = t.Result;
 
