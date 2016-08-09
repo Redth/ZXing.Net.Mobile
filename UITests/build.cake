@@ -84,8 +84,44 @@ Task ("Forms.Android.UITests")
 	foreach (var device in ANDROID_DEVICES) {
 		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
 		Information ("Running Tests on: {0}", device);
-		UITest (uitests, new NUnitSettings { ResultsFile = "../output/UITestResult-Forms-" + device + ".xml" });
+		UITest (uitests, new NUnitSettings { ResultsFile = "../output/UITestResult-FormsAndroid-" + device + ".xml" });
 	}
 });
+
+Task ("Forms.iOS.UITests")
+	.IsDependentOn ("Samples")
+	.Does (() => 
+{
+	var uitests = "./FormsSample.UITests/bin/Debug/FormsSample.UITests.dll";
+
+	DotNetBuild ("../Samples/Forms/iOS/FormsSample.iOS.csproj", c => {
+		c.Configuration = "Release";
+		c.Properties ["Platform"] = new [] { "iPhone" }; 
+	});
+
+	foreach (var device in IOS_DEVICES) {
+		System.Environment.SetEnvironmentVariable ("XTC_DEVICE_ID", device);
+		Information ("Running Tests on: {0}", device);
+
+		// Use ios-deploy app to install the iOS .app to device first
+		// UITest requires it be already installed
+		// To get ios-deploy:
+		//   brew install node
+		//   npm install -g ios-deploy
+		StartProcess ("ios-deploy", new ProcessSettings {
+			Arguments = string.Format ("--uninstall --id \"{0}\" --bundle \"{1}\"",
+					device,
+					"../Samples/Forms/iOS/bin/iPhone/Release/FormsSampleiOS.app")
+		});
+
+		UITest (uitests, new NUnitSettings { ResultsFile = "../output/UITestResult-FormsiOS-" + device + ".xml" });
+	}
+});
+
+Task ("All.UITests")
+	.IsDependentOn ("Android.UITests")
+	.IsDependentOn ("iOS.UITests")
+	.IsDependentOn ("Forms.Android.UITests")
+	.IsDependentOn ("Forms.iOS.UITests");
 
 RunTarget (TARGET);
