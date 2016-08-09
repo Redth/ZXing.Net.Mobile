@@ -10,5 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Util.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScanningTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppInitializer.cs" />
   </ItemGroup>
 </Project>

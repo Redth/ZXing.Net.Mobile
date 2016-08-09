@@ -112,6 +112,35 @@ namespace Sample.Android
 
 			this.RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
 		}
+
+        [Java.Interop.Export ("UITestBackdoorScan")]
+        public Java.Lang.String UITestBackdoorScan (string param)
+        {
+            var barcodeScanner = new MobileBarcodeScanner ();
+
+            //Start scanning
+            barcodeScanner.Scan ().ContinueWith (t => {
+
+                var result = t.Result;
+
+                var format = result?.BarcodeFormat.ToString () ?? string.Empty;
+                var value = result?.Text ?? string.Empty;
+
+                RunOnUiThread (() => {
+
+                    AlertDialog dialog = null;
+                    dialog = new AlertDialog.Builder (this)
+                                    .SetTitle ("Barcode Result")
+                                    .SetMessage (format + "|" + value)
+                                    .SetNeutralButton ("OK", (sender, e) => {
+                                        dialog.Cancel ();
+                                    }).Create ();
+                    dialog.Show ();
+                });
+            });
+
+            return new Java.Lang.String ();
+        }
 	}
 }
 

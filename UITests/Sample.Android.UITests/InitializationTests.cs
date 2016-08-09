@@ -1,57 +1,34 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Xamarin.UITest;
 using Xamarin.UITest.Android;
-using Xamarin.UITest.Queries;
 using UITests.Shared;
 
-namespace Sample.Android.UITests
+namespace UITests
 {
     [TestFixture]
     public class InitializationTests
     {
         AndroidApp app;
+        Platform platform = Platform.Android;
 
         [SetUp]
         public void BeforeEachTest ()
         {
-            var deviceId = Environment.GetEnvironmentVariable ("XTC_DEVICE_ID") ?? "";
+            app = (AndroidApp)AppInitializer.StartApp (
+                platform, 
+                TestConsts.ApkFile, 
+                null);
 
-            Console.WriteLine ("Using Device: " + deviceId);
-
-            // TODO: If the Android app being tested is included in the solution then open
-            // the Unit Tests window, right click Test Apps, select Add App Project
-            // and select the app projects that should be tested.
-            app = ConfigureApp
-                .Android
-                .EnableLocalScreenshots ()
-                .PreferIdeSettings ()
-                .DeviceSerial (deviceId)
-                .ApkFile ("../../../../Samples/Android/Sample.Android/bin/Release/com.altusapps.zxingnetmobile.apk")
-                .StartApp ();
-
-            try {
-                app.DisplayBarcode ("http://redth.ca/barcodes/blank.png");
-            } catch { }
-            
             app.WakeUpAndroidDevice ();
         }
 
         [TearDown]
         public void AfterEachTest ()
         {
-            var status = TestContext.CurrentContext?.Result?.Status ?? TestStatus.Inconclusive;
-
-            if (status == TestStatus.Failed) {
-                try {
-                    app.TakeScreenshot ("Failure", TestContext.CurrentContext.Test.Name);
-                } catch { }
-            }
+            app.ScreenshotIfFailed ();
         }
 
-        //[Test]
+        // [Test]
         public void Repl ()
         {
             app.Repl ();
@@ -122,4 +99,3 @@ namespace Sample.Android.UITests
         }
     }
 }
-

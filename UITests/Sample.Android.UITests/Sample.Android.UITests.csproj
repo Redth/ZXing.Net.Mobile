@@ -36,7 +36,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tests.cs" />
+    <Compile Include="InitializationTests.cs" />
+    <Compile Include="ScanningTests.cs" />
+    <Compile Include="TestConsts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

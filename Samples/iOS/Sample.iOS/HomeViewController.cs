@@ -117,6 +117,27 @@ namespace Sample.iOS
 				av.Show();
 			});
 		}
+
+        public void UITestBackdoorScan ()
+        {
+            //Create a new instance of our scanner
+            scanner = new MobileBarcodeScanner (this.NavigationController);
+            scanner.UseCustomOverlay = false;
+
+            //Start scanning
+            scanner.Scan ().ContinueWith (t => {
+                var result = t.Result;
+
+                var format = result?.BarcodeFormat.ToString () ?? string.Empty;
+                var value = result?.Text ?? string.Empty;
+
+                BeginInvokeOnMainThread (() => {
+                    var av = UIAlertController.Create ("Barcode Result", format + "|" + value, UIAlertControllerStyle.Alert);
+                    av.AddAction (UIAlertAction.Create ("OK", UIAlertActionStyle.Cancel, null));
+                    PresentViewController (av, true, null);
+                });
+            });
+        }
 	}
 }
 

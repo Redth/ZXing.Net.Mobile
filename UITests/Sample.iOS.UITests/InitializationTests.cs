@@ -1,37 +1,30 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UITests.Shared;
 using Xamarin.UITest;
 using Xamarin.UITest.iOS;
-using Xamarin.UITest.Queries;
+using UITests.Shared;
 
-namespace Sample.iOS.UITests
+namespace UITests
 {
     [TestFixture]
     public class Tests
     {
         iOSApp app;
+        Platform platform = Platform.iOS;
 
         [SetUp]
         public void BeforeEachTest ()
         {
-            var deviceId = Environment.GetEnvironmentVariable ("XTC_DEVICE_ID") ?? "";
+            app = (iOSApp) AppInitializer.StartApp (
+                platform, 
+                null, 
+                TestConsts.iOSBundleId);
+        }
 
-            Console.WriteLine ("Using Device: " + deviceId);
-
-            app = ConfigureApp
-                .iOS
-                .EnableLocalScreenshots ()
-                .PreferIdeSettings ()
-                .DeviceIdentifier (deviceId)
-                .InstalledApp ("com.zxing.net.mobile.sample")
-                .StartApp ();
-
-            try {
-                app.DisplayBarcode ("http://redth.ca/barcodes/blank.png");
-            } catch { }
+        [TearDown]
+        public void AfterEachTest ()
+        {
+            app.ScreenshotIfFailed ();
         }
 
         //[Test]

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using NUnit.Framework;
 
 namespace UITests.Shared
 {
@@ -33,6 +35,11 @@ namespace UITests.Shared
 
             Console.WriteLine ("Moving Screenshot -> " + fullPath);
 
+            try {
+                if (File.Exists (fullPath))
+                    File.Delete (fullPath);
+            } catch { }
+            
             file.MoveTo (fullPath);
         }
 
@@ -48,6 +55,9 @@ namespace UITests.Shared
             if (!string.IsNullOrEmpty (androidHome) && Directory.Exists (androidHome))
                 adbExe = Path.Combine (androidHome, "platform-tools", "adb" + ext);
 
+            if (!File.Exists (adbExe))
+                return;
+            
             //get dumpsys for power stats which includes screen on/off info
             string power = RunProcess (adbExe, "-s " + app.Device.DeviceIdentifier + " shell dumpsys power");
 
@@ -58,6 +68,17 @@ namespace UITests.Shared
                 //Sends keycode for menu button. This will unlock stock android lockscreen. 
                 //Does nothing if lockscreen is disabled
                 RunProcess (adbExe, "-s " + app.Device.DeviceIdentifier + " shell input keyevent 82");
+            }
+        }
+
+        public static void ScreenshotIfFailed (this Xamarin.UITest.IApp app)
+        {
+            var status = TestContext.CurrentContext?.Result?.Status ?? TestStatus.Inconclusive;
+
+            if (status == TestStatus.Failed) {
+                try {
+                    app.TakeScreenshot ("Failure", TestContext.CurrentContext.Test.Name);
+                } catch { }
             }
         }
 
@@ -99,7 +120,11 @@ namespace UITests.Shared
 
         public static void DisplayBarcode (this Xamarin.UITest.IApp app, string format, string value)
         {
-            var host = Environment.GetEnvironmentVariable ("BARCODE_SERVER_URL") ?? "http://localhost:8158";
+            var host = Environment.GetEnvironmentVariable ("BARCODE_SERVER_URL");
+            if (string.IsNullOrEmpty (host)) {
+                Console.WriteLine ("No Barcode Display Server specified, skipping...");
+                return;
+            }
             var fullUrl = host + "?format=" + System.Net.WebUtility.UrlEncode (format) + "&value=" + System.Net.WebUtility.UrlEncode (value);
 
             Console.WriteLine ("DisplayBarcode -> " + fullUrl);
@@ -107,6 +132,27 @@ namespace UITests.Shared
             var webClient = new System.Net.WebClient ();
             webClient.DownloadString (fullUrl);
         }
+
+        public static void InvokeScanner (this Xamarin.UITest.IApp app, string format, Xamarin.UITest.Platform platform)
+        {
+            if (platform == Xamarin.UITest.Platform.iOS)
+                app.Invoke ("UITestBackdoorScan:", "");
+            else
+                app.Invoke ("UITestBackdoorScan", "");
+        }
+
+        public static void AssertUITestBackdoorResult (this Xamarin.UITest.IApp app, string format, string value)
+        {
+            // First wait for the result
+            app.WaitForElement (q => q.Marked ("Barcode Result"), "Barcode not scanned, no result found", TimeSpan.FromSeconds (10));
+
+            app.TakeScreenshot ("Scan Result Found");
+
+            var result = app.Query (q => q.Marked (format + "|" + value));
+
+            Assert.AreEqual (1, result.Count ());
+
+            app.Tap (q => q.Marked ("OK"));
+        }
     }
 }
-
