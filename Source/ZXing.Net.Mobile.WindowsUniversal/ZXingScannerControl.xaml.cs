@@ -550,9 +550,8 @@ namespace ZXing.Mobile
         /// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview
         /// </summary>
         private async Task SetPreviewRotationAsync()
-        {
-            // Only need to update the orientation if the camera is mounted on the device.
-            if (mediaCapture == null || externalCamera)
+        {            
+            if (mediaCapture == null)
                 return;
 
             // Calculate which way and how far to rotate the preview.
