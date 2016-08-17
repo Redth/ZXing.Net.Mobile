@@ -45,6 +45,6 @@
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.pri" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.pri" />
 
         <!-- Portable PCL -->
-        <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\portable-net45+netcore45+wp8+UAP10.0+MonoAndroid403+MonoTouch10+Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />        
+        <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXing.Net.Mobile.Forms.dll" />        
     </files>
 </package>

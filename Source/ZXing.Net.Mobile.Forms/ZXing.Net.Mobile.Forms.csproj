@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>ZXing.Net.Mobile.Forms</RootNamespace>
     <AssemblyName>ZXing.Net.Mobile.Forms</AssemblyName>
-    <TargetFrameworkProfile>Profile78</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
