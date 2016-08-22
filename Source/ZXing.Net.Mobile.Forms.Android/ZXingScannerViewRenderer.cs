@@ -29,9 +29,9 @@ namespace ZXing.Net.Mobile.Forms.Android
             var temp = DateTime.Now;
         }
 
-        ZXingScannerView formsView;
+        protected ZXingScannerView formsView;
 
-        internal ZXingSurfaceView zxingSurface;
+        protected ZXingSurfaceView zxingSurface;
         internal Task<bool> requestPermissionsTask;
 
         protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
