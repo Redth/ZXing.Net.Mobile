@@ -41,7 +41,8 @@ namespace ZXing.Mobile
         async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
             displayOrientation = sender.CurrentOrientation;
-            await SetPreviewRotationAsync();
+            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+            await SetPreviewRotationAsync(props);
         }
 
         // Receive notifications about rotation of the UI and apply any necessary rotation to the preview stream
@@ -171,7 +172,8 @@ namespace ZXing.Mobile
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
-            
+
+
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
             var availableResolutions = new List<CameraResolution>();
@@ -208,20 +210,22 @@ namespace ZXing.Mobile
             if (previewResolution == null)
                 previewResolution = availableResolutions.LastOrDefault();
 
-            System.Diagnostics.Debug.WriteLine("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
+            MobileBarcodeScanner.Log("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
 
             // Find the matching property based on the selection, again
             var chosenProp = availableProperties.FirstOrDefault(ap => ((VideoEncodingProperties)ap).Width == previewResolution.Width && ((VideoEncodingProperties)ap).Height == previewResolution.Height);
+
+            // Pass in the requested preview size properties
+            // so we can set them at the same time as the preview rotation
+            // to save an additional set property call
+            await SetPreviewRotationAsync(chosenProp);
             
-            // Set the selected resolution
-            await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, chosenProp);
-
-            await SetPreviewRotationAsync();
-
-            await SetupAutoFocus();
-
+            // *after* the preview is setup, set this so that the UI layout happens
+            // otherwise the preview gets stuck in a funny place on screen
             captureElement.Stretch = Stretch.UniformToFill;
             
+            await SetupAutoFocus();
+                        
             var zxing = ScanningOptions.BuildBarcodeReader();
 
             timerPreview = new Timer(async (state) => {
@@ -249,7 +253,7 @@ namespace ZXing.Mobile
 
                 } catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("GetPreviewFrame Failed: {0}", ex);
+                    MobileBarcodeScanner.Log ("GetPreviewFrame Failed: {0}", ex);
                 }
 
                 ZXing.Result result = null;
@@ -262,7 +266,7 @@ namespace ZXing.Mobile
                 }
                 catch (Exception ex)
                 {
-                    
+                    MobileBarcodeScanner.Log("Warning: zxing.Decode Failed: {0}", ex);
                 }
 
                 // Check if a result was found
@@ -434,7 +438,9 @@ namespace ZXing.Mobile
                     {
                         if (useCoordinates)
                         {
-                            var previewEncodingProperties = GetPreviewResolution();
+                            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+
+                            var previewEncodingProperties = GetPreviewResolution(props);
                             var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, captureElement);
                             var focusPreview = ConvertUiTapToPreviewRect(new Point(x, y), new Size(20, 20), previewRect);
                             var regionOfInterest = new RegionOfInterest
@@ -481,6 +487,9 @@ namespace ZXing.Mobile
 
         public async Task StopScanningAsync()
         {
+            if (stopping)
+                return;
+
             stopping = true;
             isAnalyzing = false;
 
@@ -512,16 +521,15 @@ namespace ZXing.Mobile
         {
             LastScanResult = null;
 
-           await StopScanningAsync();
+            await StopScanningAsync();
 
-            if (ScanCallback != null)
-                ScanCallback(null);
+            ScanCallback?.Invoke(null);
         }        
 
         public async void Dispose()
         {
             await StopScanningAsync();
-            this.gridCustomOverlay.Children.Clear();            
+            gridCustomOverlay?.Children?.Clear();            
         }
 
         protected override void OnTapped(TappedRoutedEventArgs e)
@@ -549,7 +557,7 @@ namespace ZXing.Mobile
         /// <summary>
         /// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview
         /// </summary>
-        private async Task SetPreviewRotationAsync()
+        private async Task SetPreviewRotationAsync(IMediaEncodingProperties props)
         {
             // Only need to update the orientation if the camera is mounted on the device.
             if (mediaCapture == null || externalCamera)
@@ -564,19 +572,19 @@ namespace ZXing.Mobile
             mediaCapture.SetPreviewRotation(sourceRotation);
 
             // Add rotation metadata to the preview stream to make sure the aspect ratio / dimensions match when rendering and getting preview frames
-            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+            //var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
             props.Properties.Add(RotationKey, rotationDegrees);
-            await mediaCapture.SetEncodingPropertiesAsync(MediaStreamType.VideoPreview, props, null);
-
-            var currentPreviewResolution = GetPreviewResolution();
+            await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, props);
+            
+            var currentPreviewResolution = GetPreviewResolution(props);
             // Setup a frame to use as the input settings
             videoFrame = new VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, (int)currentPreviewResolution.Width, (int)currentPreviewResolution.Height);
         }
 
-        private Size GetPreviewResolution()
+        private Size GetPreviewResolution(IMediaEncodingProperties props)
         {
             // Get our preview properties
-            var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
+            var previewProperties = props as VideoEncodingProperties;
             if (previewProperties != null)
             {
                 var streamWidth = previewProperties.Width;
