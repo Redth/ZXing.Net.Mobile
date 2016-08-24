@@ -56,24 +56,23 @@ namespace ZXing.Common
             // sufficient to check the endpoints
             if (!checkAndNudgePoints(image, points))
                return null;
-            try
+
+            for (int x = 0; x < max; x += 2)
             {
-               for (int x = 0; x < max; x += 2)
-               {
-                  //UPGRADE_WARNING: Data types in Visual C# might be different.  Verify the accuracy of narrowing conversions. "ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?index='!DefaultContextWindowIndex'&keyword='jlca1042'"
-                  bits[x >> 1, y] = image[(int)points[x], (int)points[x + 1]];
-               }
-            }
-            catch (System.IndexOutOfRangeException)
-            {
+               //UPGRADE_WARNING: Data types in Visual C# might be different.  Verify the accuracy of narrowing conversions. "ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?index='!DefaultContextWindowIndex'&keyword='jlca1042'"
+               int imagex = (int)points[x];
+               int imagey = (int)points[x + 1];
+
                // This feels wrong, but, sometimes if the finder patterns are misidentified, the resulting
                // transform gets "twisted" such that it maps a straight line of points to a set of points
                // whose endpoints are in bounds, but others are not. There is probably some mathematical
                // way to detect this about the transformation that I don't know yet.
-               // This results in an ugly runtime exception despite our clever checks above -- can't have
-               // that. We could check each point's coordinates but that feels duplicative. We settle for
-               // catching and wrapping ArrayIndexOutOfBoundsException.
-               return null;
+               if (imagex < 0 || imagex > image.Width || imagey < 0 || imagey > image.Height)
+               {
+                  return null;
+               }
+
+               bits[x >> 1, y] = image[(int)points[x], (int)points[x + 1]];
             }
          }
          return bits;
