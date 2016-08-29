@@ -20,8 +20,8 @@ namespace ZXing.Net.Mobile.Forms.iOS
             var temp = DateTime.Now;
         }
 
-        ZXingScannerView formsView;
-        ZXing.Mobile.ZXingScannerView zxingView;
+        protected ZXingScannerView formsView;
+        protected ZXing.Mobile.ZXingScannerView zxingView;
 
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
         {
