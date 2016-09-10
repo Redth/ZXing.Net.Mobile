@@ -96,15 +96,12 @@ namespace ZXing.OneD.RSS.Expanded
          new[] { FINDER_PAT_A, FINDER_PAT_A, FINDER_PAT_B, FINDER_PAT_B, FINDER_PAT_C, FINDER_PAT_D, FINDER_PAT_D, FINDER_PAT_E, FINDER_PAT_E, FINDER_PAT_F, FINDER_PAT_F },
       };
 
-      // private static readonly int LONGEST_SEQUENCE_SIZE = FINDER_PATTERN_SEQUENCES[FINDER_PATTERN_SEQUENCES.Length - 1].Length;
-
       private const int MAX_PAIRS = 11;
 
       private readonly List<ExpandedPair> pairs = new List<ExpandedPair>(MAX_PAIRS);
       private readonly List<ExpandedRow> rows = new List<ExpandedRow>();
       private readonly int[] startEnd = new int[2];
-      //private readonly int[] currentSequence = new int[LONGEST_SEQUENCE_SIZE];
-      private bool startFromEven = false;
+      private bool startFromEven;
 
       internal List<ExpandedPair> Pairs { get { return pairs; } }
 
@@ -154,7 +151,6 @@ namespace ZXing.OneD.RSS.Expanded
             if (nextPair == null)
                break;
             pairs.Add(nextPair);
-            //System.out.println(this.pairs.size()+" pairs found so far on row "+rowNumber+": "+this.pairs);
             // exit this loop when retrieveNextPair() fails and throws
          }
          if (pairs.Count == 0)
@@ -169,11 +165,10 @@ namespace ZXing.OneD.RSS.Expanded
          }
 
          bool tryStackedDecode = rows.Count != 0;
-         bool wasReversed = false; // TODO: deal with reversed rows
-         storeRow(rowNumber, wasReversed);
+         storeRow(rowNumber, false); // TODO: deal with reversed rows
          if (tryStackedDecode)
          {
-            // When the image is 180-rotated, then rows are sorted in wrong dirrection.
+            // When the image is 180-rotated, then rows are sorted in wrong direction.
             // Try twice with both the directions.
             List<ExpandedPair> ps = checkRows(false);
             if (ps != null)
@@ -194,7 +189,7 @@ namespace ZXing.OneD.RSS.Expanded
       {
          // Limit number of rows we are checking
          // We use recursive algorithm with pure complexity and don't want it to take forever
-         // Stacked barcode can have up to 11 rows, so 25 seems resonable enough
+         // Stacked barcode can have up to 11 rows, so 25 seems reasonable enough
          if (rows.Count > 25)
          {
             rows.Clear();  // We will never have a chance to get result, so clear it
@@ -692,7 +687,7 @@ namespace ZXing.OneD.RSS.Expanded
          }//counters[] has the pixels of the module
 
          const int numModules = 17; //left and right data characters have all the same length
-         float elementWidth = (float)count(counters) / (float)numModules;
+         float elementWidth = (float)ZXing.Common.Detector.MathUtils.sum(counters) / (float)numModules;
 
          // Sanity check: element width for pattern and the character should match
          float expectedElementWidth = (pattern.StartEnd[1] - pattern.StartEnd[0]) / 15.0f;
@@ -793,8 +788,8 @@ namespace ZXing.OneD.RSS.Expanded
 
       private bool adjustOddEvenCounts(int numModules)
       {
-         int oddSum = count(getOddCounts());
-         int evenSum = count(getEvenCounts());
+         int oddSum = ZXing.Common.Detector.MathUtils.sum(getOddCounts());
+         int evenSum = ZXing.Common.Detector.MathUtils.sum(getEvenCounts());
          int mismatch = oddSum + evenSum - numModules;
          bool oddParityBad = (oddSum & 0x01) == 1;
          bool evenParityBad = (evenSum & 0x01) == 0;

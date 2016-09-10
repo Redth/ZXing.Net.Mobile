@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BD0FA561-182D-4A89-BAA7-228693B07862}</ProjectGuid>
     <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
@@ -36,6 +38,7 @@
     <Reference Include="monotouch" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="BarcodeFormat.cs" />
     <Compile Include="BarcodeReader.cs" />
@@ -192,6 +195,7 @@
     <Compile Include="oned\Code39Reader.cs" />
     <Compile Include="oned\Code39Writer.cs" />
     <Compile Include="oned\Code93Reader.cs" />
+    <Compile Include="oned\Code93Writer.cs" />
     <Compile Include="oned\EAN13Reader.cs" />
     <Compile Include="oned\EAN13Writer.cs" />
     <Compile Include="oned\EAN8Reader.cs" />
@@ -214,6 +218,7 @@
     <Compile Include="oned\UPCEANReader.cs" />
     <Compile Include="oned\UPCEANWriter.cs" />
     <Compile Include="oned\UPCEReader.cs" />
+    <Compile Include="oned\UPCEWriter.cs" />
     <Compile Include="oned\rss\AbstractRSSReader.cs" />
     <Compile Include="oned\rss\DataCharacter.cs" />
     <Compile Include="oned\rss\FinderPattern.cs" />
@@ -311,5 +316,4 @@
     <Compile Include="xamarin\SystemColors.cs" />
     <Compile Include="xamarin\BitmapRenderer.monotouch.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
 </Project>
