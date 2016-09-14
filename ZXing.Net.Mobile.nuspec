@@ -15,8 +15,9 @@
         <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
         <dependencies>
 
-        	<group targetFramework="MonoAndroid403">
-        		<dependency id="Xamarin.Android.Support.v4" version="23.0.1.3" />
+        	<group targetFramework="MonoAndroid41">
+                <dependency id="Xamarin.Android.Support.v4" version="23.4.0.1" />
+                <dependency id="Xamarin.GooglePlayServices.Vision" version="29.0.0.2" />
         	</group>
 
             <group targetFramework="wp8">
@@ -26,10 +27,10 @@
         </dependencies>
     </metadata>
     <files>
-        <!-- Android 4.0.3 and higher -->
-        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid403\zxing.portable.dll" />
-        <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid403\ZXingNetMobile.dll" />
+        <!-- Android 4.1 and higher -->
+        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid41\zxing.portable.dll" />
+        <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid41\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid41\ZXingNetMobile.dll" />
 
         <!-- iOS Unified API -->
         <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />

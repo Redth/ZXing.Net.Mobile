@@ -1,21 +1,16 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
 using Android.App;
-using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
-using Android.Widget;
-using System.Drawing;
+using Android.Hardware;
 using Android.Graphics;
 using Android.Content.PM;
-using Android.Hardware;
 using System.Threading.Tasks;
 using System.Threading;
+using ZXing.Mobile.Detectors;
 using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile
@@ -40,7 +35,7 @@ namespace ZXing.Mobile
         int cameraId = 0;
 
         DateTime lastPreviewAnalysis = DateTime.UtcNow;
-        BarcodeReader barcodeReader = null;
+        IDetector barcodeDetector;
         Task processingTask;
         TaskCompletionSource<object> tcsSurfaceReady;
 
@@ -284,32 +279,22 @@ namespace ZXing.Mobile
             var cameraParameters = camera.GetParameters ();
             var width = cameraParameters.PreviewSize.Width;
             var height = cameraParameters.PreviewSize.Height;
-            //var img = new YuvImage(bytes, ImageFormatType.Nv21, cameraParameters.PreviewSize.Width, cameraParameters.PreviewSize.Height, null);	
             lastPreviewAnalysis = DateTime.UtcNow;
 
             processingTask = Task.Factory.StartNew (() => {
                 try {
-
-                    if (barcodeReader == null) {
-                        barcodeReader = new BarcodeReader (null, null, null, (p, w, h, f) => 
-                                              new PlanarYUVLuminanceSource (p, w, h, 0, 0, w, h, false));
-                        //new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
-
-                        if (this.scanningOptions.TryHarder.HasValue)
-                            barcodeReader.Options.TryHarder = this.scanningOptions.TryHarder.Value;
-                        if (this.scanningOptions.PureBarcode.HasValue)
-                            barcodeReader.Options.PureBarcode = this.scanningOptions.PureBarcode.Value;
-                        if (!string.IsNullOrEmpty (this.scanningOptions.CharacterSet))
-                            barcodeReader.Options.CharacterSet = this.scanningOptions.CharacterSet;
-                        if (this.scanningOptions.TryInverted.HasValue)
-                            barcodeReader.TryInverted = this.scanningOptions.TryInverted.Value;
-
-                        if (this.scanningOptions.PossibleFormats != null && this.scanningOptions.PossibleFormats.Count > 0) {
-                            barcodeReader.Options.PossibleFormats = new List<BarcodeFormat> ();
-
-                            foreach (var pf in this.scanningOptions.PossibleFormats)
-                                barcodeReader.Options.PossibleFormats.Add (pf);
+                    if (barcodeDetector == null)
+                    {
+                        if (this.scanningOptions.UseNativeScanning)
+                        {
+                            barcodeDetector = new GoogleVisionDetector(Context);
                         }
+                        else
+                        {
+                            barcodeDetector = new ZXingDetector();
+                        }
+
+                        barcodeDetector.Init(this.scanningOptions);
                     }
 
                     bool rotate = false;
@@ -324,22 +309,21 @@ namespace ZXing.Mobile
                         newHeight = width;
                     }
 
-                    var start = PerformanceCounter.Start ();
-
                     if (rotate)
-                        bytes = rotateCounterClockwise (bytes, width, height);
+                        bytes = rotateCounterClockwise(bytes, width, height);
 
-                    var result = barcodeReader.Decode (bytes, newWidth, newHeight, RGBLuminanceSource.BitmapFormat.Unknown);
+                    var start = PerformanceCounter.Start ();
+                    var result = barcodeDetector.Decode(bytes, newWidth, newHeight);
+                    var imgInfo = $"width: {width}, height: {height}, degrees: {cDegrees}, rotate: {rotate}";
+                    PerformanceCounter.Stop(start, "Decode Time: {0} ms (" + imgInfo + ")");
 
-                    PerformanceCounter.Stop (start, "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " + rotate + ")");
-
-                    if (result == null || string.IsNullOrEmpty (result.Text))
+                    if (string.IsNullOrEmpty(result?.Text))
                         return;
 
-                    Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
+                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
 
                     wasScanned = true;
-                    callback (result);
+                    callback(result);
                 } catch (ReaderException) {
                     Android.Util.Log.Debug (MobileBarcodeScanner.TAG, "No barcode Found");
                     // ignore this exception; it happens every time there is a failed scan
@@ -522,16 +506,6 @@ namespace ZXing.Mobile
                     ReleaseExclusiveAccess ();
                 }
             });
-        }
-
-
-        public Size FindBestPreviewSize (Camera.Parameters p, Size screenRes)
-        {
-            var max = p.SupportedPreviewSizes.Count;
-
-            var s = p.SupportedPreviewSizes [max - 1];
-
-            return new Size (s.Width, s.Height);
         }
 
         private void GetExclusiveAccess ()
