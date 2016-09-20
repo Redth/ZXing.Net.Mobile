@@ -72,7 +72,7 @@ namespace ZXing.Mobile
         {
             if (scanner != null)
             {
-                scanner.ShutdownCamera();
+                scanner.StopScanning();
 
                 frame.RemoveView(scanner);
             }
