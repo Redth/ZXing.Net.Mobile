@@ -1,8 +1,6 @@
 ﻿using System;
 using ZXing;
-#if MONOTOUCH || MONOANDROID
-using Serializable = System.SerializableAttribute;
-#endif
+
 namespace BigIntegerLibrary
 {
    /// <summary>

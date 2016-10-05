@@ -110,7 +110,7 @@ namespace ZXing.QrCode.Internal
             CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding);
             if (eci != null)
             {
-               var eciIsExplicitDisabled = (hints != null && hints.ContainsKey(EncodeHintType.DISABLE_ECI) ? (bool)hints[EncodeHintType.DISABLE_ECI] : false);
+               var eciIsExplicitDisabled = (hints != null && hints.ContainsKey(EncodeHintType.DISABLE_ECI) && hints[EncodeHintType.DISABLE_ECI] != null && Convert.ToBoolean(hints[EncodeHintType.DISABLE_ECI].ToString()));
                if (!eciIsExplicitDisabled)
                {
                   appendECI(eci, headerBits);
@@ -215,11 +215,10 @@ namespace ZXing.QrCode.Internal
       /// <returns></returns>
       private static Mode chooseMode(String content, String encoding)
       {
-         if ("Shift_JIS".Equals(encoding))
+         if ("Shift_JIS".Equals(encoding) && isOnlyDoubleByteKanji(content))
          {
-
             // Choose Kanji mode if all input are double-byte characters
-            return isOnlyDoubleByteKanji(content) ? Mode.KANJI : Mode.BYTE;
+            return Mode.KANJI;
          }
          bool hasNumeric = false;
          bool hasAlphanumeric = false;
