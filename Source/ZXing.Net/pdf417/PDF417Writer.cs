@@ -34,6 +34,11 @@ namespace ZXing.PDF417
       private const int WHITE_SPACE = 30;
 
       /// <summary>
+      /// default error correction level
+      /// </summary>
+      private const int DEFAULT_ERROR_CORRECTION_LEVEL = 2;
+
+      /// <summary>
       /// </summary>
       /// <param name="contents">The contents to encode in the barcode</param>
       /// <param name="format">The barcode format to generate</param>
@@ -56,17 +61,19 @@ namespace ZXing.PDF417
 
          var encoder = new Internal.PDF417();
          var margin = WHITE_SPACE;
-         var errorCorrectionLevel = 2;
+         var errorCorrectionLevel = DEFAULT_ERROR_CORRECTION_LEVEL;
 
          if (hints != null)
          {
-            if (hints.ContainsKey(EncodeHintType.PDF417_COMPACT))
+            if (hints.ContainsKey(EncodeHintType.PDF417_COMPACT) && hints[EncodeHintType.PDF417_COMPACT] != null)
             {
-               encoder.setCompact((Boolean) hints[EncodeHintType.PDF417_COMPACT]);
+               encoder.setCompact(Convert.ToBoolean(hints[EncodeHintType.PDF417_COMPACT].ToString()));
             }
-            if (hints.ContainsKey(EncodeHintType.PDF417_COMPACTION))
+            if (hints.ContainsKey(EncodeHintType.PDF417_COMPACTION) && hints[EncodeHintType.PDF417_COMPACTION] != null)
             {
-               encoder.setCompaction((Compaction) hints[EncodeHintType.PDF417_COMPACTION]);
+               Compaction compactionEnum;
+               if (Enum.TryParse(hints[EncodeHintType.PDF417_COMPACTION].ToString(), out compactionEnum))
+                  encoder.setCompaction(compactionEnum);
             }
             if (hints.ContainsKey(EncodeHintType.PDF417_DIMENSIONS))
             {
@@ -76,17 +83,23 @@ namespace ZXing.PDF417
                                      dimensions.MaxRows,
                                      dimensions.MinRows);
             }
-            if (hints.ContainsKey(EncodeHintType.MARGIN))
+            if (hints.ContainsKey(EncodeHintType.MARGIN) && hints[EncodeHintType.MARGIN] != null)
             {
-               margin = (int)(hints[EncodeHintType.MARGIN]);
+               margin = Convert.ToInt32(hints[EncodeHintType.MARGIN].ToString());
             }
-            if (hints.ContainsKey(EncodeHintType.ERROR_CORRECTION))
+            if (hints.ContainsKey(EncodeHintType.ERROR_CORRECTION) && hints[EncodeHintType.ERROR_CORRECTION] != null)
             {
                var value = hints[EncodeHintType.ERROR_CORRECTION];
                if (value is PDF417ErrorCorrectionLevel ||
                    value is int)
                {
                   errorCorrectionLevel = (int)value;
+               }
+               else
+               {
+                  PDF417ErrorCorrectionLevel errorCorrectionLevelEnum;
+                  if (Enum.TryParse(value.ToString(), out errorCorrectionLevelEnum))
+                     errorCorrectionLevel = (int)errorCorrectionLevelEnum;
                }
             }
             if (hints.ContainsKey(EncodeHintType.CHARACTER_SET))
@@ -102,13 +115,13 @@ namespace ZXing.PDF417
                encoder.setEncoding("UTF-8");
 #endif
             }
-            if (hints.ContainsKey(EncodeHintType.DISABLE_ECI))
+            if (hints.ContainsKey(EncodeHintType.DISABLE_ECI) && hints[EncodeHintType.DISABLE_ECI] != null)
             {
-               encoder.setDisableEci((bool)hints[EncodeHintType.DISABLE_ECI]);
+               encoder.setDisableEci(Convert.ToBoolean(hints[EncodeHintType.DISABLE_ECI].ToString()));
             }
          }
 
-         return bitMatrixFromEncoder(encoder, contents, width, height, margin, errorCorrectionLevel);
+         return bitMatrixFromEncoder(encoder, contents, errorCorrectionLevel, width, height, margin);
       }
 
       /// <summary>
@@ -134,16 +147,15 @@ namespace ZXing.PDF417
       /// </summary>
       private static BitMatrix bitMatrixFromEncoder(Internal.PDF417 encoder,
                                                     String contents,
+                                                    int errorCorrectionLevel,
                                                     int width,
                                                     int height,
-                                                    int margin,
-                                                    int errorCorrectionLevel)
+                                                    int margin)
       {
          encoder.generateBarcodeLogic(contents, errorCorrectionLevel);
 
-         const int lineThickness = 2;
          const int aspectRatio = 4;
-         sbyte[][] originalScale = encoder.BarcodeMatrix.getScaledMatrix(lineThickness, aspectRatio*lineThickness);
+         sbyte[][] originalScale = encoder.BarcodeMatrix.getScaledMatrix(1, aspectRatio);
          bool rotated = false;
          if ((height > width) ^ (originalScale[0].Length < originalScale.Length))
          {
@@ -167,7 +179,7 @@ namespace ZXing.PDF417
          if (scale > 1)
          {
             sbyte[][] scaledMatrix =
-               encoder.BarcodeMatrix.getScaledMatrix(scale*lineThickness, scale*aspectRatio*lineThickness);
+               encoder.BarcodeMatrix.getScaledMatrix(scale, scale*aspectRatio);
             if (rotated)
             {
                scaledMatrix = rotateArray(scaledMatrix);

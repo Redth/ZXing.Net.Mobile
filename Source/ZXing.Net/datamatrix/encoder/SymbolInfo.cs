@@ -166,14 +166,13 @@ namespace ZXing.Datamatrix.Encoder
          return null;
       }
 
-      int getHorizontalDataRegions()
+      private int getHorizontalDataRegions()
       {
          switch (dataRegions)
          {
             case 1:
                return 1;
             case 2:
-               return 2;
             case 4:
                return 2;
             case 16:
@@ -185,12 +184,11 @@ namespace ZXing.Datamatrix.Encoder
          }
       }
 
-      int getVerticalDataRegions()
+      private int getVerticalDataRegions()
       {
          switch (dataRegions)
          {
             case 1:
-               return 1;
             case 2:
                return 1;
             case 4:
@@ -203,7 +201,7 @@ namespace ZXing.Datamatrix.Encoder
                throw new InvalidOperationException("Cannot handle this number of data regions");
          }
       }
-
+      
       public int getSymbolDataWidth()
       {
          return getHorizontalDataRegions() * matrixWidth;

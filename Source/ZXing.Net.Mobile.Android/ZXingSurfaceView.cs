@@ -48,16 +48,16 @@ namespace ZXing.Mobile
         {
             var r = base.OnTouchEvent(e);
 
-            // Get the last 'touch' coordinate from the touch event
-            // (could be multiple coordinates on a drag event)
-            // We only care about where the finger was lifted
-            var mostRecentPointer = e.GetPointerId(e.PointerCount - 1);
-
-            // Get our X / Y coordinates for the most recent pointer
-            var touchX = e.GetX(mostRecentPointer);
-            var touchY = e.GetY(mostRecentPointer);
-
-            AutoFocus((int)touchX, (int)touchY);
+            switch (e.Action)
+            {
+                case MotionEventActions.Down:
+                    return true;
+                case MotionEventActions.Up:
+                    var touchX = e.GetX();
+                    var touchY = e.GetY();
+                    this.AutoFocus((int)touchX, (int)touchY);
+                    break;
+            }
 
             return r;
         }

@@ -15,13 +15,6 @@
  */
 
 using System.IO;
-#if MONOTOUCH
-#if __UNIFIED__
-using UIKit;
-#else
-using MonoTouch.UIKit;
-#endif
-#endif
 
 namespace ZXing.Rendering
 {
@@ -113,5 +106,14 @@ namespace ZXing.Rendering
          return Android.Graphics.Bitmap.CreateBitmap(colors, Width, Height, Android.Graphics.Bitmap.Config.Argb8888);
       }
 #endif
+
+#if MONOTOUCH
+#if __UNIFIED__
+using UIKit;
+#else
+using MonoTouch.UIKit;
+#endif
+#endif
+
    }
 }
