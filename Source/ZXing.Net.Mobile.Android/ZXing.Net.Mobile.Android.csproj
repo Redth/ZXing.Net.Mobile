@@ -45,6 +45,10 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BitmapRenderer.cs" />
     <Compile Include="BitmapWriter.cs" />
+    <Compile Include="CameraAccess\CameraAnalyzer.cs" />
+    <Compile Include="CameraAccess\CameraController.cs" />
+    <Compile Include="CameraAccess\CameraEventsListener.cs" />
+    <Compile Include="CameraAccess\Torch.cs" />
     <Compile Include="MobileBarcodeScanner.cs" />
     <Compile Include="PlatformChecks.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
