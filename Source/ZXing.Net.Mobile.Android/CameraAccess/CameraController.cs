@@ -198,12 +198,14 @@ namespace ZXing.Mobile.CameraAccess
             var parameters = Camera.GetParameters();
             parameters.PreviewFormat = ImageFormatType.Nv21;
 
-            // First try continuous video, then auto focus, then fixed
             var supportedFocusModes = parameters.SupportedFocusModes;
-            if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
-                parameters.FocusMode = Camera.Parameters.FocusModeAuto;
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
+                supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
+                parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
                 parameters.FocusMode = Camera.Parameters.FocusModeContinuousVideo;
+            else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
+                parameters.FocusMode = Camera.Parameters.FocusModeAuto;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
                 parameters.FocusMode = Camera.Parameters.FocusModeFixed;
 
