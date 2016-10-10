@@ -182,7 +182,10 @@ namespace ZXing.Mobile
                 OnRequestPauseAnalysis -= RequestPauseAnalysisHandler;
                 OnRequestResumeAnalysis -= RequestResumeAnalysisHandler;
 
-                scannerControl.StopScanning(); 
+                scannerControl.StopScanning();
+
+                if (!ContinuousScanning)
+                    RaiseEmptyResult();
             }
             catch (Exception ex) {
                 MobileBarcodeScanner.Log("OnNavigatingFrom Error: {0}", ex);
@@ -190,7 +193,16 @@ namespace ZXing.Mobile
 
             base.OnNavigatingFrom(e);
         }
-        
+
+        void RaiseEmptyResult()
+        {
+            LastScanResult = null;
+
+            var evt = ResultFoundAction;
+            if (evt != null)
+                evt(LastScanResult);
+        }
+
         void HandleResult(ZXing.Result result)
         {
             LastScanResult = result;

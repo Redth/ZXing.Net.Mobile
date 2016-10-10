@@ -3,57 +3,74 @@
 #addin nuget:?package=Cake.XCode
 #addin nuget:?package=Cake.Xamarin
 #addin nuget:?package=Cake.Xamarin.Build
+#addin nuget:?package=Cake.SemVer
 #addin nuget:?package=Cake.FileHelpers
 #addin nuget:?package=Cake.MonoApiTools
 
-var PREVIEW = "beta";
-var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.9999");
+var PREVIEW = "";
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.1.9999");
 var NUGET_VERSION = VERSION;
 
 var TARGET = Argument ("t", Argument ("target", "Default"));
 
 // Build a semver string out of the preview if it's specified
 if (!string.IsNullOrEmpty (PREVIEW)) {
-	var v = Version.Parse (VERSION);
-	NUGET_VERSION = string.Format ("{0}.{1}.{2}-{3}{4}", v.Major, v.Minor, v.Build, PREVIEW, v.Revision);
+	var sv = ParseSemVer (VERSION);
+	NUGET_VERSION = CreateSemVer (sv.Major, sv.Minor, sv.Patch, PREVIEW).ToString ();
 }
 
 var buildSpec = new BuildSpec {
-
-	Libs = new [] {
-		new DefaultSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.sln",
-			BuildsOn = BuildPlatforms.Windows,
-		},
-		new DefaultSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
-			BuildsOn = BuildPlatforms.Windows,
-		}
-	},
-
 	Samples = new [] {
 		new DefaultSolutionBuilder { SolutionPath = "./Samples/Android/Sample.Android.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
 		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
-		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsPhone/Sample.WindowsPhone.sln", BuildsOn = BuildPlatforms.Windows },
+		new WpSolutionBuilder { SolutionPath = "./Samples/WindowsPhone/Sample.WindowsPhone.sln", BuildsOn = BuildPlatforms.Windows },
 		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", BuildsOn = BuildPlatforms.Windows },
-		new DefaultSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
+		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
 	},
 
-	NuGets = new [] {
+	// These should only get populated on windows where all the binaries will exist
+	NuGets = new NuGetInfo [] {},
+	Components = new Component [] {},
+};
+
+if (IsRunningOnWindows ()) {
+	buildSpec.Libs = new [] {
+		new WpSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.sln",
+			BuildsOn = BuildPlatforms.Windows,
+		},
+		new WpSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			BuildsOn = BuildPlatforms.Windows,
+		}
+	};
+	
+	buildSpec.NuGets = new [] {
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
-	},
+	};
 
-	Components = new [] {
+	buildSpec.Components = new [] {
 		new Component { ManifestDirectory = "./Component" },
 		new Component { ManifestDirectory = "./Component-Forms" },
-	}
-};
+	};
+} else {
+	buildSpec.Libs = new [] {
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Mac.sln",
+			BuildsOn = BuildPlatforms.Mac,
+		},
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.Mac.sln",
+			BuildsOn = BuildPlatforms.Mac,
+		}
+	};
+}
 
 Task ("component-setup")
 	.IsDependentOn ("samples")
 	.IsDependentOn ("nuget")
-	.Does (() => 
+	.Does (() =>
 {
 	var compVersion = VERSION;
 	if (compVersion.Contains ("-"))
@@ -74,7 +91,7 @@ Task ("component").IsDependentOn ("component-setup").IsDependentOn ("component-b
 
 Task ("Default").IsDependentOn ("component");
 
-Task ("clean").IsDependentOn ("clean-base").Does (() => 
+Task ("clean").IsDependentOn ("clean-base").Does (() =>
 {
 	CleanDirectories ("./Build/");
 

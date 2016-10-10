@@ -11,14 +11,16 @@ namespace ZXing.Mobile
 	{
 		public const string TAG = "ZXing.Net.Mobile";
 
-		static ActivityLifecycleContextListener lifecycleListener = new ActivityLifecycleContextListener ();
+        static ActivityLifecycleContextListener lifecycleListener;
 
 		public static void Initialize (Android.App.Application app)
 		{
 			var version = Build.VERSION.SdkInt;
 
-			if (version >= BuildVersionCodes.IceCreamSandwich) 
-				app.RegisterActivityLifecycleCallbacks (lifecycleListener);
+            if (version >= BuildVersionCodes.IceCreamSandwich) {
+                lifecycleListener = new ActivityLifecycleContextListener ();
+                app.RegisterActivityLifecycleCallbacks (lifecycleListener);
+            }
 		}
 
 		public static void Uninitialize (Android.App.Application app)
@@ -157,5 +159,22 @@ namespace ZXing.Mobile
 				return torch;
 			}
 		}
+
+        internal static void LogDebug (string format, params object [] args)
+        {
+            Android.Util.Log.Debug ("ZXING", format, args);
+        }
+        internal static void LogError (string format, params object [] args)
+        {
+            Android.Util.Log.Error ("ZXING", format, args);
+        }
+        internal static void LogInfo (string format, params object [] args)
+        {
+            Android.Util.Log.Info ("ZXING", format, args);
+        }
+        internal static void LogWarn (string format, params object [] args)
+        {
+            Android.Util.Log.Warn ("ZXING", format, args);
+        }
 	}
 }

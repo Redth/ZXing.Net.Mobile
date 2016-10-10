@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################
 # This is the Cake bootstrapper script that is responsible for
 # downloading Cake and all specified tools from NuGet.
@@ -8,18 +8,20 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOOLS_DIR=$SCRIPT_DIR/tools
 NUGET_EXE=$TOOLS_DIR/nuget.exe
-NUGET3_EXE=$TOOLS_DIR/nuget3.exe
-XC_EXE=$TOOLS_DIR/xamarin-component.exe
 CAKE_EXE=$TOOLS_DIR/Cake/Cake.exe
+
+# BEGIN TEMP WORKAROUND
+SYSIOCOMP=$TOOLS_DIR/System.IO.Compression.dll
+# END TEMP WORKAROUND
 
 # Define default arguments.
 SCRIPT="build.cake"
 TARGET="Default"
 CONFIGURATION="Release"
-VERBOSITY="diagnostic"
-DRYRUN=false
+VERBOSITY="verbose"
+DRYRUN=
 SHOW_VERSION=false
-EXTRA_ARGS=""
+SCRIPT_ARGUMENTS=()
 
 # Parse arguments.
 for i in "$@"; do
@@ -28,22 +30,23 @@ for i in "$@"; do
         -t|--target) TARGET="$2"; shift ;;
         -c|--configuration) CONFIGURATION="$2"; shift ;;
         -v|--verbosity) VERBOSITY="$2"; shift ;;
-        -d|--dryrun) DRYRUN=true ;;
+        -d|--dryrun) DRYRUN="-dryrun" ;;
         --version) SHOW_VERSION=true ;;
-        *) if [[ "$1" && "$2" ]];then EXTRA_ARGS+="$1=$2 "; fi; shift ;;
+        --) shift; SCRIPT_ARGUMENTS+=("$@"); break ;;
+        *) SCRIPT_ARGUMENTS+=("$1") ;;
     esac
     shift
 done
 
 # Make sure the tools folder exist.
-if [ ! -d $TOOLS_DIR ]; then
-  mkdir $TOOLS_DIR
+if [ ! -d "$TOOLS_DIR" ]; then
+  mkdir "$TOOLS_DIR"
 fi
 
 # Make sure that packages.config exist.
-if [ ! -f $TOOLS_DIR/packages.config ]; then
+if [ ! -f "$TOOLS_DIR/packages.config" ]; then
     echo "Downloading packages.config..."
-    curl -Lsfo $TOOLS_DIR/packages.config http://cakebuild.net/bootstrapper/packages
+    curl -Lsfo "$TOOLS_DIR/packages.config" http://cakebuild.net/download/bootstrapper/packages
     if [ $? -ne 0 ]; then
         echo "An error occured while downloading packages.config."
         exit 1
@@ -51,60 +54,48 @@ if [ ! -f $TOOLS_DIR/packages.config ]; then
 fi
 
 # Download NuGet if it does not exist.
-if [ ! -f $NUGET_EXE ]; then
+if [ ! -f "$NUGET_EXE" ]; then
     echo "Downloading NuGet..."
-    curl -Lsfo $NUGET_EXE https://www.nuget.org/nuget.exe
+    # For now grab explicit 3.4.4 version instead of: https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+    curl -Lsfo "$NUGET_EXE" https://dist.nuget.org/win-x86-commandline/v3.4.4/NuGet.exe
     if [ $? -ne 0 ]; then
         echo "An error occured while downloading nuget.exe."
         exit 1
     fi
 fi
 
-# Download NuGet3 if it does not exist.
-if [ ! -f $NUGET3_EXE ]; then
-    echo "Downloading NuGet3..."
-    curl -Lsfo $NUGET3_EXE https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-    if [ $? -ne 0 ]; then
-        echo "An error occured while downloading nuget3.exe."
-        exit 1
-    fi
-fi
-
-# Download xamarin-component.exe if it does not exist.
-if [ ! -f $XC_EXE ]; then
-    echo "Downloading Xamarin-Component.exe..."
-    curl -Lsfo "$TOOLS_DIR/xpkg.zip" https://components.xamarin.com/submit/xpkg
-    if [ $? -ne 0 ]; then
-        echo "An error occured while downloading xamarin-component.exe."
-        exit 1
-    fi
-    unzip -oq "$TOOLS_DIR/xpkg.zip" -d $TOOLS_DIR
-fi
-
-
 # Restore tools from NuGet.
-pushd $TOOLS_DIR >/dev/null
-mono $NUGET_EXE install -ExcludeVersion
+pushd "$TOOLS_DIR" >/dev/null
+mono "$NUGET_EXE" install -ExcludeVersion
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet packages."
     exit 1
 fi
 popd >/dev/null
 
+# BEGIN TEMP WORKAROUND
+# There is a bug in Mono's System.IO.Compression
+# This binary fixes the bug for now
+# Download System.IO.Compression if it does not exist.
+if [ ! -f "$SYSIOCOMP" ]; then
+    echo "Downloading System.IO.Compression.dll ..."
+    curl -Lsfo "$SYSIOCOMP" http://xamarin-components-binaries.s3.amazonaws.com/System.IO.Compression.dll
+    if [ $? -ne 0 ]; then
+        echo "An error occured while downloading System.IO.Compression.dll."
+        exit 1
+    fi
+fi
+# END TEMP WORKAROUND
+
 # Make sure that Cake has been installed.
-if [ ! -f $CAKE_EXE ]; then
+if [ ! -f "$CAKE_EXE" ]; then
     echo "Could not find Cake.exe at '$CAKE_EXE'."
     exit 1
 fi
 
-echo "EXTRA ARGS: $EXTRA_ARGS"
 # Start Cake
 if $SHOW_VERSION; then
-    mono $CAKE_EXE -version
-elif $DRYRUN; then
-    mono $CAKE_EXE $SCRIPT -verbosity=$VERBOSITY -configuration=$CONFIGURATION -target=$TARGET -dryrun $EXTRA_ARGS
+    exec mono "$CAKE_EXE" -version
 else
-    mono $CAKE_EXE $SCRIPT -verbosity=$VERBOSITY -configuration=$CONFIGURATION -target=$TARGET $EXTRA_ARGS
+    exec mono "$CAKE_EXE" $SCRIPT -verbosity=$VERBOSITY -configuration=$CONFIGURATION -target=$TARGET $DRYRUN "${SCRIPT_ARGUMENTS[@]}"
 fi
-
-exit $?

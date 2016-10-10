@@ -1,24 +1,69 @@
+<#
+
+.SYNOPSIS
+This is a Powershell script to bootstrap a Cake build.
+
+.DESCRIPTION
+This Powershell script will download NuGet if missing, restore NuGet tools (including Cake)
+and execute your Cake build script with the parameters you provide.
+
+.PARAMETER Script
+The build script to execute.
+.PARAMETER Target
+The build script target to run.
+.PARAMETER Configuration
+The build configuration to use.
+.PARAMETER Verbosity
+Specifies the amount of information to be displayed.
+.PARAMETER Experimental
+Tells Cake to use the latest Roslyn release.
+.PARAMETER WhatIf
+Performs a dry run of the build script.
+No tasks will be executed.
+.PARAMETER Mono
+Tells Cake to use the Mono scripting engine.
+
+.LINK
+http://cakebuild.net
+
+#>
+
+[CmdletBinding()]
 Param(
     [string]$Script = "build.cake",
     [string]$Target = "Default",
     [string]$Configuration = "Release",
     [ValidateSet("Quiet", "Minimal", "Normal", "Verbose", "Diagnostic")]
-    [string]$Verbosity = "Verbose",
+    [string]$Verbosity = "Diagnostic",
     [switch]$Experimental,
     [Alias("DryRun","Noop")]
-    [switch]$WhatIf
+    [switch]$WhatIf,
+    [switch]$Mono,
+    [switch]$SkipToolPackageRestore,
+    [Parameter(Position=0,Mandatory=$false,ValueFromRemainingArguments=$true)]
+    [string[]]$ScriptArgs
 )
 
+Write-Host "Preparing to run build script..."
+
+$PS_SCRIPT_ROOT = split-path -parent $MyInvocation.MyCommand.Definition;
 $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
 $NUGET_EXE = Join-Path $TOOLS_DIR "nuget.exe"
-$NUGET3_EXE = Join-Path $TOOLS_DIR "nuget3.exe"
-$PACKAGES_CONFIG = Join-Path $TOOLS_DIR "packages.config"
+$NUGET_URL = "http://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
 $CAKE_EXE = Join-Path $TOOLS_DIR "Cake/Cake.exe"
-$XC_EXE = Join-Path $TOOLS_DIR "xamarin-component.exe"
+$PACKAGES_CONFIG = Join-Path $TOOLS_DIR "packages.config"
+
+# Should we use mono?
+$UseMono = "";
+if($Mono.IsPresent) {
+    Write-Verbose -Message "Using the Mono based scripting engine."
+    $UseMono = "-mono"
+}
 
 # Should we use the new Roslyn?
 $UseExperimental = "";
-if($Experimental.IsPresent) {
+if($Experimental.IsPresent -and !($Mono.IsPresent)) {
+    Write-Verbose -Message "Using experimental version of Roslyn."
     $UseExperimental = "-experimental"
 }
 
@@ -29,53 +74,67 @@ if($WhatIf.IsPresent) {
 }
 
 # Make sure tools folder exists
-if (!(Test-Path $TOOLS_DIR)) {
-    New-Item -ItemType directory -Path $TOOLS_DIR | Out-Null
+if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
+    Write-Verbose -Message "Creating tools directory..."
+    New-Item -Path $TOOLS_DIR -Type directory | out-null
 }
 
-# Make sure packages.config exists where we expect it.
+# Make sure that packages.config exist.
 if (!(Test-Path $PACKAGES_CONFIG)) {
-    Invoke-WebRequest -Uri http://cakebuild.net/bootstrapper/packages -OutFile $PACKAGES_CONFIG
+    Write-Verbose -Message "Downloading packages.config..."
+    try { Invoke-WebRequest -Uri http://cakebuild.net/download/bootstrapper/packages -OutFile $PACKAGES_CONFIG } catch {
+        Throw "Could not download packages.config."
+    }
 }
 
-# Make sure NuGet exists where we expect it.
+# Try find NuGet.exe in path if not exists
 if (!(Test-Path $NUGET_EXE)) {
-    Invoke-WebRequest -Uri http://nuget.org/nuget.exe -OutFile $NUGET_EXE
+    Write-Verbose -Message "Trying to find nuget.exe in PATH..."
+    $existingPaths = $Env:Path -Split ';' | Where-Object { Test-Path $_ }
+    $NUGET_EXE_IN_PATH = Get-ChildItem -Path $existingPaths -Filter "nuget.exe" | Select -First 1
+    if ($NUGET_EXE_IN_PATH -ne $null -and (Test-Path $NUGET_EXE_IN_PATH.FullName)) {
+        Write-Verbose -Message "Found in PATH at $($NUGET_EXE_IN_PATH.FullName)."
+        $NUGET_EXE = $NUGET_EXE_IN_PATH.FullName
+    }
 }
 
-# Make sure NuGet exists where we expect it.
-if (!(Test-Path $NUGET3_EXE)) {
-    Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile $NUGET3_EXE
-}
-
-# Make sure NuGet exists where we expect it.
+# Try download NuGet.exe if not exists
 if (!(Test-Path $NUGET_EXE)) {
-    Throw "Could not find NuGet.exe"
+    Write-Verbose -Message "Downloading NuGet.exe..."
+    try {
+        (New-Object System.Net.WebClient).DownloadFile($NUGET_URL, $NUGET_EXE)
+    } catch {
+        Throw "Could not download NuGet.exe."
+    }
 }
 
-# Make sure xamarin-component exists where we expect it.
-if (!(Test-Path $XC_EXE)) {
-    Invoke-WebRequest -Uri https://www.dropbox.com/s/mpiesu3nfs5pguu/xamarin-component.exe?dl=1 -OutFile (Join-Path $TOOLS_DIR "xamarin-component.exe")        
-    #Invoke-WebRequest -Uri https://components.xamarin.com/submit/xpkg -OutFile (Join-Path $TOOLS_DIR "xpkg.zip")    
-    #Add-Type -AssemblyName System.IO.Compression.FileSystem
-    #[System.IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $TOOLS_DIR "xpkg.zip"), ($TOOLS_DIR))   
-}
+# Save nuget.exe path to environment to be available to child processed
+$ENV:NUGET_EXE = $NUGET_EXE
 
-# Restore tools from NuGet.
-Push-Location
-Set-Location $TOOLS_DIR
-Invoke-Expression "$NUGET_EXE install -ExcludeVersion -Source https://www.nuget.org/api/v2"
-Pop-Location
-if ($LASTEXITCODE -ne 0)
+# Restore tools from NuGet?
+if(-Not $SkipToolPackageRestore.IsPresent)
 {
-    exit $LASTEXITCODE
+    # Restore packages from NuGet.
+    Push-Location
+    Set-Location $TOOLS_DIR
+
+    Write-Verbose -Message "Restoring tools from NuGet..."
+    $NuGetOutput = Invoke-Expression "&`"$NUGET_EXE`" install -ExcludeVersion -OutputDirectory `"$TOOLS_DIR`""
+    Write-Verbose -Message ($NuGetOutput | out-string)
+
+    Pop-Location
+    if ($LASTEXITCODE -ne 0)
+    {
+        exit $LASTEXITCODE
+    }
 }
 
 # Make sure that Cake has been installed.
 if (!(Test-Path $CAKE_EXE)) {
-    Throw "Could not find Cake.exe"
+    Throw "Could not find Cake.exe at $CAKE_EXE"
 }
 
 # Start Cake
-Invoke-Expression "$CAKE_EXE `"$Script`" -target=`"$Target`" -configuration=`"$Configuration`" -verbosity=`"$Verbosity`" $UseDryRun $UseExperimental"
+Write-Host "Running build script..."
+Invoke-Expression "& `"$CAKE_EXE`" `"$Script`" -target=`"$Target`" -configuration=`"$Configuration`" -verbosity=`"$Verbosity`" $UseMono $UseDryRun $UseExperimental $ScriptArgs"
 exit $LASTEXITCODE

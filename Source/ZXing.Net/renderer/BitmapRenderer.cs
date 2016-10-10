@@ -91,15 +91,17 @@ namespace ZXing.Rendering
          int height = matrix.Height;
          bool outputContent = (options == null || !options.PureBarcode) &&
                               !String.IsNullOrEmpty(content) && (format == BarcodeFormat.CODE_39 ||
+                                                                 format == BarcodeFormat.CODE_93 ||
                                                                  format == BarcodeFormat.CODE_128 ||
                                                                  format == BarcodeFormat.EAN_13 ||
                                                                  format == BarcodeFormat.EAN_8 ||
                                                                  format == BarcodeFormat.CODABAR ||
                                                                  format == BarcodeFormat.ITF ||
                                                                  format == BarcodeFormat.UPC_A ||
+                                                                 format == BarcodeFormat.UPC_E ||
                                                                  format == BarcodeFormat.MSI ||
                                                                  format == BarcodeFormat.PLESSEY);
-         int emptyArea = outputContent ? 16 : 0;
+         int emptyArea = outputContent && matrix.Height > 16 ? 16 : 0;
          int pixelsize = 1;
 
          if (options != null)

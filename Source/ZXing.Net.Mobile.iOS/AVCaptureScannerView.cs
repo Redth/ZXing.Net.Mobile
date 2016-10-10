@@ -224,29 +224,29 @@ namespace ZXing.Mobile
                         return;
                     }
 
-                    working = true;
-                    wasScanned = false;
-                    lastAnalysis = DateTime.UtcNow;
+                    try {
+                        working = true;
+                        wasScanned = false;
+                        lastAnalysis = DateTime.UtcNow;
 
-					var mdo = metaDataObjects.FirstOrDefault();
+                        var mdo = metaDataObjects.FirstOrDefault();
 
-					if (mdo == null)
-						return;
+                        var readableObj = mdo as AVMetadataMachineReadableCodeObject;
 
-					var readableObj = mdo as AVMetadataMachineReadableCodeObject;
+                        if (readableObj == null)
+                            return;
 
-					if (readableObj == null)
-						return;
+                        wasScanned = true;
 
-                    wasScanned = true;
+                        var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
-					var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
+                        var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
 
-					var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
-
-					resultCallback(rs);
-
-                    working = false;
+                        resultCallback(rs);
+                    } finally {
+                        working = false;
+                        wasScanned = false;
+                    }
 				});
 
 			metadataOutput.SetDelegate (captureDelegate, DispatchQueue.MainQueue);

@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8971B59D-78F1-49BA-808D-CBADB37F571F}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
@@ -10,7 +12,7 @@
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AssemblyName>zxing.monoandroid</AssemblyName>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Key\private.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -43,6 +45,7 @@
     <Reference Include="Mono.Android" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <ItemGroup />
   <ItemGroup>
     <Compile Include="aztec\AztecDetectorResult.cs" />
@@ -187,6 +190,7 @@
     <Compile Include="oned\Code39Reader.cs" />
     <Compile Include="oned\Code39Writer.cs" />
     <Compile Include="oned\Code93Reader.cs" />
+    <Compile Include="oned\Code93Writer.cs" />
     <Compile Include="oned\EAN13Reader.cs" />
     <Compile Include="oned\EAN13Writer.cs" />
     <Compile Include="oned\EAN8Reader.cs" />
@@ -238,6 +242,7 @@
     <Compile Include="oned\UPCEANReader.cs" />
     <Compile Include="oned\UPCEANWriter.cs" />
     <Compile Include="oned\UPCEReader.cs" />
+    <Compile Include="oned\UPCEWriter.cs" />
     <Compile Include="pdf417\decoder\BarcodeMetadata.cs" />
     <Compile Include="pdf417\decoder\BarcodeValue.cs" />
     <Compile Include="pdf417\decoder\BoundingBox.cs" />
@@ -310,5 +315,4 @@
     <Compile Include="xamarin\BitmapRenderer.monoandroid.cs" />
     <Compile Include="xamarin\BitmapLuminanceSource.monoandroid.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

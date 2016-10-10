@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Reflection;
 using Foundation;
 using ZXing.Net.Mobile.Forms.iOS;
+using UIKit;
 
 [assembly:ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.iOS
@@ -19,12 +20,13 @@ namespace ZXing.Net.Mobile.Forms.iOS
             var temp = DateTime.Now;
         }
 
-        ZXingScannerView formsView;
-
-        ZXing.Mobile.ZXingScannerView zxingView;
+        protected ZXingScannerView formsView;
+        protected ZXing.Mobile.ZXingScannerView zxingView;
 
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
         {
+            AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+
             formsView = Element;
 
             if (zxingView == null) {
@@ -42,6 +44,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
 
                 zxingView = new ZXing.Mobile.ZXingScannerView ();
                 zxingView.UseCustomOverlayView = true;
+                zxingView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 
                 base.SetNativeControl (zxingView);
 
@@ -89,6 +92,19 @@ namespace ZXing.Net.Mobile.Forms.iOS
             base.TouchesEnded (touches, evt);
 
             zxingView.AutoFocus ();
+        }
+
+        public override void LayoutSubviews ()
+        {
+            base.LayoutSubviews ();
+
+            // Find the best guess at current orientation
+            var o = UIApplication.SharedApplication.StatusBarOrientation;
+            if (ViewController != null)
+                o = ViewController.InterfaceOrientation;
+
+            // Tell the native view to rotate
+            zxingView.DidRotate (o);
         }
     }
 }

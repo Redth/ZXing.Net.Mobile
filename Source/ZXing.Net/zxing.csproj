@@ -44,10 +44,10 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
-    <SccProjectName>Svn</SccProjectName>
-    <SccLocalPath>Svn</SccLocalPath>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccProvider>SubversionScc</SccProvider>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\Build\Debug\net4.0\</OutputPath>
@@ -230,10 +230,12 @@
     <Compile Include="InvertedLuminanceSource.cs" />
     <Compile Include="oned\Code128EncodingOptions.cs" />
     <Compile Include="imb\IMBReader.cs" />
+    <Compile Include="oned\Code93Writer.cs" />
     <Compile Include="oned\MSIReader.cs" />
     <Compile Include="oned\MSIWriter.cs" />
     <Compile Include="oned\PlesseyWriter.cs" />
     <Compile Include="oned\rss\expanded\ExpandedRow.cs" />
+    <Compile Include="oned\UPCEWriter.cs" />
     <Compile Include="pdf417\decoder\BarcodeMetadata.cs" />
     <Compile Include="pdf417\decoder\BarcodeValue.cs" />
     <Compile Include="pdf417\decoder\BoundingBox.cs" />

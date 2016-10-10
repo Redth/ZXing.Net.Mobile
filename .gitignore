@@ -14,6 +14,9 @@ obj
 *.svn
 *.csproj.user
 
+Resource.designer.cs
+component.yaml
+
 # mstest test results
 TestResults
 

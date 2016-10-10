@@ -17,9 +17,9 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
             // Force the assembly to load
         }
 
-        ZXingScannerView formsView;
+        protected ZXingScannerView formsView;
 
-        ZXing.Mobile.ZXingScannerControl zxingControl;
+        protected ZXing.Mobile.ZXingScannerControl zxingControl;
 
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
         {

@@ -22,174 +22,46 @@ namespace ZXing.Mobile
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ScanPage : Page
+    public sealed partial class ScanPage : Page, IMobileBarcodeScanner
     {
-        private bool isNewInstance = false;
+        ScanPageNavigationParameters Parameters { get; set; }
 
         public ScanPage()
         {
-            isNewInstance = true;
-            this.InitializeComponent();
-        }
-
-        public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
-        public static MobileBarcodeScannerBase Scanner { get; set; }
-        public static UIElement CustomOverlay { get; set; }
-        public static string TopText { get; set; }
-        public static string BottomText { get; set; }
-        public static bool UseCustomOverlay { get; set; }
-        public static bool ContinuousScanning { get; set; }
-
-        public static Result LastScanResult { get; set; }
-
-        public static Action<Result> ResultFoundAction { get; set; }
-
-        public static event Action<bool> OnRequestTorch;
-        public static event Action OnRequestToggleTorch;
-        public static event Action OnRequestAutoFocus;
-        public static event Action OnRequestCancel;
-        public static event Func<bool> OnRequestIsTorchOn;
-        public static event Action OnRequestPauseAnalysis;
-        public static event Action OnRequestResumeAnalysis;
-
-        public static bool RequestIsTorchOn()
-        {
-            var evt = OnRequestIsTorchOn;
-            return evt != null && evt();
-        }
-
-        public static void RequestTorch(bool on)
-        {
-            var evt = OnRequestTorch;
-            if (evt != null)
-                evt(on);
-        }
-
-        public static void RequestToggleTorch()
-        {
-            var evt = OnRequestToggleTorch;
-            if (evt != null)
-                evt();
-        }
-
-        public static void RequestAutoFocus()
-        {
-            var evt = OnRequestAutoFocus;
-            if (evt != null)
-                evt();
-        }
-
-        public static void RequestCancel()
-        {
-            var evt = OnRequestCancel;
-            if (evt != null)
-                evt();
-        }
-
-        public static void RequestPauseAnalysis()
-        {
-            var evt = OnRequestPauseAnalysis;
-            if (evt != null)
-                evt();
-        }
-
-        public static void RequestResumeAnalysis()
-        {
-            var evt = OnRequestResumeAnalysis;
-            if (evt != null)
-                evt();
-        }
-
-        void RequestAutoFocusHandler()
-        {
-            if (scannerControl != null)
-                scannerControl.AutoFocus();
-        }
-
-        void RequestTorchHandler(bool on)
-        {
-            if (scannerControl != null)
-                scannerControl.Torch(on);
-        }
-
-        void RequestToggleTorchHandler()
-        {
-            if (scannerControl != null)
-                scannerControl.ToggleTorch();
-        }
-
-        async Task RequestCancelHandler()
-        {
-            if (scannerControl != null)
-                await scannerControl.Cancel();
-        }
-
-        bool RequestIsTorchOnHandler()
-        {
-            if (scannerControl != null)
-                return scannerControl.IsTorchOn;
-
-            return false;
-        }
-
-        void RequestPauseAnalysisHandler()
-        {
-            if (scannerControl != null)
-                scannerControl.PauseAnalysis();
-        }
-
-        void RequestResumeAnalysisHandler()
-        {
-            if (scannerControl != null)
-                scannerControl.ResumeAnalysis();
+            InitializeComponent();
         }
         
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            scannerControl.TopText = TopText;
-            scannerControl.BottomText = BottomText;
-
-            scannerControl.CustomOverlay = CustomOverlay;
-            scannerControl.UseCustomOverlay = UseCustomOverlay;
-
-            scannerControl.ScanningOptions = ScanningOptions;
-            scannerControl.ContinuousScanning = ScanPage.ContinuousScanning;
-
-            OnRequestAutoFocus += RequestAutoFocusHandler;
-            OnRequestTorch += RequestTorchHandler;
-            OnRequestToggleTorch += RequestToggleTorchHandler;
-            OnRequestCancel += ScanPage_OnRequestCancel;
-            OnRequestIsTorchOn += RequestIsTorchOnHandler;
-            OnRequestPauseAnalysis += RequestPauseAnalysisHandler;
-            OnRequestResumeAnalysis += RequestResumeAnalysisHandler;
-
-            await scannerControl.StartScanningAsync(HandleResult, ScanningOptions);
-
-            if (!isNewInstance && Frame.CanGoBack)
-                Frame.GoBack();
-
-            isNewInstance = false;
-
             base.OnNavigatedTo(e);
-        }
 
-        private async void ScanPage_OnRequestCancel()
-        {
-            await RequestCancelHandler();
-        }
+            // If no parameters were passed, we navigated here for some other reason
+            // so let's ignore it
+            if (e.Parameter == null)
+                return;
 
+            Parameters = e.Parameter as ScanPageNavigationParameters;
+
+            if (Parameters != null)
+                Parameters.Scanner.ScanPage = this;
+            
+            scannerControl.TopText = Parameters?.Scanner?.TopText ?? "";
+            scannerControl.BottomText = Parameters?.Scanner?.BottomText ?? "";
+
+            scannerControl.CustomOverlay = Parameters?.Scanner?.CustomOverlay;
+            scannerControl.UseCustomOverlay = Parameters?.Scanner?.UseCustomOverlay ?? false;
+
+            scannerControl.ScanningOptions = Parameters?.Options ?? new MobileBarcodeScanningOptions ();
+            scannerControl.ContinuousScanning = Parameters?.ContinuousScanning ?? false;
+
+            scannerControl.StartScanning(Parameters?.ResultHandler, Parameters?.Options);
+        }
+        
         protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
             try
             {
-                OnRequestAutoFocus -= RequestAutoFocusHandler;
-                OnRequestTorch -= RequestTorchHandler;
-                OnRequestToggleTorch -= RequestToggleTorchHandler;
-                OnRequestCancel -= ScanPage_OnRequestCancel;
-                OnRequestIsTorchOn -= RequestIsTorchOnHandler;
-                OnRequestPauseAnalysis -= RequestPauseAnalysisHandler;
-                OnRequestResumeAnalysis -= RequestResumeAnalysisHandler;
-
+                MobileBarcodeScanner.Log("OnNavigatingFrom, stopping camera...");
                 await scannerControl.StopScanningAsync();
             }
             catch (Exception ex)
@@ -200,23 +72,116 @@ namespace ZXing.Mobile
             base.OnNavigatingFrom(e);
         }
 
-        void HandleResult(ZXing.Result result)
+        #region IMobileBarcodeScanner Implementation
+        public bool UseCustomOverlay
         {
-            LastScanResult = result;
-
-            var evt = ResultFoundAction;
-            if (evt != null)
-                evt(LastScanResult);
-
-            if (!ContinuousScanning)
-            {
-                Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
-               {
-                   if (Frame.CanGoBack)
-                       Frame.GoBack();
-               });
-                
-            }
+            get { return scannerControl.UseCustomOverlay; }
         }
+
+        public string TopText
+        {
+            get { return scannerControl.TopText; }
+            set { scannerControl.TopText = value; }
+        }
+
+        public string BottomText
+        {
+            get { return scannerControl.BottomText; }
+            set { scannerControl.BottomText = value; }
+        }
+
+        public string CancelButtonText
+        {
+            get { return ""; }
+            set { }
+        }
+
+        public string FlashButtonText
+        {
+            get { return ""; }
+            set { }
+        }
+
+        public string CameraUnsupportedMessage
+        {
+            get { return ""; }
+            set { }
+        }
+
+        public bool IsTorchOn
+        {
+            get { return scannerControl.IsTorchOn; }
+        }
+
+        public Task<Result> Scan(MobileBarcodeScanningOptions options)
+        {
+            var tcsResult = new TaskCompletionSource<Result>();
+
+            scannerControl.ContinuousScanning = false;
+            scannerControl.StartScanning(r =>
+            {
+                scannerControl.StopScanning();
+
+                tcsResult.SetResult(r);
+            }, options ?? Parameters?.Options);
+
+            return tcsResult.Task;
+        }
+
+        public Task<Result> Scan()
+        {
+            return Scan(new MobileBarcodeScanningOptions());
+        }
+
+        public void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        {
+            scannerControl.ContinuousScanning = true;
+            scannerControl.StartScanning(scanHandler, options ?? Parameters?.Options);
+        }
+
+        public void ScanContinuously(Action<Result> scanHandler)
+        {
+            ScanContinuously(new MobileBarcodeScanningOptions(), scanHandler);
+        }
+
+        public void Cancel()
+        {
+            scannerControl?.Cancel();
+        }
+
+        public void Torch(bool on)
+        {
+            scannerControl?.Torch(on);
+        }
+
+        public void AutoFocus()
+        {
+            scannerControl?.AutoFocus();
+        }
+
+        public void ToggleTorch()
+        {
+            scannerControl?.ToggleTorch();
+        }
+
+        public void PauseAnalysis()
+        {
+            scannerControl?.PauseAnalysis();
+        }
+
+        public void ResumeAnalysis()
+        {
+            scannerControl?.ResumeAnalysis();
+        }
+
+        #endregion
+    }
+
+    public class ScanPageNavigationParameters
+    {
+        public MobileBarcodeScanner Scanner { get; set; }
+        public bool ContinuousScanning { get; set; }
+        public MobileBarcodeScanningOptions Options { get; set; }
+        public Action<ZXing.Result> ResultHandler { get; set; }
     }
 }

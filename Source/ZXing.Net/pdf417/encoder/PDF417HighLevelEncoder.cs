@@ -189,7 +189,6 @@ namespace ZXing.PDF417.Internal
          int textSubMode = SUBMODE_ALPHA;
 
          // User selected encoding mode
-         byte[] bytes = null; //Fill later and only if needed
          if (compaction == Compaction.TEXT)
          {
             encodeText(msg, p, len, sb, textSubMode);
@@ -197,7 +196,7 @@ namespace ZXing.PDF417.Internal
          }
          else if (compaction == Compaction.BYTE)
          {
-            bytes = toBytes(msg, encoding);
+            var bytes = toBytes(msg, encoding);
             encodeBinary(bytes, p, bytes.Length, BYTE_COMPACTION, sb);
 
          }
@@ -210,6 +209,7 @@ namespace ZXing.PDF417.Internal
          else
          {
             int encodingMode = TEXT_COMPACTION; //Default mode, see 4.4.2.1
+            byte[] bytes = null;
             while (p < len)
             {
                int n = determineConsecutiveDigitCount(msg, p);
@@ -240,8 +240,8 @@ namespace ZXing.PDF417.Internal
                      if (bytes == null)
                      {
                         bytes = toBytes(msg, encoding);
-                     }
-                     int b = determineConsecutiveBinaryCount(msg, bytes, p);
+                     } 
+                     int b = determineConsecutiveBinaryCount(msg, bytes, p, encoding);
                      if (b == 0)
                      {
                         b = 1;
@@ -287,7 +287,7 @@ namespace ZXing.PDF417.Internal
          return result;
       }
 
-      private static byte[] toBytes(String msg, Encoding encoding)
+      private static Encoding getEncoder(Encoding encoding)
       {
          // Defer instantiating default Charset until needed, since it may be for an unsupported
          // encoding.
@@ -297,7 +297,7 @@ namespace ZXing.PDF417.Internal
             {
                encoding = Encoding.GetEncoding(DEFAULT_ENCODING_NAME);
             }
-            catch (Exception )
+            catch (Exception)
             {
                // continue
             }
@@ -329,7 +329,18 @@ namespace ZXing.PDF417.Internal
                }
             }
          }
-         return encoding.GetBytes(msg);
+
+         return encoding;
+      }
+
+      private static byte[] toBytes(String msg, Encoding encoding)
+      {
+         return getEncoder(encoding).GetBytes(msg);
+      }
+
+      private static byte[] toBytes(char msg, Encoding encoding)
+      {
+         return getEncoder(encoding).GetBytes(new []{msg});
       }
 
       /// <summary>
@@ -526,8 +537,7 @@ namespace ZXing.PDF417.Internal
          }
          else
          {
-            bool sixpack = ((count % 6) == 0);
-            if (sixpack)
+            if ((count % 6) == 0)
             {
                sb.Append((char)LATCH_TO_BYTE);
             }
@@ -741,11 +751,12 @@ namespace ZXing.PDF417.Internal
       /// <param name="startpos">the start position within the message</param>
       /// <returns>the requested character count</returns>
       /// </summary>
-      private static int determineConsecutiveBinaryCount(String msg, byte[] bytes, int startpos)
+      private static int determineConsecutiveBinaryCount(String msg, byte[] bytes, int startpos, Encoding encoding)
       {
          int len = msg.Length;
          int idx = startpos;
          int idxb = idx;  // bytes index (may differ from idx for utf-8 and other unicode encodings)
+         encoding = getEncoder(encoding);
          while (idx < len)
          {
             char ch = msg[idx];
@@ -767,17 +778,14 @@ namespace ZXing.PDF417.Internal
                return idx - startpos;
             }
             ch = msg[idx];
-
-            //Check if character is encodable
-            //Sun returns a ASCII 63 (?) for a character that cannot be mapped. Let's hope all
-            //other VMs do the same
+            // .Net fallback strategie: REPLACEMENT_CHARACTER 0x3F
             if (bytes[idxb] == 63 && ch != '?')
             {
                throw new WriterException("Non-encodable character detected: " + ch + " (Unicode: " + (int) ch + ')');
             }
             idx++;
             idxb++;
-            if (ch >= 256)  // for non-ascii symbols
+            if (toBytes(ch, encoding).Length > 1)  // for non-ascii symbols
                 idxb++;
          }
          return idx - startpos;

@@ -13,7 +13,8 @@ namespace FormsSample
         {
             barcode = new ZXingBarcodeImageView {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.FillAndExpand,                   
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                AutomationId = "zxingBarcodeImageView",
             };
             barcode.BarcodeFormat = ZXing.BarcodeFormat.QR_CODE;
             barcode.BarcodeOptions.Width = 300;

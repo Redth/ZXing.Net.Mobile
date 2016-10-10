@@ -1,5 +1,4 @@
-﻿using System;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 using ZXing.Mobile;
 
 namespace ZXing.Net.Mobile.Forms
@@ -15,25 +14,36 @@ namespace ZXing.Net.Mobile.Forms
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 VerticalOptions = LayoutOptions.FillAndExpand,
-                Options = options
+                Options = options,
+                AutomationId = "zxingScannerView"
             };
 
+            zxing.SetBinding( ZXingScannerView.IsTorchOnProperty, new Binding( nameof( IsTorchOn ) ) );
+            zxing.SetBinding( ZXingScannerView.IsAnalyzingProperty, new Binding( nameof( IsAnalyzing ) ) );
+            zxing.SetBinding( ZXingScannerView.IsScanningProperty, new Binding( nameof( IsScanning ) ) );
+            zxing.SetBinding( ZXingScannerView.HasTorchProperty, new Binding( nameof( HasTorch ) ) );
+            zxing.SetBinding( ZXingScannerView.ResultProperty, new Binding( nameof( Result ) ) );
+
             zxing.OnScanResult += (result) => {
-                var eh = this.OnScanResult;
-                if (eh != null)
-                    eh(result);
-                    //Device.BeginInvokeOnMainThread (() => eh (result));
+                this.OnScanResult?.Invoke( result );
+                //Device.BeginInvokeOnMainThread (() => eh (result));
             };
 
             if (customOverlay == null) {
-                defaultOverlay = new ZXingDefaultOverlay {
-                    TopText = "Hold your phone up to the barcode",
-                    BottomText = "Scanning will happen automatically",
-                    ShowFlashButton = zxing.HasTorch,
-                };
+                defaultOverlay = new ZXingDefaultOverlay () { AutomationId = "zxingDefaultOverlay" };
+
+                defaultOverlay.SetBinding( ZXingDefaultOverlay.TopTextProperty, new Binding( nameof( DefaultOverlayTopText ) ) );
+                defaultOverlay.SetBinding( ZXingDefaultOverlay.BottomTextProperty, new Binding( nameof( DefaultOverlayBottomText ) ) );
+                defaultOverlay.SetBinding( ZXingDefaultOverlay.ShowFlashButtonProperty, new Binding( nameof( DefaultOverlayShowFlashButton ) ) );
+
+                DefaultOverlayTopText = "Hold your phone up to the barcode";
+                DefaultOverlayBottomText = "Scanning will happen automatically";
+                DefaultOverlayShowFlashButton = HasTorch;
+
                 defaultOverlay.FlashButtonClicked += (sender, e) => {
                     zxing.IsTorchOn = !zxing.IsTorchOn;
                 };
+
                 Overlay = defaultOverlay;
             } else {
                 Overlay = customOverlay;
@@ -51,33 +61,33 @@ namespace ZXing.Net.Mobile.Forms
             Content = grid;
         }
 
-        public string DefaultOverlayTopText {
-            get {
-                return defaultOverlay == null ? string.Empty : defaultOverlay.TopText;
-            }
-            set {
-                if (defaultOverlay != null)
-                    defaultOverlay.TopText = value;
-            }
+        #region Default Overlay Properties
+
+        public static readonly BindableProperty DefaultOverlayTopTextProperty =
+            BindableProperty.Create( nameof( DefaultOverlayTopText ), typeof( string ), typeof( ZXingScannerPage ), string.Empty );
+        public string DefaultOverlayTopText
+        {
+            get { return ( string )GetValue( DefaultOverlayTopTextProperty ); }
+            set { SetValue( DefaultOverlayTopTextProperty, value ); }
         }
-        public string DefaultOverlayBottomText {
-            get {
-                return defaultOverlay == null ? string.Empty : defaultOverlay.BottomText;
-            }
-            set {
-                if (defaultOverlay != null)
-                    defaultOverlay.BottomText = value;
-            }
+
+        public static readonly BindableProperty DefaultOverlayBottomTextProperty =
+            BindableProperty.Create( nameof( DefaultOverlayBottomText ), typeof( string ), typeof( ZXingScannerPage ), string.Empty );
+        public string DefaultOverlayBottomText
+        {
+            get { return ( string )GetValue( DefaultOverlayBottomTextProperty ); }
+            set { SetValue( DefaultOverlayBottomTextProperty, value ); }
         }
-        public bool DefaultOverlayShowFlashButton {
-            get {
-                return defaultOverlay == null ? false : defaultOverlay.ShowFlashButton;
-            }
-            set {
-                if (defaultOverlay != null)
-                    defaultOverlay.ShowFlashButton = value;
-            }
+
+        public static readonly BindableProperty DefaultOverlayShowFlashButtonProperty =
+            BindableProperty.Create( nameof( DefaultOverlayShowFlashButton ), typeof( bool ), typeof( ZXingScannerPage ), false );
+        public bool DefaultOverlayShowFlashButton
+        {
+            get { return ( bool )GetValue( DefaultOverlayShowFlashButtonProperty ); }
+            set { SetValue( DefaultOverlayShowFlashButtonProperty, value ); }
         }
+
+        #endregion
 
         public delegate void ScanResultDelegate (ZXing.Result result);
         public event ScanResultDelegate OnScanResult;
@@ -86,6 +96,8 @@ namespace ZXing.Net.Mobile.Forms
             get;
             private set;
         }
+
+        #region Functions
 
         public void ToggleTorch ()
         {
@@ -131,43 +143,45 @@ namespace ZXing.Net.Mobile.Forms
                 zxing.AutoFocus (x, y);
         }
 
-        public bool IsTorchOn {
-            get {
-                return zxing == null ? false : zxing.IsTorchOn;
-            }
-            set {
-                if (zxing != null)
-                    zxing.IsTorchOn = value;
-            }
+        #endregion
+
+        public static readonly BindableProperty IsTorchOnProperty =
+            BindableProperty.Create( nameof( IsTorchOn ), typeof( bool ), typeof( ZXingScannerPage ), false );
+        public bool IsTorchOn
+        {
+            get { return ( bool )GetValue( IsTorchOnProperty ); }
+            set { SetValue( IsTorchOnProperty, value ); }
         }
 
-        public bool IsAnalyzing {
-            get {
-                return zxing == null ? false : zxing.IsAnalyzing;
-            }
-            set {
-                if (zxing != null)
-                    zxing.IsAnalyzing = value;
-            }
+        public static readonly BindableProperty IsAnalyzingProperty =
+            BindableProperty.Create( nameof( IsAnalyzing ), typeof( bool ), typeof( ZXingScannerPage ), false );
+        public bool IsAnalyzing
+        {
+            get { return ( bool )GetValue( IsAnalyzingProperty ); }
+            set { SetValue( IsAnalyzingProperty, value ); }
         }
 
+        public static readonly BindableProperty IsScanningProperty =
+            BindableProperty.Create( nameof( IsScanning ), typeof( bool ), typeof( ZXingScannerPage ), false );
         public bool IsScanning
         {
-            get
-            {
-                return zxing == null ? false : zxing.IsScanning;
-            }
-            set
-            {
-                if (zxing != null)
-                    zxing.IsScanning = value;
-            }
+            get { return ( bool )GetValue( IsScanningProperty ); }
+            set { SetValue( IsScanningProperty, value ); }
         }
 
+        public static readonly BindableProperty HasTorchProperty =
+            BindableProperty.Create( nameof( HasTorch ), typeof( bool ), typeof( ZXingScannerPage ), false );
         public bool HasTorch {
-            get {
-                return zxing == null ? false : zxing.HasTorch;
-            }
+            get { return ( bool )GetValue( HasTorchProperty ); }
+            set { SetValue( HasTorchProperty, value ); }
+        }
+
+        public static readonly BindableProperty ResultProperty =
+            BindableProperty.Create( nameof( Result ), typeof( Result ), typeof( ZXingScannerPage ), default( Result ) );
+        public Result Result
+        {
+            get { return ( Result )GetValue( ResultProperty ); }
+            set { SetValue( ResultProperty, value ); }
         }
     }
 }

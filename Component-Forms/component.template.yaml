@@ -4,11 +4,11 @@ id: zxing.net.mobile.forms
 publisher: Redth
 license: License.md
 skip_docs: true
-icons: 
+icons:
   - ./icons/zxing.net.mobile.forms_128x128.png
   - ./icons/zxing.net.mobile.forms_512x512.png
 publisher-url: "https://github.com/Redth/ZXing.Net.Mobile"
-libraries: 
+libraries:
   ios-unified:
     - ../Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll
     - ../Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll
@@ -38,10 +38,10 @@ packages:
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library for Xamarin.Forms"
 details: ./Details.md
 getting-started: ./GettingStarted.md
-samples: 
+samples:
   - name: Forms Sample
     path: "../Samples/Forms/Sample.Forms.sln"
-    removeProjects: 
+    removeProjects:
       - zxing.portable
       - ZXing.Net.Mobile.Core
       - ZXing.Net.Mobile.Portable
@@ -49,7 +49,7 @@ samples:
       - ZXing.Net.Mobile.iOS
       - ZXing.Net.Mobile.Android
       - ZXing.Net.Mobile.WindowsPhone
-      - ZXing.Net.Mobile.WindowsUniversal      
+      - ZXing.Net.Mobile.WindowsUniversal
       - ZXing.Net.Mobile.Forms
       - ZXing.Net.Mobile.Forms.iOS
       - ZXing.Net.Mobile.Forms.Android
@@ -57,27 +57,26 @@ samples:
       - ZXing.Net.Mobile.Forms.WindowsUniversal
     installNuGets:
       - project: FormsSample
-        packages: 
+        packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.iOS
-        packages: 
+        packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.Droid
-        packages: 
+        packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.WindowsPhone
-        packages: 
+        packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.WindowsUniversal
-        packages: 
+        packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
     no_build: true
-    skip_docs: true  
-local-nuget-repo: ../Build/nuget
+    skip_docs: true
+local-nuget-repo: ../output
 no_build: true
-

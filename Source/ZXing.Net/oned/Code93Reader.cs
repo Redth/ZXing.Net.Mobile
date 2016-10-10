@@ -29,14 +29,14 @@ namespace ZXing.OneD
    public sealed class Code93Reader : OneDReader
    {
       // Note that 'abcd' are dummy characters in place of control characters.
-      private const String ALPHABET_STRING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%abcd*";
+      internal const String ALPHABET_STRING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%abcd*";
       private static readonly char[] ALPHABET = ALPHABET_STRING.ToCharArray();
 
       /// <summary>
       /// These represent the encodings of characters, as patterns of wide and narrow bars.
       /// The 9 least-significant bits of each int correspond to the pattern of wide and narrow.
       /// </summary>
-      private static readonly int[] CHARACTER_ENCODINGS = {
+      internal static readonly int[] CHARACTER_ENCODINGS = {
                                                     0x114, 0x148, 0x144, 0x142, 0x128, 0x124, 0x122, 0x150, 0x112, 0x10A, // 0-9
                                                     0x1A8, 0x1A4, 0x1A2, 0x194, 0x192, 0x18A, 0x168, 0x164, 0x162, 0x134, // A-J
                                                     0x11A, 0x158, 0x14C, 0x146, 0x12C, 0x116, 0x1B4, 0x1B2, 0x1AC, 0x1A6, // K-T
@@ -288,14 +288,27 @@ namespace ZXing.OneD
                      }
                      break;
                   case 'b':
-                     // %A to %E map to control codes ESC to US
                      if (next >= 'A' && next <= 'E')
                      {
+                        // %A to %E map to control codes ESC to USep
                         decodedChar = (char)(next - 38);
                      }
-                     else if (next >= 'F' && next <= 'W')
+                     else if (next >= 'F' && next <= 'J') {
+                       // %F to %J map to ; < = > ?
+                       decodedChar = (char) (next - 11);
+                     } 
+                     else if (next >= 'K' && next <= 'O') {
+                       // %K to %O map to [ \ ] ^ _
+                       decodedChar = (char) (next + 16);
+                     } 
+                     else if (next >= 'P' && next <= 'S') {
+                       // %P to %S map to { | } ~
+                       decodedChar = (char) (next + 43);
+                     } 
+                     else if (next >= 'T' && next <= 'Z')
                      {
-                        decodedChar = (char)(next - 11);
+                        // %T to %Z all map to DEL (127)
+                        decodedChar = (char)127;
                      }
                      else
                      {

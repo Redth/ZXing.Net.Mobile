@@ -177,7 +177,11 @@ namespace ZXing.Mobile
 		}	
 		public override bool ShouldAutorotate ()
 		{
-			return true;
+			if (ScanningOptions.AutoRotate != null)
+            		{
+                		return (bool)ScanningOptions.AutoRotate;
+            		}
+            		return false;
 		}
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
@@ -188,7 +192,11 @@ namespace ZXing.Mobile
 		[Obsolete ("Deprecated in iOS6. Replace it with both GetSupportedInterfaceOrientations and PreferredInterfaceOrientationForPresentation")]
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
 		{
-			return true;
+			if (ScanningOptions.AutoRotate != null)
+            		{
+                		return (bool)ScanningOptions.AutoRotate;
+            		}
+            		return false;
 		}
 
 		void HandleOnScannerSetupComplete ()
