@@ -38,6 +38,7 @@ Function Install-AndroidSDK
     Execute-AndroidSDKInstall -sdks $sdks
 }
 
+Install-AndroidSDK 15
 Install-AndroidSDK 16
 Install-AndroidSDK 20
 Install-AndroidSDK 21
