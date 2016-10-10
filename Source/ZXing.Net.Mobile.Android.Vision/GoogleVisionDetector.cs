@@ -1,11 +1,13 @@
 ﻿using System;
 using Android.Content;
+using ZXing.Mobile.Detectors;
 using Android.Gms.Vision;
 using Android.Gms.Vision.Barcodes;
 using Android.Graphics;
 using Java.Nio;
+using ZXing.Mobile;
 
-namespace ZXing.Mobile.Detectors
+namespace ZXing.Net.Mobile.Android.Vision
 {
     public class GoogleVisionDetector : IDetector
     {
@@ -17,7 +19,14 @@ namespace ZXing.Mobile.Detectors
             _context = context;
         }
 
-        public void Init(MobileBarcodeScanningOptions scanningOptions)
+        /// <summary>
+        /// Use this method to ensure that lib is included by linker (usually in LinkerPleaseInclude.cs)
+        /// </summary>
+        public static void Init()
+        {
+        }
+
+        public bool Init(MobileBarcodeScanningOptions scanningOptions)
         {
             // todo: associate ZXing formats with Vision to use .SetBarcodeFormats(..)
             _detector = new BarcodeDetector.Builder(_context).Build();
@@ -33,8 +42,11 @@ namespace ZXing.Mobile.Detectors
                 // isOperational() can be used to check if the required native libraries are currently
                 // available.  The detectors will automatically become operational once the library
                 // downloads complete on device.
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Detector dependencies are not yet available.");
+                global::Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Detector dependencies are not yet available.");
+                return false;
             }
+
+            return true;
         }
 
         public Result Decode(byte[] bytes, int width, int height)
@@ -58,33 +70,33 @@ namespace ZXing.Mobile.Detectors
             return null;
         }
 
-        private BarcodeFormat VisionToZxingFormat(Android.Gms.Vision.Barcodes.BarcodeFormat format)
+        private BarcodeFormat VisionToZxingFormat(global::Android.Gms.Vision.Barcodes.BarcodeFormat format)
         {
             switch (format)
             {
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Code128:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Code128:
                     return BarcodeFormat.CODE_128;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Code39:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Code39:
                     return BarcodeFormat.CODE_39;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Code93:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Code93:
                     return BarcodeFormat.CODE_93;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Codabar:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Codabar:
                     return BarcodeFormat.CODABAR;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.DataMatrix:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.DataMatrix:
                     return BarcodeFormat.DATA_MATRIX;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Ean13:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Ean13:
                     return BarcodeFormat.EAN_13;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Ean8:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Ean8:
                     return BarcodeFormat.EAN_8;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Itf:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Itf:
                     return BarcodeFormat.ITF;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.QrCode:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.QrCode:
                     return BarcodeFormat.QR_CODE;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.UpcA:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.UpcA:
                     return BarcodeFormat.UPC_A;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.UpcE:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.UpcE:
                     return BarcodeFormat.UPC_E;
-                case Android.Gms.Vision.Barcodes.BarcodeFormat.Pdf417:
+                case global::Android.Gms.Vision.Barcodes.BarcodeFormat.Pdf417:
                     return BarcodeFormat.PDF_417;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);

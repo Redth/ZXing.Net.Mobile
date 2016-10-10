@@ -76,6 +76,10 @@
     <AndroidResource Include="Resources\layout\ImageActivity.axml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Android.Vision\ZXing.Net.Mobile.Android.Vision.csproj">
+      <Project>{4f310b13-2492-4c2d-b6f3-76adec8fb7e6}</Project>
+      <Name>ZXing.Net.Mobile.Android.Vision</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Android\ZXing.Net.Mobile.Android.csproj">
       <Project>{AC17589E-C817-4FA8-B3EC-CCEB25E55E59}</Project>
       <Name>ZXing.Net.Mobile.Android</Name>

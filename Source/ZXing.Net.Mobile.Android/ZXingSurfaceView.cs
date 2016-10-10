@@ -256,17 +256,39 @@ namespace ZXing.Mobile
                 AutoFocus ();
         }
 
+        private IDetector CreateGoogleVisionDetector()
+        {
+            try
+            {
+                var targetAsm =
+                    AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault(x => x.GetName().Name == "ZXing.Net.Mobile.Android.Vision");
+                if (targetAsm != null)
+                {
+                    var type = targetAsm.GetType("ZXing.Net.Mobile.Android.Vision.GoogleVisionDetector");
+                    if (type != null)
+                    {
+                        return Activator.CreateInstance(type, Context) as IDetector;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Android.Util.Log.Error(MobileBarcodeScanner.TAG, ex.ToString());
+            }
 
+            return null;
+        }
 
-        public void OnPreviewFrame (byte[] bytes, Android.Hardware.Camera camera)
+        public void OnPreviewFrame(byte[] bytes, Android.Hardware.Camera camera)
         {
             if (!isAnalyzing)
                 return;
-            
+
             //Check and see if we're still processing a previous frame
             if (processingTask != null && !processingTask.IsCompleted)
                 return;
-            
+
             if ((DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds < scanningOptions.DelayBetweenAnalyzingFrames)
                 return;
 
@@ -276,25 +298,35 @@ namespace ZXing.Mobile
 
             wasScanned = false;
 
-            var cameraParameters = camera.GetParameters ();
+            var cameraParameters = camera.GetParameters();
             var width = cameraParameters.PreviewSize.Width;
             var height = cameraParameters.PreviewSize.Height;
             lastPreviewAnalysis = DateTime.UtcNow;
 
-            processingTask = Task.Factory.StartNew (() => {
-                try {
+            processingTask = Task.Factory.StartNew(() => {
+                try
+                {
                     if (barcodeDetector == null)
                     {
+                        var isNativeUsed = false;
                         if (this.scanningOptions.UseNativeScanning)
                         {
-                            barcodeDetector = new GoogleVisionDetector(Context);
-                        }
-                        else
-                        {
-                            barcodeDetector = new ZXingDetector();
+                            barcodeDetector = CreateGoogleVisionDetector();
+                            isNativeUsed = true;
                         }
 
-                        barcodeDetector.Init(this.scanningOptions);
+                        if (barcodeDetector == null)
+                        {
+                            barcodeDetector = new ZXingDetector();
+                            isNativeUsed = false;
+                        }
+
+                        var isAvailable = barcodeDetector.Init(this.scanningOptions);
+                        if (!isAvailable && isNativeUsed)
+                        {
+                            barcodeDetector = new ZXingDetector();
+                            barcodeDetector.Init(this.scanningOptions);
+                        }
                     }
 
                     bool rotate = false;

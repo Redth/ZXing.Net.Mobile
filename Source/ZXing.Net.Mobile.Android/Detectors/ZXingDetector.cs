@@ -10,7 +10,7 @@
                 (p, w, h, f) => new PlanarYUVLuminanceSource(p, w, h, 0, 0, w, h, false));
         }
 
-        public void Init(MobileBarcodeScanningOptions scanningOptions)
+        public bool Init(MobileBarcodeScanningOptions scanningOptions)
         {
             if (scanningOptions.TryHarder.HasValue)
             {
@@ -33,6 +33,8 @@
             {
                 _detector.Options.PossibleFormats = scanningOptions.PossibleFormats.ToArray();
             }
+
+            return true;
         }
 
         public Result Decode(byte[] bytes, int width, int height)

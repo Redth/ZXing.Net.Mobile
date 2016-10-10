@@ -2,7 +2,7 @@
 {
     public interface IDetector
     {
-        void Init(MobileBarcodeScanningOptions scanningOptions);
+        bool Init(MobileBarcodeScanningOptions scanningOptions);
 
         ZXing.Result Decode(byte[] bytes, int width, int height);
     }
