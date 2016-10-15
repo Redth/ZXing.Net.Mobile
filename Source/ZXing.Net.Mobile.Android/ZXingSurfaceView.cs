@@ -306,6 +306,8 @@ namespace ZXing.Mobile
                             barcodeReader.Options.CharacterSet = this.scanningOptions.CharacterSet;
                         if (this.scanningOptions.TryInverted.HasValue)
                             barcodeReader.TryInverted = this.scanningOptions.TryInverted.Value;
+                        if (this.scanningOptions.UseCode39ExtendedMode.HasValue)
+                            barcodeReader.Options.UseCode39ExtendedMode = this.scanningOptions.UseCode39ExtendedMode.Value;
 
                         if (this.scanningOptions.PossibleFormats != null && this.scanningOptions.PossibleFormats.Count > 0) {
                             barcodeReader.Options.PossibleFormats = new List<BarcodeFormat> ();
