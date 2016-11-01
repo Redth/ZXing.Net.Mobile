@@ -99,17 +99,20 @@ namespace ZXing.Net.Mobile.Forms.Android
             } 
         }
 
-        public override bool OnTouchEvent (MotionEvent e)
-        {
-            var x = e.GetX ();            
-            var y = e.GetY ();
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			if (e.PointerCount >= 2)
+			{
+				var x = e.GetX();
+				var y = e.GetY();
 
-            if (zxingSurface != null) {
-                zxingSurface.AutoFocus ((int)x, (int)y);
-                System.Diagnostics.Debug.WriteLine ("Touch: x={0}, y={1}", x, y);
-            }
-            return base.OnTouchEvent (e);
-        }
+				if (zxingSurface != null)
+				{
+					zxingSurface.AutoFocus((int)x, (int)y);
+					System.Diagnostics.Debug.WriteLine("Touch: x={0}, y={1}", x, y);
+				}
+			}
+			return base.OnTouchEvent(e);
+		}
     }
 }
-
