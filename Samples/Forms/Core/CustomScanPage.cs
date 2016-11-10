@@ -21,6 +21,15 @@ namespace FormsSample
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 AutomationId = "zxingScannerView",
             };
+
+			var formats = zxing.Options.PossibleFormats;
+			formats.Clear();
+			formats.Add(ZXing.BarcodeFormat.CODE_128);
+			formats.Add(ZXing.BarcodeFormat.CODE_39);
+			formats.Add(ZXing.BarcodeFormat.QR_CODE);
+
+			zxing.IsTorchOn = true;
+
             zxing.OnScanResult += (result) => 
                 Device.BeginInvokeOnMainThread (async () => {
 
@@ -30,8 +39,7 @@ namespace FormsSample
                     // Show an alert
                     await DisplayAlert ("Scanned Barcode", result.Text, "OK");
 
-                    // Navigate away
-                    await Navigation.PopAsync ();
+					zxing.IsAnalyzing = true;
                 });
 
             overlay = new ZXingDefaultOverlay
@@ -46,6 +54,10 @@ namespace FormsSample
             };
             var grid = new Grid
             {
+				RowDefinitions = {
+					new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+					new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }
+				},
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
             };

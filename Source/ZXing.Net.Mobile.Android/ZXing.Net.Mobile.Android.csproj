@@ -63,6 +63,10 @@
     <Compile Include="Permissions.cs" />
     <Compile Include="PermissionsHandler.cs" />
     <Compile Include="FastJavaArrayEx.cs" />
+    <Compile Include="ZXingTextureView.cs" />
+    <Compile Include="CameraExtensions.cs" />
+    <Compile Include="FastJavaByteArray.cs" />
+    <Compile Include="FastJavaByteArrayEnumerator.cs" />
     <Compile Include="FastJavaByteArrayYUVLuminanceSource.cs" />
   </ItemGroup>
   <ItemGroup>

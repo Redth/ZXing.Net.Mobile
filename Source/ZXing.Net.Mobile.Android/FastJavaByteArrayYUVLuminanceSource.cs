@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2009 ZXing authors
  * Modifications copyright 2016 kasper@byolimit.com
  *
