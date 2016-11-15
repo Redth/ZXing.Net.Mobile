@@ -25,7 +25,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
         {
             formsView = Element;
 
-            if (zxingControl == null)
+            if (formsView != null && zxingControl == null)
             {
                 formsView.AutoFocusRequested += FormsView_AutoFocusRequested;
 
@@ -43,6 +43,12 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 
                 if (formsView.IsTorchOn)
                     zxingControl.Torch(formsView.IsTorchOn);
+            }
+
+            // Shut the scanner down if necessary
+            if (formsView == null && e.NewElement == null && zxingControl != null)
+            {
+                zxingControl.StopScanning();
             }
 
             base.OnElementChanged(e);
@@ -78,6 +84,12 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
         private void FormsView_AutoFocusRequested(int x, int y)
         {
            zxingControl.AutoFocus(x, y);
+        }
+
+        protected override async void OnDisconnectVisualChildren()
+        {
+            await zxingControl?.StopScanningAsync();
+            base.OnDisconnectVisualChildren();
         }
     }
 }
