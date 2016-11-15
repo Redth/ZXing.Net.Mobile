@@ -110,6 +110,11 @@ namespace ZXing.Net.Mobile.Forms.Android
             }
             return base.OnTouchEvent (e);
         }
+
+        protected override ZXingSurfaceView CreateNativeControl()
+        {
+            return null;
+        }
     }
 }
 

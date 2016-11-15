@@ -45,6 +45,11 @@ namespace ZXing.Net.Mobile.Forms.Android
             base.OnElementChanged (e);
         }
 
+        protected override ImageView CreateNativeControl()
+        {
+            return null;
+        }
+
         void regenerate ()
         {
             if (formsView != null && formsView.BarcodeValue != null)
