@@ -497,6 +497,8 @@ namespace ZXing.Mobile
 
             try
             {
+                if (IsTorchOn)
+                    Torch(false);
                 if (isMediaCaptureInitialized)
                     await mediaCapture.StopPreviewAsync();
                 if (UseCustomOverlay && CustomOverlay != null)
