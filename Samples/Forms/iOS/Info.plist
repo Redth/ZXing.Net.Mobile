@@ -42,5 +42,7 @@
 	<string>ZXing Forms</string>
 	<key>XSLaunchImageAssets</key>
 	<string>Resources/Images.xcassets/LaunchImage.launchimage</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Please allow the camera to be used for Barcode Scanning</string>
 </dict>
 </plist>
