@@ -81,14 +81,30 @@ namespace ZXing.Mobile
             
         }
 
+        int lastSurfaceWx = -1;
+        int lastSurfaceHx = -1;
+
         public void SurfaceChanged (ISurfaceHolder holder, Format format, int wx, int hx)
         {
             tcsSurfaceReady.TrySetResult (null);
 
             if (wasStarted) {
-                SetupCamera ().ContinueWith (t => {
-                    MobileBarcodeScanner.LogError ("SetupCamera Failed: {0}", t.Exception);
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                if (camera == null)
+                {
+                    SetupCamera().ContinueWith(t =>
+                    {
+                        MobileBarcodeScanner.LogError("SetupCamera Failed: {0}", t.Exception);
+                    }, TaskContinuationOptions.OnlyOnFaulted);
+                }
+                else
+                {
+                    if (this.activity != null && (lastSurfaceHx != hx || lastSurfaceWx != wx))
+                    {
+                        lastSurfaceHx = hx;
+                        lastSurfaceWx = wx;
+                        SetCameraDisplayOrientation(this.activity);
+                    }
+                }
             }
         }
 
@@ -103,6 +119,9 @@ namespace ZXing.Mobile
                 theCamera.SetPreviewCallback (null);
                 theCamera.StopPreview ();
                 theCamera.Release ();
+
+                lastSurfaceHx = -1;
+                lastSurfaceWx = -1;
             }
             tcsSurfaceReady = new TaskCompletionSource<object> ();
             ReleaseExclusiveAccess ();
