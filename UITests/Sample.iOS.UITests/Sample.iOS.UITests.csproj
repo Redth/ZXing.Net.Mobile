@@ -32,11 +32,13 @@
       <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.UITest">
-      <HintPath>..\..\packages\Xamarin.UITest.1.3.12\lib\Xamarin.UITest.dll</HintPath>
+      <HintPath>..\..\packages\Xamarin.UITest.1.3.14\lib\Xamarin.UITest.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Tests.cs" />
+    <Compile Include="InitializationTests.cs" />
+    <Compile Include="ScanningTests.cs" />
+    <Compile Include="TestConsts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -48,6 +50,15 @@
       <ReferenceOutputAssembly>False</ReferenceOutputAssembly>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\Source\ZXing.Net\zxing.portable.csproj">
+      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
+      <Name>zxing.portable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
+      <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
+      <Name>ZXing.Net.Mobile.Core</Name>
+    </ProjectReference>
   </ItemGroup>
+  <Import Project="..\UITests.Shared\UITests.Shared.projitems" Label="Shared" Condition="Exists('..\UITests.Shared\UITests.Shared.projitems')" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

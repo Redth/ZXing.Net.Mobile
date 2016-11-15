@@ -1,20 +1,18 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using UITests.Shared;
 using Xamarin.UITest;
-using Xamarin.UITest.Queries;
+using UITests.Shared;
 
-namespace FormsSample.UITests
+namespace UITests
 {
     [TestFixture (Platform.Android)]
     [TestFixture (Platform.iOS)]
-    public class Tests
+    public class InitializationTests
     {
         IApp app;
         Platform platform;
 
-        public Tests (Platform platform)
+        public InitializationTests (Platform platform)
         {
             this.platform = platform;
         }
@@ -22,7 +20,16 @@ namespace FormsSample.UITests
         [SetUp]
         public void BeforeEachTest ()
         {
-            app = AppInitializer.StartApp (platform);
+            app = AppInitializer.StartApp (
+                platform,
+                TestConsts.ApkFile,
+                TestConsts.iOSBundleId);
+        }
+
+        [TearDown]
+        public void AfterEachTest ()
+        {
+            app.ScreenshotIfFailed ();
         }
 
         //[Test]

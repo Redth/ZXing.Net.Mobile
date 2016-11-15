@@ -7,7 +7,7 @@
 # Define directories.
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOOLS_DIR=$SCRIPT_DIR/tools
-NUGET_EXE=$TOOLS_DIR/nuget.exe
+export NUGET_EXE=$TOOLS_DIR/nuget.exe
 CAKE_EXE=$TOOLS_DIR/Cake/Cake.exe
 
 # BEGIN TEMP WORKAROUND
@@ -46,7 +46,7 @@ fi
 # Make sure that packages.config exist.
 if [ ! -f "$TOOLS_DIR/packages.config" ]; then
     echo "Downloading packages.config..."
-    curl -Lsfo "$TOOLS_DIR/packages.config" http://cakebuild.net/download/bootstrapper/packages
+    curl -Lsfo "$TOOLS_DIR/packages.config" http://cakebuild.net/bootstrapper/packages
     if [ $? -ne 0 ]; then
         echo "An error occured while downloading packages.config."
         exit 1
@@ -56,22 +56,12 @@ fi
 # Download NuGet if it does not exist.
 if [ ! -f "$NUGET_EXE" ]; then
     echo "Downloading NuGet..."
-    # For now grab explicit 3.4.4 version instead of: https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
     curl -Lsfo "$NUGET_EXE" https://dist.nuget.org/win-x86-commandline/v3.4.4/NuGet.exe
     if [ $? -ne 0 ]; then
         echo "An error occured while downloading nuget.exe."
         exit 1
     fi
 fi
-
-# Restore tools from NuGet.
-pushd "$TOOLS_DIR" >/dev/null
-mono "$NUGET_EXE" install -ExcludeVersion
-if [ $? -ne 0 ]; then
-    echo "Could not restore NuGet packages."
-    exit 1
-fi
-popd >/dev/null
 
 # BEGIN TEMP WORKAROUND
 # There is a bug in Mono's System.IO.Compression
@@ -86,6 +76,15 @@ if [ ! -f "$SYSIOCOMP" ]; then
     fi
 fi
 # END TEMP WORKAROUND
+
+# Restore tools from NuGet.
+pushd "$TOOLS_DIR" >/dev/null
+mono "$NUGET_EXE" install -ExcludeVersion
+if [ $? -ne 0 ]; then
+    echo "Could not restore NuGet packages."
+    exit 1
+fi
+popd >/dev/null
 
 # Make sure that Cake has been installed.
 if [ ! -f "$CAKE_EXE" ]; then
