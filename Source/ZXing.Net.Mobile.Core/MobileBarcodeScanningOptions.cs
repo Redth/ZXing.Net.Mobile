@@ -24,6 +24,7 @@ namespace ZXing.Mobile
 
 		public CameraResolutionSelectorDelegate CameraResolutionSelector { get;set; }
 		public List<BarcodeFormat> PossibleFormats { get;set; }
+		public bool? UseCode39ExtendedMode { get; set; }
 		public bool? TryHarder { get;set; } 
 		public bool? PureBarcode { get;set; }
 		public bool? AutoRotate { get;set; }
@@ -55,6 +56,8 @@ namespace ZXing.Mobile
 				reader.Options.CharacterSet = this.CharacterSet;
 			if (this.TryInverted.HasValue)
 				reader.TryInverted = this.TryInverted.Value;
+			if (this.UseCode39ExtendedMode.HasValue)
+				reader.Options.UseCode39ExtendedMode = this.UseCode39ExtendedMode.Value;
 
 			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
 			{
