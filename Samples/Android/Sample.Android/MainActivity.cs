@@ -102,6 +102,14 @@ namespace Sample.Android
             };
 		}
 
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            if (ZXing.Net.Mobile.Android.PermissionsHandler.NeedsPermissionRequest(this))
+                ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync(this);
+        }
+
 		void HandleScanResult (ZXing.Result result)
 		{
 			string msg = "";
@@ -113,6 +121,11 @@ namespace Sample.Android
 
 			this.RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
 		}
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            global::ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
 
         [Java.Interop.Export ("UITestBackdoorScan")]
         public Java.Lang.String UITestBackdoorScan (string param)
