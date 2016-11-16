@@ -21,6 +21,7 @@
     <MtouchLink>None</MtouchLink>
     <MtouchDebug>True</MtouchDebug>
     <IntermediateOutputPath>obj\unified\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -31,29 +32,33 @@
     <ConsolePause>False</ConsolePause>
     <MtouchLink>None</MtouchLink>
     <IntermediateOutputPath>obj\unified\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>..\..\Build\Debug\ios-unified\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>__UNIFIED__;__MOBILE__;__IOS__;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
     <IntermediateOutputPath>obj\unified\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>..\..\Build\Release\ios-unified\</OutputPath>
+    <DefineConstants>__UNIFIED__;__MOBILE__;__IOS__;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <IntermediateOutputPath>obj\unified\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyName>ZXingNetMobile</AssemblyName>
@@ -78,6 +83,7 @@
     <Compile Include="ZXingDefaultOverlayView.cs" />
     <Compile Include="ZXingScannerView.cs" />
     <Compile Include="ZXingScannerViewController.cs" />
+    <Compile Include="CVPixelBufferARGB32LuminanceSource.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
