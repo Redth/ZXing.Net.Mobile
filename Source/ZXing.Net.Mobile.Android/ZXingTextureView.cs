@@ -8,6 +8,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
 using Android.Hardware;
+using Android.Opengl;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
@@ -16,7 +17,10 @@ using Android.Widget;
 
 using ApxLabs.FastAndroidCamera;
 
+using Javax.Microedition.Khronos.Egl;
+
 using Camera = Android.Hardware.Camera;
+using Matrix = Android.Graphics.Matrix;
 
 namespace ZXing.Mobile
 {
@@ -119,6 +123,7 @@ namespace ZXing.Mobile
 		Handler _handler;
 		MyOrientationEventListener _orientationEventListener;
 		TaskCompletionSource<SurfaceTextureAvailableEventArgs> _surfaceAvailable = new TaskCompletionSource<SurfaceTextureAvailableEventArgs>();
+		SurfaceTexture _surfaceTexture;
 		void Init()
 		{
 			_toast = Toast.MakeText(Context, string.Empty, ToastLength.Short);
@@ -134,17 +139,16 @@ namespace ZXing.Mobile
 				_orientationEventListener.Enable();
 
 			SurfaceTextureAvailable += (sender, e) =>
-			{
 				_surfaceAvailable.SetResult(e);
-			};
 
 			SurfaceTextureSizeChanged += (sender, e) =>
 				SetSurfaceTransform(e.Surface, e.Width, e.Height);
 
 			SurfaceTextureDestroyed += (sender, e) =>
 			{
-				_surfaceAvailable = new TaskCompletionSource<SurfaceTextureAvailableEventArgs>();
 				ShutdownCamera();
+				_surfaceAvailable = new TaskCompletionSource<SurfaceTextureAvailableEventArgs>();
+				_surfaceTexture = null;
 			};
 		}
 
@@ -214,7 +218,7 @@ namespace ZXing.Mobile
 					aspectRatio = 1f / aspectRatio;
 
 				// OpenGL coordinate system goes form 0 to 1
-				Matrix transform = new Matrix();
+				var transform = new Matrix();
 				transform.SetScale(1f, aspectRatio * width / height); // lock on to width
 
 				Post(() => SetTransform(transform)); // ensure we use the right thread when updating transform
@@ -438,6 +442,8 @@ namespace ZXing.Mobile
 			Log.Debug(MobileBarcodeScanner.TAG, $"Preview size {PreviewSize.Width}x{PreviewSize.Height} with {bitsPerPixel} bits per pixel");
 
 			var surfaceInfo = await _surfaceAvailable.Task;
+			_surfaceTexture = surfaceInfo.Surface;
+
 			SetSurfaceTransform(surfaceInfo.Surface, surfaceInfo.Width, surfaceInfo.Height);
 
 			_camera.SetDisplayOrientation(CameraOrientation(WindowManager.DefaultDisplay.Rotation));
@@ -496,6 +502,7 @@ namespace ZXing.Mobile
 				{
 					camera.StopPreview();
 					camera.SetNonMarshalingPreviewCallback(null);
+					ClearSurface(_surfaceTexture);
 				}
 				catch (Exception e)
 				{
@@ -506,6 +513,43 @@ namespace ZXing.Mobile
 					camera.Release();
 				}
 			});
+		}
+
+		void ClearSurface(SurfaceTexture texture)
+		{
+			if (texture == null)
+				return;
+
+			var egl = (IEGL10)EGLContext.EGL;
+			var display = egl.EglGetDisplay(EGL10.EglDefaultDisplay);
+			egl.EglInitialize(display, null);
+
+			int[] attribList = {
+				EGL10.EglRedSize, 8,
+				EGL10.EglGreenSize, 8,
+				EGL10.EglBlueSize, 8,
+				EGL10.EglAlphaSize, 8,
+				EGL10.EglRenderableType, EGL10.EglWindowBit,
+				EGL10.EglNone, 0, // placeholder for recordable [@-3]
+				EGL10.EglNone
+			};
+
+			var configs = new EGLConfig[1];
+			int[] numConfigs = new int[1];
+			egl.EglChooseConfig(display, attribList, configs, configs.Length, numConfigs);
+			var config = configs[0];
+			var context = egl.EglCreateContext(display, config, EGL10.EglNoContext, new int[] { 12440, 2, EGL10.EglNone });
+
+			var eglSurface = egl.EglCreateWindowSurface(display, config, texture, new int[] { EGL10.EglNone });
+
+			egl.EglMakeCurrent(display, eglSurface, eglSurface, context);
+			GLES20.GlClearColor(0, 0, 0, 1); // black, no opacity
+			GLES20.GlClear(GLES20.GlColorBufferBit);
+			egl.EglSwapBuffers(display, eglSurface);
+			egl.EglDestroySurface(display, eglSurface);
+			egl.EglMakeCurrent(display, EGL10.EglNoSurface, EGL10.EglNoSurface, EGL10.EglNoContext);
+			egl.EglDestroyContext(display, context);
+			egl.EglTerminate(display);
 		}
 
 		public void StopScanning()

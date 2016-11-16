@@ -19,10 +19,6 @@ namespace ZXing.Net.Mobile.Forms.Android
     [Preserve(AllMembers = true)]
 	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingTextureView>
     {       
-        public ZXingScannerViewRenderer () : base ()
-        {
-        }
-
         public static void Init ()
         {
             // Keep linker from stripping empty method
@@ -57,7 +53,6 @@ namespace ZXing.Net.Mobile.Forms.Android
                 if (activity != null)                
                     await ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync (activity);
                 
-				// zxingSurface = new ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity, formsView.Options);
 				zxingTexture = new ZXingTextureView(Xamarin.Forms.Forms.Context);
 				zxingTexture.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
 
