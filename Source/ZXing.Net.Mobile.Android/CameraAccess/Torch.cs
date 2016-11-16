@@ -41,7 +41,7 @@ namespace ZXing.Mobile.CameraAccess
                 if ((supportedFlashModes != null)
                     && (supportedFlashModes.Contains(Camera.Parameters.FlashModeTorch)
                     || supportedFlashModes.Contains(Camera.Parameters.FlashModeOn)))
-                    _hasTorch = PlatformChecks.CheckTorchPermissions(_context, false);
+                    _hasTorch = ZXing.Net.Mobile.Android.PermissionsHandler.CheckTorchPermissions(_context, false);
 
                 return _hasTorch != null && _hasTorch.Value;
             }

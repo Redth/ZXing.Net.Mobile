@@ -29,18 +29,24 @@ namespace ZXing.Mobile
             Holder.SetType(SurfaceType.PushBuffers);
         }
 
-        public void SurfaceCreated(ISurfaceHolder holder)
+        public async void SurfaceCreated(ISurfaceHolder holder)
         {
+            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
             _cameraAnalyzer.SetupCamera();
         }
 
-        public void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
+        public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
         {
+            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
             _cameraAnalyzer.RefreshCamera();
         }
 
-        public void SurfaceDestroyed(ISurfaceHolder holder)
+        public async void SurfaceDestroyed(ISurfaceHolder holder)
         {
+            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
             _cameraAnalyzer.ShutdownCamera();
         }
 

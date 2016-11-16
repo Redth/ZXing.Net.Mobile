@@ -55,7 +55,7 @@ namespace ZXing.Mobile.CameraAccess
         {
             if (Camera != null) return;
 
-            PlatformChecks.CheckCameraPermissions(_context);
+            ZXing.Net.Mobile.Android.PermissionsHandler.CheckCameraPermissions(_context);
 
             var perf = PerformanceCounter.Start();
             OpenCamera();

@@ -50,13 +50,13 @@
     <Compile Include="CameraAccess\CameraEventsListener.cs" />
     <Compile Include="CameraAccess\Torch.cs" />
     <Compile Include="MobileBarcodeScanner.cs" />
-    <Compile Include="PlatformChecks.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="ZxingActivity.cs" />
     <Compile Include="ZxingOverlayView.cs" />
     <Compile Include="ZXingScannerFragment.cs" />
     <Compile Include="ZXingSurfaceView.cs" />
     <Compile Include="Permissions.cs" />
+    <Compile Include="PermissionsHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
