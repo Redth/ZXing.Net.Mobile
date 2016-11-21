@@ -1,26 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Android.Content;
 using Android.Views;
+using ZXing.Mobile.Detectors;
 
 namespace ZXing.Mobile.CameraAccess
 {
     public class CameraAnalyzer
     {
         private readonly CameraController _cameraController;
+        private readonly Context _context;
         private readonly MobileBarcodeScanningOptions _scanningOptions;
         private readonly CameraEventsListener _cameraEventListener;
-        private Task _processingTask;
-        private DateTime _lastPreviewAnalysis = DateTime.UtcNow;
         private bool _wasScanned;
-        private BarcodeReader _barcodeReader;
+        private Task _processingTask;
+        private IDetector _barcodeDetector;
+        private DateTime _lastPreviewAnalysis = DateTime.UtcNow;
 
         public CameraAnalyzer(SurfaceView surfaceView, MobileBarcodeScanningOptions scanningOptions)
         {
+            _context = surfaceView.Context;
             _scanningOptions = scanningOptions;
             _cameraEventListener = new CameraEventsListener();
             _cameraController = new CameraController(surfaceView, _cameraEventListener, scanningOptions);
-            Torch = new Torch(_cameraController, surfaceView.Context);
+            Torch = new Torch(_cameraController, _context);
         }
 
         public event EventHandler<Result> BarcodeFound;
@@ -135,7 +139,7 @@ namespace ZXing.Mobile.CameraAccess
             if (rotate)
                 bytes = RotateCounterClockwise(bytes, width, height);
 
-            var result = _barcodeReader.Decode(bytes, newWidth, newHeight, RGBLuminanceSource.BitmapFormat.Unknown);
+            var result = _barcodeDetector.Decode(bytes, newWidth, newHeight);
 
             PerformanceCounter.Stop(start,
                 "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
@@ -152,29 +156,52 @@ namespace ZXing.Mobile.CameraAccess
 
         private void InitBarcodeReaderIfNeeded()
         {
-            if (_barcodeReader != null)
+            if (_barcodeDetector != null)
                 return;
 
-            _barcodeReader = new BarcodeReader(null, null, null, (p, w, h, f) =>
-                    new PlanarYUVLuminanceSource(p, w, h, 0, 0, w, h, false));
-            //new PlanarYUVLuminanceSource(p, w, h, dataRect.Left, dataRect.Top, dataRect.Width(), dataRect.Height(), false))
-
-            if (_scanningOptions.TryHarder.HasValue)
-                _barcodeReader.Options.TryHarder = _scanningOptions.TryHarder.Value;
-            if (_scanningOptions.PureBarcode.HasValue)
-                _barcodeReader.Options.PureBarcode = _scanningOptions.PureBarcode.Value;
-            if (!string.IsNullOrEmpty(_scanningOptions.CharacterSet))
-                _barcodeReader.Options.CharacterSet = _scanningOptions.CharacterSet;
-            if (_scanningOptions.TryInverted.HasValue)
-                _barcodeReader.TryInverted = _scanningOptions.TryInverted.Value;
-
-            if (_scanningOptions.PossibleFormats != null && _scanningOptions.PossibleFormats.Count > 0)
+            var isNativeUsed = false;
+            if (_scanningOptions.UseNativeScanning)
             {
-                _barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
-
-                foreach (var pf in _scanningOptions.PossibleFormats)
-                    _barcodeReader.Options.PossibleFormats.Add(pf);
+                _barcodeDetector = CreateGoogleVisionDetector();
+                isNativeUsed = true;
             }
+
+            if (_barcodeDetector == null)
+            {
+                _barcodeDetector = new ZXingDetector();
+                isNativeUsed = false;
+            }
+
+            var isDetectorAvailable = _barcodeDetector.Init(_scanningOptions);
+            if (!isDetectorAvailable && isNativeUsed)
+            {
+                _barcodeDetector = new ZXingDetector();
+                _barcodeDetector.Init(_scanningOptions);
+            }
+        }
+
+        private IDetector CreateGoogleVisionDetector()
+        {
+            try
+            {
+                var targetAsm =
+                    AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault(x => x.GetName().Name == "ZXing.Net.Mobile.Android.Vision");
+                if (targetAsm != null)
+                {
+                    var type = targetAsm.GetType("ZXing.Net.Mobile.Android.Vision.GoogleVisionDetector");
+                    if (type != null)
+                    {
+                        return Activator.CreateInstance(type, _context) as IDetector;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Android.Util.Log.Error(MobileBarcodeScanner.TAG, ex.ToString());
+            }
+
+            return null;
         }
 
         private static byte[] RotateCounterClockwise(byte[] data, int width, int height)

@@ -23,7 +23,7 @@ namespace ZXing.Mobile
 
             try
             {
-                scanner = new ZXingSurfaceView (this.Activity, ScanningOptions);
+                scanner = new ZXingSurfaceView (this.Activity);
 
                 frame.AddView(scanner, layoutParams);
 
