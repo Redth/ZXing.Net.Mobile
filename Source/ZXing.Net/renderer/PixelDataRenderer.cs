@@ -21,8 +21,6 @@ using UnityEngine;
 using Color = UnityEngine.Color32;
 #elif MONOANDROID
 using Android.Graphics;
-#elif MONOTOUCH
-using System.Drawing;
 #elif PORTABLE
 #elif (NET45 || NET40 || NET35 || NET20 || WindowsCE)
 using System.Drawing;
@@ -31,11 +29,9 @@ using Windows.UI;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 #else
-#if !MONOTOUCH && !__UNIFIED__ && !MONOANDROID
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-#endif
 #endif
 
 using ZXing.Common;
@@ -91,7 +87,7 @@ namespace ZXing.Rendering
 #if UNITY
          Foreground = UnityEngine.Color.black;
          Background = UnityEngine.Color.white;
-#elif (NET45 || NET40 || NET35 || NET20 || WindowsCE || PORTABLE || MONOANDROID || MONOTOUCH)
+#elif (NET45 || NET40 || NET35 || NET20 || WindowsCE || PORTABLE || MONOANDROID)
          Foreground = Color.Black;
          Background = Color.White;
 #else

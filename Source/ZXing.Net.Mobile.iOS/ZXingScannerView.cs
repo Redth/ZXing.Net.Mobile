@@ -479,14 +479,14 @@ namespace ZXing.Mobile
 
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
 		{
-			public OutputRecorder(MobileBarcodeScanningOptions options, Func<UIImage, bool> handleImage) : base()
-			{
-				HandleImage = handleImage;
-				this.options = options;
-			}
+            public OutputRecorder(MobileBarcodeScanningOptions options, Func<LuminanceSource, bool> handleImage) : base()
+            {
+                HandleImage = handleImage;
+                this.options = options;
+            }
 
 			MobileBarcodeScanningOptions options;
-			Func<UIImage, bool> HandleImage;
+            Func<LuminanceSource, bool> HandleImage;
 
 			DateTime lastAnalysis = DateTime.MinValue;
 			volatile bool working = false;
@@ -495,7 +495,7 @@ namespace ZXing.Mobile
 			[Export ("captureOutput:didDropSampleBuffer:fromConnection:")]
 			public void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
-				//Console.WriteLine("DROPPED");
+				//Console.WriteLine("Dropped Sample Buffer");
 			}
 
 			public CancellationTokenSource CancelTokenSource = new CancellationTokenSource();
@@ -524,10 +524,28 @@ namespace ZXing.Mobile
 
 				try 
 				{
-					using (var image = ImageFromSampleBuffer (sampleBuffer))
-                        if (HandleImage(image))
-                            wasScanned = true;
-					
+                    // Get the CoreVideo image
+                    using (var pixelBuffer = sampleBuffer.GetImageBuffer() as CVPixelBuffer)
+                    {
+                        // Lock the base address
+                        pixelBuffer.Lock(CVPixelBufferLock.ReadOnly); // MAYBE NEEDS READ/WRITE
+
+                        CVPixelBufferARGB32LuminanceSource luminanceSource;
+
+                        // Let's access the raw underlying data and create a luminance source from it
+                        unsafe
+                        {
+                            var rawData = (byte*)pixelBuffer.BaseAddress.ToPointer();
+                            var rawDatalen = (int)(pixelBuffer.Height * pixelBuffer.Width * 4); //This drops 8 bytes from the original length to give us the expected length
+
+                            luminanceSource = new CVPixelBufferARGB32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
+                        }
+
+                        HandleImage(luminanceSource);
+
+                        pixelBuffer.Unlock(CVPixelBufferLock.ReadOnly);
+                    }
+
 					//
 					// Although this looks innocent "Oh, he is just optimizing this case away"
 					// this is incredibly important to call on this callback, because the AVFoundation
@@ -542,36 +560,6 @@ namespace ZXing.Mobile
 				}
 
 				working = false;
-			}
-			
-			UIImage ImageFromSampleBuffer (CMSampleBuffer sampleBuffer)
-			{
-				UIImage img = null;
-
-				// Get the CoreVideo image
-				using (var pixelBuffer = sampleBuffer.GetImageBuffer () as CVPixelBuffer)
-				{
-					// Lock the base address
-					pixelBuffer.Lock (CVPixelBufferLock.ReadOnly);
-
-					// Get the number of bytes per row for the pixel buffer
-					var baseAddress = pixelBuffer.BaseAddress;
-					var bytesPerRow = pixelBuffer.BytesPerRow;
-					var width = pixelBuffer.Width;
-					var height = pixelBuffer.Height;
-					var flags = CGBitmapFlags.PremultipliedFirst | CGBitmapFlags.ByteOrder32Little;
-					// Create a CGImage on the RGB colorspace from the configured parameter above
-					using (var cs = CGColorSpace.CreateDeviceRGB ())
-					using (var context = new CGBitmapContext (baseAddress, width, height, 8, bytesPerRow, cs, (CGImageAlphaInfo) flags))
-					using (var cgImage = context.ToImage ())
-					{
-						pixelBuffer.Unlock (CVPixelBufferLock.ReadOnly);
-
-						img = new UIImage(cgImage);
-					}
-				}
-
-				return img;
 			}
 		}
 	

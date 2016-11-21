@@ -30,5 +30,7 @@
 	<string>Resources/Images.xcassets/LaunchImage.launchimage</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Please allow the camera to be used for Scanning Barcodes</string>
 </dict>
 </plist>

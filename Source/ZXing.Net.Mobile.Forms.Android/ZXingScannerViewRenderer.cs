@@ -55,7 +55,7 @@ namespace ZXing.Net.Mobile.Forms.Android
                 var activity = Context as Activity;
 
                 if (activity != null)                
-                    await PermissionsHandler.RequestPermissions (activity);
+                    await ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync (activity);
                 
                 zxingSurface = new ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity, formsView.Options);
                 zxingSurface.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);

@@ -19,24 +19,38 @@ namespace Sample.Android
 			base.OnCreate (savedInstanceState);
 
 			SetContentView (Resource.Layout.FragmentActivity);
-
-			scanFragment = new ZXingScannerFragment ();
-
-			SupportFragmentManager.BeginTransaction ()
-				.Replace (Resource.Id.fragment_container, scanFragment)
-				.Commit ();            
 		}
 
         protected override void OnResume ()
         {
             base.OnResume ();
 
-            scan ();
+            var needsPermissionRequest = ZXing.Net.Mobile.Android.PermissionsHandler.NeedsPermissionRequest(this);
+
+            if (needsPermissionRequest)
+                ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync(this);
+
+            if (scanFragment == null)
+            {
+                scanFragment = new ZXingScannerFragment();
+
+                SupportFragmentManager.BeginTransaction()
+                    .Replace(Resource.Id.fragment_container, scanFragment)
+                    .Commit();
+            }
+
+            if (!needsPermissionRequest)
+                scan();
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
         protected override void OnPause ()
         {
-            scanFragment.StopScanning ();
+            scanFragment?.StopScanning ();
 
             base.OnPause ();
         }

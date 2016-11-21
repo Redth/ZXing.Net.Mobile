@@ -43,10 +43,12 @@ namespace ZXing
          formatMap = new Dictionary<BarcodeFormat, Func<Writer>>
                         {
                            {BarcodeFormat.EAN_8, () => new EAN8Writer()},
+                           {BarcodeFormat.UPC_E, () => new UPCEWriter()},
                            {BarcodeFormat.EAN_13, () => new EAN13Writer()},
                            {BarcodeFormat.UPC_A, () => new UPCAWriter()},
                            {BarcodeFormat.QR_CODE, () => new QRCodeWriter()},
                            {BarcodeFormat.CODE_39, () => new Code39Writer()},
+                           {BarcodeFormat.CODE_93, () => new Code93Writer()},
                            {BarcodeFormat.CODE_128, () => new Code128Writer()},
                            {BarcodeFormat.ITF, () => new ITFWriter()},
                            {BarcodeFormat.PDF_417, () => new PDF417Writer()},

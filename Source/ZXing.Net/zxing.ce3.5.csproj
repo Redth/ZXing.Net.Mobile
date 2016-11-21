@@ -200,6 +200,7 @@
     <Compile Include="oned\Code39Reader.cs" />
     <Compile Include="oned\Code39Writer.cs" />
     <Compile Include="oned\Code93Reader.cs" />
+    <Compile Include="oned\Code93Writer.cs" />
     <Compile Include="oned\EAN13Reader.cs" />
     <Compile Include="oned\EAN13Writer.cs" />
     <Compile Include="oned\EAN8Reader.cs" />
@@ -251,6 +252,7 @@
     <Compile Include="oned\UPCEANReader.cs" />
     <Compile Include="oned\UPCEANWriter.cs" />
     <Compile Include="oned\UPCEReader.cs" />
+    <Compile Include="oned\UPCEWriter.cs" />
     <Compile Include="pdf417\decoder\BarcodeMetadata.cs" />
     <Compile Include="pdf417\decoder\BarcodeValue.cs" />
     <Compile Include="pdf417\decoder\BoundingBox.cs" />

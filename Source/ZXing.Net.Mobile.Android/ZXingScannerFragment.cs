@@ -72,7 +72,7 @@ namespace ZXing.Mobile
         {
             if (scanner != null)
             {
-                scanner.ShutdownCamera();
+                scanner.StopScanning();
 
                 frame.RemoveView(scanner);
             }
@@ -103,17 +103,17 @@ namespace ZXing.Mobile
 
 		public void Torch(bool on)
 		{
-			scanner.Torch(on);
+			scanner?.Torch(on);
 		}
 		
         public void AutoFocus()
         {
-            scanner.AutoFocus();
+            scanner?.AutoFocus();
         }
 
         public void AutoFocus(int x, int y)
 		{
-			scanner.AutoFocus(x, y);
+			scanner?.AutoFocus(x, y);
 		}
 
         Action<Result> scanCallback;
@@ -134,45 +134,44 @@ namespace ZXing.Mobile
 
         void scan ()
         {
-            if (scanner != null)
-                scanner.StartScanning (scanCallback, ScanningOptions);
+            scanner?.StartScanning (scanCallback, ScanningOptions);
         }
 
         public void StopScanning ()
         {
-            scanner.StopScanning ();
+            scanner?.StopScanning ();
         }
 
         public void PauseAnalysis ()
         {
-            scanner.PauseAnalysis ();
+            scanner?.PauseAnalysis ();
         }
 
         public void ResumeAnalysis ()
         {
-            scanner.ResumeAnalysis ();
+            scanner?.ResumeAnalysis ();
         }
 
         public void ToggleTorch ()
         {
-            scanner.ToggleTorch ();
+            scanner?.ToggleTorch ();
         }
 
         public bool IsTorchOn {
             get {
-                return scanner.IsTorchOn;
+                return scanner?.IsTorchOn ?? false;
             }
         }
 
         public bool IsAnalyzing {
             get {
-                return scanner.IsAnalyzing;
+                return scanner?.IsAnalyzing ?? false;
             }
         }
 
         public bool HasTorch {
             get {
-                return scanner.HasTorch; 
+                return scanner?.HasTorch ?? false;
             }
         }
 	}

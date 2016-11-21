@@ -13,6 +13,8 @@ namespace FormsSample.Droid
     [Activity (Label = "ZXing Forms", Icon = "@mipmap/ic_launcher", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity
     {
+        App formsApp;
+
         protected override void OnCreate (Bundle bundle)
         {
             base.OnCreate (bundle);
@@ -21,12 +23,20 @@ namespace FormsSample.Droid
 
             global::ZXing.Net.Mobile.Forms.Android.Platform.Init ();
 
-            LoadApplication (new App ());
+            formsApp = new App ();
+            LoadApplication (formsApp);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
-            global::ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult (requestCode, permissions, grantResults);           
+            global::ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult (requestCode, permissions, grantResults);           
+        }
+
+        [Java.Interop.Export ("UITestBackdoorScan")]
+        public Java.Lang.String UITestBackdoorScan (string param)
+        {
+            formsApp.UITestBackdoorScan (param);
+            return new Java.Lang.String ();
         }
     }
 }

@@ -122,39 +122,15 @@ namespace ZXing.Mobile
         {
             base.OnResume ();
 
-            var permissionsToRequest = new List<string> ();
-
-            // Check and request any permissions
-            foreach (var permission in RequiredPermissions) {
-                if (PlatformChecks.IsPermissionInManifest (this, permission)) {
-                    if (!PlatformChecks.IsPermissionGranted (this, permission))
-                        permissionsToRequest.Add (permission);
-                }
-            }
-
-            if (permissionsToRequest.Any ()) {
-                PlatformChecks.RequestPermissions (this, permissionsToRequest.ToArray (), 101);
-            } else {
+            if (ZXing.Net.Mobile.Android.PermissionsHandler.NeedsPermissionRequest(this))
+                ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync(this);
+            else
                 StartScanning ();
-            }
         }
 
         public override void OnRequestPermissionsResult (int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         { 
-            base.OnRequestPermissionsResult (requestCode, permissions, grantResults);
-
-            if (requestCode == 101) {
-                var canScan = false;
-                for (int i = 0; i < permissions.Length; i++) {
-                    if (permissions [i] == Android.Manifest.Permission.Camera && grantResults [i] == Permission.Granted)
-                        canScan = true;
-                }
-
-                if (!canScan) {
-                    Toast.MakeText (this, "Camera Permissions not Granted", ToastLength.Long).Show ();
-                    Finish ();
-                }
-            }
+            ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
         void StartScanning ()

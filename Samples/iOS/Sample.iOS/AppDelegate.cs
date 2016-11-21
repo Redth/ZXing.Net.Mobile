@@ -50,6 +50,14 @@ namespace Sample.iOS
 
 			return true;
 		}
+
+        [Export ("UITestBackdoorScan:")] // notice the colon at the end of the method name
+        public NSString UITestBackdoorScan (NSString value)
+        {
+            homeViewController.UITestBackdoorScan (value.ToString ());
+
+            return new NSString ();
+        }
 	}
 }
 

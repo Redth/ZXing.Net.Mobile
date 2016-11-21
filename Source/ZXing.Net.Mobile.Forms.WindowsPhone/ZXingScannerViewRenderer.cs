@@ -25,7 +25,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
         {
             formsView = Element;
 
-            if (zxingControl == null)
+            if (formsView != null && zxingControl == null)
             {
                 formsView.AutoFocusRequested += FormsView_AutoFocusRequested;
 
@@ -43,6 +43,11 @@ namespace ZXing.Net.Mobile.Forms.WindowsPhone
 
                 if (formsView.IsTorchOn)
                     zxingControl.Torch(formsView.IsTorchOn);
+            }
+
+            if (formsView == null && e.NewElement == null && zxingControl != null)
+            {
+                zxingControl.StopScanning();
             }
 
             base.OnElementChanged(e);
