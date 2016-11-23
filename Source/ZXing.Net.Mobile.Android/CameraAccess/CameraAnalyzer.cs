@@ -45,13 +45,14 @@ namespace ZXing.Mobile.CameraAccess
 
         public void ShutdownCamera()
         {
-            IsAnalyzing = false;
+            PauseAnalysis();
             _cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
             _cameraController.ShutdownCamera();
         }
 
         public void SetupCamera()
         {
+            ResumeAnalysis();
             _cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
             _cameraController.SetupCamera();
         }
@@ -145,7 +146,7 @@ namespace ZXing.Mobile.CameraAccess
                 "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
                 rotate + ")");
 
-            if ((result == null) || string.IsNullOrEmpty(result.Text))
+            if (string.IsNullOrEmpty(result?.Text))
                 return;
 
             Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
