@@ -294,7 +294,13 @@ namespace ZXing.Mobile
 				var transform = new Matrix();
 				transform.SetScale(1f, aspectRatio * width / height); // lock on to width
 
-				Post(() => SetTransform(transform)); // ensure we use the right thread when updating transform
+				Post(() => {
+					try
+					{
+						SetTransform(transform);
+					}
+					catch (ObjectDisposedException) { } // todo: What to do here?! For now we squash :-/
+				}); // ensure we use the right thread when updating transform
 
 				Log.Debug(MobileBarcodeScanner.TAG, $"Aspect ratio: {aspectRatio}, Transform: {transform}");
 

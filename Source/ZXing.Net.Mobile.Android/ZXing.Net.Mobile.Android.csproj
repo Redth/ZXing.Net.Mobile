@@ -44,7 +44,6 @@
     </Reference>
     <Reference Include="FastAndroidCamera">
       <HintPath>..\..\packages\FastAndroidCamera.2.0.0\lib\MonoAndroid403\FastAndroidCamera.dll</HintPath>
-      <HintPath>..\..\Samples\Forms\packages\FastAndroidCamera.2.0.0\lib\MonoAndroid403\FastAndroidCamera.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -64,10 +63,9 @@
     <Compile Include="ZXingSurfaceView.cs" />
     <Compile Include="Permissions.cs" />
     <Compile Include="PermissionsHandler.cs" />
-    <Compile Include="FastJavaArrayEx.cs" />
-    <Compile Include="ZXingTextureView.cs" />
     <Compile Include="FastJavaByteArrayYUVLuminanceSource.cs" />
     <Compile Include="FastJavaArrayEx.cs" />
+    <Compile Include="ZXingTextureView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
