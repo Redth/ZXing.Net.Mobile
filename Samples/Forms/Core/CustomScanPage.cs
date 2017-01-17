@@ -28,13 +28,15 @@ namespace FormsSample
 			formats.Add(ZXing.BarcodeFormat.CODE_39);
 			formats.Add(ZXing.BarcodeFormat.QR_CODE);
 
+			zxing.Options.DelayBetweenContinuousScans = 1000; // same barcode can only be scanned once a second. Different barcodes is a different matter
+
 			zxing.IsTorchOn = true;
 
             zxing.OnScanResult += (result) => 
                 Device.BeginInvokeOnMainThread (async () => {
 
                     // Stop analysis until we navigate away so we don't keep reading barcodes
-                    zxing.IsAnalyzing = false;
+                    zxing.IsAnalyzing = true;
 
                     // Show an alert
                     await DisplayAlert ("Scanned Barcode", result.Text, "OK");

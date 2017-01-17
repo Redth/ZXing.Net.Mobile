@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -88,6 +89,75 @@ namespace ZXing.Mobile
 		public override void OnOrientationChanged(int orientation)
 		{
 			OrientationChanged?.Invoke(orientation);
+		}
+	}
+
+	public class RingBuffer<T>
+	{
+		readonly T[] _buffer;
+		int _tail;
+		int _length;
+
+		public RingBuffer(int capacity)
+		{
+			_buffer = new T[capacity];
+		}
+
+		public void Add(T item)
+		{
+			_buffer[_tail] = item; // will overwrite existing entry, if any
+			_tail = (_tail + 1) % _buffer.Length; // roll over
+			_length++;
+		}
+
+		public T this[int index]
+		{
+			get { return _buffer[WrapIndex(index)]; }
+			set { _buffer[WrapIndex(index)] = value; }
+		}
+
+		public int Length
+		{
+			get { return _length; }
+		}
+
+		public int FindIndex(ref T toFind, IComparer<T> comparer = null)
+		{
+			comparer = comparer ?? Comparer<T>.Default;
+			int idx = -1;
+			for (int i = 0; i < Length; ++i)
+			{
+				var candidate = this[i];
+				if (comparer.Compare(candidate, toFind) == 0)
+				{
+					idx = i;
+					toFind = candidate;
+					break; // item found in history ring
+				}
+			}
+			return idx;
+		}
+
+		public void AddOrUpdate(ref T item, IComparer<T> comparer = null) 
+		{
+			var idx = FindIndex(ref item);
+			if (idx < 0)
+				Add(item);
+			else
+				this[idx] = item;
+		}
+
+		int Head
+		{
+			get { return (_tail - _length) % _buffer.Length; }
+		}
+
+		int WrapIndex(int index)
+		{
+			if (index < 0 || index >= _length)
+				throw new IndexOutOfRangeException($"{nameof(index)} = {index}");
+
+			return (Head + index) % _buffer.Length;
 		}
 	}
 
@@ -202,6 +272,10 @@ namespace ZXing.Mobile
 		Rectangle _area;
 		void SetSurfaceTransform(SurfaceTexture st, int width, int height)
 		{
+			var p = PreviewSize;
+			if (p == null)
+				return; // camera no ready yet, we will be called again later from SetupCamera.
+
 			using (var metrics = new DisplayMetrics())
 			{
 				#region transform
@@ -210,7 +284,6 @@ namespace ZXing.Mobile
 				var aspectRatio = metrics.Xdpi / metrics.Ydpi; // close to 1, but rarely perfect 1
 
 				// Compensate for preview streams aspect ratio
-				var p = PreviewSize;
 				aspectRatio *= (float)p.Height / p.Width;
 
 				// Compensate for portrait mode
@@ -312,6 +385,7 @@ namespace ZXing.Mobile
 			set
 			{
 				_scanningOptions = value;
+				_delay = TimeSpan.FromMilliseconds(value.DelayBetweenContinuousScans).Ticks;
 				_barcodeReader = CreateBarcodeReader(value);
 			}
 		}
@@ -674,9 +748,20 @@ namespace ZXing.Mobile
 					target[x * height + height - y - 1] = source[x + y * width];
 		}
 
+		const int maxHistory = 10; // a bit arbitrary :-/
+		struct LastResult
+		{
+			public long Timestamp;
+			public Result Result;
+		};
+
+		readonly RingBuffer<LastResult> _ring = new RingBuffer<LastResult>(maxHistory);
+		readonly IComparer<LastResult> _resultComparer = Comparer<LastResult>.Create((x, y) => x.Result.Text.CompareTo(y.Result.Text));
+		long _delay;
+
 		byte[] _matrix;
 		byte[] _rotatedMatrix;
-		Result _lastResult;
+
 		async public void OnPreviewFrame(IntPtr data, Camera camera)
 		{
 			System.Diagnostics.Stopwatch sw = null;
@@ -685,7 +770,7 @@ namespace ZXing.Mobile
 				try
 				{
 #if DEBUG
-					sw = new System.Diagnostics.Stopwatch();
+					sw = new Stopwatch();
 					sw.Start();
 #endif
 					if (!_isAnalyzing)
@@ -711,14 +796,22 @@ namespace ZXing.Mobile
 
 					if (result != null)
 					{
-						// don't raise the same barcode multiple times, unless we have seen atleast one other barcode or an empty frame
-						if (result.Text != _lastResult?.Text)
+						var now = Stopwatch.GetTimestamp();
+						var lastResult = new LastResult { Result = result };
+						int idx = _ring.FindIndex(ref lastResult, _resultComparer);
+						if (idx < 0 || lastResult.Timestamp + _delay < now)
+						{
 							_callback(result);
+
+							lastResult.Timestamp = now; // update timestamp
+							if (idx < 0)
+								_ring.Add(lastResult);
+							else
+								_ring[idx] = lastResult;
+						}
 					}
 					else if (!_useContinuousFocus)
 						AutoFocus();
-
-					_lastResult = result;
 				}
 				catch (Exception ex)
 				{
