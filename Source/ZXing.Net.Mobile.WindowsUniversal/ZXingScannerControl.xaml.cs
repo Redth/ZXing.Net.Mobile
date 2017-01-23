@@ -357,6 +357,7 @@ namespace ZXing.Mobile
             get
             {
                 return mediaCapture != null
+                    && isMediaCaptureInitialized
                     && mediaCapture.VideoDeviceController != null
                     && mediaCapture.VideoDeviceController.FocusControl != null
                     && mediaCapture.VideoDeviceController.FocusControl.Supported;
