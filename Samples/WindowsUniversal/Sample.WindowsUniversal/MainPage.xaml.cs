@@ -34,7 +34,7 @@ namespace Sample.WindowsUniversal
 
             //Create a new instance of our scanner
             scanner = new MobileBarcodeScanner(this.Dispatcher);
-            scanner.Dispatcher = this.Dispatcher;
+            scanner.RootFrame = this.Frame;
         }
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
