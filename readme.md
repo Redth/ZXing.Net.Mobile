@@ -84,14 +84,14 @@ ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
 If you notice that finishing scanning or pressing the back button is causing your Page to jump back further than you'd like, or if you're having trouble updating the UI of a Page after scanning is completed, you may need to set `NavigationCacheMode="Enabled"` within your Page's XAML `<Page ... />` element.
 
 
-###Features
+### Features
 - Xamarin.iOS
 - Xamarin.Android (Including Google Glass)
 - Windows Phone 8
 - Simple API - Scan in as little as 2 lines of code!
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
-###Changes
+### Changes
 See [CHANGES.md](https://github.com/Redth/ZXing.Net.Mobile/blob/master/CHANGES.md) for changelog
 
    
@@ -119,7 +119,7 @@ Keep in mind that when using a Custom Overlay, you are responsible for the entir
 
 All of the platform samples have examples of custom overlays.
 
-###Barcode Formats
+### Barcode Formats
 By default, all barcode formats are monitored while scanning.  You can change which formats to check for by passing a ZxingScanningOptions instance into the StartScanning method:
 
 ```csharp
@@ -137,12 +137,12 @@ options.PossibleFormats = new List<ZXing.BarcodeFormat>() {
 var scanner = new ZXing.Mobile.MobileBarcodeScanner(); 
 var result = await scanner.Scan(options);
 //Handle result
-````
+```
 
-###Samples
+### Samples
 Samples for implementing ZXing.Net.Mobile can be found in the /*sample*/ folder.  There is a sample for each platform including examples of how to use custom overlays.
 
-###Using the ZXingScanner View / Fragment / Control
+### Using the ZXingScanner View / Fragment / Control
 On each platform, the ZXing scanner has been implemented as a reusable component (view, fragment, or control), and it is possible to use the reusable component directly without using the MobileBarcodeScanner class at all.  On each platform, the instance of the view/fragment/control contains the necessary properties and methods required to control your scanner.  By default, the default overlay is automatically used, unless you set the CustomOverlay property as well as the UseCustomOverlay property on the instance of the view/fragment/control.  You can use methods such as ToggleTorch() or StopScanning() on the view/fragment/control, however you are responsible for calling StartScanning(...) with a callback and an instance of MobileBarcodeScanningOptions when you are ready for the view's scanning to begin.  You are also responsible for stopping scanning if you want to cancel at any point.
 
 The view/fragment/control classes for each platform are:
@@ -152,7 +152,7 @@ The view/fragment/control classes for each platform are:
  - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
  - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
 
-###Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
+### Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
 In iOS7, Apple added some API's to allow for scanning of barcodes in an AVCaptureSession.  The latest version of ZXing.Net.Mobile gives you the option of using this instead of the ZXing scanning engine.  You can use the `AVCaptureScannerView` or the `AVCaptureScannerViewController` classes directly just the same as you would use their ZXing* equivalents.  Or, in your `MobileBarcodeScanner`, there is now an overload to use the AV Capture Engine:
 
 ```csharp
@@ -172,7 +172,7 @@ In the MobileBarcodeScanner, even if you specify to use the AVCaptureSession sca
 - UPC-E
 
 
-###Thanks
+### Thanks
 ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put together (including my own).  So naturally, I'd like to thank everyone who's helped out in any way.  Those of you I know have helped I'm listing here, but anyone else that was involved, please let me know!
 
 - ZXing Project and those responsible for porting it to C#
@@ -183,7 +183,7 @@ ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put togeth
 
 
 
-###License
+### License
 Apache ZXing.Net.Mobile Copyright 2012 The Apache Software Foundation
 This product includes software developed at The Apache Software Foundation (http://www.apache.org/).
 
