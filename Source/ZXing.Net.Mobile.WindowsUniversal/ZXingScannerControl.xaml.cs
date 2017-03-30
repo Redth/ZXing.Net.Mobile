@@ -40,6 +40,9 @@ namespace ZXing.Mobile
 
         async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
+            //This safeguards against a null reference if the device is rotated *before* the first call to StartScanning
+            if (mediaCapture == null) return;
+
             displayOrientation = sender.CurrentOrientation;
             var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
             await SetPreviewRotationAsync(props);
