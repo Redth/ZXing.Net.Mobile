@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.portable", "..\..\Source\ZXing.Net\zxing.portable.csproj", "{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.portable", "..\..\Source\ZXing.Net\Source\lib\zxing.portable.csproj", "{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.Core", "..\..\Source\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj", "{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}"
 EndProject
