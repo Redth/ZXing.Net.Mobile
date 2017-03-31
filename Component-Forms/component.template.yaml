@@ -67,4 +67,3 @@ samples:
     skip_docs: true
 local-nuget-repo: ../output
 no_build: true
-skip_docs: true
