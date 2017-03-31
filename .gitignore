@@ -42,3 +42,4 @@ tools/
 .mygetapikey
 *.xam
 *.nupkg
+.DS_Store
