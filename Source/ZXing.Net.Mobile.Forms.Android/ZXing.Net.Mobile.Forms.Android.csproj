@@ -124,8 +124,8 @@
       <Project>{AC17589E-C817-4FA8-B3EC-CCEB25E55E59}</Project>
       <Name>ZXing.Net.Mobile.Android</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
-      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
+    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
+      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
   </ItemGroup>

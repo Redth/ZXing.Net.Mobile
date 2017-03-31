@@ -141,8 +141,8 @@
       <Project>{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}</Project>
       <Name>ZXing.Net.Mobile.iOS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\ZXing.Net\zxing.portable.csproj">
-      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
+    <ProjectReference Include="..\..\..\Source\ZXing.Net\Source\lib\zxing.portable.csproj">
+      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
     <ProjectReference Include="..\Core\FormsSample.csproj">

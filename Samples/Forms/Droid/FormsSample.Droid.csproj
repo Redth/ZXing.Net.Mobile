@@ -115,10 +115,6 @@
       <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\ZXing.Net\zxing.portable.csproj">
-      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
-      <Name>zxing.portable</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Forms.Android\ZXing.Net.Mobile.Forms.Android.csproj">
       <Project>{DC2FF2AE-4090-4056-BBE4-087BDE6567BD}</Project>
       <Name>ZXing.Net.Mobile.Forms.Android</Name>
@@ -130,6 +126,10 @@
     <ProjectReference Include="..\..\..\Source\ZXing.Net.Mobile.Android\ZXing.Net.Mobile.Android.csproj">
       <Project>{AC17589E-C817-4FA8-B3EC-CCEB25E55E59}</Project>
       <Name>ZXing.Net.Mobile.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Source\ZXing.Net\Source\lib\zxing.portable.csproj">
+      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
+      <Name>zxing.portable</Name>
     </ProjectReference>
     <ProjectReference Include="..\Core\FormsSample.csproj">
       <Project>{0DAF97CA-02DB-4E4F-9163-B8F14EAE2D90}</Project>

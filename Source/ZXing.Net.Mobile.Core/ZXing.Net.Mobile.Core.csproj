@@ -34,13 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
-      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
-      <Name>zxing.portable</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="CameraResolution.cs" />
     <Compile Include="IMobileBarcodeScanner.cs" />
@@ -50,6 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
+      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
+      <Name>zxing.portable</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
