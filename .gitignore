@@ -13,6 +13,8 @@ obj
 *.resharper
 *.svn
 *.csproj.user
+*.nuget.targets
+*.nuget.props
 
 Resource.designer.cs
 component.yaml
