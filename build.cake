@@ -20,6 +20,7 @@ if (!string.IsNullOrEmpty (PREVIEW)) {
 }
 
 var buildSpec = new BuildSpec {
+
 	Samples = new [] {
 		new DefaultSolutionBuilder { SolutionPath = "./Samples/Android/Sample.Android.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
 		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
@@ -34,17 +35,20 @@ var buildSpec = new BuildSpec {
 };
 
 if (IsRunningOnWindows ()) {
+
 	buildSpec.Libs = new [] {
 		new WpSolutionBuilder {
 			SolutionPath = "./ZXing.Net.Mobile.sln",
+			Configuration = "ReleaseWin",
 			BuildsOn = BuildPlatforms.Windows,
 		},
 		new WpSolutionBuilder {
 			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			Configuration = "ReleaseWin",
 			BuildsOn = BuildPlatforms.Windows,
-		}
+		},
 	};
-	
+
 	buildSpec.NuGets = new [] {
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
 		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
@@ -57,15 +61,18 @@ if (IsRunningOnWindows ()) {
 } else {
 	buildSpec.Libs = new [] {
 		new DefaultSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.Mac.sln",
+			SolutionPath = "./ZXing.Net.Mobile.sln",
+			Configuration = "ReleaseMac",
 			BuildsOn = BuildPlatforms.Mac,
 		},
 		new DefaultSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.Forms.Mac.sln",
+			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			Configuration = "ReleaseMac",
 			BuildsOn = BuildPlatforms.Mac,
 		}
 	};
 }
+
 
 Task ("component-setup")
 	.IsDependentOn ("samples")
