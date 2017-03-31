@@ -15,9 +15,6 @@ libraries:
   android:
     - ../Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll
     - ../Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll
-  winphone-8.0:
-    - ../Build/Forms/Release/wp8.0/ZXing.Net.Mobile.Forms.dll
-    - ../Build/Forms/Release/wp8.0/ZXing.Net.Mobile.Forms.WindowsPhone.dll
   winuniversal-10.0:
     - ../Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll
     - ../Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll
@@ -26,10 +23,6 @@ libraries:
 is_shell: true
 packages:
   android:
-    - ZXing.Net.Mobile.Forms, Version={VERSION}
-  winphone-8.0:
-    - ZXing.Net.Mobile.Forms, Version={VERSION}
-  winphone-8.1:
     - ZXing.Net.Mobile.Forms, Version={VERSION}
   ios-unified:
     - ZXing.Net.Mobile.Forms, Version={VERSION}
@@ -48,12 +41,10 @@ samples:
       - ZXing.Net.Mobile.WindowsRT
       - ZXing.Net.Mobile.iOS
       - ZXing.Net.Mobile.Android
-      - ZXing.Net.Mobile.WindowsPhone
       - ZXing.Net.Mobile.WindowsUniversal
       - ZXing.Net.Mobile.Forms
       - ZXing.Net.Mobile.Forms.iOS
       - ZXing.Net.Mobile.Forms.Android
-      - ZXing.Net.Mobile.Forms.WindowsPhone
       - ZXing.Net.Mobile.Forms.WindowsUniversal
     installNuGets:
       - project: FormsSample
@@ -68,10 +59,6 @@ samples:
         packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
-      - project: FormsSample.WindowsPhone
-        packages:
-          - ZXing.Net.Mobile
-          - ZXing.Net.Mobile.Forms
       - project: FormsSample.WindowsUniversal
         packages:
           - ZXing.Net.Mobile
@@ -80,3 +67,4 @@ samples:
     skip_docs: true
 local-nuget-repo: ../output
 no_build: true
+skip_docs: true
