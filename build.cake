@@ -26,7 +26,7 @@ var buildSpec = new BuildSpec {
 		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
 		new WpSolutionBuilder { SolutionPath = "./Samples/WindowsPhone/Sample.WindowsPhone.sln", BuildsOn = BuildPlatforms.Windows },
 		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", BuildsOn = BuildPlatforms.Windows },
-		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
+		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
 		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.WP8.sln", BuildsOn = BuildPlatforms.Windows },
 	},
 
