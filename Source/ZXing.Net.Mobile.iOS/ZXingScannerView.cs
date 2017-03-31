@@ -321,6 +321,8 @@ namespace ZXing.Mobile
 				Console.WriteLine("AUTO_ROTATE: " + ScanningOptions.AutoRotate.Value);
 				barcodeReader.AutoRotate = ScanningOptions.AutoRotate.Value;
 			}
+			if (ScanningOptions.UseCode39ExtendedMode.HasValue)
+ 				barcodeReader.Options.UseCode39ExtendedMode = ScanningOptions.UseCode39ExtendedMode.Value;
 			if (!string.IsNullOrEmpty (ScanningOptions.CharacterSet))
 				barcodeReader.Options.CharacterSet = ScanningOptions.CharacterSet;
 			if (ScanningOptions.TryInverted.HasValue)

@@ -167,6 +167,8 @@ namespace ZXing.Mobile.CameraAccess
                 _barcodeReader.Options.CharacterSet = _scanningOptions.CharacterSet;
             if (_scanningOptions.TryInverted.HasValue)
                 _barcodeReader.TryInverted = _scanningOptions.TryInverted.Value;
+            if (_scanningOptions.UseCode39ExtendedMode.HasValue)
+                _barcodeReader.Options.UseCode39ExtendedMode = _scanningOptions.UseCode39ExtendedMode.Value;
 
             if (_scanningOptions.PossibleFormats != null && _scanningOptions.PossibleFormats.Count > 0)
             {
