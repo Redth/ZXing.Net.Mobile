@@ -293,6 +293,7 @@ Global
 		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseMac|x64.ActiveCfg = Debug|iPhoneSimulator
 		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseMac|x86.ActiveCfg = Debug|iPhoneSimulator
 		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseWin|Any CPU.ActiveCfg = Release|iPhone
+		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseWin|Any CPU.Build.0 = Release|iPhone
 		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseWin|ARM.ActiveCfg = Debug|iPhoneSimulator
 		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseWin|iPhone.ActiveCfg = Release|iPhone
 		{6CBD1DF3-1FD3-4F20-80A2-A0C7414C411A}.ReleaseWin|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
