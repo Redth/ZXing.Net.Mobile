@@ -147,7 +147,7 @@
       <Project>{c9efc2f6-ac4c-446c-8fbf-91824b00431d}</Project>
       <Name>ZXing.Net.Mobile.WindowsPhone</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Source\ZXing.Net\zxing.portable.csproj">
+    <ProjectReference Include="..\..\..\Source\ZXing.Net\Source\lib\zxing.portable.csproj">
       <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>
