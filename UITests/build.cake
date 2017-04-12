@@ -1,4 +1,5 @@
-#tool nuget:?package=NUnit.Runners&version=2.6.3
+#tool nuget:?package=NUnit.Runners&version=2.6.4
+#tool nuget:?package=Xamarin.UITest&version=2.0.8
 #addin nuget:?package=Cake.Xamarin
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
@@ -11,18 +12,17 @@ Task ("Samples").Does (() =>
 {
 	EnsureDirectoryExists ("../output");
 
-	var sampleSlns = new [] {
-		"../ZXing.Net.Mobile.Mac.sln",
-		"../ZXing.Net.Mobile.Forms.Mac.sln",		
-		"../Samples/Android/Sample.Android.sln",
-		"../Samples/iOS/Sample.iOS.sln",
-		"../Samples/Forms/Sample.Forms.Mac.sln",
-		"../ZXing.Net.Mobile.UITests.sln"
-	};
-	
+	var sampleSlns = new Dictionary<string, string> ();
+	sampleSlns.Add ("../ZXing.Net.Mobile.sln", "ReleaseMac");
+	sampleSlns.Add ("../ZXing.Net.Mobile.Forms.sln", "ReleaseMac");
+	sampleSlns.Add ("../Samples/Android/Sample.Android.sln", "Release");
+	sampleSlns.Add ("../Samples/iOS/Sample.iOS.sln", "Release");
+	sampleSlns.Add ("../Samples/Forms/Sample.Forms.Mac.sln", "Release");
+	sampleSlns.Add ("../ZXing.Net.Mobile.UITests.sln", "Release");
+		
 	foreach (var sln in sampleSlns) {
-		NuGetRestore (sln);
-		DotNetBuild (sln, c => c.Configuration = "Debug");
+		NuGetRestore (sln.Key);
+		DotNetBuild (sln.Key, c => c.Configuration = sln.Value);
 	}
 });
 
@@ -30,7 +30,7 @@ Task ("Android.UITests")
 	.IsDependentOn ("Samples")
 	.Does (() => 
 {
-	var uitests = "./Sample.Android.UITests/bin/Debug/Sample.Android.UITests.dll";
+	var uitests = "./Sample.Android.UITests/bin/Release/Sample.Android.UITests.dll";
 
 	var apk = AndroidPackage ("../Samples/Android/Sample.Android/Sample.Android.csproj", false, c => c.Configuration = "Release");
 	Information ("APK: {0}", apk);
