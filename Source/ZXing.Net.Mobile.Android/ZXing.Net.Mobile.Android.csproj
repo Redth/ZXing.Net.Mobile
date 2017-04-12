@@ -42,7 +42,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FastAndroidCamera">
-      <HintPath>..\..\Samples\Android\packages\FastAndroidCamera.2.0.0\lib\MonoAndroid403\FastAndroidCamera.dll</HintPath>
+      <HintPath>..\..\packages\FastAndroidCamera.2.0.0\lib\MonoAndroid403\FastAndroidCamera.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
