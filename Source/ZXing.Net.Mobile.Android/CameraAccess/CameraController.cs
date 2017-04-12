@@ -7,6 +7,7 @@ using Android.Hardware;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
+using ApxLabs.FastAndroidCamera;
 using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile.CameraAccess
@@ -69,7 +70,26 @@ namespace ZXing.Mobile.CameraAccess
             try
             {
                 Camera.SetPreviewDisplay(_holder);
-                Camera.StartPreview();
+                
+
+                var previewParameters = Camera.GetParameters();
+                var previewSize = previewParameters.PreviewSize;
+                var bitsPerPixel = ImageFormat.GetBitsPerPixel(previewParameters.PreviewFormat);
+
+
+                int bufferSize = (previewSize.Width * previewSize.Height * bitsPerPixel) / 8;
+				const int NUM_PREVIEW_BUFFERS = 5;
+				for (uint i = 0; i < NUM_PREVIEW_BUFFERS; ++i)
+				{
+					using (var buffer = new FastJavaByteArray(bufferSize))
+						Camera.AddCallbackBuffer(buffer);
+				}
+
+                
+
+				Camera.StartPreview();
+
+                Camera.SetNonMarshalingPreviewCallback(_cameraEventListener);
             }
             catch (Exception ex)
             {
@@ -114,9 +134,10 @@ namespace ZXing.Mobile.CameraAccess
             {
                 try
                 {
-                    Camera.SetPreviewCallback(null);
+                    //Camera.SetPreviewCallback(null);
                     Camera.SetPreviewDisplay(null);
                     Camera.StopPreview();
+                    Camera.SetNonMarshalingPreviewCallback(null);
                 }
                 catch (Exception ex)
                 {
@@ -181,10 +202,10 @@ namespace ZXing.Mobile.CameraAccess
                     Camera = Camera.Open();
                 }
 
-                if (Camera != null)
-                    Camera.SetPreviewCallback(_cameraEventListener);
-                else
-                    MobileBarcodeScanner.LogWarn(MobileBarcodeScanner.TAG, "Camera is null :(");
+                //if (Camera != null)
+                //    Camera.SetPreviewCallback(_cameraEventListener);
+                //else
+                //    MobileBarcodeScanner.LogWarn(MobileBarcodeScanner.TAG, "Camera is null :(");
             }
             catch (Exception ex)
             {
