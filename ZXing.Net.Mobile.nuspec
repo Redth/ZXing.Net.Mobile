@@ -9,7 +9,11 @@
         <projectUrl>http://github.com/Redth/ZXing.Net.Mobile</projectUrl>
         <iconUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/Art/ZXing.Net.Mobile-Icon.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port. It works with Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight) and Windows Universal. The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.</description>
+        <description>
+            ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port. It works with Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight) and Windows Universal. The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.
+
+            See https://github.com/Redth/ZXing.Net.Mobile/releases for release notes.
+        </description>
         <summary>ZXing Barcode Scanning for your Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight) and Windows Universal apps!</summary>
         <copyright />
         <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
