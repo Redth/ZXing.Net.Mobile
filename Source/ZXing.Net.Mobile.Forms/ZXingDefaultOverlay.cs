@@ -15,6 +15,8 @@ namespace ZXing.Net.Mobile.Forms
            
         public ZXingDefaultOverlay ()
         {
+			BindingContext = this;
+
             VerticalOptions = LayoutOptions.FillAndExpand;
             HorizontalOptions = LayoutOptions.FillAndExpand;
 
