@@ -173,9 +173,14 @@ namespace ZXing.Mobile
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
 
+            
             // Start the preview
             await mediaCapture.StartPreviewAsync();
-
+            // If camera begins streaming invoke OnCameraInitialized
+            if (mediaCapture.CameraStreamState == CameraStreamState.Streaming)
+            {
+                OnCameraInitialized.Invoke();
+            }
 
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
@@ -295,6 +300,10 @@ namespace ZXing.Mobile
                          
             }, null, ScanningOptions.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
         }
+
+        public event ScannerOpened OnCameraInitialized;
+        public delegate void ScannerOpened();
+
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(MobileBarcodeScanningOptions options)
         {
