@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{638781A7-5053-4915-AAEB-0A1FF148180E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ZXing.Net.Mobile.NUnit</RootNamespace>
+    <AssemblyName>ZXing.Net.Mobile.NUnit</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="nunit.framework" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Test.cs" />
+    <Compile Include="RGBLuminanceSource.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\ZXing.Net\zxing.vs2012.csproj">
+      <Project>{24074395-0196-4204-B516-CB6DBA2FC4B9}</Project>
+      <Name>zxing.vs2012</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\aztec.png" />
+    <Content Include="Images\codabar.png" />
+    <Content Include="Images\code128.png" />
+    <Content Include="Images\code39.png" />
+    <Content Include="Images\code93.png" />
+    <Content Include="Images\datamatrix.png" />
+    <Content Include="Images\ean13.gif" />
+    <Content Include="Images\ean8.png" />
+    <Content Include="Images\itf.gif" />
+    <Content Include="Images\itf.png" />
+    <Content Include="Images\pdf417.png" />
+    <Content Include="Images\qrcode.png" />
+    <Content Include="Images\upca.png" />
+    <Content Include="Images\upce.png" />
+    <Content Include="Images\l2of5small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\l2of5verysmall.png" />
+  </ItemGroup>
+</Project>

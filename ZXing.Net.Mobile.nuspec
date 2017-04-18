@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>ZXing.Net.Mobile</id>
+        <version>$version$</version>
+        <title>ZXing.Net.Mobile Barcode Scanner</title>
+        <authors>Redth</authors>
+        <licenseUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/License.md</licenseUrl>
+        <projectUrl>http://github.com/Redth/ZXing.Net.Mobile</projectUrl>
+        <iconUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/Art/ZXing.Net.Mobile-Icon.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+            ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port. It works with Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight) and Windows Universal. The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.
+
+            See https://github.com/Redth/ZXing.Net.Mobile/releases for release notes.
+        </description>
+        <summary>ZXing Barcode Scanning for your Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight) and Windows Universal apps!</summary>
+        <copyright />
+        <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
+        <dependencies>
+
+        	<group targetFramework="MonoAndroid403">
+                <dependency id="Xamarin.Android.Support.v4" version="23.3.0" />
+                <dependency id="FastAndroidCamera" version="2.0.0" />
+        	</group>
+
+            <group targetFramework="wp8">
+                <dependency id="WriteableBitmapEx" version="1.5.0" />
+            </group>
+
+        </dependencies>
+    </metadata>
+    <files>
+        <!-- Android 4.0.3 and higher -->
+        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid403\zxing.portable.dll" />
+        <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid403\ZXingNetMobile.dll" />
+
+        <!-- iOS Unified API -->
+        <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />
+        <file src="Build/Release/ios-unified/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS10\ZXingNetMobile.dll" />
+
+        <!-- Windows Phone  -->
+        <file src="Build/Release/wp8.0/zxing.portable.dll" target="lib\wp8\zxing.portable.dll" />
+        <file src="Build/Release/wp8.0/ZXing.Net.Mobile.Core.dll" target="lib\wp8\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wp8\ZXingNetMobile.dll" />
+
+        <!-- Windows RT / Store  -->
+        <!-- Not supported, the PCL's will get installed for this platform and throw implementation errors at runtime -->
+
+        <!-- Windows Universal  -->
+        <file src="Build/Release/uwp/zxing.portable.dll" target="lib\UAP10\zxing.portable.dll" />
+        <file src="Build/Release/uwp/ZXing.Net.Mobile.Core.dll" target="lib\UAP10\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/uwp/ZXingNetMobile.dll" target="lib\UAP10\ZXingNetMobile.dll" />
+        <file src="Build/Release/uwp/ZXingNetMobile.pri" target="lib\UAP10\ZXingNetMobile.pri" />
+        <file src="Build/Release/uwp/ZXingNetMobile.xr.xml" target="lib\UAP10\ZXingNetMobile\ZXingNetMobile.xr.xml" />
+
+        <!-- Portable PCL -->
+        <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wpa81+wp8\zxing.portable.dll" />
+        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXingNetMobile.dll" />
+    </files>
+</package>

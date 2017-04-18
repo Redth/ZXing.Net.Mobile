@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
+    <ProjectGuid>{49F99F7E-D407-4A9F-8BB2-24212B60C2D2}</ProjectGuid>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ZXing.Mobile</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>..\..\Build\Debug\ios\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <MtouchLink>None</MtouchLink>
+    <MtouchDebug>True</MtouchDebug>
+    <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXingNetMobile</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>..\..\Build\Release\ios\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <MtouchLink>None</MtouchLink>
+    <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXingNetMobile</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>..\..\Build\Debug\ios\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <MtouchDebug>True</MtouchDebug>
+    <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXing.Net.Mobile</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>..\..\Build\Release\ios\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <IntermediateOutputPath>obj\classic\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <AssemblyName>ZXing.Net.Mobile</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="monotouch" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyVersionInfo.cs">
+      <Link>AssemblyVersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="iOS\MobileBarcodeScanner.cs" />
+    <Compile Include="iOS\ZXingScannerView.cs" />
+    <Compile Include="iOS\ZXingScannerViewController.cs" />
+    <Compile Include="iOS\ZXingDefaultOverlayView.cs" />
+    <Compile Include="iOS\AVCaptureScannerView.cs" />
+    <Compile Include="iOS\AVCaptureScannerViewController.cs" />
+    <Compile Include="iOS\IScannerViewController.cs" />
+    <Compile Include="Common\IMobileBarcodeScanner.cs" />
+    <Compile Include="Common\MobileBarcodeScanningOptions.cs" />
+    <Compile Include="Common\Performance.cs" />
+    <Compile Include="Common\CameraResolution.cs" />
+    <Compile Include="iOS\BarcodeReaderiOS.cs" />
+    <Compile Include="iOS\RGBLuminanceSourceiOS.cs" />
+    <Compile Include="iOS\BarcodeWriter.cs" />
+    <Compile Include="iOS\BitmapRenderer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="iOS\" />
+    <Folder Include="Common\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
+      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
+      <Name>zxing.portable</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

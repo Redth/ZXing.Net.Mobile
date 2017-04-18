@@ -1,0 +1,69 @@
+version: {VERSION}
+name: ZXing.Net.Mobile for Forms
+id: zxing.net.mobile.forms
+publisher: Redth
+license: License.md
+skip_docs: true
+icons:
+  - ./icons/zxing.net.mobile.forms_128x128.png
+  - ./icons/zxing.net.mobile.forms_512x512.png
+publisher-url: "https://github.com/Redth/ZXing.Net.Mobile"
+libraries:
+  ios-unified:
+    - ../Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll
+    - ../Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll
+  android:
+    - ../Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll
+    - ../Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll
+  winuniversal-10.0:
+    - ../Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll
+    - ../Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll
+  pcl:
+    - ../Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll
+is_shell: true
+packages:
+  android:
+    - ZXing.Net.Mobile.Forms, Version={VERSION}
+  ios-unified:
+    - ZXing.Net.Mobile.Forms, Version={VERSION}
+  winuniversal-10.0:
+    - ZXing.Net.Mobile.Forms, Version={VERSION}
+summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library for Xamarin.Forms"
+details: ./Details.md
+getting-started: ./GettingStarted.md
+samples:
+  - name: Forms Sample
+    path: "../Samples/Forms/Sample.Forms.sln"
+    removeProjects:
+      - zxing.portable
+      - ZXing.Net.Mobile.Core
+      - ZXing.Net.Mobile.Portable
+      - ZXing.Net.Mobile.WindowsRT
+      - ZXing.Net.Mobile.iOS
+      - ZXing.Net.Mobile.Android
+      - ZXing.Net.Mobile.WindowsUniversal
+      - ZXing.Net.Mobile.Forms
+      - ZXing.Net.Mobile.Forms.iOS
+      - ZXing.Net.Mobile.Forms.Android
+      - ZXing.Net.Mobile.Forms.WindowsUniversal
+    installNuGets:
+      - project: FormsSample
+        packages:
+          - ZXing.Net.Mobile
+          - ZXing.Net.Mobile.Forms
+      - project: FormsSample.iOS
+        packages:
+          - ZXing.Net.Mobile
+          - ZXing.Net.Mobile.Forms
+      - project: FormsSample.Droid
+        packages:
+          - ZXing.Net.Mobile
+          - ZXing.Net.Mobile.Forms
+      - project: FormsSample.WindowsUniversal
+        packages:
+          - ZXing.Net.Mobile
+          - ZXing.Net.Mobile.Forms
+    no_build: true
+    skip_docs: true
+local-nuget-repo: ../output
+no_build: true

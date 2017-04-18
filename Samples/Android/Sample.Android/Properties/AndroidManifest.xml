@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" android:installLocation="auto" package="com.altusapps.zxingnetmobile">
+	<uses-sdk android:targetSdkVersion="23" android:minSdkVersion="10" />
+	<application android:icon="@drawable/launcher" android:label="ZXing.Net.Mobile"></application>
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.FLASHLIGHT" />
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.INTERNET" />
+</manifest>

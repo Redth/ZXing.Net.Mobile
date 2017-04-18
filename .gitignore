@@ -13,6 +13,11 @@ obj
 *.resharper
 *.svn
 *.csproj.user
+*.nuget.targets
+*.nuget.props
+
+Resource.designer.cs
+component.yaml
 
 # mstest test results
 TestResults
@@ -21,8 +26,22 @@ TestResults
 packages/
 
 Libraries/
-Component/
 Documentation/
 
 ZXing.YuvTool/
 ZXing.UIImageTool/
+
+[Cc]omponents/
+
+Backup/
+
+TestCloud/
+.vs/
+project.lock.json
+
+tools/
+.nugetapikey
+.mygetapikey
+*.xam
+*.nupkg
+.DS_Store

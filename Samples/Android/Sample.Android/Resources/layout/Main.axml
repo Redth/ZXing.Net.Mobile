@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="5">
+    <Button
+        android:text="Scan with Default Overlay"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonScanDefaultView"
+        android:layout_weight="1" />
+    <Button
+        android:text="Continuous Scanning"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonScanContinuous"
+        android:layout_weight="1" />
+    <Button
+        android:id="@+id/buttonScanCustomView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Scan with Custom Overlay"
+        android:layout_weight="1" />
+    <Button
+        android:text="Fragment Scanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonFragment"
+        android:layout_weight="1" />
+    <Button
+        android:text="Barcode Generator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonGenerate"
+        android:layout_weight="1" />
+</LinearLayout>
