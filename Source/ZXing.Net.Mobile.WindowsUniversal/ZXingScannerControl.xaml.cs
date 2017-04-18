@@ -37,7 +37,8 @@ namespace ZXing.Mobile
             displayOrientation = displayInformation.CurrentOrientation;
             displayInformation.OrientationChanged += displayInformation_OrientationChanged; 
         }
-
+        public event ScannerOpened OnCameraInitialized;
+        public delegate void ScannerOpened();
         async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
             //This safeguards against a null reference if the device is rotated *before* the first call to StartScanning
@@ -175,7 +176,10 @@ namespace ZXing.Mobile
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
-
+            if(mediaCapture.CameraStreamState == CameraStreamState.Streaming)
+            {
+                OnCameraInitialized.Invoke();
+            }
 
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
@@ -318,12 +322,12 @@ namespace ZXing.Mobile
             return selectedCamera;
         }
 
-        protected override async void OnPointerPressed(PointerRoutedEventArgs e)
+        protected override void OnPointerPressed(PointerRoutedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("AutoFocus requested");
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
-            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true);
+            new Task(() => { AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true); });
         }
 
         Timer timerPreview;
@@ -432,7 +436,7 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
-            if (IsFocusSupported)
+            if (IsFocusSupported && mediaCapture?.CameraStreamState == CameraStreamState.Streaming)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
                 var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
