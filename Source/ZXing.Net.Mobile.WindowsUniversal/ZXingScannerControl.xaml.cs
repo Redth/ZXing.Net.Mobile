@@ -179,8 +179,7 @@ namespace ZXing.Mobile
             // If camera begins streaming invoke OnCameraInitialized
             if (mediaCapture.CameraStreamState == CameraStreamState.Streaming)
             {
-                if(OnCameraInitialized != null)
-                    OnCameraInitialized.Invoke();
+                OnCameraInitialized.Invoke();
             }
 
             // Get all the available resolutions for preview
@@ -442,7 +441,7 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
-            if (IsFocusSupported && mediaCapture.CameraStreamState == CameraStreamState.Streaming)
+            if (IsFocusSupported)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
                 var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
@@ -489,7 +488,7 @@ namespace ZXing.Mobile
                             await roiControl.ClearRegionsAsync();
                         }
                     }
-                    
+
                     await focusControl.FocusAsync();
                 }
                 catch (Exception ex)

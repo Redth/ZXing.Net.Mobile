@@ -60,7 +60,7 @@ namespace ZXing.Mobile
                     },
                     Scanner = this,
                     ContinuousScanning = false,
-                    CameraInitialized = () => { OnCameraInitialized?.Invoke(); }
+                    CameraInitialized = () => { OnCameraInitialized.Invoke(); }
                 };
                 rootFrame.Navigate(typeof(ScanPage), pageOptions);
             });
