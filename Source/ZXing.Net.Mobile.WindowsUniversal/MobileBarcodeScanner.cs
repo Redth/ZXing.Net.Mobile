@@ -51,7 +51,7 @@ namespace ZXing.Mobile
 
             await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                var pageOptions = new ScanPageNavigationParameters
+                rootFrame.Navigate(typeof(ScanPage), new ScanPageNavigationParameters
                 {
                     Options = options,
                     ResultHandler = r =>
@@ -59,10 +59,8 @@ namespace ZXing.Mobile
                         tcsScanResult.SetResult(r);
                     },
                     Scanner = this,
-                    ContinuousScanning = false,
-                    CameraInitialized = () => { OnCameraInitialized.Invoke(); }
-                };
-                rootFrame.Navigate(typeof(ScanPage), pageOptions);
+                    ContinuousScanning = false
+                });
             });
             
             var result = await tcsScanResult.Task;
@@ -75,10 +73,6 @@ namespace ZXing.Mobile
 
             return result;
         }
-
-        public event ScannerOpened OnCameraInitialized;
-        public delegate void ScannerOpened();
-
 
         public override async void Cancel()
         {
