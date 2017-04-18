@@ -173,9 +173,15 @@ namespace ZXing.Mobile
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
 
+            
             // Start the preview
             await mediaCapture.StartPreviewAsync();
-
+            // If camera begins streaming invoke OnCameraInitialized
+            if (mediaCapture.CameraStreamState == CameraStreamState.Streaming)
+            {
+                if(OnCameraInitialized != null)
+                    OnCameraInitialized.Invoke();
+            }
 
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
@@ -295,6 +301,10 @@ namespace ZXing.Mobile
                          
             }, null, ScanningOptions.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
         }
+
+        public event ScannerOpened OnCameraInitialized;
+        public delegate void ScannerOpened();
+
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(MobileBarcodeScanningOptions options)
         {
@@ -432,7 +442,7 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
-            if (IsFocusSupported)
+            if (IsFocusSupported && mediaCapture.CameraStreamState == CameraStreamState.Streaming)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
                 var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
@@ -479,7 +489,7 @@ namespace ZXing.Mobile
                             await roiControl.ClearRegionsAsync();
                         }
                     }
-
+                    
                     await focusControl.FocusAsync();
                 }
                 catch (Exception ex)
