@@ -42,16 +42,15 @@ namespace ZXing.Mobile
         private readonly int _top;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PlanarYUVLuminanceSource"/> class.
+        /// Initializes a new instance of the <see cref="FastJavaByteArrayYUVLuminanceSource"/> class.
         /// </summary>
-        /// <param name="yuvData">The yuv data.</param>
+        /// <param name="yuv">The yuv data.</param>
         /// <param name="dataWidth">Width of the data.</param>
         /// <param name="dataHeight">Height of the data.</param>
         /// <param name="left">The left.</param>
         /// <param name="top">The top.</param>
         /// <param name="width">The width.</param>
         /// <param name="height">The height.</param>
-        /// <param name="reverseHoriz">if set to <c>true</c> [reverse horiz].</param>
         public FastJavaByteArrayYUVLuminanceSource(FastJavaByteArray yuv,
             int dataWidth,
             int dataHeight,
@@ -116,27 +115,8 @@ namespace ZXing.Mobile
         {
             get
             {
-                int width = Width;
-                int height = Height;
-
-                int area = width * height;
-                byte[] matrix = new byte[area];
-                int inputOffset = _top * _dataWidth + _left;
-
-                // If the width matches the full width of the underlying data, perform a single copy.
-                if (width == _dataWidth)
-                {
-                    _yuv.BlockCopyTo(inputOffset, matrix, 0, area);
-                    return matrix;
-                }
-
-                // Otherwise copy one cropped row at a time.
-                for (int y = 0; y < height; y++)
-                {
-                    int outputOffset = y * width;
-                    _yuv.BlockCopyTo(inputOffset, matrix, outputOffset, width);
-                    inputOffset += _dataWidth;
-                }
+                byte[] matrix = null;
+                CopyMatrix(ref matrix);
                 return matrix;
             }
         }
@@ -160,7 +140,8 @@ namespace ZXing.Mobile
                 // If the width matches the full width of the underlying data, perform a single copy.
                 _yuv.BlockCopyTo(inputOffset, matrix, 0, area);
             }
-            else {
+            else
+            {
                 // Otherwise copy one cropped row at a time.
                 for (int y = 0; y < height; y++)
                 {
@@ -201,8 +182,6 @@ namespace ZXing.Mobile
 
         protected override LuminanceSource CreateLuminanceSource(byte[] newLuminances, int width, int height)
         {
-            // Called when rotating. 
-            // todo: This partially defeats the purpose as we traffic in byte[] luminances
             return new PlanarYUVLuminanceSource(newLuminances, width, height, 0, 0, width, height, false);
         }
     }

@@ -115,9 +115,7 @@ namespace ZXing.Mobile.CameraAccess
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        byte[] _matrix;
-        byte[] _rotatedMatrix;
-
+		private byte[] buffer;
         private void DecodeFrame(FastJavaByteArray fastArray)
         {
             var cameraParameters = _cameraController.Camera.GetParameters();
@@ -126,34 +124,17 @@ namespace ZXing.Mobile.CameraAccess
 
             InitBarcodeReaderIfNeeded();
 
-            var rotate = false;
-            var newWidth = width;
-            var newHeight = height;
-
             // use last value for performance gain
             var cDegrees = _cameraController.LastCameraDisplayOrientationDegree;
+			var rotate = (cDegrees == 90 || cDegrees == 270);
 
-            if (cDegrees == 90 || cDegrees == 270)
-            {
-                rotate = true;
-                newWidth = height;
-                newHeight = width;
-            }
-
-            ZXing.Result result = null;
+            Result result = null;
             var start = PerformanceCounter.Start();
 
-            LuminanceSource luminanceSource;
-
-            var fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
-            if (rotate)
-            {
-                fast.CopyMatrix(ref _matrix);
-                RotateCounterClockwise(_matrix, ref _rotatedMatrix, width, height); // _area.Width, _area.Height);
-                luminanceSource = new PlanarYUVLuminanceSource(_rotatedMatrix, height, width, 0, 0, height, width, false); // _area.Height, _area.Width, 0, 0, _area.Height, _area.Width, false);
-            }
-            else
-                luminanceSource = fast;
+			if (rotate)
+				fastArray.RotateInPlace(ref buffer, width, height);
+			
+            var luminanceSource = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
             
             result = _barcodeReader.Decode(luminanceSource);
 
@@ -199,25 +180,6 @@ namespace ZXing.Mobile.CameraAccess
                 foreach (var pf in _scanningOptions.PossibleFormats)
                     _barcodeReader.Options.PossibleFormats.Add(pf);
             }
-        }
-
-        private static byte[] RotateCounterClockwise(byte[] data, int width, int height)
-        {
-            var rotatedData = new byte[data.Length];
-            for (var y = 0; y < height; y++)
-                for (var x = 0; x < width; x++)
-                    rotatedData[x*height + height - y - 1] = data[x + y*width];
-            return rotatedData;
-        }
-
-        private void RotateCounterClockwise(byte[] source, ref byte[] target, int width, int height)
-        {
-            if (source.Length != (target?.Length ?? -1))
-                target = new byte[source.Length];
-
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    target[x * height + height - y - 1] = source[x + y * width];
         }
     }
 }
