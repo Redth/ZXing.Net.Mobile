@@ -86,7 +86,14 @@ namespace ZXing.Mobile
 
         public override void OnOrientationChanged(int orientation)
         {
-            OrientationChanged?.Invoke(orientation);
+            try
+            {
+                OrientationChanged?.Invoke(orientation);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(MobileBarcodeScanner.TAG, $"Squashing {ex} in OnOrientationChanged!");
+            }
         }
     }
 
@@ -162,45 +169,38 @@ namespace ZXing.Mobile
         SurfaceOrientation _lastSurfaceOrientation;
         void OnOrientationChanged(int orientation)
         {
-            try
+            //
+            // This code should only run when UI snaps into either portrait or landscape mode.
+            // At first glance we could just override OnConfigurationChanged, but unfortunately 
+            // a rotation from landscape directly to reverse landscape won't fire an event 
+            // (which is easily done by rotating via upside-down on many devices), because Android
+            // can just reuse the existing config and handle the rotation automatically ..
+            // 
+            // .. except of course for camera orientation, which must handled explicitly *sigh*. 
+            // Hurray Google, you sure suck at API design!
+            //
+            // Instead we waste some CPU by tracking orientation down to the last degree, every 200ms.
+            // I have yet to come up with a better way. 
+            //
+            if (_camera == null)
+                return;
+
+            var o = (((orientation + 45) % 360) / 90) * 90; // snap to 0, 90, 180, or 270.
+            if (o == _lastOrientation)
+                return; // fast path, no change ..
+
+            // Actual snap is delayed, so check if we are actually rotated
+            var rotation = WindowManager.DefaultDisplay.Rotation;
+            if (rotation == _lastSurfaceOrientation)
+                return;  // .. still no change
+
+            _lastOrientation = o;
+            _lastSurfaceOrientation = rotation;
+
+            _handler.PostSafe(() =>
             {
-                //
-                // This code should only run when UI snaps into either portrait or landscape mode.
-                // At first glance we could just override OnConfigurationChanged, but unfortunately 
-                // a rotation from landscape directly to reverse landscape won't fire an event 
-                // (which is easily done by rotating via upside-down on many devices), because Android
-                // can just reuse the existing config and handle the rotation automatically ..
-                // 
-                // .. except of course for camera orientation, which must handled explicitly *sigh*. 
-                // Hurray Google, you sure suck at API design!
-                //
-                // Instead we waste some CPU by tracking orientation down to the last degree, every 200ms.
-                // I have yet to come up with a better way. 
-                //
-                if (_camera == null)
-                    return;
-
-                var o = (((orientation + 45) % 360) / 90) * 90; // snap to 0, 90, 180, or 270.
-                if (o == _lastOrientation)
-                    return; // fast path, no change ..
-
-                // Actual snap is delayed, so check if we are actually rotated
-                var rotation = WindowManager.DefaultDisplay.Rotation;
-                if (rotation == _lastSurfaceOrientation)
-                    return;  // .. still no change
-
-                _lastOrientation = o;
-                _lastSurfaceOrientation = rotation;
-
-                _handler.PostSafe(() =>
-                {
-                    _camera?.SetDisplayOrientation(CameraOrientation(WindowManager.DefaultDisplay.Rotation)); // and finally, the interesting part *sigh*
-                });
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(MobileBarcodeScanner.TAG, $"Exception in OnOrientationChanged: {ex.Message}\n{ex.StackTrace}");
-            }
+                _camera?.SetDisplayOrientation(CameraOrientation(WindowManager.DefaultDisplay.Rotation)); // and finally, the interesting part *sigh*
+            });
         }
 
         bool IsPortrait
@@ -369,7 +369,6 @@ namespace ZXing.Mobile
             if (!(focus || _useContinuousFocus))
                 AutoFocus();
         }
-
 
         public void PauseAnalysis()
         {
@@ -614,7 +613,7 @@ namespace ZXing.Mobile
         {
             Log.Debug(MobileBarcodeScanner.TAG, $"Checking {permission}...");
 
-            if (!PermissionsHandler .IsPermissionInManifest(Context, permission)
+            if (!PermissionsHandler.IsPermissionInManifest(Context, permission)
                 || !PermissionsHandler.IsPermissionGranted(Context, permission))
             {
                 var msg = $"Requires: {permission}, but was not found in your AndroidManifest.xml file.";
