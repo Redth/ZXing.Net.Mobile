@@ -663,10 +663,10 @@ namespace ZXing.Mobile
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-            _orientationEventListener.Disable();
-            _orientationEventListener.Dispose();
+            _orientationEventListener?.Disable();
+            _orientationEventListener?.Dispose();
             _orientationEventListener = null;
+            base.Dispose(disposing);
         }
 
         byte[] _buffer;
