@@ -28,7 +28,7 @@ namespace FormsSample
 			formats.Add(ZXing.BarcodeFormat.CODE_39);
 			formats.Add(ZXing.BarcodeFormat.QR_CODE);
 
-			zxing.Options.DelayBetweenContinuousScans = 1000; // same barcode can only be scanned once a second. Different barcodes is a different matter
+			zxing.Options.DelayBetweenContinuousScans = 1000;
 
 			zxing.IsTorchOn = true;
 

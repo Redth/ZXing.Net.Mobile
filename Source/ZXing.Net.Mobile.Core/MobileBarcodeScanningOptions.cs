@@ -14,11 +14,10 @@ namespace ZXing.Mobile
 
 		public MobileBarcodeScanningOptions ()
 		{
-			this.PossibleFormats = new List<BarcodeFormat>();
-			//this.AutoRotate = true;
-			this.DelayBetweenAnalyzingFrames = 150;
-			this.InitialDelayBeforeAnalyzingFrames = 300;
-            this.DelayBetweenContinuousScans = 1000;
+            PossibleFormats = new List<BarcodeFormat>();
+            DelayBetweenAnalyzingFrames = 150;
+            InitialDelayBeforeAnalyzingFrames = 300;
+            DelayBetweenContinuousScans = 1000;
             UseNativeScanning = false;
 		}
 

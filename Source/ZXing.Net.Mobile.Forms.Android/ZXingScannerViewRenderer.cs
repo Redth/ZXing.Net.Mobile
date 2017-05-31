@@ -9,15 +9,16 @@ using Android.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-using ZXing.Mobile;
 using ZXing.Net.Mobile.Forms;
 using ZXing.Net.Mobile.Forms.Android;
+
+using MyView = ZXing.Mobile.ZXingTextureView;
 
 [assembly: ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Android
 {
     [Preserve(AllMembers = true)]
-	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingTextureView>
+	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, MyView>
     {       
         public static void Init ()
         {
@@ -27,7 +28,7 @@ namespace ZXing.Net.Mobile.Forms.Android
 
         protected ZXingScannerView formsView;
 
-		protected ZXingTextureView zxingTexture;
+        protected MyView view;
         internal Task<bool> requestPermissionsTask;
 
         protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
@@ -36,15 +37,15 @@ namespace ZXing.Net.Mobile.Forms.Android
 
             formsView = Element;
 
-            if (zxingTexture == null) {
+            if (view == null) {
 
                 // Process requests for autofocus
                 formsView.AutoFocusRequested += (x, y) => {
-                    if (zxingTexture != null) {
+                    if (view != null) {
                         if (x < 0 && y < 0)
-                            zxingTexture.AutoFocus ();
+                            view.AutoFocus ();
                         else
-                            zxingTexture.AutoFocus (x, y);
+                            view.AutoFocus (x, y);
                     }
                 };
 
@@ -53,19 +54,19 @@ namespace ZXing.Net.Mobile.Forms.Android
                 if (activity != null)                
                     await ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync (activity);
                 
-				zxingTexture = new ZXingTextureView(Xamarin.Forms.Forms.Context);
-				zxingTexture.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
+                view = new MyView(Xamarin.Forms.Forms.Context, formsView.Options);
+				view.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
 
-                base.SetNativeControl (zxingTexture);
+                base.SetNativeControl (view);
 
                 if (formsView.IsScanning)
-                    zxingTexture.StartScanning(formsView.RaiseScanResult, formsView.Options);
+                    view.StartScanning(formsView.RaiseScanResult, formsView.Options);
 
                 if (!formsView.IsAnalyzing)
-                    zxingTexture.PauseAnalysis ();
+                    view.PauseAnalysis ();
 
                 if (formsView.IsTorchOn)
-                    zxingTexture.Torch (true);
+                    view.Torch (true);
             }
         }
 
@@ -73,24 +74,24 @@ namespace ZXing.Net.Mobile.Forms.Android
         {
             base.OnElementPropertyChanged (sender, e);
 
-            if (zxingTexture == null)
+            if (view == null)
                 return;
             
             switch (e.PropertyName) {
             case nameof (ZXingScannerView.IsTorchOn):
-                zxingTexture.Torch (formsView.IsTorchOn);
+                view.Torch (formsView.IsTorchOn);
                 break;
             case nameof (ZXingScannerView.IsScanning):
                 if (formsView.IsScanning)
-                    zxingTexture.StartScanning (formsView.RaiseScanResult, formsView.Options);
+                    view.StartScanning (formsView.RaiseScanResult, formsView.Options);
                 else
-                    zxingTexture.StopScanning ();
+                    view.StopScanning ();
                 break;
             case nameof (ZXingScannerView.IsAnalyzing):
                 if (formsView.IsAnalyzing)
-                    zxingTexture.ResumeAnalysis ();
+                    view.ResumeAnalysis ();
                 else
-                    zxingTexture.PauseAnalysis ();
+                    view.PauseAnalysis ();
                 break;
             } 
         }
@@ -100,8 +101,8 @@ namespace ZXing.Net.Mobile.Forms.Android
             var x = e.GetX ();            
             var y = e.GetY ();
 
-            if (zxingTexture != null) {
-                zxingTexture.AutoFocus ((int)x, (int)y);
+            if (view != null) {
+                view.AutoFocus ((int)x, (int)y);
                 System.Diagnostics.Debug.WriteLine ("Touch: x={0}, y={1}", x, y);
             }
             return base.OnTouchEvent (e);

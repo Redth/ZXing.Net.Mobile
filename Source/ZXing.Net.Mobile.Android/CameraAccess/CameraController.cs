@@ -17,21 +17,34 @@ namespace ZXing.Mobile.CameraAccess
         private readonly Context _context;
         private readonly MobileBarcodeScanningOptions _scanningOptions;
         private readonly ISurfaceHolder _holder;
-        private readonly SurfaceView _surfaceView;
         private readonly CameraEventsListener _cameraEventListener;
         private int _cameraId;
+        private bool _autoFocusCycleDone = true;
+        private bool _useContinousFocus;
 
         public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener,
             MobileBarcodeScanningOptions scanningOptions)
         {
+            SurfaceView = surfaceView;
+
             _context = surfaceView.Context;
-            _holder = surfaceView.Holder;
-            _surfaceView = surfaceView;
-            _cameraEventListener = cameraEventListener;
             _scanningOptions = scanningOptions;
+            _holder = surfaceView.Holder;
+
+            _cameraEventListener = cameraEventListener;
+            _cameraEventListener.AutoFocus += (s, e) => 
+                _autoFocusCycleDone = true;
         }
 
+        public SurfaceView SurfaceView { get; }
+
         public Camera Camera { get; private set; }
+
+        public event EventHandler<FastJavaByteArray> OnPreviewFrameReady
+        {
+            add { _cameraEventListener.OnPreviewFrameReady += value; }
+            remove { _cameraEventListener.OnPreviewFrameReady -= value; }
+        }
 
         public int LastCameraDisplayOrientationDegree { get; private set; }
 
@@ -78,13 +91,8 @@ namespace ZXing.Mobile.CameraAccess
 
 
                 int bufferSize = (previewSize.Width * previewSize.Height * bitsPerPixel) / 8;
-				const int NUM_PREVIEW_BUFFERS = 5;
-				for (uint i = 0; i < NUM_PREVIEW_BUFFERS; ++i)
-				{
-					using (var buffer = new FastJavaByteArray(bufferSize))
-						Camera.AddCallbackBuffer(buffer);
-				}
-
+				using (var buffer = new FastJavaByteArray(bufferSize))
+					Camera.AddCallbackBuffer(buffer);
                 
 
 				Camera.StartPreview();
@@ -117,8 +125,8 @@ namespace ZXing.Mobile.CameraAccess
         {
             // The bounds for focus areas are actually -1000 to 1000
             // So we need to translate the touch coordinates to this scale
-            var focusX = x / _surfaceView.Width * 2000 - 1000;
-            var focusY = y / _surfaceView.Height * 2000 - 1000;
+            var focusX = x / SurfaceView.Width * 2000 - 1000;
+            var focusY = y / SurfaceView.Height * 2000 - 1000;
 
             // Call the autofocus with our coords
             AutoFocus(focusX, focusY, true);
@@ -134,10 +142,9 @@ namespace ZXing.Mobile.CameraAccess
             {
                 try
                 {
-                    //Camera.SetPreviewCallback(null);
                     Camera.SetPreviewDisplay(null);
                     Camera.StopPreview();
-                    Camera.SetNonMarshalingPreviewCallback(null);
+                    Camera.SetNonMarshalingPreviewCallback(null); // replaces Camera.SetPreviewCallback(null);
                 }
                 catch (Exception ex)
                 {
@@ -201,11 +208,6 @@ namespace ZXing.Mobile.CameraAccess
                 {
                     Camera = Camera.Open();
                 }
-
-                //if (Camera != null)
-                //    Camera.SetPreviewCallback(_cameraEventListener);
-                //else
-                //    MobileBarcodeScanner.LogWarn(MobileBarcodeScanner.TAG, "Camera is null :(");
             }
             catch (Exception ex)
             {
@@ -217,8 +219,13 @@ namespace ZXing.Mobile.CameraAccess
         private void ApplyCameraSettings()
         {
             var parameters = Camera.GetParameters();
-            parameters.PreviewFormat = ImageFormatType.Nv21;
+            parameters.PreviewFormat = ImageFormatType.Nv21; // YCrCb format (all Android devices must support this)
 
+            // Android actually defines a barcode scene mode ..
+            if (parameters.SupportedSceneModes.Contains(Camera.Parameters.SceneModeBarcode)) // .. we might be lucky :-)
+                parameters.SceneMode = Camera.Parameters.SceneModeBarcode;
+
+            // First try continuous video, then auto focus, then fixed
             var supportedFocusModes = parameters.SupportedFocusModes;
             if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
                 supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
@@ -229,20 +236,6 @@ namespace ZXing.Mobile.CameraAccess
                 parameters.FocusMode = Camera.Parameters.FocusModeAuto;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
                 parameters.FocusMode = Camera.Parameters.FocusModeFixed;
-
-            var selectedFps = parameters.SupportedPreviewFpsRange.FirstOrDefault();
-            if (selectedFps != null)
-            {
-                // This will make sure we select a range with the lowest minimum FPS
-                // and maximum FPS which still has the lowest minimum
-                // This should help maximize performance / support for hardware
-                foreach (var fpsRange in parameters.SupportedPreviewFpsRange)
-                {
-                    if (fpsRange[0] <= selectedFps[0] && fpsRange[1] > selectedFps[1])
-                        selectedFps = fpsRange;
-                }
-                parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
-            }
 
             var availableResolutions = parameters.SupportedPreviewSizes.Select(sps => new CameraResolution
             {
@@ -292,12 +285,18 @@ namespace ZXing.Mobile.CameraAccess
 
             Camera.SetParameters(parameters);
 
+            parameters = Camera.GetParameters(); // refresh to see what is actually set!
+
+            _useContinousFocus = parameters.FocusMode == Camera.Parameters.FocusModeContinuousPicture || parameters.FocusMode == Camera.Parameters.FocusModeContinuousVideo;
+
             SetCameraDisplayOrientation();
         }
 
         private void AutoFocus(int x, int y, bool useCoordinates)
         {
-            if (Camera == null) return;
+            if (_useContinousFocus || !_autoFocusCycleDone || Camera == null) 
+                return;
+
             var cameraParams = Camera.GetParameters();
 
             Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
@@ -317,7 +316,7 @@ namespace ZXing.Mobile.CameraAccess
                     // So we'll offset -10 from the center of the touch and then 
                     // make a rect of 20 to give an area to focus on based on the center of the touch
                     x = x - 10;
-                    y = y - 10;
+                    y = y - 10; // todo: ensure positive!
 
                     // Ensure we don't go over the -1000 to 1000 limit of focus area
                     if (x >= 1000)
@@ -340,6 +339,7 @@ namespace ZXing.Mobile.CameraAccess
                 }
 
                 // Finally autofocus (weather we used focus areas or not)
+                _autoFocusCycleDone = false;
                 Camera.AutoFocus(_cameraEventListener);
             }
             catch (Exception ex)
