@@ -35,7 +35,23 @@ namespace Sample.WindowsUniversal
             //Create a new instance of our scanner
             scanner = new MobileBarcodeScanner(this.Dispatcher);
             scanner.Dispatcher = this.Dispatcher;
+            scanner.OnCameraError += Scanner_OnCameraError;
+            scanner.OnCameraInitialized += Scanner_OnCameraInitialized; ;
         }
+
+        private void Scanner_OnCameraInitialized()
+        {
+            //handle initialization
+        }
+
+        private void Scanner_OnCameraError(IEnumerable<string> errors)
+        {
+            if(errors != null)
+            {
+                errors.ToList().ForEach(async e => await MessageBox(e));
+            }
+        }
+        
 
         private void buttonScanDefault_Click(object sender, RoutedEventArgs e)
         {
@@ -44,7 +60,6 @@ namespace Sample.WindowsUniversal
             //We can customize the top and bottom text of our default overlay
             scanner.TopText = "Hold camera up to barcode";
             scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
-
             //Start scanning
             scanner.Scan().ContinueWith(t =>
             {
@@ -52,7 +67,7 @@ namespace Sample.WindowsUniversal
                     HandleScanResult(t.Result);
             });
         }
-
+        
         private void buttonScanContinuously_Click(object sender, RoutedEventArgs e)
         {
             //Tell our scanner to use the default overlay

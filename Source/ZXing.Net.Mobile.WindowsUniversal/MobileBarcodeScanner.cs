@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -60,10 +61,9 @@ namespace ZXing.Mobile
                     },
                     Scanner = this,
                     ContinuousScanning = false,
-                    CameraInitialized = () => { OnCameraInitialized?.Invoke(); }
+                    CameraInitialized = () => { OnCameraInitialized?.Invoke(); },
+                    CameraError = (errors) => { OnCameraError?.Invoke(errors); }
                 };
-
-
                 rootFrame.Navigate(typeof(ScanPage), pageOptions);
             });
             
@@ -80,6 +80,9 @@ namespace ZXing.Mobile
 
         public event ScannerOpened OnCameraInitialized;
         public delegate void ScannerOpened();
+
+        public event ScannerError OnCameraError;
+        public delegate void ScannerError(IEnumerable<string> errors);
 
         public override async void Cancel()
         {

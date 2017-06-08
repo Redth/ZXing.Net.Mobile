@@ -42,6 +42,7 @@ namespace ZXing.Mobile
 
             Parameters = e.Parameter as ScanPageNavigationParameters;
             scannerControl.OnCameraInitialized += ScannerControl_OnCameraInitialized;
+            scannerControl.OnScannerError += ScannerControl_OnScannerError;
 
             if (Parameters != null)
                 Parameters.Scanner.ScanPage = this;
@@ -62,6 +63,14 @@ namespace ZXing.Mobile
         {
             Parameters.CameraInitialized?.Invoke();
         }
+
+        private void ScannerControl_OnScannerError(IEnumerable<string> errors)
+        {
+            Parameters.CameraError?.Invoke(errors);
+        }
+
+        
+        
 
     protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
@@ -191,5 +200,6 @@ namespace ZXing.Mobile
         public Action<ZXing.Result> ResultHandler { get; set; }
 
         public Action CameraInitialized { get; set; }
+        public Action<IEnumerable<string>> CameraError { get; set; }
     }
 }

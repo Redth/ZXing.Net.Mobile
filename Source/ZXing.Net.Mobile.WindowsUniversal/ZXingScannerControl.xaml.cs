@@ -39,6 +39,9 @@ namespace ZXing.Mobile
         }
         public event ScannerOpened OnCameraInitialized;
         public delegate void ScannerOpened();
+
+        public event ScannerError OnScannerError;
+        public delegate void ScannerError(IEnumerable<string> errors);
         async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
             //This safeguards against a null reference if the device is rotated *before* the first call to StartScanning
@@ -98,7 +101,12 @@ namespace ZXing.Mobile
         public async Task StartScanningAsync(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
         {
             if (stopping)
+            {
+                var error = "Camera is closing";
+                OnScannerError?.Invoke(new[] { error });
                 return;
+            }
+                
 
             displayRequest.RequestActive();
 
@@ -128,8 +136,10 @@ namespace ZXing.Mobile
             var preferredCamera = await GetFilteredCameraOrDefaultAsync(ScanningOptions);
             if (preferredCamera == null)
             {
-                System.Diagnostics.Debug.WriteLine("No camera available");
+                var error = "No camera available";
+                System.Diagnostics.Debug.WriteLine(error);
                 isMediaCaptureInitialized = false;
+                OnScannerError?.Invoke(new[] { error });
                 return;
             }
 
@@ -169,7 +179,12 @@ namespace ZXing.Mobile
             }
 
             if (!isMediaCaptureInitialized)
+            {
+                var error = "Unexpected error on Camera initialisation";
+                OnScannerError?.Invoke(new[] { error });
                 return;
+            }
+                
 
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
@@ -193,6 +208,13 @@ namespace ZXing.Mobile
             CameraResolution previewResolution = null;
             if (ScanningOptions.CameraResolutionSelector != null)
                 previewResolution = ScanningOptions.CameraResolutionSelector(availableResolutions);
+
+            if(availableResolutions == null || availableResolutions.Count < 1)
+            {
+                var error = "Camera is busy. Try to close all applications that use camera.";
+                OnScannerError?.Invoke(new[] { error });
+                return;
+            }
 
             // If the user did not specify a resolution, let's try and find a suitable one
             if (previewResolution == null)

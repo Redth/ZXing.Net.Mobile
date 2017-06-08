@@ -11,16 +11,12 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Button Name="buttonScanDefault" Grid.Row="0" Click="buttonScanDefault_Click">Scan with Default View</Button>
-            <Button Name="buttonScanCustom" Grid.Row="1" Click="buttonScanCustom_Click">Scan with Custom View</Button>
-            <Button Name="buttonScanContinuously" Grid.Row="2" Click="buttonScanContinuously_Click">Scan Continuously</Button>
-            <Button Name="buttonGenerate" Grid.Row="3" Click="buttonGenerate_Click">Generate Barcode</Button>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Button Name="buttonScanDefault" Grid.Row="0" Click="buttonScanDefault_Click" HorizontalAlignment="Center" Margin="10">Scan with Default View</Button>
+                <Button Name="buttonScanCustom" Grid.Row="1" Click="buttonScanCustom_Click" HorizontalAlignment="Center" Margin="10">Scan with Custom View</Button>
+                <Button Name="buttonGenerate" Grid.Row="3" Click="buttonGenerate_Click" HorizontalAlignment="Center" Margin="10">Generate Barcode</Button>
+            </StackPanel>
+            
         </Grid>
         
         <Grid Name="customOverlay" Visibility="Collapsed">
