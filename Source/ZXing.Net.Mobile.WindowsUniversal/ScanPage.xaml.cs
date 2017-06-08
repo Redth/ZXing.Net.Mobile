@@ -60,7 +60,7 @@ namespace ZXing.Mobile
 
         private void ScannerControl_OnCameraInitialized()
         {
-            Parameters.CameraInitialized.Invoke();
+            Parameters.CameraInitialized?.Invoke();
         }
 
     protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)

@@ -178,7 +178,7 @@ namespace ZXing.Mobile
             await mediaCapture.StartPreviewAsync();
             if(mediaCapture.CameraStreamState == CameraStreamState.Streaming)
             {
-                OnCameraInitialized.Invoke();
+                OnCameraInitialized?.Invoke();
             }
 
             // Get all the available resolutions for preview
