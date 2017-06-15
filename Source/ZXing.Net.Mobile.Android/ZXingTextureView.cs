@@ -669,7 +669,32 @@ namespace ZXing.Mobile
             base.Dispose(disposing);
         }
 
-        byte[] _buffer;
+		private bool _wasScanned;
+		private DateTime _lastPreviewAnalysis;
+		private bool CanAnalyzeFrame
+		{
+			get
+			{
+				if (!IsAnalyzing)
+					return false;
+
+				var elapsedTimeMs = (DateTime.UtcNow - _lastPreviewAnalysis).TotalMilliseconds;
+				if (elapsedTimeMs < _scanningOptions.DelayBetweenAnalyzingFrames)
+					return false;
+
+				// Delay a minimum between scans
+				if (_wasScanned && elapsedTimeMs < _scanningOptions.DelayBetweenContinuousScans)
+					return false;
+
+				// reset!
+				_wasScanned = false;
+				_lastPreviewAnalysis = DateTime.UtcNow;
+
+				return true;
+			}
+		}
+
+		byte[] _buffer;
         async public void OnPreviewFrame(IntPtr data, Camera camera)
         {
             System.Diagnostics.Stopwatch sw = null;
@@ -681,7 +706,7 @@ namespace ZXing.Mobile
                     sw = new Stopwatch();
                     sw.Start();
 #endif
-                    if (!_isAnalyzing)
+					if (!CanAnalyzeFrame)
                         return;
 
                     var isPortrait = IsPortrait; // this is checked asynchronously, so make sure to copy.
@@ -703,8 +728,11 @@ namespace ZXing.Mobile
                         return _barcodeReader.Decode(luminanceSource);
                     });
 
-                    if (result != null)
-                        _callback(result);
+					if (result != null)
+					{
+						_wasScanned = true;
+						_callback(result);
+					}
                     else if (!_useContinuousFocus)
                         AutoFocus();
                 }
