@@ -65,9 +65,6 @@ namespace ZXing.Net.Mobile.Forms.Android
                 if (formsView.IsScanning)
                     zxingSurface.StartScanning(formsView.RaiseScanResult, formsView.Options);
 
-                if (!formsView.IsAnalyzing)
-                    zxingSurface.PauseAnalysis ();
-
                 if (formsView.IsTorchOn)
                     zxingSurface.Torch (true);
             }
