@@ -37,7 +37,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
 
             if (imageView == null) {
 
-                imageView = new UIImageView ();
+                imageView = new UIImageView {ContentMode = UIViewContentMode.ScaleAspectFit};
 
                 base.SetNativeControl (imageView);     
             }
