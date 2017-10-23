@@ -40,6 +40,7 @@
     <Compile Include="MobileBarcodeScanningOptions.cs" />
     <Compile Include="Performance.cs" />
     <Compile Include="IScannerView.cs" />
+    <Compile Include="IScannerSessionHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

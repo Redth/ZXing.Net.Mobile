@@ -8,7 +8,6 @@ namespace ZXing.Mobile
 	{		
 		TOverlayViewType CustomOverlayView { get;set; }
 		bool UseCustomOverlayView { get; set; }
-		MobileBarcodeScanningOptions ScanningOptions { get; }
 		string TopText { get;set; }
 		string BottomText { get;set; }
 	}
