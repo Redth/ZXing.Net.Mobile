@@ -74,7 +74,6 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AVCaptureScannerView.cs" />
     <Compile Include="AVCaptureScannerViewController.cs" />
-    <Compile Include="BarcodeReaderiOS.cs" />
     <Compile Include="BarcodeWriter.cs" />
     <Compile Include="BitmapRenderer.cs" />
     <Compile Include="IScannerViewController.cs" />
@@ -83,7 +82,7 @@
     <Compile Include="ZXingDefaultOverlayView.cs" />
     <Compile Include="ZXingScannerView.cs" />
     <Compile Include="ZXingScannerViewController.cs" />
-    <Compile Include="CVPixelBufferARGB32LuminanceSource.cs" />
+    <Compile Include="CVPixelBufferBGRA32LuminanceSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj">
