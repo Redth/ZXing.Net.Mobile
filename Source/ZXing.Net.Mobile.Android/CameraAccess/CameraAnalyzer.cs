@@ -14,7 +14,7 @@ namespace ZXing.Mobile.CameraAccess
         private Task _processingTask;
         private DateTime _lastPreviewAnalysis = DateTime.UtcNow;
         private bool _wasScanned;
-        private BarcodeReaderGeneric<FastJavaByteArrayYUVLuminanceSource> _barcodeReader;
+        private BarcodeReader _barcodeReader;
 
         public CameraAnalyzer(SurfaceView surfaceView, MobileBarcodeScanningOptions scanningOptions)
         {
@@ -179,28 +179,7 @@ namespace ZXing.Mobile.CameraAccess
             if (_barcodeReader != null)
                 return;
 
-            _barcodeReader = new BarcodeReaderGeneric<FastJavaByteArrayYUVLuminanceSource>();
-
-            if (_scanningOptions.TryHarder.HasValue)
-                _barcodeReader.Options.TryHarder = _scanningOptions.TryHarder.Value;
-            if (_scanningOptions.PureBarcode.HasValue)
-                _barcodeReader.Options.PureBarcode = _scanningOptions.PureBarcode.Value;
-            if (!string.IsNullOrEmpty(_scanningOptions.CharacterSet))
-                _barcodeReader.Options.CharacterSet = _scanningOptions.CharacterSet;
-            if (_scanningOptions.TryInverted.HasValue)
-                _barcodeReader.TryInverted = _scanningOptions.TryInverted.Value;
-            if (_scanningOptions.UseCode39ExtendedMode.HasValue)
-                _barcodeReader.Options.UseCode39ExtendedMode = _scanningOptions.UseCode39ExtendedMode.Value;
-            if (_scanningOptions.AssumeGS1.HasValue)
-                _barcodeReader.Options.AssumeGS1 = _scanningOptions.AssumeGS1.Value;
-
-            if (_scanningOptions.PossibleFormats != null && _scanningOptions.PossibleFormats.Count > 0)
-            {
-                _barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
-
-                foreach (var pf in _scanningOptions.PossibleFormats)
-                    _barcodeReader.Options.PossibleFormats.Add(pf);
-            }
+            _barcodeReader = _scanningOptions.BuildBarcodeReader();
         }
 
         private static byte[] RotateCounterClockwise(byte[] data, int width, int height)
