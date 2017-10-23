@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if __UNIFIED__
 using Foundation;
 using CoreFoundation;
 using AVFoundation;
@@ -14,19 +13,6 @@ using CoreMedia;
 using CoreVideo;
 using ObjCRuntime;
 using UIKit;
-#else
-using MonoTouch.AVFoundation;
-using MonoTouch.CoreFoundation;
-using MonoTouch.CoreGraphics;
-using MonoTouch.CoreMedia;
-using MonoTouch.CoreVideo;
-using MonoTouch.Foundation;
-using MonoTouch.ObjCRuntime;
-using MonoTouch.UIKit;
-
-using CGRect = global::System.Drawing.RectangleF;
-using CGPoint = global::System.Drawing.PointF;
-#endif
 
 using ZXing.Common;
 using ZXing.Mobile;
