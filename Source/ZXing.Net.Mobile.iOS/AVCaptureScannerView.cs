@@ -230,7 +230,6 @@ namespace ZXing.Mobile
                         resultCallback(rs);
                     } finally {
                         working = false;
-                        wasScanned = false;
                     }
 				});
 
