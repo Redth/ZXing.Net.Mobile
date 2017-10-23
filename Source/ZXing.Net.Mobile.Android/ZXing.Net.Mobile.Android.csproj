@@ -13,6 +13,7 @@
     <RootNamespace>ZXing.Mobile</RootNamespace>
     <AssemblyName>ZXingNetMobile</AssemblyName>
     <TargetFrameworkVersion>v4.0.3</TargetFrameworkVersion>
+    <AndroidTlsProvider></AndroidTlsProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>False</Optimize>
@@ -44,6 +45,8 @@
     <Reference Include="FastAndroidCamera">
       <HintPath>..\..\packages\FastAndroidCamera.2.0.0\lib\MonoAndroid403\FastAndroidCamera.dll</HintPath>
     </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityLifecycleContextListener.cs" />
@@ -62,8 +65,9 @@
     <Compile Include="ZXingSurfaceView.cs" />
     <Compile Include="Permissions.cs" />
     <Compile Include="PermissionsHandler.cs" />
-    <Compile Include="FastJavaArrayEx.cs" />
     <Compile Include="FastJavaByteArrayYUVLuminanceSource.cs" />
+    <Compile Include="FastJavaArrayEx.cs" />
+    <Compile Include="ZXingTextureView.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

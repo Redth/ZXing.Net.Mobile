@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Android.Views;
 using ApxLabs.FastAndroidCamera;
 
 namespace ZXing.Mobile.CameraAccess
@@ -10,18 +9,16 @@ namespace ZXing.Mobile.CameraAccess
     {
         private readonly CameraController _cameraController;
         private readonly MobileBarcodeScanningOptions _scanningOptions;
-        private readonly CameraEventsListener _cameraEventListener;
-        private Task _processingTask;
         private DateTime _lastPreviewAnalysis = DateTime.UtcNow;
         private bool _wasScanned;
         private BarcodeReaderGeneric<FastJavaByteArrayYUVLuminanceSource> _barcodeReader;
 
-        public CameraAnalyzer(SurfaceView surfaceView, MobileBarcodeScanningOptions scanningOptions)
+        public CameraAnalyzer(CameraController cameraController, MobileBarcodeScanningOptions scanningOptions)
         {
             _scanningOptions = scanningOptions;
-            _cameraEventListener = new CameraEventsListener();
-            _cameraController = new CameraController(surfaceView, _cameraEventListener, scanningOptions);
-            Torch = new Torch(_cameraController, surfaceView.Context);
+            _cameraController = cameraController;
+
+            Torch = new Torch(_cameraController);
         }
 
         public event EventHandler<Result> BarcodeFound;
@@ -43,13 +40,13 @@ namespace ZXing.Mobile.CameraAccess
         public void ShutdownCamera()
         {
             IsAnalyzing = false;
-            _cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
+            _cameraController.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
             _cameraController.ShutdownCamera();
         }
 
         public void SetupCamera()
         {
-            _cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
+            _cameraController.OnPreviewFrameReady += HandleOnPreviewFrameReady;
             _cameraController.SetupCamera();
         }
 
@@ -75,11 +72,6 @@ namespace ZXing.Mobile.CameraAccess
 				if (!IsAnalyzing)
 					return false;
 				
-                //Check and see if we're still processing a previous frame
-                // todo: check if we can run as many as possible or mby run two analyzers at once (Vision + ZXing)
-                if (_processingTask != null && !_processingTask.IsCompleted)
-                    return false;
-                
                 var elapsedTimeMs = (DateTime.UtcNow - _lastPreviewAnalysis).TotalMilliseconds;
 				if (elapsedTimeMs < _scanningOptions.DelayBetweenAnalyzingFrames)
 					return false;
@@ -100,24 +92,17 @@ namespace ZXing.Mobile.CameraAccess
             _wasScanned = false;
             _lastPreviewAnalysis = DateTime.UtcNow;
 
-			_processingTask = Task.Run(() =>
-			{
-				try
-				{
-					DecodeFrame(fastArray);
-				} catch (Exception ex) {
-					Console.WriteLine(ex);
-				}
-			}).ContinueWith(task =>
+            try 
             {
-                if (task.IsFaulted)
-                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "DecodeFrame exception occurs");
-            }, TaskContinuationOptions.OnlyOnFaulted);
+                DecodeFrame(fastArray);
+            }
+            catch (Exception ex)
+            {
+                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"DecodeFrame exception occured: {ex.Message}");
+            }
         }
 
-        byte[] _matrix;
-        byte[] _rotatedMatrix;
-
+		private byte[] buffer;
         private void DecodeFrame(FastJavaByteArray fastArray)
         {
             var cameraParameters = _cameraController.Camera.GetParameters();
@@ -126,52 +111,36 @@ namespace ZXing.Mobile.CameraAccess
 
             InitBarcodeReaderIfNeeded();
 
-            var rotate = false;
-            var newWidth = width;
-            var newHeight = height;
-
             // use last value for performance gain
             var cDegrees = _cameraController.LastCameraDisplayOrientationDegree;
+			var rotate = (cDegrees == 90 || cDegrees == 270);
 
-            if (cDegrees == 90 || cDegrees == 270)
-            {
-                rotate = true;
-                newWidth = height;
-                newHeight = width;
-            }
-
-            ZXing.Result result = null;
+            Result result = null;
             var start = PerformanceCounter.Start();
 
-            LuminanceSource luminanceSource;
-
-            var fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
-            if (rotate)
+            if (rotate) 
             {
-                fast.CopyMatrix(ref _matrix);
-                RotateCounterClockwise(_matrix, ref _rotatedMatrix, width, height); // _area.Width, _area.Height);
-                luminanceSource = new PlanarYUVLuminanceSource(_rotatedMatrix, height, width, 0, 0, height, width, false); // _area.Height, _area.Width, 0, 0, _area.Height, _area.Width, false);
+                fastArray.Transpose(ref buffer, width, height);
+                var tmp = width;
+                width = height;
+                height = tmp;
             }
-            else
-                luminanceSource = fast;
+			
+            var luminanceSource = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
             
             result = _barcodeReader.Decode(luminanceSource);
 
-            fastArray.Dispose();
-            fastArray = null;
+            PerformanceCounter.Stop(start, "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " + rotate + ")");
 
-            PerformanceCounter.Stop(start,
-                "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
-                rotate + ")");
+            if (result != null)
+            {
+                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
 
-			if (result != null)
-			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
-
-				_wasScanned = true;
-				BarcodeFound?.Invoke(this, result);
-				return;
-			}
+                _wasScanned = true;
+                BarcodeFound?.Invoke(this, result);
+            }
+            else
+                AutoFocus();
         }
 
         private void InitBarcodeReaderIfNeeded()
@@ -201,25 +170,6 @@ namespace ZXing.Mobile.CameraAccess
                 foreach (var pf in _scanningOptions.PossibleFormats)
                     _barcodeReader.Options.PossibleFormats.Add(pf);
             }
-        }
-
-        private static byte[] RotateCounterClockwise(byte[] data, int width, int height)
-        {
-            var rotatedData = new byte[data.Length];
-            for (var y = 0; y < height; y++)
-                for (var x = 0; x < width; x++)
-                    rotatedData[x*height + height - y - 1] = data[x + y*width];
-            return rotatedData;
-        }
-
-        private void RotateCounterClockwise(byte[] source, ref byte[] target, int width, int height)
-        {
-            if (source.Length != (target?.Length ?? -1))
-                target = new byte[source.Length];
-
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    target[x * height + height - y - 1] = source[x + y * width];
         }
     }
 }

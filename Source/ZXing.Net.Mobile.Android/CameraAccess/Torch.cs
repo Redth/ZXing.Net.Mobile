@@ -10,10 +10,10 @@ namespace ZXing.Mobile.CameraAccess
         private readonly Context _context;
         private bool? _hasTorch;
 
-        public Torch(CameraController cameraController, Context context)
+        public Torch(CameraController cameraController)
         {
             _cameraController = cameraController;
-            _context = context;
+            _context = cameraController.SurfaceView.Context;
         }
 
         public bool IsSupported

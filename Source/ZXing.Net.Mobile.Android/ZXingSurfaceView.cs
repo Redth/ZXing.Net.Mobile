@@ -4,6 +4,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Graphics;
 using ZXing.Mobile.CameraAccess;
+using Android.OS;
 
 namespace ZXing.Mobile
 {
@@ -24,9 +25,8 @@ namespace ZXing.Mobile
 
         private void Init()
         {
-            _cameraAnalyzer = new CameraAnalyzer(this, ScanningOptions);
+            _cameraAnalyzer = new CameraAnalyzer(new CameraController(this, new CameraEventsListener(), ScanningOptions), ScanningOptions);
             Holder.AddCallback(this);
-            Holder.SetType(SurfaceType.PushBuffers);
         }
 
         public async void SurfaceCreated(ISurfaceHolder holder)
