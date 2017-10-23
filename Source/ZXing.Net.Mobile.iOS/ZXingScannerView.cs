@@ -54,6 +54,8 @@ namespace ZXing.Mobile
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
+		bool shouldRotatePreviewBuffer = false;
+
 		void Setup(CGRect frame)
 		{
 			var started = DateTime.UtcNow;
@@ -278,6 +280,9 @@ namespace ZXing.Mobile
 				{
 					var perfDecode = PerformanceCounter.Start();
 
+					if (shouldRotatePreviewBuffer)
+						ls = ls.rotateCounterClockwise();
+					
 					var result = barcodeReader.Decode(ls);
 
 					PerformanceCounter.Stop(perfDecode, "Decode Time: {0} ms");
@@ -355,6 +360,8 @@ namespace ZXing.Mobile
 
 		public void ResizePreview (UIInterfaceOrientation orientation)
 		{
+			shouldRotatePreviewBuffer = orientation == UIInterfaceOrientation.Portrait || orientation == UIInterfaceOrientation.PortraitUpsideDown;
+
 			if (previewLayer == null)
 				return;
 
