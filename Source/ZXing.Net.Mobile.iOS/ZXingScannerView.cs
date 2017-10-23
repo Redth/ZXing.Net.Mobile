@@ -327,6 +327,8 @@ namespace ZXing.Mobile
 				barcodeReader.Options.CharacterSet = ScanningOptions.CharacterSet;
 			if (ScanningOptions.TryInverted.HasValue)
 				barcodeReader.TryInverted = ScanningOptions.TryInverted.Value;
+            if (ScanningOptions.AssumeGS1.HasValue)
+                barcodeReader.Options.AssumeGS1 = ScanningOptions.AssumeGS1.Value;
 
 			if (ScanningOptions.PossibleFormats != null && ScanningOptions.PossibleFormats.Count > 0)
 			{
