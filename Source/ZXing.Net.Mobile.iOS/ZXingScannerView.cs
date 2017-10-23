@@ -543,7 +543,8 @@ namespace ZXing.Mobile
                             luminanceSource = new CVPixelBufferARGB32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
                         }
 
-                        HandleImage(luminanceSource);
+                        if (HandleImage(luminanceSource))
+                            wasScanned = true;
 
                         pixelBuffer.Unlock(CVPixelBufferLock.ReadOnly);
                     }
@@ -560,8 +561,11 @@ namespace ZXing.Mobile
 				} catch (Exception e){
 					Console.WriteLine (e);
 				}
+                finally
+                {
+                    working = false;
+                }
 
-				working = false;
 			}
 		}
 	
@@ -735,4 +739,3 @@ namespace ZXing.Mobile
 		#endregion
 	}
 }
-
