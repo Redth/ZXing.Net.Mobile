@@ -22,11 +22,18 @@ namespace ZXing.Mobile
             Init();
         }
 
+		bool addedHolderCallback = false;
+
         private void Init()
         {
-            _cameraAnalyzer = new CameraAnalyzer(this, ScanningOptions);
-            Holder.AddCallback(this);
-            Holder.SetType(SurfaceType.PushBuffers);
+			if (_cameraAnalyzer == null)
+	            _cameraAnalyzer = new CameraAnalyzer(this, ScanningOptions);
+
+			if (!addedHolderCallback) {
+				Holder.AddCallback(this);
+				Holder.SetType(SurfaceType.PushBuffers);
+				addedHolderCallback = true;
+			}
         }
 
         public async void SurfaceCreated(ISurfaceHolder holder)
@@ -46,6 +53,13 @@ namespace ZXing.Mobile
         public async void SurfaceDestroyed(ISurfaceHolder holder)
         {
             await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
+            try {
+				if (addedHolderCallback) {
+					Holder.RemoveCallback(this);
+					addedHolderCallback = false;
+				}
+            } catch { }
 
             _cameraAnalyzer.ShutdownCamera();
         }
@@ -170,5 +184,13 @@ namespace ZXing.Mobile
         //        }
 
         #endregion
+
+		protected override void OnAttachedToWindow()
+		{
+			base.OnAttachedToWindow();
+
+			// Reinit things
+			Init();
+		}
     }
 }
