@@ -39,7 +39,6 @@ namespace ZXing.Mobile
 		//DispatchQueue queue;
 		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = true;
-		//BarcodeReader barcodeReader;
 
 		volatile bool foundResult = false;
 		CaptureDelegate captureDelegate;
