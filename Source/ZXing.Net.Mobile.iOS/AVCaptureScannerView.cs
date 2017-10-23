@@ -594,29 +594,36 @@ namespace ZXing.Mobile
 		}
 
 		BarcodeFormat ZXingBarcodeFormatFromAVCaptureBarcodeFormat(string avMetadataObjectType)
-		{	
-			if (avMetadataObjectType == AVMetadataObject.TypeAztecCode)
+		{
+			switch(avMetadataObjectType)
+			{
+			case "AztecCode":
 				return BarcodeFormat.AZTEC;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode128Code)
+			case "Code128Code":
 				return BarcodeFormat.CODE_128;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode39Code)
+			case "Code39Code":
 				return BarcodeFormat.CODE_39;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode39Mod43Code)
+			case "Code39Mod43Code":
 				return BarcodeFormat.CODE_39;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode93Code)
+			case "Code93Code":
 				return BarcodeFormat.CODE_93;
-			if (avMetadataObjectType == AVMetadataObject.TypeEAN13Code)
+			case "EAN13Code":
 				return BarcodeFormat.EAN_13;
-			if (avMetadataObjectType == AVMetadataObject.TypeEAN8Code)
+			case "EAN8Code":
 				return BarcodeFormat.EAN_8;
-			if (avMetadataObjectType == AVMetadataObject.TypePDF417Code)
+			case "PDF417Code":
 				return BarcodeFormat.PDF_417;
-			if (avMetadataObjectType == AVMetadataObject.TypeQRCode)
+			case "QRCode":
 				return BarcodeFormat.QR_CODE;
-			if (avMetadataObjectType == AVMetadataObject.TypeUPCECode)
+			case "UPCECode":
 				return BarcodeFormat.UPC_E;
-
-			return BarcodeFormat.QR_CODE;
+			case "DataMatrixCode":
+				return BarcodeFormat.DATA_MATRIX;
+			case "Interleaved2of5Code":
+				return BarcodeFormat.ITF;
+			default:
+				return BarcodeFormat.QR_CODE;
+			}		    
 		}
 
         #if __UNIFIED__
