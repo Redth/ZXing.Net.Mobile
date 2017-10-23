@@ -54,7 +54,7 @@ namespace Sample.iOS
                         opt.DelayBetweenContinuousScans = 3000;
 
                         //Start scanning
-                        scanner.ScanContinuously (opt, true, HandleScanResult);
+                        scanner.ScanContinuously (opt, false, HandleScanResult);
                     }),
 
                     new StyledStringElement ("Scan with Custom View", async () => {
