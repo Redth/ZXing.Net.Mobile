@@ -15,20 +15,19 @@ namespace ZXing.Mobile.CameraAccess
     public class CameraController
     {
         private readonly Context _context;
-        private readonly MobileBarcodeScanningOptions _scanningOptions;
         private readonly ISurfaceHolder _holder;
         private readonly SurfaceView _surfaceView;
         private readonly CameraEventsListener _cameraEventListener;
         private int _cameraId;
+		IScannerSessionHost _scannerHost;
 
-        public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener,
-            MobileBarcodeScanningOptions scanningOptions)
+        public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
         {
             _context = surfaceView.Context;
             _holder = surfaceView.Holder;
             _surfaceView = surfaceView;
             _cameraEventListener = cameraEventListener;
-            _scanningOptions = scanningOptions;
+			_scannerHost = scannerHost;
         }
 
         public Camera Camera { get; private set; }
@@ -171,8 +170,8 @@ namespace ZXing.Mobile.CameraAccess
 
                     var whichCamera = CameraFacing.Back;
 
-                    if (_scanningOptions.UseFrontCameraIfAvailable.HasValue &&
-                        _scanningOptions.UseFrontCameraIfAvailable.Value)
+					if (_scannerHost.ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
+                        _scannerHost.ScanningOptions.UseFrontCameraIfAvailable.Value)
                         whichCamera = CameraFacing.Front;
 
                     for (var i = 0; i < numCameras; i++)
@@ -251,7 +250,7 @@ namespace ZXing.Mobile.CameraAccess
             });
 
             // Try and get a desired resolution from the options selector
-            var resolution = _scanningOptions.GetResolution(availableResolutions.ToList());
+            var resolution = _scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
 
             // If the user did not specify a resolution, let's try and find a suitable one
             if (resolution == null)

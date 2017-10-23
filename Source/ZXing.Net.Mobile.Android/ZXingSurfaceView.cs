@@ -7,7 +7,7 @@ using ZXing.Mobile.CameraAccess;
 
 namespace ZXing.Mobile
 {
-    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView
+    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView, IScannerSessionHost
     {
         public ZXingSurfaceView(Context context, MobileBarcodeScanningOptions options)
             : base(context)
@@ -27,7 +27,7 @@ namespace ZXing.Mobile
         private void Init()
         {
 			if (_cameraAnalyzer == null)
-	            _cameraAnalyzer = new CameraAnalyzer(this, ScanningOptions);
+	            _cameraAnalyzer = new CameraAnalyzer(this, this);
 
 			if (!addedHolderCallback) {
 				Holder.AddCallback(this);
@@ -131,7 +131,7 @@ namespace ZXing.Mobile
             _cameraAnalyzer.Torch.Toggle();
         }
 
-        public MobileBarcodeScanningOptions ScanningOptions { get; private set; }
+        public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
         public bool IsTorchOn => _cameraAnalyzer.Torch.IsEnabled;
 
