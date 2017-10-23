@@ -425,7 +425,7 @@ namespace ZXing.Mobile
             volatile bool wasScanned = false;
 
 			[Export ("captureOutput:didDropSampleBuffer:fromConnection:")]
-			public void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
+			public override void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
 				//Console.WriteLine("Dropped Sample Buffer");
 			}
