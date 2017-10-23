@@ -176,7 +176,6 @@ namespace ZXing.Mobile
             // Start the preview
             await mediaCapture.StartPreviewAsync();
 
-
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
             var availableResolutions = new List<CameraResolution>();
@@ -212,6 +211,12 @@ namespace ZXing.Mobile
 
             if (previewResolution == null)
                 previewResolution = availableResolutions.LastOrDefault();
+            
+            if (previewResolution == null)
+            {
+                System.Diagnostics.Debug.WriteLine("No preview resolution available. Camera may be in use by another application.");
+                return;
+            }
 
             MobileBarcodeScanner.Log("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
 
