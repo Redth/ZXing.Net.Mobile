@@ -520,7 +520,7 @@ namespace ZXing.Mobile
                         // Lock the base address
                         pixelBuffer.Lock(CVPixelBufferLock.ReadOnly); // MAYBE NEEDS READ/WRITE
 
-                        CVPixelBufferARGB32LuminanceSource luminanceSource;
+                        LuminanceSource luminanceSource;
 
                         // Let's access the raw underlying data and create a luminance source from it
                         unsafe
@@ -528,7 +528,7 @@ namespace ZXing.Mobile
                             var rawData = (byte*)pixelBuffer.BaseAddress.ToPointer();
                             var rawDatalen = (int)(pixelBuffer.Height * pixelBuffer.Width * 4); //This drops 8 bytes from the original length to give us the expected length
 
-                            luminanceSource = new CVPixelBufferARGB32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
+                            luminanceSource = new CVPixelBufferBGRA32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
                         }
 
                         if (HandleImage(luminanceSource))
