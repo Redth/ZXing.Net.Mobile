@@ -190,13 +190,11 @@ namespace ZXing.Mobile
 				session.AddInput (input);
 
 
-			var startedAVPreviewLayerAlloc = DateTime.UtcNow;
+			var startedAVPreviewLayerAlloc = PerformanceCounter.Start();
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
-			var totalAVPreviewLayerAlloc = DateTime.UtcNow - startedAVPreviewLayerAlloc;
-
-			Console.WriteLine ("PERF: Alloc AVCaptureVideoPreviewLayer took {0} ms.", totalAVPreviewLayerAlloc.TotalMilliseconds);
+			PerformanceCounter.Stop(startedAVPreviewLayerAlloc, "Alloc AVCaptureVideoPreviewLayer took {0} ms.");
 
 
 			// //Framerate set here (15 fps)
@@ -278,17 +276,14 @@ namespace ZXing.Mobile
 
 				try
 				{
-					//var sw = new System.Diagnostics.Stopwatch();
-					//sw.Start();
+					var perfDecode = PerformanceCounter.Start();
 
-                    var rs = barcodeReader.Decode(img);
+					var result = barcodeReader.Decode(ls);
 
-					//sw.Stop();
+					PerformanceCounter.Stop(perfDecode, "Decode Time: {0} ms");
 
-					//Console.WriteLine("Decode Time: {0} ms", sw.ElapsedMilliseconds);
-
-                    if (rs != null) {
-						resultCallback(rs);
+                    if (result != null) {
+						resultCallback(result);
                         return true;
                     }
 				}
@@ -447,6 +442,12 @@ namespace ZXing.Mobile
                     || working
 				    || CancelTokenSource.IsCancellationRequested)
 				{
+
+					if (msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
+						Console.WriteLine("Too soon between frames");
+					if (wasScanned && msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
+						Console.WriteLine("Too soon since last scan");
+					
 					if (sampleBuffer != null)
 					{
 						sampleBuffer.Dispose ();
