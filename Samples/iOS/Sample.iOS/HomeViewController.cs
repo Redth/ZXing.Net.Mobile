@@ -1,15 +1,9 @@
 using System;
 using MonoTouch.Dialog;
 
-#if __UNIFIED__
 using Foundation;
 using CoreGraphics;
 using UIKit;
-#else
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-using CGRect = System.Drawing.RectangleF;
-#endif
 
 using ZXing;
 using ZXing.Mobile;
