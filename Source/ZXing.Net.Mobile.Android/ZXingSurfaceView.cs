@@ -46,6 +46,8 @@ namespace ZXing.Mobile
         public async void SurfaceDestroyed(ISurfaceHolder holder)
         {
             await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+            
+            Holder.RemoveCallback(this);
 
             _cameraAnalyzer.ShutdownCamera();
         }
