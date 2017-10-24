@@ -4,5 +4,5 @@
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.FLASHLIGHT" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<application android:label="FormsSample"></application>
+	<application android:label="ZXing Forms" android:icon="@mipmap/ic_launcher"></application>
 </manifest>

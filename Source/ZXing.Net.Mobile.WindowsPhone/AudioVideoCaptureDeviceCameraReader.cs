@@ -97,7 +97,8 @@ namespace ZXing.Mobile
 
                     if (supportedCameraModes.ToList().Contains((UInt32)VideoTorchMode.On))
                     {
-                        var torchStatus = (VideoTorchMode)_photoCamera.GetProperty(KnownCameraAudioVideoProperties.VideoTorchMode);
+                        UInt32 propValue = (UInt32)_photoCamera.GetProperty(KnownCameraAudioVideoProperties.VideoTorchMode);                        
+                        var torchStatus = (VideoTorchMode)propValue;
 
                         switch (torchStatus)
                         {
@@ -183,10 +184,9 @@ namespace ZXing.Mobile
             // preview-image and fire our timer events
             uiDispatcher = Application.Current.RootVisual.Dispatcher;
 
-            InitializeCamera();
-
-
             _reader = this.Options.BuildMultiFormatReader();
+
+            InitializeCamera();            
         }
 
         private async Task InitializeCamera()
@@ -357,7 +357,7 @@ namespace ZXing.Mobile
 
         private void ScanPreviewBuffer()
         {
-            if (IsAnalyzing) return;
+            if (!IsAnalyzing) return;
             if (_photoCamera == null) return;
             if (!_initialized) return;
 

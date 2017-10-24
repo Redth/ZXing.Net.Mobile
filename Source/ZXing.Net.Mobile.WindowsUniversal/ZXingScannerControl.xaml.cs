@@ -11,8 +11,10 @@ using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.Media;
 using Windows.Media.Capture;
+using Windows.Media.Devices;
 using Windows.Media.MediaProperties;
 using Windows.System.Display;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -26,7 +28,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IDisposable
+    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IScannerSessionHost, IDisposable
     {
         public ZXingScannerControl()
         {
@@ -38,20 +40,29 @@ namespace ZXing.Mobile
 
         async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
+            //This safeguards against a null reference if the device is rotated *before* the first call to StartScanning
+            if (mediaCapture == null) return;
+
             displayOrientation = sender.CurrentOrientation;
-            await SetPreviewRotationAsync();
+            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+            await SetPreviewRotationAsync(props);
         }
 
         // Receive notifications about rotation of the UI and apply any necessary rotation to the preview stream
         readonly DisplayInformation displayInformation = DisplayInformation.GetForCurrentView();
         DisplayOrientations displayOrientation = DisplayOrientations.Portrait;
+        VideoFrame videoFrame;
+
+        // Information about the camera device.
+        bool mirroringPreview = false;
+        bool externalCamera = false;
 
         // Rotation metadata to apply to the preview stream (MF_MT_VIDEO_ROTATION)
         // Reference: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
         static readonly Guid RotationKey = new Guid("C380465D-2271-428C-9B83-ECEA3B4A85C1");
 
         // Prevent the screen from sleeping while the camera is running
-        readonly DisplayRequest _displayRequest = new DisplayRequest();
+        readonly DisplayRequest displayRequest = new DisplayRequest();
 
         // For listening to media property changes
         readonly SystemMediaTransportControls _systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
@@ -85,6 +96,11 @@ namespace ZXing.Mobile
 
         public async Task StartScanningAsync(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
         {
+            if (stopping)
+                return;
+
+            displayRequest.RequestActive();
+
             isAnalyzing = true;
             ScanCallback = scanCallback;
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
@@ -108,22 +124,58 @@ namespace ZXing.Mobile
             }
 
             // Find which device to use
-            var preferredCamera = await this.GetFilteredCameraOrDefaultAsync(ScanningOptions);            
-            mediaCapture = new MediaCapture();
-            
-            // Initialize the capture with the settings above
-            await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings()
+            var preferredCamera = await GetFilteredCameraOrDefaultAsync(ScanningOptions);
+            if (preferredCamera == null)
             {
-                StreamingCaptureMode = StreamingCaptureMode.Video,
-                VideoDeviceId = preferredCamera.Id
-            });
+                System.Diagnostics.Debug.WriteLine("No camera available");
+                isMediaCaptureInitialized = false;
+                return;
+            }
+
+            if (preferredCamera.EnclosureLocation == null || preferredCamera.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Unknown)
+            {
+                // No information on the location of the camera, assume it's an external camera, not integrated on the device.
+                externalCamera = true;
+            }
+            else
+            {
+                // Camera is fixed on the device.
+                externalCamera = false;
+
+                // Only mirror the preview if the camera is on the front panel.
+                mirroringPreview = preferredCamera.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Front;
+            }
+
+            mediaCapture = new MediaCapture();
+
+            // Initialize the capture with the settings above
+            try
+            {
+                await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
+                {
+                    StreamingCaptureMode = StreamingCaptureMode.Video,
+                    VideoDeviceId = preferredCamera.Id
+                });
+                isMediaCaptureInitialized = true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                System.Diagnostics.Debug.WriteLine("Denied access to the camera");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Exception when init MediaCapture: {0}", ex);
+            }
+
+            if (!isMediaCaptureInitialized)
+                return;
 
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
-            
+
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
             var availableResolutions = new List<CameraResolution>();
@@ -159,36 +211,41 @@ namespace ZXing.Mobile
 
             if (previewResolution == null)
                 previewResolution = availableResolutions.LastOrDefault();
+            
+            if (previewResolution == null)
+            {
+                System.Diagnostics.Debug.WriteLine("No preview resolution available. Camera may be in use by another application.");
+                return;
+            }
 
-            System.Diagnostics.Debug.WriteLine("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
+            MobileBarcodeScanner.Log("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
 
             // Find the matching property based on the selection, again
             var chosenProp = availableProperties.FirstOrDefault(ap => ((VideoEncodingProperties)ap).Width == previewResolution.Width && ((VideoEncodingProperties)ap).Height == previewResolution.Height);
+
+            // Pass in the requested preview size properties
+            // so we can set them at the same time as the preview rotation
+            // to save an additional set property call
+            await SetPreviewRotationAsync(chosenProp);
             
-            // Set the selected resolution
-            await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, chosenProp);
-
-            await SetPreviewRotationAsync();
-
+            // *after* the preview is setup, set this so that the UI layout happens
+            // otherwise the preview gets stuck in a funny place on screen
             captureElement.Stretch = Stretch.UniformToFill;
-
-            // Get our preview properties
-            var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
             
-            // Setup a frame to use as the input settings
-            var destFrame = new VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
-
+            await SetupAutoFocus();
+                        
             var zxing = ScanningOptions.BuildBarcodeReader();
 
             timerPreview = new Timer(async (state) => {
-                if (stopping)
-                    return;                               
-                if (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming)
+
+                var delay = ScanningOptions.DelayBetweenAnalyzingFrames;
+
+                if (stopping || processing || !isAnalyzing
+                || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
+                {
+                    timerPreview.Change(delay, Timeout.Infinite);
                     return;
-                if (processing)
-                    return;
-                if (!isAnalyzing)
-                    return;
+                }
 
                 processing = true;
 
@@ -196,16 +253,15 @@ namespace ZXing.Mobile
 
                 try
                 {
-
                     // Get preview 
-                    var frame = await mediaCapture.GetPreviewFrameAsync(destFrame);
+                    var frame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
 
                     // Create our luminance source
                     luminanceSource = new SoftwareBitmapLuminanceSource(frame.SoftwareBitmap);
 
                 } catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("GetPreviewFrame Failed: {0}", ex);
+                    MobileBarcodeScanner.Log ("GetPreviewFrame Failed: {0}", ex);
                 }
 
                 ZXing.Result result = null;
@@ -218,21 +274,31 @@ namespace ZXing.Mobile
                 }
                 catch (Exception ex)
                 {
-                    
+                    MobileBarcodeScanner.Log("Warning: zxing.Decode Failed: {0}", ex);
                 }
 
                 // Check if a result was found
                 if (result != null && !string.IsNullOrEmpty (result.Text))
                 {
                     if (!ContinuousScanning)
-                        await StopScanningAsync();
+                    {
+                        delay = Timeout.Infinite;
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => { await StopScanningAsync(); });
+                    }
+                    else
+                    {
+                        delay = ScanningOptions.DelayBetweenContinuousScans;
+                    }
+
                     LastScanResult = result;
-                    ScanCallback(result);                    
+                    ScanCallback(result);
                 }
 
                 processing = false;
+
+                timerPreview.Change(delay, Timeout.Infinite);
                          
-            }, null, TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(200));           
+            }, null, ScanningOptions.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
         }
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(MobileBarcodeScanningOptions options)
@@ -248,9 +314,13 @@ namespace ZXing.Mobile
 
             // we fall back to the first camera that we can find.  
             if (selectedCamera == null)
+            {
+                var whichCamera = useFront ? "front" : "back";
+                System.Diagnostics.Debug.WriteLine("Finding " + whichCamera + " camera failed, opening first available camera");
                 selectedCamera = videoCaptureDevices.FirstOrDefault();
+            }
 
-            return (selectedCamera);
+            return selectedCamera;
         }
 
         protected override async void OnPointerPressed(PointerRoutedEventArgs e)
@@ -258,14 +328,14 @@ namespace ZXing.Mobile
             System.Diagnostics.Debug.WriteLine("AutoFocus requested");
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
-            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y);
-
+            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true);
         }
 
         Timer timerPreview;
         MediaCapture mediaCapture;
 
         bool stopping = false;
+        bool isMediaCaptureInitialized = false;
 
         volatile bool processing = false;
         volatile bool isAnalyzing = false;
@@ -280,79 +350,181 @@ namespace ZXing.Mobile
         public bool ContinuousScanning { get; set; }
 
         public Result LastScanResult { get; set; }
-        
+
 
         public bool IsTorchOn
         {
             get
             {
-                if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
-                {
-                    if (!mediaCapture.VideoDeviceController.FlashControl.Supported)
-                        return false;
+                return HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
+            }
+        }
 
-                    return mediaCapture.VideoDeviceController.FlashControl.Enabled;
+        public bool IsFocusSupported
+        {
+            get
+            {
+                return mediaCapture != null
+                    && isMediaCaptureInitialized
+                    && mediaCapture.VideoDeviceController != null
+                    && mediaCapture.VideoDeviceController.FocusControl != null
+                    && mediaCapture.VideoDeviceController.FocusControl.Supported;
+            }
+        }
+
+        private async Task SetupAutoFocus()
+        {
+            if (IsFocusSupported)
+            {
+                var focusControl = mediaCapture.VideoDeviceController.FocusControl;
+
+                var focusSettings = new FocusSettings();
+                focusSettings.AutoFocusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
+                    ? AutoFocusRange.FullRange
+                    : focusControl.SupportedFocusRanges.FirstOrDefault();
+
+                var supportedFocusModes = focusControl.SupportedFocusModes;
+                if (supportedFocusModes.Contains(FocusMode.Continuous))
+                {
+                    focusSettings.Mode = FocusMode.Continuous;
+                }
+                else if (supportedFocusModes.Contains(FocusMode.Auto))
+                {
+                    focusSettings.Mode = FocusMode.Auto;
                 }
 
-                return false;
+                if (focusSettings.Mode == FocusMode.Continuous || focusSettings.Mode == FocusMode.Auto)
+                {
+                    focusSettings.WaitForFocus = false;
+                    focusControl.Configure(focusSettings);
+                    await focusControl.FocusAsync();
+                }
             }
         }
 
         public void Torch(bool on)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
-            {
-                if (mediaCapture.VideoDeviceController.FlashControl.Supported)
-                    mediaCapture.VideoDeviceController.FlashControl.Enabled = on;
-            }
+            if (HasTorch)
+                mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
         }
 
         public void ToggleTorch()
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null)
-            {
-                if (mediaCapture.VideoDeviceController.FlashControl.Supported)
-                {
-                    Torch(!IsTorchOn);
-                }
-            }            
+            if (HasTorch)
+                Torch(!IsTorchOn);
         }
 
         public bool HasTorch
         {
             get
             {
-                return mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FlashControl != null
-                    && mediaCapture.VideoDeviceController.FlashControl.Supported;
+                return mediaCapture != null
+                    && mediaCapture.VideoDeviceController != null
+                    && mediaCapture.VideoDeviceController.TorchControl != null
+                    && mediaCapture.VideoDeviceController.TorchControl.Supported;
             }
         }
 
         public async void AutoFocus ()
         {
-            await AutoFocusAsync(-1, -1);
+            await AutoFocusAsync(0, 0, false);
         }
 
-        public async void AutoFocus (int x = -1, int y = -1)
+        public async void AutoFocus (int x, int y)
         {
-            await AutoFocusAsync(x, y);
+            await AutoFocusAsync(x, y, true);
         }
 
-        public async Task AutoFocusAsync(int x = -1, int y = -1)
+        public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
-            if (mediaCapture != null && mediaCapture.VideoDeviceController != null && mediaCapture.VideoDeviceController.FocusControl != null)
-                if (mediaCapture.VideoDeviceController.FocusControl.Supported)
-                    await mediaCapture.VideoDeviceController.FocusControl.FocusAsync();            
+            if (IsFocusSupported)
+            {
+                var focusControl = mediaCapture.VideoDeviceController.FocusControl;
+                var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
+                try
+                {
+                    if (roiControl.AutoFocusSupported && roiControl.MaxRegions > 0)
+                    {
+                        if (useCoordinates)
+                        {
+                            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+
+                            var previewEncodingProperties = GetPreviewResolution(props);
+                            var previewRect = GetPreviewStreamRectInControl(previewEncodingProperties, captureElement);
+                            var focusPreview = ConvertUiTapToPreviewRect(new Point(x, y), new Size(20, 20), previewRect);
+                            var regionOfInterest = new RegionOfInterest
+                            {
+                                AutoFocusEnabled = true,
+                                BoundsNormalized = true,
+                                Bounds = focusPreview,
+                                Type = RegionOfInterestType.Unknown,
+                                Weight = 100
+                            };
+                            await roiControl.SetRegionsAsync(new[] { regionOfInterest }, true);
+
+                            var focusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
+                                ? AutoFocusRange.FullRange
+                                : focusControl.SupportedFocusRanges.FirstOrDefault();
+
+                            var focusMode = focusControl.SupportedFocusModes.Contains(FocusMode.Single)
+                                ? FocusMode.Single
+                                : focusControl.SupportedFocusModes.FirstOrDefault();
+
+                            var settings = new FocusSettings
+                            {
+                                Mode = focusMode,
+                                AutoFocusRange = focusRange,
+                            };
+
+                            focusControl.Configure(settings);
+                        }
+                        else
+                        {
+                            // If no region provided, clear any regions and reset focus
+                            await roiControl.ClearRegionsAsync();
+                        }
+                    }
+
+                    await focusControl.FocusAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+                }
+            }
         }
 
         public async Task StopScanningAsync()
         {
+            if (stopping)
+                return;
+
             stopping = true;
             isAnalyzing = false;
-            await mediaCapture.StopPreviewAsync();
-            if (UseCustomOverlay && CustomOverlay != null)
-                gridCustomOverlay.Children.Remove(CustomOverlay);
 
-            timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
+            displayRequest.RequestRelease();
+
+            try
+            {
+                if (IsTorchOn)
+                    Torch(false);
+                if (isMediaCaptureInitialized)
+                    await mediaCapture.StopPreviewAsync();
+                if (UseCustomOverlay && CustomOverlay != null)
+                    gridCustomOverlay.Children.Remove(CustomOverlay);
+            }
+            catch { }
+            finally {
+                //second execution from sample will crash if the object is not properly disposed (always on mobile, sometimes on desktop)
+                 if (mediaCapture != null)
+                    mediaCapture.Dispose();
+            }
+
+            //this solves a crash occuring when the user rotates the screen after the QR scanning is closed
+            displayInformation.OrientationChanged -= displayInformation_OrientationChanged;
+
+            if (timerPreview != null)
+                timerPreview.Change(Timeout.Infinite, Timeout.Infinite);
             stopping = false;            
         }
 
@@ -360,16 +532,15 @@ namespace ZXing.Mobile
         {
             LastScanResult = null;
 
-           await StopScanningAsync();
+            await StopScanningAsync();
 
-            if (ScanCallback != null)
-                ScanCallback(null);
+            ScanCallback?.Invoke(null);
         }        
 
         public async void Dispose()
         {
             await StopScanningAsync();
-            this.gridCustomOverlay.Children.Clear();            
+            gridCustomOverlay?.Children?.Clear();            
         }
 
         protected override void OnTapped(TappedRoutedEventArgs e)
@@ -394,49 +565,218 @@ namespace ZXing.Mobile
             ToggleTorch();
         }
 
-
         /// <summary>
         /// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview
         /// </summary>
-        private async Task SetPreviewRotationAsync()
+        private async Task SetPreviewRotationAsync(IMediaEncodingProperties props)
         {
-            // Only need to update the orientation if the camera is mounted on the device
-            //if (_externalCamera) return;
+            // Only need to update the orientation if the camera is mounted on the device.
+            if (mediaCapture == null)
+                return;
 
-            // Calculate which way and how far to rotate the preview
-            int rotationDegrees = ConvertDisplayOrientationToDegrees(displayOrientation);
+            // Calculate which way and how far to rotate the preview.
+            int rotationDegrees;
+            VideoRotation sourceRotation;
+            CalculatePreviewRotation(out sourceRotation, out rotationDegrees);
 
-            // The rotation direction needs to be inverted if the preview is being mirrored
-            //if (_mirroringPreview)
-            //{
-            //    rotationDegrees = (360 - rotationDegrees) % 360;
-            //}
+            // Set preview rotation in the preview source.
+            mediaCapture.SetPreviewRotation(sourceRotation);
 
             // Add rotation metadata to the preview stream to make sure the aspect ratio / dimensions match when rendering and getting preview frames
-            var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
+            //var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
             props.Properties.Add(RotationKey, rotationDegrees);
-            await mediaCapture.SetEncodingPropertiesAsync(MediaStreamType.VideoPreview, props, null);
+            await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, props);
+            
+            var currentPreviewResolution = GetPreviewResolution(props);
+            // Setup a frame to use as the input settings
+            videoFrame = new VideoFrame(Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, (int)currentPreviewResolution.Width, (int)currentPreviewResolution.Height);
+        }
+
+        private Size GetPreviewResolution(IMediaEncodingProperties props)
+        {
+            // Get our preview properties
+            var previewProperties = props as VideoEncodingProperties;
+            if (previewProperties != null)
+            {
+                var streamWidth = previewProperties.Width;
+                var streamHeight = previewProperties.Height;
+
+                // For portrait orientations, the width and height need to be swapped
+                if (displayOrientation == DisplayOrientations.Portrait || displayOrientation == DisplayOrientations.PortraitFlipped)
+                {
+                    streamWidth = previewProperties.Height;
+                    streamHeight = previewProperties.Width;
+                }
+
+                return new Size(streamWidth, streamHeight);
+            }
+
+            return default(Size);
         }
 
         /// <summary>
-        /// Converts the given orientation of the app on the screen to the corresponding rotation in degrees
+        /// Reads the current orientation of the app and calculates the VideoRotation necessary to ensure the preview is rendered in the correct orientation.
         /// </summary>
-        /// <param name="orientation">The orientation of the app on the screen</param>
-        /// <returns>An orientation in degrees</returns>
-        private static int ConvertDisplayOrientationToDegrees(DisplayOrientations orientation)
+        /// <param name="sourceRotation">The rotation value to use in MediaCapture.SetPreviewRotation.</param>
+        /// <param name="rotationDegrees">The accompanying rotation metadata with which to tag the preview stream.</param>
+        private void CalculatePreviewRotation(out VideoRotation sourceRotation, out int rotationDegrees)
         {
-            switch (orientation)
+            // Note that in some cases, the rotation direction needs to be inverted if the preview is being mirrored.
+            switch (displayInformation.CurrentOrientation)
             {
                 case DisplayOrientations.Portrait:
-                    return 90;
+                    if (mirroringPreview)
+                    {
+                        rotationDegrees = 270;
+                        sourceRotation = VideoRotation.Clockwise270Degrees;
+                    }
+                    else
+                    {
+                        rotationDegrees = 90;
+                        sourceRotation = VideoRotation.Clockwise90Degrees;
+                    }
+                    break;
+
                 case DisplayOrientations.LandscapeFlipped:
-                    return 180;
+                    // No need to invert this rotation, as rotating 180 degrees is the same either way.
+                    rotationDegrees = 180;
+                    sourceRotation = VideoRotation.Clockwise180Degrees;
+                    break;
+
                 case DisplayOrientations.PortraitFlipped:
-                    return 270;
+                    if (mirroringPreview)
+                    {
+                        rotationDegrees = 90;
+                        sourceRotation = VideoRotation.Clockwise90Degrees;
+                    }
+                    else
+                    {
+                        rotationDegrees = 270;
+                        sourceRotation = VideoRotation.Clockwise270Degrees;
+                    }
+                    break;
+
                 case DisplayOrientations.Landscape:
                 default:
-                    return 0;
+                    rotationDegrees = 0;
+                    sourceRotation = VideoRotation.None;
+                    break;
             }
+        }
+
+        /// <summary>
+        /// Applies the necessary rotation to a tap on a CaptureElement (with Stretch mode set to Uniform) to account for device orientation
+        /// </summary>
+        /// <param name="tap">The location, in UI coordinates, of the user tap</param>
+        /// <param name="size">The size, in UI coordinates, of the desired focus rectangle</param>
+        /// <param name="previewRect">The area within the CaptureElement that is actively showing the preview, and is not part of the letterboxed area</param>
+        /// <returns>A Rect that can be passed to the MediaCapture Focus and RegionsOfInterest APIs, with normalized bounds in the orientation of the native stream</returns>
+        private Rect ConvertUiTapToPreviewRect(Point tap, Size size, Rect previewRect)
+        {
+            // Adjust for the resulting focus rectangle to be centered around the position
+            double left = tap.X - size.Width / 2, top = tap.Y - size.Height / 2;
+
+            // Get the information about the active preview area within the CaptureElement (in case it's letterboxed)
+            double previewWidth = previewRect.Width, previewHeight = previewRect.Height;
+            double previewLeft = previewRect.Left, previewTop = previewRect.Top;
+
+            // Transform the left and top of the tap to account for rotation
+            switch (displayOrientation)
+            {
+                case DisplayOrientations.Portrait:
+                    var tempLeft = left;
+
+                    left = top;
+                    top = previewRect.Width - tempLeft;
+                    break;
+                case DisplayOrientations.LandscapeFlipped:
+                    left = previewRect.Width - left;
+                    top = previewRect.Height - top;
+                    break;
+                case DisplayOrientations.PortraitFlipped:
+                    var tempTop = top;
+
+                    top = left;
+                    left = previewRect.Width - tempTop;
+                    break;
+            }
+
+            // For portrait orientations, the information about the active preview area needs to be rotated
+            if (displayOrientation == DisplayOrientations.Portrait || displayOrientation == DisplayOrientations.PortraitFlipped)
+            {
+                previewWidth = previewRect.Height;
+                previewHeight = previewRect.Width;
+                previewLeft = previewRect.Top;
+                previewTop = previewRect.Left;
+            }
+
+            // Normalize width and height of the focus rectangle
+            var width = size.Width / previewWidth;
+            var height = size.Height / previewHeight;
+
+            // Shift rect left and top to be relative to just the active preview area
+            left -= previewLeft;
+            top -= previewTop;
+
+            // Normalize left and top
+            left /= previewWidth;
+            top /= previewHeight;
+
+            // Ensure rectangle is fully contained within the active preview area horizontally
+            left = Math.Max(left, 0);
+            left = Math.Min(1 - width, left);
+
+            // Ensure rectangle is fully contained within the active preview area vertically
+            top = Math.Max(top, 0);
+            top = Math.Min(1 - height, top);
+
+            // Create and return resulting rectangle
+            return new Rect(left, top, width, height);
+        }
+
+        /// <summary>
+        /// Calculates the size and location of the rectangle that contains the preview stream within the preview control, when the scaling mode is Uniform
+        /// </summary>
+        /// <param name="previewResolution">The resolution at which the preview is running</param>
+        /// <param name="previewControl">The control that is displaying the preview using Uniform as the scaling mode</param>
+        /// <returns></returns>
+        private static Rect GetPreviewStreamRectInControl(Size previewResolution, CaptureElement previewControl)
+        {
+            var result = new Rect();
+
+            // In case this function is called before everything is initialized correctly, return an empty result
+            if (previewControl == null || previewControl.ActualHeight < 1 || previewControl.ActualWidth < 1 ||
+                previewResolution.Height < 1 || previewResolution.Width < 1)
+            {
+                return result;
+            }
+
+            var streamWidth = previewResolution.Width;
+            var streamHeight = previewResolution.Height;
+
+            // Start by assuming the preview display area in the control spans the entire width and height both (this is corrected in the next if for the necessary dimension)
+            result.Width = previewControl.ActualWidth;
+            result.Height = previewControl.ActualHeight;
+
+            // If UI is "wider" than preview, letterboxing will be on the sides
+            if ((previewControl.ActualWidth / previewControl.ActualHeight > streamWidth / (double)streamHeight))
+            {
+                var scale = previewControl.ActualHeight / streamHeight;
+                var scaledWidth = streamWidth * scale;
+
+                result.X = (previewControl.ActualWidth - scaledWidth) / 2.0;
+                result.Width = scaledWidth;
+            }
+            else // Preview stream is "wider" than UI, so letterboxing will be on the top+bottom
+            {
+                var scale = previewControl.ActualWidth / streamWidth;
+                var scaledHeight = streamHeight * scale;
+
+                result.Y = (previewControl.ActualHeight - scaledHeight) / 2.0;
+                result.Height = scaledHeight;
+            }
+
+            return result;
         }
     }
 }

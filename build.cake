@@ -1,127 +1,135 @@
-var target = Argument("target", "libs");
-var version = Argument("nugetversion", "");
+#tool nuget:?package=XamarinComponent
 
-var libs = new Dictionary<string, string> {
-	{ "./ZXing.Net.Mobile.sln", "Any" },
-	{ "./ZXing.Net.Mobile.Forms.sln", "Any" }
+#addin nuget:?package=Cake.Android.SdkManager
+#addin nuget:?package=Cake.XCode
+#addin nuget:?package=Cake.Xamarin
+#addin nuget:?package=Cake.Xamarin.Build
+#addin nuget:?package=Cake.SemVer
+#addin nuget:?package=Cake.FileHelpers
+#addin nuget:?package=Cake.MonoApiTools
+
+var PREVIEW = "";
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.0");
+var NUGET_VERSION = VERSION;
+
+var ANDROID_HOME = EnvironmentVariable ("ANDROID_HOME") ?? Argument ("android_home", "");
+
+var TARGET = Argument ("t", Argument ("target", "Default"));
+
+var buildSpec = new BuildSpec {
+
+	Samples = new [] {
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/Android/Sample.Android.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
+		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
+		new WpSolutionBuilder { SolutionPath = "./Samples/WindowsPhone/Sample.WindowsPhone.sln", BuildsOn = BuildPlatforms.Windows },
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", BuildsOn = BuildPlatforms.Windows },
+		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
+		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.WP8.sln", BuildsOn = BuildPlatforms.Windows },
+	},
+
+	// These should only get populated on windows where all the binaries will exist
+	NuGets = new NuGetInfo [] {},
+	Components = new Component [] {},
 };
 
-var samples = new Dictionary<string, string> {
-	{ "./Samples/Android/Sample.Android.sln", "Any" },
-	{ "./Samples/iOS/Sample.iOS.sln", "Any" },
-	{ "./Samples/WindowsPhone/Sample.WindowsPhone.sln", "Win" },
-	{ "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", "Win" },
-	{ "./Samples/Forms/Sample.Forms.sln", "Win" },
-};
+if (IsRunningOnWindows ()) {
 
-var buildAction = new Action<Dictionary<string, string>> (solutions => {
+	buildSpec.Libs = new [] {
+		new WpSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.sln",
+			Configuration = "ReleaseWin",
+			BuildsOn = BuildPlatforms.Windows,
+		},
+		new WpSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			Configuration = "ReleaseWin",
+			BuildsOn = BuildPlatforms.Windows,
+		},
+		new WpSolutionBuilder { 
+			SolutionPath = "./ZXing.Net.Mobile.WP8.sln",
+			BuildsOn = BuildPlatforms.Windows 
+		},
+	};
 
-	foreach (var sln in solutions) {
+	buildSpec.NuGets = new [] {
+		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
+		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
+	};
 
-		if ((sln.Value == "Any")
-				|| (sln.Value == "Win" && IsRunningOnWindows ())
-				|| (sln.Value == "Mac" && IsRunningOnUnix ())) {
-			
-			if (IsRunningOnWindows ()) {
-				NuGetRestore (sln.Key, new NuGetRestoreSettings {
-					ToolPath = "./tools/nuget3.exe"
-				});
-
-				MSBuild (sln.Key, c => { 
-					c.Configuration = "Release";
-					c.MSBuildPlatform = MSBuildPlatform.x86;
-				});
-			} else {
-				NuGetRestore (sln.Key);
-
-				DotNetBuild (sln.Key, c => c.Configuration = "Release");
-			}
+	buildSpec.Components = new [] {
+		new Component { ManifestDirectory = "./Component" },
+		new Component { ManifestDirectory = "./Component-Forms" },
+	};
+} else {
+	buildSpec.Libs = new [] {
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.sln",
+			Configuration = "ReleaseMac",
+			BuildsOn = BuildPlatforms.Mac,
+		},
+		new DefaultSolutionBuilder {
+			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
+			Configuration = "ReleaseMac",
+			BuildsOn = BuildPlatforms.Mac,
 		}
-	}
+	};
+}
+
+Task ("externals")
+	.IsDependentOn ("externals-base")
+	.Does (() =>
+{
+	Information ("ANDROID_HOME: {0}", ANDROID_HOME);
+
+	var androidSdkSettings = new AndroidSdkManagerToolSettings { 
+		SdkRoot = ANDROID_HOME,
+		SkipVersionCheck = true
+	};
+
+	try { AcceptLicenses (androidSdkSettings); } catch { }
+
+	AndroidSdkManagerInstall (new [] { 
+			"platforms;android-15",
+			"platforms;android-23",
+			"platforms;android-25",
+			"platforms;android-26"
+		}, androidSdkSettings);
 });
 
-Task ("libs").Does (() => 
+
+Task ("component-setup")
+	.IsDependentOn ("samples")
+	.IsDependentOn ("nuget")
+	.Does (() =>
 {
-	buildAction (libs);
-});
+	var compVersion = VERSION;
+	if (compVersion.Contains ("-"))
+		compVersion = compVersion.Substring (0, compVersion.IndexOf ("-"));
 
-
-Task ("samples").Does (() => 
-{
-	buildAction (samples);
-});
-
-
-Task ("tools").WithCriteria (!FileExists ("./Component/tools/xamarin-component.exe")).Does (() => 
-{
-	if (!DirectoryExists ("./Component/tools/"))
-		CreateDirectory ("./Component/tools/");
-
-	DownloadFile ("https://components.xamarin.com/submit/xpkg", "./Component/tools/tools.zip");
-
-	Unzip ("./Component/tools/tools.zip", "./Component/tools/");
-
-	DeleteFile ("./Component/tools/tools.zip");
-});
-
-Task ("component").IsDependentOn ("libs").IsDependentOn ("tools").Does (() => 
-{
+	// Clear out xml files from build (they interfere with the component packaging)
 	DeleteFiles ("./Build/**/*.xml");
-	
-	if (IsRunningOnWindows ())
-		StartProcess ("./Component/tools/xamarin-component.exe", new ProcessSettings { Arguments = "package ./" });
-	else
-		StartProcess ("mono", new ProcessSettings { Arguments = "./Component/tools/xamarin-component.exe package ./" });
+
+	// Generate component.yaml files from templates
+	CopyFile ("./Component/component.template.yaml", "./Component/component.yaml");
+	CopyFile ("./Component-Forms/component.template.yaml", "./Component-Forms/component.yaml");
+
+	// Replace version in template files
+	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", compVersion);
 });
 
-Task ("nuget").IsDependentOn ("libs").Does (() => 
+Task ("component").IsDependentOn ("component-setup").IsDependentOn ("component-base");
+
+Task ("Default").IsDependentOn ("component");
+
+Task ("clean").IsDependentOn ("clean-base").Does (() =>
 {
-	if (!DirectoryExists ("./Build/nuget/"))
-		CreateDirectory ("./Build/nuget");
-
-	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" });	
-	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { OutputDirectory = "./Build/nuget/" });	
-});
-
-Task ("release").IsDependentOn ("nuget").IsDependentOn ("component");
-Task ("Default").IsDependentOn ("release");
-
-Task ("publish").IsDependentOn ("nuget").IsDependentOn ("component")
-	.Does (() => 
-{
-	if (string.IsNullOrEmpty (version)) {
-		Information ("No version specified, not publishing anything.");		
-		return;
-	}
-
-	var apiKey = TransformTextFile("./.nugetapikey").ToString ().Trim ();
-
-	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile." + version + ".nupkg " + apiKey });
-	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile.Forms." + version + ".nupkg " + apiKey });
-});
-
-Task ("stage").IsDependentOn ("nuget").Does (() => 
-{
-	if (string.IsNullOrEmpty (version)) {
-		Information ("No version specified, not publishing anything.");		
-		return;
-	}
-
-	var apiKey = TransformTextFile("./.mygetapikey").ToString ().Trim ();
-
-	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile." + version + ".nupkg -Source https://www.myget.org/F/redth/api/v2 " + apiKey });
-	StartProcess ("nuget", new ProcessSettings { Arguments = "push ./NuGet/ZXing.Net.Mobile.Forms." + version + ".nupkg -Source https://www.myget.org/F/redth/api/v2 " + apiKey });
-});
-
-Task ("clean").Does (() => 
-{
-
-	CleanDirectory ("./Component/tools/");
-
 	CleanDirectories ("./Build/");
 
 	CleanDirectories ("./**/bin");
 	CleanDirectories ("./**/obj");
 });
 
-RunTarget (target);
+SetupXamarinBuildTasks (buildSpec, Tasks, Task);
+
+RunTarget (TARGET);
+

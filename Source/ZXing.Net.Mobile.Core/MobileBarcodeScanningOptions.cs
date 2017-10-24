@@ -27,9 +27,12 @@ namespace ZXing.Mobile
 		public bool? TryHarder { get;set; } 
 		public bool? PureBarcode { get;set; }
 		public bool? AutoRotate { get;set; }
+		public bool? UseCode39ExtendedMode { get; set; }
 		public string CharacterSet { get;set; }
 		public bool? TryInverted { get;set; }
 		public bool? UseFrontCameraIfAvailable { get; set; }
+        public bool? AssumeGS1 { get; set; }
+
         public bool UseNativeScanning { get; set; }
 
         public int DelayBetweenContinuousScans { get; set; }
@@ -51,10 +54,14 @@ namespace ZXing.Mobile
 				reader.Options.PureBarcode = this.PureBarcode.Value;
 			if (this.AutoRotate.HasValue)
 				reader.AutoRotate = this.AutoRotate.Value;
+			if (this.UseCode39ExtendedMode.HasValue)
+				reader.Options.UseCode39ExtendedMode = this.UseCode39ExtendedMode.Value;
 			if (!string.IsNullOrEmpty (this.CharacterSet))
 				reader.Options.CharacterSet = this.CharacterSet;
 			if (this.TryInverted.HasValue)
 				reader.TryInverted = this.TryInverted.Value;
+            if (this.AssumeGS1.HasValue)
+                reader.Options.AssumeGS1 = this.AssumeGS1.Value;
 
 			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
 			{

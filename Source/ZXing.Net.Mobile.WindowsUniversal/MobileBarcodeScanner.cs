@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using ZXing;
 
 namespace ZXing.Mobile
 {
@@ -20,89 +18,104 @@ namespace ZXing.Mobile
             this.Dispatcher = dispatcher;
         }
 
+        internal ScanPage ScanPage { get; set; }
+
         public CoreDispatcher Dispatcher { get; set; }
 
-        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        public Frame RootFrame { get; set; }
+
+        public override async void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
         {
             //Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-            var rootFrame = Window.Current.Content as Frame;
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
-
-            ScanPage.ScanningOptions = options;
-            ScanPage.ResultFoundAction = (r) =>
-            {
-                scanHandler(r);
-            };
-
-            ScanPage.UseCustomOverlay = this.UseCustomOverlay;
-            ScanPage.CustomOverlay = this.CustomOverlay;
-            ScanPage.TopText = TopText;
-            ScanPage.BottomText = BottomText;
-            ScanPage.ContinuousScanning = true;
             
-            dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                rootFrame.Navigate(typeof(ZXing.Mobile.ScanPage));
+                rootFrame.Navigate(typeof(ScanPage), new ScanPageNavigationParameters
+                {
+                    Options = options,
+                    ResultHandler = scanHandler,
+                    Scanner = this,
+                    ContinuousScanning = true
+                });
             });
         }
 
-        public override Task<Result> Scan(MobileBarcodeScanningOptions options)
+        public override async Task<Result> Scan(MobileBarcodeScanningOptions options)
         {
-            var rootFrame = Window.Current.Content as Frame;
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement) Window.Current.Content).GetFirstChildOfType<Frame>();
             var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
-            return Task.Factory.StartNew(new Func<Result>(() =>
+            var tcsScanResult = new TaskCompletionSource<Result>();
+
+            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                var scanResultResetEvent = new System.Threading.ManualResetEvent(false);
-
-                Result result = null;
-
-                ScanPage.ScanningOptions = options;
-                ScanPage.ResultFoundAction = (r) => 
+                rootFrame.Navigate(typeof(ScanPage), new ScanPageNavigationParameters
                 {
-                    result = r;
-                    scanResultResetEvent.Set();
-                };
-
-                ScanPage.UseCustomOverlay = this.UseCustomOverlay;
-                ScanPage.CustomOverlay = this.CustomOverlay;
-                ScanPage.TopText = TopText;
-                ScanPage.BottomText = BottomText;
-
-                dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                {
-                    rootFrame.Navigate(typeof(ZXing.Mobile.ScanPage));
+                    Options = options,
+                    ResultHandler = r =>
+                    {
+                        tcsScanResult.SetResult(r);
+                    },
+                    Scanner = this,
+                    ContinuousScanning = false
                 });
-                
-                scanResultResetEvent.WaitOne();
+            });
+            
+            var result = await tcsScanResult.Task;
 
-                return result;
-            }));            
+            await dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            {
+                if (rootFrame.CanGoBack)
+                    rootFrame.GoBack();
+            });
+
+            return result;
         }
 
-        public override void Cancel()
+        public override async void Cancel()
         {
-            ScanPage.RequestCancel();
+            var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
+            var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
+
+            ScanPage?.Cancel();
+
+            await dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+            {
+                if (rootFrame.CanGoBack)
+                    rootFrame.GoBack();
+            });
         }
 
         public override void Torch(bool on)
         {
-            ScanPage.RequestTorch(on);   
+            ScanPage?.Torch(on);
         }
 
         public override void ToggleTorch()
         {
-            ScanPage.RequestToggleTorch();
+            ScanPage?.ToggleTorch();
         }
 
         public override bool IsTorchOn
         {
-            get { return ScanPage.RequestIsTorchOn(); }
+            get { return ScanPage?.IsTorchOn ?? false; }
         }
 
         public override void AutoFocus()
         {
-            ScanPage.RequestAutoFocus();
+            ScanPage?.AutoFocus();
+        }
+
+        public override void PauseAnalysis()
+        {
+            ScanPage?.PauseAnalysis();
+        }
+
+        public override void ResumeAnalysis()
+        {
+            ScanPage?.ResumeAnalysis();
         }
 
         public UIElement CustomOverlay

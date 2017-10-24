@@ -3,21 +3,10 @@ using System.Text;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-#if __UNIFIED__
 using UIKit;
 using Foundation;
 using AVFoundation;
 using CoreGraphics;
-#else
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
-using MonoTouch.AVFoundation;
-using MonoTouch.CoreGraphics;
-using System.Drawing;
-
-using CGSize = System.Drawing.SizeF;
-using CGRect = System.Drawing.RectangleF;
-#endif
 
 using ZXing;
 
@@ -107,6 +96,16 @@ namespace ZXing.Mobile
 				scannerView.ToggleTorch ();
 		}
 
+        public void PauseAnalysis ()
+        {
+            scannerView.PauseAnalysis ();
+        }
+
+        public void ResumeAnalysis ()
+        {
+            scannerView.ResumeAnalysis ();
+        }
+
 		public bool IsTorchOn
 		{
 			get { return scannerView.IsTorchOn; }
@@ -167,7 +166,11 @@ namespace ZXing.Mobile
 		}	
 		public override bool ShouldAutorotate ()
 		{
-			return true;
+			if (ScanningOptions.AutoRotate != null)
+            		{
+                		return (bool)ScanningOptions.AutoRotate;
+            		}
+            		return false;
 		}
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()
@@ -178,7 +181,11 @@ namespace ZXing.Mobile
 		[Obsolete ("Deprecated in iOS6. Replace it with both GetSupportedInterfaceOrientations and PreferredInterfaceOrientationForPresentation")]
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
 		{
-			return true;
+			if (ScanningOptions.AutoRotate != null)
+            		{
+                		return (bool)ScanningOptions.AutoRotate;
+            		}
+            		return false;
 		}
 
 		void HandleOnScannerSetupComplete ()

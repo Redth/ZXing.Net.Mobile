@@ -4,30 +4,109 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using ZXing.Net.Mobile.Forms;
 
 namespace FormsSample
 {
     public class HomePage : ContentPage
     {
-        Button buttonScan;
+        ZXingScannerPage scanPage;
+        Button buttonScanDefaultOverlay;
+        Button buttonScanCustomOverlay;
+        Button buttonScanContinuously;
+        Button buttonScanCustomPage;
+        Button buttonGenerateBarcode;
 
         public HomePage () : base ()
         {
-            buttonScan = new Button
-            {
+            buttonScanDefaultOverlay = new Button {
                 Text = "Scan with Default Overlay",
+                AutomationId = "scanWithDefaultOverlay",
             };
-            buttonScan.Clicked += async delegate
-            {
-                await Navigation.PushAsync(new ScanPage());
+            buttonScanDefaultOverlay.Clicked += async delegate {
+                scanPage = new ZXingScannerPage ();
+                scanPage.OnScanResult += (result) => {
+                    scanPage.IsScanning = false;
+
+                    Device.BeginInvokeOnMainThread (() => {
+                        Navigation.PopAsync ();
+                        DisplayAlert("Scanned Barcode", result.Text, "OK");
+                    });
+                };
+
+                await Navigation.PushAsync (scanPage);
             };
 
-            var stack = new StackLayout
-            {
 
+            buttonScanCustomOverlay = new Button {
+                Text = "Scan with Custom Overlay",
+                AutomationId = "scanWithCustomOverlay",
+            };
+            buttonScanCustomOverlay.Clicked += async delegate {
+                // Create our custom overlay
+                var customOverlay = new StackLayout {
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    VerticalOptions = LayoutOptions.FillAndExpand
+                };
+                var torch = new Button {
+                    Text = "Toggle Torch"
+                };
+                torch.Clicked += delegate {
+                    scanPage.ToggleTorch ();
+                };
+                customOverlay.Children.Add (torch);
+
+				scanPage = new ZXingScannerPage (new ZXing.Mobile.MobileBarcodeScanningOptions { AutoRotate = true }, customOverlay: customOverlay);
+                scanPage.OnScanResult += (result) => {
+                    scanPage.IsScanning = false;
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        Navigation.PopAsync();
+                        DisplayAlert("Scanned Barcode", result.Text, "OK");
+                    });
+                };
+                await Navigation.PushAsync (scanPage);
             };
 
-            stack.Children.Add(buttonScan);
+
+            buttonScanContinuously = new Button {
+                Text = "Scan Continuously",
+                AutomationId = "scanContinuously",
+            };
+            buttonScanContinuously.Clicked += async delegate {
+				scanPage = new ZXingScannerPage(new ZXing.Mobile.MobileBarcodeScanningOptions { DelayBetweenContinuousScans = 3000 });
+                scanPage.OnScanResult += (result) =>
+                    Device.BeginInvokeOnMainThread (() => 
+                        DisplayAlert ("Scanned Barcode", result.Text, "OK"));
+                
+                await Navigation.PushAsync (scanPage);
+            };
+
+            buttonScanCustomPage = new Button {
+                Text = "Scan with Custom Page",
+                AutomationId = "scanWithCustomPage",
+            };
+            buttonScanCustomPage.Clicked += async delegate {
+                var customScanPage = new CustomScanPage ();
+                await Navigation.PushAsync (customScanPage);
+            };
+
+
+            buttonGenerateBarcode = new Button {
+                Text = "Barcode Generator",
+                AutomationId = "barcodeGenerator",
+            };
+            buttonGenerateBarcode.Clicked += async delegate {
+                await Navigation.PushAsync (new BarcodePage ());    
+            };
+
+            var stack = new StackLayout ();
+            stack.Children.Add (buttonScanDefaultOverlay);
+            stack.Children.Add (buttonScanCustomOverlay);
+            stack.Children.Add (buttonScanContinuously);
+            stack.Children.Add (buttonScanCustomPage);
+            stack.Children.Add (buttonGenerateBarcode);
 
             Content = stack;
         }

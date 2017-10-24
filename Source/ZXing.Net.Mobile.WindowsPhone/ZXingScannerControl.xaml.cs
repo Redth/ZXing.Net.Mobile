@@ -86,7 +86,7 @@ namespace ZXing.Mobile
 
         public void Torch(bool on)
         {
-            _reader.FlashMode = FlashMode.On;
+            _reader.FlashMode = on ? FlashMode.On : FlashMode.Off;
         }
 
         public void ToggleTorch()
@@ -144,6 +144,8 @@ namespace ZXing.Mobile
             if (_reader != null)
             {
                 _reader.Stop();
+                _reader.CameraInitialized -= ReaderOnCameraInitialized;
+		_reader.DecodingCompleted -= (o, r) => DisplayResult(r);
                 _reader = null;
             }
         }

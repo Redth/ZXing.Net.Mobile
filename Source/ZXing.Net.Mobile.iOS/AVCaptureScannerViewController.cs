@@ -3,19 +3,10 @@ using System.Drawing;
 using System.Text;
 using System.Collections.Generic;
 
-#if __UNIFIED__
 using UIKit;
 using Foundation;
 using AVFoundation;
 using CoreGraphics;
-#else
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
-using MonoTouch.AVFoundation;
-using MonoTouch.CoreGraphics;
-
-using CGRect = global::System.Drawing.RectangleF;
-#endif
 
 using ZXing;
 
@@ -108,6 +99,16 @@ namespace ZXing.Mobile
 			get { return scannerView.IsTorchOn; }
 		}
 
+        public void PauseAnalysis ()
+        {
+            scannerView.PauseAnalysis ();
+        }
+
+        public void ResumeAnalysis ()
+        {
+            scannerView.ResumeAnalysis ();
+        }
+
 		public override void ViewDidAppear (bool animated)
 		{
 			originalStatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
@@ -162,7 +163,11 @@ namespace ZXing.Mobile
 		}	
 		public override bool ShouldAutorotate ()
 		{
-			return true;
+		    if (ScanningOptions.AutoRotate != null)
+		    {
+		        return (bool)ScanningOptions.AutoRotate;
+		    }
+		    return false;
 		}
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations ()

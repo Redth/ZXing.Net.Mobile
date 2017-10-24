@@ -1,25 +1,10 @@
 ﻿using System;
 using ZXing.Rendering;
 
-#if __UNIFIED__
 using Foundation;
 using CoreFoundation;
 using CoreGraphics;
 using UIKit;
-#else
-using System.Drawing;
-using MonoTouch.Foundation;
-using MonoTouch.CoreFoundation;
-using MonoTouch.CoreGraphics;
-using MonoTouch.UIKit;
-
-using CGRect = global::System.Drawing.RectangleF;
-using CGPoint = global::System.Drawing.PointF;
-using CGSize = global::System.Drawing.SizeF;
-using nfloat = global::System.Single;
-using nint = global::System.Int32;
-using nuint = global::System.UInt32;
-#endif
 
 using ZXing.Common;
 

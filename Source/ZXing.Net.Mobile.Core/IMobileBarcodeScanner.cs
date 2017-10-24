@@ -8,7 +8,6 @@ namespace ZXing.Mobile
 	{		
 		TOverlayViewType CustomOverlayView { get;set; }
 		bool UseCustomOverlayView { get; set; }
-		MobileBarcodeScanningOptions ScanningOptions { get; }
 		string TopText { get;set; }
 		string BottomText { get;set; }
 	}
@@ -26,6 +25,9 @@ namespace ZXing.Mobile
 		void Torch(bool on);
 		void AutoFocus();
 		void ToggleTorch();
+
+        void PauseAnalysis ();
+        void ResumeAnalysis ();
 
 		bool UseCustomOverlay { get; }
 		string TopText { get; set; }
@@ -78,6 +80,8 @@ namespace ZXing.Mobile
 
 		public abstract void AutoFocus();
 
+        public abstract void PauseAnalysis ();
+        public abstract void ResumeAnalysis ();
 	}
 
 	public class CancelScanRequestEventArgs : EventArgs

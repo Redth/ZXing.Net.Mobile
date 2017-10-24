@@ -1,19 +1,13 @@
 using System;
 using MonoTouch.Dialog;
 
-#if __UNIFIED__
 using Foundation;
 using CoreGraphics;
 using UIKit;
-#else
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-using CGRect = System.Drawing.RectangleF;
-#endif
 
 using ZXing;
 using ZXing.Mobile;
-
+using System.Collections.Generic;
 
 namespace Sample.iOS
 {
@@ -60,7 +54,7 @@ namespace Sample.iOS
                         opt.DelayBetweenContinuousScans = 3000;
 
                         //Start scanning
-                        scanner.ScanContinuously (opt, true, HandleScanResult);
+                        scanner.ScanContinuously (opt, false, HandleScanResult);
                     }),
 
                     new StyledStringElement ("Scan with Custom View", async () => {
@@ -78,7 +72,7 @@ namespace Sample.iOS
                         scanner.UseCustomOverlay = true;
                         scanner.CustomOverlay = customOverlay;
 
-                        var result = await scanner.Scan ();
+						var result = await scanner.Scan (new MobileBarcodeScanningOptions { AutoRotate = true });
 
                         HandleScanResult(result);
                     }),
@@ -117,6 +111,35 @@ namespace Sample.iOS
 				av.Show();
 			});
 		}
+
+        public void UITestBackdoorScan (string param)
+        {
+            var expectedFormat = BarcodeFormat.QR_CODE;
+            Enum.TryParse (param, out expectedFormat);
+            var opts = new MobileBarcodeScanningOptions {
+                PossibleFormats = new List<BarcodeFormat> { expectedFormat }
+            };
+
+            //Create a new instance of our scanner
+            scanner = new MobileBarcodeScanner (this.NavigationController);
+            scanner.UseCustomOverlay = false;
+
+            Console.WriteLine ("Scanning " + expectedFormat);
+
+            //Start scanning
+            scanner.Scan (opts).ContinueWith (t => {
+                var result = t.Result;
+
+                var format = result?.BarcodeFormat.ToString () ?? string.Empty;
+                var value = result?.Text ?? string.Empty;
+
+                BeginInvokeOnMainThread (() => {
+                    var av = UIAlertController.Create ("Barcode Result", format + "|" + value, UIAlertControllerStyle.Alert);
+                    av.AddAction (UIAlertAction.Create ("OK", UIAlertActionStyle.Cancel, null));
+                    PresentViewController (av, true, null);
+                });
+            });
+        }
 	}
 }
 

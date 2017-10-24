@@ -1,13 +1,8 @@
 ﻿using System;
-#if __UNIFIED__
+using System.Runtime.InteropServices;
+
 using UIKit;
 using CoreGraphics;
-#else
-using MonoTouch.UIKit;
-using MonoTouch.CoreGraphics;
-using CGRect = System.Drawing.RectangleF;
-#endif
-using System.Runtime.InteropServices;
 
 namespace ZXing.Mobile
 {

@@ -11,7 +11,7 @@
     <AssemblyName>ZXingNetMobile</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -122,6 +122,7 @@
       <DependentUpon>ScanPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SoftwareBitmapLuminanceSource.cs" />
+    <Compile Include="VisualTreeHelperExt.cs" />
     <Compile Include="WriteableBitmapRenderer.cs" />
     <Compile Include="ZXingScannerControl.xaml.cs">
       <DependentUpon>ZXingScannerControl.xaml</DependentUpon>
@@ -133,7 +134,7 @@
       <Project>{7528dd0a-1781-47f4-adbf-eeddb011f6bb}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ZXing.Net\zxing.portable.csproj">
+    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
       <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
       <Name>zxing.portable</Name>
     </ProjectReference>

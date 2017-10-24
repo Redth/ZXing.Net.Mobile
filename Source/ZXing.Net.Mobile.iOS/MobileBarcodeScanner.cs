@@ -2,15 +2,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if __UNIFIED__
 using Foundation;
 using CoreFoundation;
 using UIKit;
-#else
-using MonoTouch.Foundation;
-using MonoTouch.CoreFoundation;
-using MonoTouch.UIKit;
-#endif
 
 namespace ZXing.Mobile
 {
@@ -213,6 +207,16 @@ namespace ZXing.Mobile
 		{
 			//Does nothing on iOS
 		}
+
+        public override void PauseAnalysis ()
+        {
+            viewController.PauseAnalysis ();
+        }
+
+        public override void ResumeAnalysis ()
+        {
+            viewController.ResumeAnalysis ();
+        }
 
 		public override bool IsTorchOn {
 			get {

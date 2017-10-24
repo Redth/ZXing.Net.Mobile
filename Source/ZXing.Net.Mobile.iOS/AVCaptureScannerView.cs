@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if __UNIFIED__
 using Foundation;
 using AVFoundation;
 using CoreFoundation;
@@ -13,27 +12,13 @@ using CoreMedia;
 using CoreVideo;
 using ObjCRuntime;
 using UIKit;
-#else
-using MonoTouch.AVFoundation;
-using MonoTouch.CoreFoundation;
-using MonoTouch.CoreGraphics;
-using MonoTouch.CoreMedia;
-using MonoTouch.CoreVideo;
-using MonoTouch.Foundation;
-using MonoTouch.ObjCRuntime;
-using MonoTouch.UIKit;
-using System.Drawing;
-
-using CGRect = global::System.Drawing.RectangleF;
-using CGPoint = global::System.Drawing.PointF;
-#endif
 
 using ZXing.Common;
 using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-    public class AVCaptureScannerView : UIView, IZXingScanner<UIView>
+    public class AVCaptureScannerView : UIView, IZXingScanner<UIView>, IScannerSessionHost
 	{
 		public AVCaptureScannerView()
 		{
@@ -54,9 +39,9 @@ namespace ZXing.Mobile
 		//DispatchQueue queue;
 		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = true;
-		//BarcodeReader barcodeReader;
 
 		volatile bool foundResult = false;
+		CaptureDelegate captureDelegate;
 
 		UIView layerView;
 		UIView overlayView = null;
@@ -66,7 +51,7 @@ namespace ZXing.Mobile
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
 		void Setup()
 		{
@@ -114,6 +99,9 @@ namespace ZXing.Mobile
 
 		bool torch = false;
 		bool analyzing = true;
+        DateTime lastAnalysis = DateTime.UtcNow.AddYears (-99);
+        bool wasScanned = false;
+        bool working = false;
 
 
 		bool SetupCaptureSession ()
@@ -141,12 +129,12 @@ namespace ZXing.Mobile
 			foreach (var device in devices)
 			{
 				captureDevice = device;
-				if (options.UseFrontCameraIfAvailable.HasValue &&
-					options.UseFrontCameraIfAvailable.Value &&
+				if (ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
+					ScanningOptions.UseFrontCameraIfAvailable.Value &&
 					device.Position == AVCaptureDevicePosition.Front)
 
 					break; //Front camera successfully set
-				else if (device.Position == AVCaptureDevicePosition.Back && (!options.UseFrontCameraIfAvailable.HasValue || !options.UseFrontCameraIfAvailable.Value))
+				else if (device.Position == AVCaptureDevicePosition.Back && (!ScanningOptions.UseFrontCameraIfAvailable.HasValue || !ScanningOptions.UseFrontCameraIfAvailable.Value))
 					break; //Back camera succesfully set
 			}
 			if (captureDevice == null){
@@ -170,7 +158,7 @@ namespace ZXing.Mobile
                     availableResolutions.Add (cr.Value);
             }
 
-            resolution = options.GetResolution (availableResolutions);
+            resolution = ScanningOptions.GetResolution (availableResolutions);
 
             // See if the user selected a resolution
             if (resolution != null) {
@@ -203,35 +191,48 @@ namespace ZXing.Mobile
 			//Detect barcodes with built in avcapture stuff
 			AVCaptureMetadataOutput metadataOutput = new AVCaptureMetadataOutput();
 
-			var dg = new CaptureDelegate (metaDataObjects =>
+			captureDelegate = new CaptureDelegate (metaDataObjects =>
 				{
-					if (foundResult)
-						return;
+                    if (!analyzing)
+                        return;
 
 					//Console.WriteLine("Found MetaData Objects");
 
-					var mdo = metaDataObjects.FirstOrDefault();
+                    var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
 
-					if (mdo == null)
-						return;
+                    if (msSinceLastPreview < ScanningOptions.DelayBetweenAnalyzingFrames 
+                        || (wasScanned && msSinceLastPreview < ScanningOptions.DelayBetweenContinuousScans)
+                        || working)
+                        //|| CancelTokenSource.IsCancellationRequested)
+                    {
+                        return;
+                    }
 
-					var readableObj = mdo as AVMetadataMachineReadableCodeObject;
+                    try {
+                        working = true;
+                        wasScanned = false;
+                        lastAnalysis = DateTime.UtcNow;
 
-					if (readableObj == null)
-						return;
+                        var mdo = metaDataObjects.FirstOrDefault();
 
-					foundResult = true;
+                        var readableObj = mdo as AVMetadataMachineReadableCodeObject;
 
-					//Console.WriteLine("Barcode: " + readableObj.StringValue);
+                        if (readableObj == null)
+                            return;
 
-					var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
+                        wasScanned = true;
 
-					var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
+                        var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
-					resultCallback(rs);
+                        var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
+
+                        resultCallback(rs);
+                    } finally {
+                        working = false;
+                    }
 				});
 
-			metadataOutput.SetDelegate (dg, DispatchQueue.MainQueue);
+			metadataOutput.SetDelegate (captureDelegate, DispatchQueue.MainQueue);
 			session.AddOutput (metadataOutput);
 
 			//Setup barcode formats
@@ -264,27 +265,27 @@ namespace ZXing.Mobile
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
-			//Framerate set here (15 fps)
-            if (previewLayer.RespondsToSelector(new Selector("connection")))
-            {
-				if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
-				{
-					var perf1 = PerformanceCounter.Start ();
+			// //Framerate set here (15 fps)
+   //          if (previewLayer.RespondsToSelector(new Selector("connection")))
+   //          {
+			// 	if (UIDevice.CurrentDevice.CheckSystemVersion (7, 0))
+			// 	{
+			// 		var perf1 = PerformanceCounter.Start ();
 
-					NSError lockForConfigErr = null;
+			// 		NSError lockForConfigErr = null;
 
-					captureDevice.LockForConfiguration (out lockForConfigErr);
-					if (lockForConfigErr == null)
-					{
-						captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
-						captureDevice.UnlockForConfiguration ();
-					}
+			// 		captureDevice.LockForConfiguration (out lockForConfigErr);
+			// 		if (lockForConfigErr == null)
+			// 		{
+			// 			captureDevice.ActiveVideoMinFrameDuration = new CMTime (1, 10);
+			// 			captureDevice.UnlockForConfiguration ();
+			// 		}
 
-					PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
-				}
-                else
-                    previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
-            }
+			// 		PerformanceCounter.Stop (perf1, "PERF: ActiveVideoMinFrameDuration Took {0} ms");
+			// 	}
+   //              else
+   //                  previewLayer.Connection.VideoMinFrameDuration = new CMTime(1, 10);
+   //          }
 
 			#if __UNIFIED__
 			previewLayer.VideoGravity = AVLayerVideoGravity.ResizeAspectFill;
@@ -442,7 +443,7 @@ namespace ZXing.Mobile
 
 			Setup ();
 
-			this.options = options;
+			this.ScanningOptions = options;
 			this.resultCallback = scanResultHandler;
 
 			Console.WriteLine("StartScanning");
@@ -563,7 +564,6 @@ namespace ZXing.Mobile
 
 		public UIView CustomOverlayView { get; set; }
 		public bool UseCustomOverlayView { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get { return options; } }
 		public bool IsAnalyzing { get { return analyzing; } }
 		public bool IsTorchOn { get { return torch; } }
 
@@ -594,29 +594,36 @@ namespace ZXing.Mobile
 		}
 
 		BarcodeFormat ZXingBarcodeFormatFromAVCaptureBarcodeFormat(string avMetadataObjectType)
-		{	
-			if (avMetadataObjectType == AVMetadataObject.TypeAztecCode)
+		{
+			switch(avMetadataObjectType)
+			{
+			case "AztecCode":
 				return BarcodeFormat.AZTEC;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode128Code)
+			case "Code128Code":
 				return BarcodeFormat.CODE_128;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode39Code)
+			case "Code39Code":
 				return BarcodeFormat.CODE_39;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode39Mod43Code)
+			case "Code39Mod43Code":
 				return BarcodeFormat.CODE_39;
-			if (avMetadataObjectType == AVMetadataObject.TypeCode93Code)
+			case "Code93Code":
 				return BarcodeFormat.CODE_93;
-			if (avMetadataObjectType == AVMetadataObject.TypeEAN13Code)
+			case "EAN13Code":
 				return BarcodeFormat.EAN_13;
-			if (avMetadataObjectType == AVMetadataObject.TypeEAN8Code)
+			case "EAN8Code":
 				return BarcodeFormat.EAN_8;
-			if (avMetadataObjectType == AVMetadataObject.TypePDF417Code)
+			case "PDF417Code":
 				return BarcodeFormat.PDF_417;
-			if (avMetadataObjectType == AVMetadataObject.TypeQRCode)
+			case "QRCode":
 				return BarcodeFormat.QR_CODE;
-			if (avMetadataObjectType == AVMetadataObject.TypeUPCECode)
+			case "UPCECode":
 				return BarcodeFormat.UPC_E;
-
-			return BarcodeFormat.QR_CODE;
+			case "DataMatrixCode":
+				return BarcodeFormat.DATA_MATRIX;
+			case "Interleaved2of5Code":
+				return BarcodeFormat.ITF;
+			default:
+				return BarcodeFormat.QR_CODE;
+			}		    
 		}
 
         #if __UNIFIED__

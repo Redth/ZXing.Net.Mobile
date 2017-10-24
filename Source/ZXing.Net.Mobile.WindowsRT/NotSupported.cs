@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Media.Capture;
 
 namespace ZXing.Net.Mobile
 {
@@ -50,6 +49,16 @@ namespace ZXing.Mobile
         }
 
         public override void ToggleTorch()
+        {
+            throw ex;
+        }
+
+        public override void PauseAnalysis()
+        {
+            throw ex;
+        }
+
+        public override void ResumeAnalysis()
         {
             throw ex;
         }

@@ -1,10 +1,14 @@
 # ZXing.Net.Mobile
 
+[![Join the chat at https://gitter.im/Redth/ZXing.Net.Mobile](https://badges.gitter.im/Redth/ZXing.Net.Mobile.svg)](https://gitter.im/Redth/ZXing.Net.Mobile?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/zxing.net.mobile_128x128.png)
 
 ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
 
 ![AppVeyor CI Status](https://ci.appveyor.com/api/projects/status/github/Redth/ZXing.Net.Mobile?branch=master&svg=true)
+[![Bitrise CI Status](https://www.bitrise.io/app/379eeea5b638f470.svg?token=jEVeMXcISnOVDlVxcxl9Lg&branch=master)](https://www.bitrise.io/app/379eeea5b638f470)
+[![NuGet](https://img.shields.io/nuget/v/Nuget.Core.svg)](https://www.nuget.org/packages/ZXing.Net.Mobile/)
 
 ### Usage
 The simplest example of using ZXing.Net.Mobile looks something like this:
@@ -26,96 +30,71 @@ buttonScan.Click += (sender, e) => {
 };
 ```
 
-###Features
+
+#### Xamarin Forms
+For Xamarin Forms there is a bit more setup needed.  You will need to initialize the library on each platform in your platform specific app project.
+
+
+##### Android 
+
+On Android, in your main `Activity`'s `OnCreate (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.Android.Platform.Init();
+```
+
+ZXing.Net.Mobile for Xamarin.Forms also handles the new Android permission request model for you, but you will need to add the following override implementation to your main `Activity` as well:
+
+```csharp
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+{
+    global::ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult (requestCode, permissions, grantResults);           
+}
+```
+
+The `Camera` permission should be automatically included for you in the `AndroidManifest.xml` however if you would like to use the Torch API's you will still need to add the `Flashlight` permission yourself.  You can do this by using the following assembly level attribute:
+
+```csharp
+[assembly: UsesPermission (Android.Manifest.Permission.Flashlight)]
+```
+
+##### iOS
+
+In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.iOS.Platform.Init();
+```
+
+
+##### Windows Phone
+In your main `Page`'s constructor, you should add:
+
+```csharp
+ZXing.Net.Mobile.Forms.WindowsPhone.ZXingScannerViewRenderer.Init();
+```
+
+##### Windows Universal UWP
+
+In your main `Page`'s constructor, you should add:
+
+```csharp
+ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+```
+
+If you notice that finishing scanning or pressing the back button is causing your Page to jump back further than you'd like, or if you're having trouble updating the UI of a Page after scanning is completed, you may need to set `NavigationCacheMode="Enabled"` within your Page's XAML `<Page ... />` element.
+
+
+### Features
 - Xamarin.iOS
 - Xamarin.Android (Including Google Glass)
 - Windows Phone 8
 - Simple API - Scan in as little as 2 lines of code!
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
 
-###Changes
- - v1.4.7.1
-        - iOS: Updated Unified support
+### Changes
+See [CHANGES.md](https://github.com/Redth/ZXing.Net.Mobile/blob/master/CHANGES.md) for changelog
 
- - v1.4.7
-        - Updated ZXing.Net
-        - iOS: Better destruction of default overlay to prevent memory leak
-        - WP8: Fixed issue with HW shutter pressed after camera no longer available
-        - Android: Fixed `Scan` method
-
- - v1.4.6
-        - Android: Updated Android Support Library v4 component used (20.0.0.3)
-        - Updated ZXing.Net (SVN commit 88850)
-        - Android: now takes `UseFrontCameraIfAvailable` into account ([#120](https://github.com/Redth/ZXing.Net.Mobile/issues/120))
-        - Added camera resolution selector to MobileBarcodeScanningOptions
-        - WP8: Fixed a null reference exception ([#104](https://github.com/Redth/ZXing.Net.Mobile/issues/104))
-
- - v1.4.5
-        - Android: Updated Android Support Library v4 component used (20.0.0)
-        - Updated ZXing.Net
-        - WP8: Fixed an issue with an exception on subsequent scans ([#102](https://github.com/Redth/ZXing.Net.Mobile/pull/102))
-        - Android: Updated Android Support Library v4 component used (4.19.0.1)
-
- - v1.4.4
-        - iOS: Fixed issue with loading view size in landscape orientation ([#100](https://github.com/Redth/ZXing.Net.Mobile/issues/100))
-        - Android: Fixed issue with scanning not working from timestamps ([#98](https://github.com/Redth/ZXing.Net.Mobile/issues/98))
-
- - v1.4.3
-        - iOS: Fixed slowness after 4-5 scans ([#71](https://github.com/Redth/ZXing.Net.Mobile/issues/71))
-        - WP8: Fixed preview sometimes not starting
-        - Android: Fixed resuming fragment which closes
-        - Android: Scanner rotates as needed for orientation
-        - Android: Removed YuvImage use for better, faster decoding with less memory usage
-        - Android: Added permission checks
-        - Updated ZXing.Net version used
-
- - v1.4.2
- 	- WP8: Fixed crash when pressing back while camera initializes
- 	- Android: Added merged workaround from @chrisntr support for Google Glass	
- 	- Android: Now using the ***Android Support Library v4*** from the component store
- 	
- - v1.4.1
- 	- iOS: Fixed multiple scanner launches causing Scanning to no longer work
- 	- Android: Fixed rotation on some tablets showing incorrectly
- 	
- - v1.4.0
-   - iOS: Added iOS7's built in AVCaptureSession MetadataObject barcode scanning as an option
-   - iOS: Fixed Offset of overlay and preview layers when a non-zero based offset was specified
-   - iOS: Added code to remove session inputs/outputs to improve performance between scans
-   - iOS: Front Camera now possible on iOS
-   - Android: Fixed rotation
-   - Windows Phone: Added Windows Phone 8 samples and builds
-   - Windows Phone: Dropped explicit support for WP7x (code is still there, but no binaries shipped)
-   - Updated ZXing.NET version used
-   - General performance enhancements and bug fixes
-   
- - v1.3.6
-   - Built for Xamarin 3.0 with async/await support
-   - iOS: Added PauseScanning and ResumeScanning options
-   - iOS: Added empty ctor to ZXingScannerView
-
- - v1.3.5
-   - Views for each Platform - Encapsulates scanner functionality in a reusable view
-    - iOS: ZXingScannerView as a UIView
-    - Android: ZXingScannerFragment as a Fragment
-    - Windows Phone: ZXingScannerControl as a UserControl
-   - Scanning logic improvements from ZXing.Net project
-   - Compiled against Xamarin Stable channel
-   - Performance improvements
-   - Bug fixes
-
- - v1.3.4
-   - iOS: Scanning Engine rebuilt to use AVCaptureSession
-   - iOS: ZXingScannerView inherits from UIView can now be used independently for advanced use cases
-   - Android: Fixed Torch bug on Android
-   - Android: Front Cameras now work in Sample by default
-   - Performance improvements
-
-   
- - v1.3.3
-   - Fixed Android not scanning some barcodes in Portrait
-   - Fixed Android scanning very slowly
-   - Added to MobileBarcodeScanningOptions: IntervalBetweenAnalyzingFrames to configure how 'fast' frames from the live scanner view are analyzed in an attempt to decode barcodes 
    
 ### Android Versions
 The component should work on Android 2.2 or higher.  In Xamarin.Android there are 3 places in the project settings relating to Android version.  YOU ***MUST*** set the Project Options -> Build -> General -> Target Framework to ***2.3*** or higher.  If you still want to use 2.2, you can set the Project Options -> Build -> Android Application -> Minimum Android version to 2.2, but be sure to set the Target Android version in this section to 2.3 or higher.
@@ -141,7 +120,7 @@ Keep in mind that when using a Custom Overlay, you are responsible for the entir
 
 All of the platform samples have examples of custom overlays.
 
-###Barcode Formats
+### Barcode Formats
 By default, all barcode formats are monitored while scanning.  You can change which formats to check for by passing a ZxingScanningOptions instance into the StartScanning method:
 
 ```csharp
@@ -159,12 +138,12 @@ options.PossibleFormats = new List<ZXing.BarcodeFormat>() {
 var scanner = new ZXing.Mobile.MobileBarcodeScanner(); 
 var result = await scanner.Scan(options);
 //Handle result
-````
+```
 
-###Samples
+### Samples
 Samples for implementing ZXing.Net.Mobile can be found in the /*sample*/ folder.  There is a sample for each platform including examples of how to use custom overlays.
 
-###Using the ZXingScanner View / Fragment / Control
+### Using the ZXingScanner View / Fragment / Control
 On each platform, the ZXing scanner has been implemented as a reusable component (view, fragment, or control), and it is possible to use the reusable component directly without using the MobileBarcodeScanner class at all.  On each platform, the instance of the view/fragment/control contains the necessary properties and methods required to control your scanner.  By default, the default overlay is automatically used, unless you set the CustomOverlay property as well as the UseCustomOverlay property on the instance of the view/fragment/control.  You can use methods such as ToggleTorch() or StopScanning() on the view/fragment/control, however you are responsible for calling StartScanning(...) with a callback and an instance of MobileBarcodeScanningOptions when you are ready for the view's scanning to begin.  You are also responsible for stopping scanning if you want to cancel at any point.
 
 The view/fragment/control classes for each platform are:
@@ -174,7 +153,7 @@ The view/fragment/control classes for each platform are:
  - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
  - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
 
-###Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
+### Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
 In iOS7, Apple added some API's to allow for scanning of barcodes in an AVCaptureSession.  The latest version of ZXing.Net.Mobile gives you the option of using this instead of the ZXing scanning engine.  You can use the `AVCaptureScannerView` or the `AVCaptureScannerViewController` classes directly just the same as you would use their ZXing* equivalents.  Or, in your `MobileBarcodeScanner`, there is now an overload to use the AV Capture Engine:
 
 ```csharp
@@ -194,7 +173,7 @@ In the MobileBarcodeScanner, even if you specify to use the AVCaptureSession sca
 - UPC-E
 
 
-###Thanks
+### Thanks
 ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put together (including my own).  So naturally, I'd like to thank everyone who's helped out in any way.  Those of you I know have helped I'm listing here, but anyone else that was involved, please let me know!
 
 - ZXing Project and those responsible for porting it to C#
@@ -205,7 +184,7 @@ ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put togeth
 
 
 
-###License
+### License
 Apache ZXing.Net.Mobile Copyright 2012 The Apache Software Foundation
 This product includes software developed at The Apache Software Foundation (http://www.apache.org/).
 

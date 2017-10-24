@@ -1,10 +1,6 @@
 using System;
 
-#if __UNIFIED__
 using UIKit;
-#else
-using MonoTouch.UIKit;
-#endif
 
 namespace ZXing.Mobile
 {
@@ -17,6 +13,9 @@ namespace ZXing.Mobile
 
 		bool IsTorchOn { get; }
         bool ContinuousScanning { get;set; }
+
+        void PauseAnalysis ();
+        void ResumeAnalysis ();
 
 		event Action<ZXing.Result> OnScannedResult;
 
