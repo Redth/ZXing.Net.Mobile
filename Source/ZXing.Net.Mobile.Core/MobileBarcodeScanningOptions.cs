@@ -33,6 +33,9 @@ namespace ZXing.Mobile
 		public bool? UseFrontCameraIfAvailable { get; set; }
         public bool? AssumeGS1 { get; set; }
 
+
+		public bool DisableAutofocus { get; set; }
+
         public bool UseNativeScanning { get; set; }
 
         public int DelayBetweenContinuousScans { get; set; }

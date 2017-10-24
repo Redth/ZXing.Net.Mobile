@@ -314,10 +314,14 @@ namespace ZXing.Mobile
 			NSError err = null;
 			if (captureDevice.LockForConfiguration(out err))
 			{
-				if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
-					captureDevice.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
-				else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.AutoFocus))
-					captureDevice.FocusMode = AVCaptureFocusMode.AutoFocus;
+				if (ScanningOptions.DisableAutofocus) {
+					captureDevice.FocusMode = AVCaptureFocusMode.Locked;
+				} else {
+					if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
+					else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.AutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.AutoFocus;
+				}
 
 				if (captureDevice.IsExposureModeSupported (AVCaptureExposureMode.ContinuousAutoExposure))
 					captureDevice.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;

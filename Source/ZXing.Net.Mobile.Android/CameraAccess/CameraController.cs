@@ -218,8 +218,11 @@ namespace ZXing.Mobile.CameraAccess
             var parameters = Camera.GetParameters();
             parameters.PreviewFormat = ImageFormatType.Nv21;
 
+
             var supportedFocusModes = parameters.SupportedFocusModes;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
+            if (_scannerHost.ScanningOptions.DisableAutofocus)
+                parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+            else if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
                 supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
                 parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
@@ -297,6 +300,13 @@ namespace ZXing.Mobile.CameraAccess
         private void AutoFocus(int x, int y, bool useCoordinates)
         {
             if (Camera == null) return;
+
+			if (_scannerHost.ScanningOptions.DisableAutofocus)
+			{
+				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Disabled");
+				return;
+			}
+
             var cameraParams = Camera.GetParameters();
 
             Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
