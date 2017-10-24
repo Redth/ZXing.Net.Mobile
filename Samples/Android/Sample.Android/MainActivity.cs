@@ -86,7 +86,7 @@ namespace Sample.Android
 				scanner.CustomOverlay = zxingOverlay;
 
 				//Start scanning!
-				var result = await scanner.Scan();
+				var result = await scanner.Scan(new MobileBarcodeScanningOptions { AutoRotate = true });
 
 				HandleScanResult(result);
 			};

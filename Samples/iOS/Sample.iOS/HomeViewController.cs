@@ -72,7 +72,7 @@ namespace Sample.iOS
                         scanner.UseCustomOverlay = true;
                         scanner.CustomOverlay = customOverlay;
 
-                        var result = await scanner.Scan ();
+						var result = await scanner.Scan (new MobileBarcodeScanningOptions { AutoRotate = true });
 
                         HandleScanResult(result);
                     }),
