@@ -24,10 +24,6 @@
                 <dependency id="FastAndroidCamera" version="2.0.0" />
         	</group>
 
-            <group targetFramework="wp8">
-                <dependency id="WriteableBitmapEx" version="1.5.0" />
-            </group>
-
         </dependencies>
     </metadata>
     <files>
@@ -40,11 +36,6 @@
         <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />
         <file src="Build/Release/ios-unified/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS10\ZXingNetMobile.dll" />
-
-        <!-- Windows Phone  -->
-        <file src="Build/Release/wp8.0/zxing.portable.dll" target="lib\wp8\zxing.portable.dll" />
-        <file src="Build/Release/wp8.0/ZXing.Net.Mobile.Core.dll" target="lib\wp8\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/wp8.0/ZXingNetMobile.dll" target="lib\wp8\ZXingNetMobile.dll" />
 
         <!-- Windows RT / Store  -->
         <!-- Not supported, the PCL's will get installed for this platform and throw implementation errors at runtime -->

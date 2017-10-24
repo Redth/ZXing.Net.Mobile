@@ -22,7 +22,7 @@
         	<!-- Every platforms requires the ZXing.Net.Mobile and Xamarin.Forms packages -->
         	<group>
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.3.3.193" />
+                <dependency id="Xamarin.Forms" version="2.3.4.270" />
         	</group>
 
         </dependencies>
@@ -36,10 +36,6 @@
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.iOS.dll" />
         
-        <!-- Windows Phone  -->
-        <file src="Build/Forms/Release/wp8.0/ZXing.Net.Mobile.Forms.dll" target="lib\wp8\ZXing.Net.Mobile.Forms.dll" />
-        <file src="Build/Forms/Release/wp8.0/ZXing.Net.Mobile.Forms.WindowsPhone.dll" target="lib\wp8\ZXing.Net.Mobile.Forms.WindowsPhone.dll" />
-
         <!-- Windows RT / Store  -->
         <!-- Not supported -->        
 
