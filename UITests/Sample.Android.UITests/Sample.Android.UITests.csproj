@@ -28,20 +28,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Xamarin.UITest">
-      <HintPath>..\..\packages\Xamarin.UITest.2.0.8\lib\Xamarin.UITest.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InitializationTests.cs" />
     <Compile Include="ScanningTests.cs" />
     <Compile Include="TestConsts.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Samples\Android\Sample.Android\Sample.Android.csproj">
@@ -61,4 +52,8 @@
   </ItemGroup>
   <Import Project="..\UITests.Shared\UITests.Shared.projitems" Label="Shared" Condition="Exists('..\UITests.Shared\UITests.Shared.projitems')" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <PackageReference Include="Xamarin.UITest" Version="2.0.8" />
+    <PackageReference Include="NUnit" Version="2.6.4" />
+  </ItemGroup>
 </Project>
