@@ -29,6 +29,8 @@ namespace ZXing.Mobile
 			if (_cameraAnalyzer == null)
 	            _cameraAnalyzer = new CameraAnalyzer(this, this);
 
+			_cameraAnalyzer.ResumeAnalysis();
+
 			if (!addedHolderCallback) {
 				Holder.AddCallback(this);
 				Holder.SetType(SurfaceType.PushBuffers);
@@ -191,6 +193,13 @@ namespace ZXing.Mobile
 
 			// Reinit things
 			Init();
+		}
+
+		protected override void OnWindowVisibilityChanged(ViewStates visibility)
+		{
+			base.OnWindowVisibilityChanged(visibility);
+			if (visibility == ViewStates.Visible)
+				Init();
 		}
     }
 }
