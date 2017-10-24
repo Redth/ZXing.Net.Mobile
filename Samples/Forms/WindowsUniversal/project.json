@@ -7,7 +7,7 @@
     "Xamarin.Forms": "2.3.4.270"
   },
   "frameworks": {
-    "uap10.0.14393": {}
+    "uap10.0": {}
   },
   "runtimes": {
     "win10-arm": {},
