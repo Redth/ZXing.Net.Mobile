@@ -72,7 +72,7 @@ namespace ZXing.Net.Mobile.Forms
         }
 
         public static readonly BindableProperty IsAnalyzingProperty =
-            BindableProperty.Create( nameof( IsAnalyzing ), typeof( bool ), typeof( ZXingScannerView ), false );
+            BindableProperty.Create( nameof( IsAnalyzing ), typeof( bool ), typeof( ZXingScannerView ), true );
 
         public bool IsAnalyzing {
             get { return (bool)GetValue (IsAnalyzingProperty); }
