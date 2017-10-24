@@ -1,5 +1,6 @@
 #tool nuget:?package=XamarinComponent
 
+#addin nuget:?package=Cake.Android.SdkManager
 #addin nuget:?package=Cake.XCode
 #addin nuget:?package=Cake.Xamarin
 #addin nuget:?package=Cake.Xamarin.Build
@@ -8,16 +9,12 @@
 #addin nuget:?package=Cake.MonoApiTools
 
 var PREVIEW = "";
-var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.1.9999");
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.0");
 var NUGET_VERSION = VERSION;
 
-var TARGET = Argument ("t", Argument ("target", "Default"));
+var ANDROID_HOME = EnvironmentVariable ("ANDROID_HOME") ?? Argument ("android_home", "");
 
-// Build a semver string out of the preview if it's specified
-if (!string.IsNullOrEmpty (PREVIEW)) {
-	var sv = ParseSemVer (VERSION);
-	NUGET_VERSION = CreateSemVer (sv.Major, sv.Minor, sv.Patch, PREVIEW).ToString ();
-}
+var TARGET = Argument ("t", Argument ("target", "Default"));
 
 var buildSpec = new BuildSpec {
 
@@ -77,6 +74,27 @@ if (IsRunningOnWindows ()) {
 		}
 	};
 }
+
+Task ("externals")
+	.IsDependentOn ("externals-base")
+	.Does (() =>
+{
+	Information ("ANDROID_HOME: {0}", ANDROID_HOME);
+
+	var androidSdkSettings = new AndroidSdkManagerToolSettings { 
+		SdkRoot = ANDROID_HOME,
+		SkipVersionCheck = true
+	};
+
+	try { AcceptLicenses (androidSdkSettings); } catch { }
+
+	AndroidSdkManagerInstall (new [] { 
+			"platforms;android-15",
+			"platforms;android-23",
+			"platforms;android-25",
+			"platforms;android-26"
+		}, androidSdkSettings);
+});
 
 
 Task ("component-setup")
