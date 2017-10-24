@@ -379,6 +379,15 @@ namespace ZXing.Mobile
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
 
                 var focusSettings = new FocusSettings();
+
+                if (ScanningOptions.DisableAutofocus)
+                {
+                    focusSettings.Mode = FocusMode.Manual;
+                    focusSettings.Distance = ManualFocusDistance.Nearest;
+                    focusControl.Configure(focusSettings);
+                    return;
+                }
+
                 focusSettings.AutoFocusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
                     ? AutoFocusRange.FullRange
                     : focusControl.SupportedFocusRanges.FirstOrDefault();
@@ -437,6 +446,9 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
+            if (ScanningOptions.DisableAutofocus)
+                return;
+
             if (IsFocusSupported)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
