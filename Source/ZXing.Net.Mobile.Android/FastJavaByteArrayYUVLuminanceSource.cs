@@ -141,36 +141,6 @@ namespace ZXing.Mobile
             }
         }
 
-        public void CopyMatrix(ref byte[] matrix)
-        {
-            int width = Width;
-            int height = Height;
-
-            int area = width * height;
-
-            if (area != (matrix?.Length ?? -1))
-            {
-                matrix = new byte[area];
-            }
-
-            int inputOffset = _top * _dataWidth + _left;
-
-            if (width == _dataWidth)
-            {
-                // If the width matches the full width of the underlying data, perform a single copy.
-                _yuv.BlockCopyTo(inputOffset, matrix, 0, area);
-            }
-            else {
-                // Otherwise copy one cropped row at a time.
-                for (int y = 0; y < height; y++)
-                {
-                    int outputOffset = y * width;
-                    _yuv.BlockCopyTo(inputOffset, matrix, outputOffset, width);
-                    inputOffset += _dataWidth;
-                }
-            }
-        }
-
         /// <returns> Whether this subclass supports cropping.</returns>
         override public bool CropSupported
         {
