@@ -28,7 +28,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IDisposable
+    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IScannerSessionHost, IDisposable
     {
         public ZXingScannerControl()
         {
