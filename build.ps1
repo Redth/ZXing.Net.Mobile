@@ -118,7 +118,7 @@ if (!(Test-Path $PACKAGES_CONFIG)) {
     Write-Verbose -Message "Downloading packages.config..."    
     try {        
         $wc = GetProxyEnabledWebClient
-        $wc.DownloadFile("https://cakebuild.net/download/bootstrapper/packages", $PACKAGES_CONFIG) } catch {
+        $wc.DownloadFile("https://raw.githubusercontent.com/cake-build/resources/master/packages.config", $PACKAGES_CONFIG) } catch {
         Throw "Could not download packages.config."
     }
 }
