@@ -45,3 +45,5 @@ tools/
 *.xam
 *.nupkg
 .DS_Store
+.vscode/
+
