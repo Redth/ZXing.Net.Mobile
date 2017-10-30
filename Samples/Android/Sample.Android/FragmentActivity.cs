@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ZXing.Mobile;
+﻿using ZXing.Mobile;
 using Android.OS;
 
 using Android.App;
@@ -9,21 +7,22 @@ using Android.Content.PM;
 
 namespace Sample.Android
 {
-	[Activity (Label = "ZXing.Net.Mobile", Theme="@android:style/Theme.Holo.Light", ConfigurationChanges=ConfigChanges.Orientation|ConfigChanges.KeyboardHidden)]
-	public class FragmentActivity : global::Android.Support.V4.App.FragmentActivity
-	{
-		ZXingScannerFragment scanFragment;
+    [Activity(Label = "ZXing.Net.Mobile", Theme = "@android:style/Theme.Holo.Light",
+        ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.KeyboardHidden)]
+    public class FragmentActivity : global::Android.Support.V4.App.FragmentActivity
+    {
+        ZXingScannerFragment scanFragment;
 
-		protected override void OnCreate (Bundle savedInstanceState)
-		{
-			base.OnCreate (savedInstanceState);
-
-			SetContentView (Resource.Layout.FragmentActivity);
-		}
-
-        protected override void OnResume ()
+        protected override void OnCreate(Bundle savedInstanceState)
         {
-            base.OnResume ();
+            base.OnCreate(savedInstanceState);
+
+            SetContentView(Resource.Layout.FragmentActivity);
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
 
             var needsPermissionRequest = ZXing.Net.Mobile.Android.PermissionsHandler.NeedsPermissionRequest(this);
 
@@ -37,51 +36,41 @@ namespace Sample.Android
                 SupportFragmentManager.BeginTransaction()
                     .Replace(Resource.Id.fragment_container, scanFragment)
                     .Commit();
+                SupportFragmentManager.ExecutePendingTransactions();
             }
 
             if (!needsPermissionRequest)
-                scan();
+                Scan();
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions,
+            Permission[] grantResults)
         {
-            ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions,
+                grantResults);
         }
 
-        protected override void OnPause ()
+        protected override void OnPause()
         {
-            scanFragment?.StopScanning ();
+            scanFragment?.StopScanning();
 
-            base.OnPause ();
+            base.OnPause();
         }
 
-        void scan ()
+        private void Scan()
         {
-            var opts = new MobileBarcodeScanningOptions {
-                PossibleFormats = new List<ZXing.BarcodeFormat> {
-                    ZXing.BarcodeFormat.QR_CODE
-                },
-                CameraResolutionSelector = availableResolutions => {
-
-                    foreach (var ar in availableResolutions) {
-                        Console.WriteLine ("Resolution: " + ar.Width + "x" + ar.Height);
-                    }
-                    return null;
-                }
-            };
-
-            scanFragment.StartScanning (result => {
-
-                // Null result means scanning was cancelled
-                if (result == null || string.IsNullOrEmpty (result.Text)) {
-                    Toast.MakeText (this, "Scanning Cancelled", ToastLength.Long).Show ();
+            scanFragment?.StartScanning(result =>
+            {
+                // Null result means scanning was canceled
+                if (string.IsNullOrEmpty(result?.Text))
+                {
+                    Toast.MakeText(this, "Scanning Canceled", ToastLength.Long).Show();
                     return;
                 }
 
                 // Otherwise, proceed with result
-                RunOnUiThread (() => Toast.MakeText (this, "Scanned: " + result.Text, ToastLength.Short).Show ());
-            }, opts);
+                RunOnUiThread(() => Toast.MakeText(this, "Scanned: " + result.Text, ToastLength.Short).Show());
+            });
         }
-	}
+    }
 }
-
