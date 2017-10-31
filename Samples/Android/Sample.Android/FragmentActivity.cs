@@ -1,6 +1,5 @@
 ﻿using ZXing.Mobile;
 using Android.OS;
-
 using Android.App;
 using Android.Widget;
 using Android.Content.PM;
@@ -36,7 +35,6 @@ namespace Sample.Android
                 SupportFragmentManager.BeginTransaction()
                     .Replace(Resource.Id.fragment_container, scanFragment)
                     .Commit();
-                SupportFragmentManager.ExecutePendingTransactions();
             }
 
             if (!needsPermissionRequest)
