@@ -8,7 +8,8 @@ ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: 
 
 ![AppVeyor CI Status](https://ci.appveyor.com/api/projects/status/github/Redth/ZXing.Net.Mobile?branch=master&svg=true)
 [![Bitrise CI Status](https://www.bitrise.io/app/379eeea5b638f470.svg?token=jEVeMXcISnOVDlVxcxl9Lg&branch=master)](https://www.bitrise.io/app/379eeea5b638f470)
-[![NuGet](https://img.shields.io/nuget/v/Nuget.Core.svg)](https://www.nuget.org/packages/ZXing.Net.Mobile/)
+[![NuGet](https://img.shields.io/nuget/v/ZXing.Net.Mobile.svg)](https://www.nuget.org/packages/ZXing.Net.Mobile/)
+[![NuGet](https://img.shields.io/nuget/dt/ZXing.Net.Mobile.svg)](https://www.nuget.org/packages/ZXing.Net.Mobile/)
 
 ### Usage
 The simplest example of using ZXing.Net.Mobile looks something like this:
