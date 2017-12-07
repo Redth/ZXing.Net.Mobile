@@ -215,6 +215,11 @@ namespace ZXing.Mobile.CameraAccess
 
         private void ApplyCameraSettings()
         {
+            if (Camera == null)
+            {
+                OpenCamera();
+            }
+
             var parameters = Camera.GetParameters();
             parameters.PreviewFormat = ImageFormatType.Nv21;
 
