@@ -154,7 +154,7 @@ namespace ZXing.Mobile.CameraAccess
 
             if (result != null)
             {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
+                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
 
                 _wasScanned = true;
                 BarcodeFound?.Invoke(this, result);
