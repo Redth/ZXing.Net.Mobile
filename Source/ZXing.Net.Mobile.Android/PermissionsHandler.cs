@@ -125,7 +125,7 @@ namespace ZXing.Net.Mobile.Android
             return false;
         }
 
-        internal static bool CheckCameraPermissions(Context context, bool throwOnError = true)
+        public static bool CheckCameraPermissions(Context context, bool throwOnError = false)
         {
             return CheckPermissions(context, global::Android.Manifest.Permission.Camera, throwOnError);
         }
