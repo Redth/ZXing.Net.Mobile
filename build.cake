@@ -23,6 +23,7 @@ var buildSpec = new BuildSpec {
 		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
 		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", BuildsOn = BuildPlatforms.Windows },
 		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
+		new DefaultSolutionBuilder { SolutionPath = "./Samples/Tizen/Sample.Tizen.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
 	},
 
 	// These should only get populated on windows where all the binaries will exist

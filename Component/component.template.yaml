@@ -18,6 +18,9 @@ libraries:
   winuniversal-10.0:
     - ../Build/Release/uwp/zxing.portable.dll
     - ../Build/Release/uwp/ZXingNetMobile.dll
+  tizen40:
+    - ../Build/Release/tizen40/zxing.portable.dll
+    - ../Build/Release/tizen40/ZXingNetMobile.dll
   pcl:
     - ../Build/Release/portable/zxing.portable.dll
     - ../Build/Release/portable/ZXingNetMobile.dll
@@ -30,6 +33,9 @@ packages:
     - ZXing.Net.Mobile, Version={VERSION}
   winuniversal-10.0:
     - ZXing.Net.Mobile, Version={VERSION}
+  tizen40:
+    - ZXing.Net.Mobile, Version={VERSION}
+    - Tizen.NET, Version=4.0.0
 summary: "ZXing.Net.Mobile is a C#/.NET Barcode Scanning Library"
 details: ./Details.md
 getting-started: ./GettingStarted.md
@@ -66,6 +72,18 @@ samples:
       - zxing.portable
     installNuGets:
       - project: Sample.WindowsUniversal
+        packages:
+          - ZXing.Net.Mobile
+    no_build: true
+    skip_docs: true
+  - name: Tizen Sample
+    path: "../Samples/Tizen/Sample.Tizen.sln"
+    removeProjects:
+      - ZXing.Net.Mobile.Tizen
+      - ZXing.Net.Mobile.Core
+      - zxing.portable
+    installNuGets:
+      - project: Sample.Tizen
         packages:
           - ZXing.Net.Mobile
     no_build: true

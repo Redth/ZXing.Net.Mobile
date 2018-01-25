@@ -22,7 +22,7 @@
         	<!-- Every platforms requires the ZXing.Net.Mobile and Xamarin.Forms packages -->
         	<group>
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.3.4.270" />
+                <dependency id="Xamarin.Forms" version="2.4.0.18342" />
         	</group>
 
         </dependencies>
@@ -43,6 +43,10 @@
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.dll" />
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.pri" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.pri" />
+
+        <!-- Tizen 4.0 and higher -->
+        <file src="Build/Forms/Release/tizen40/ZXing.Net.Mobile.Forms.dll" target="lib\tizen40\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/tizen40/ZXing.Net.Mobile.Forms.Tizen.dll" target="lib\tizen40\ZXing.Net.Mobile.Forms.Tizen.dll" />
 
         <!-- Portable PCL -->
         <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXing.Net.Mobile.Forms.dll" />        

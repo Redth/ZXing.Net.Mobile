@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>tizen40</TargetFramework>
+  </PropertyGroup>
+  <!-- Property Group for Tizen Project -->
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>ZXing.Net.Mobile.Forms.Tizen</AssemblyName>
+    <RootNamespace>ZXing.Net.Mobile.Forms.Tizen</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>portable</DebugType>
+    <OutputPath>..\..\Build\Forms\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>None</DebugType>
+    <OutputPath>..\..\Build\Forms\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Platform.cs" />
+    <Compile Include="ZXingBarcodeImageViewRenderer.cs" />
+    <Compile Include="ZXingScannerViewRenderer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Tizen.NET" Version="4.0.0">
+      <ExcludeAssets>Runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Forms.Platform.Tizen" Version="2.4.0.18342" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZXing.Net.Mobile.Core\ZXing.Net.Mobile.Core.csproj" />
+    <ProjectReference Include="..\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj" />
+    <ProjectReference Include="..\ZXing.Net.Mobile.Tizen\ZXing.Net.Mobile.Tizen.csproj" />
+    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj" />
+  </ItemGroup>
+
+</Project>
