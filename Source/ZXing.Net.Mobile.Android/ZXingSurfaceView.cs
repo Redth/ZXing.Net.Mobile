@@ -201,5 +201,14 @@ namespace ZXing.Mobile
 			if (visibility == ViewStates.Visible)
 				Init();
 		}
+
+        public override async void OnWindowFocusChanged(bool hasWindowFocus)
+        {
+            base.OnWindowFocusChanged(hasWindowFocus);
+            if (!hasWindowFocus) return;
+            // SurfaceCreated/SurfaceChanged are not called on a resume
+            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+            _cameraAnalyzer.RefreshCamera();
+        }
     }
 }
