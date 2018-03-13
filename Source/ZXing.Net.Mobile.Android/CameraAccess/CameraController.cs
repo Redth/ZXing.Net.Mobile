@@ -215,9 +215,16 @@ namespace ZXing.Mobile.CameraAccess
 
         private void ApplyCameraSettings()
         {
+            if (Camera == null)
+            {
+                OpenCamera();
+            }
+
+            // do nothing if something wrong with camera
+            if (Camera == null) return;
+
             var parameters = Camera.GetParameters();
             parameters.PreviewFormat = ImageFormatType.Nv21;
-
 
             var supportedFocusModes = parameters.SupportedFocusModes;
             if (_scannerHost.ScanningOptions.DisableAutofocus)
@@ -246,28 +253,33 @@ namespace ZXing.Mobile.CameraAccess
                 parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
             }
 
-            var availableResolutions = parameters.SupportedPreviewSizes.Select(sps => new CameraResolution
+            CameraResolution resolution = null;
+            var supportedPreviewSizes = parameters.SupportedPreviewSizes;
+            if (supportedPreviewSizes != null)
             {
-                Width = sps.Width,
-                Height = sps.Height
-            });
-
-            // Try and get a desired resolution from the options selector
-            var resolution = _scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
-
-            // If the user did not specify a resolution, let's try and find a suitable one
-            if (resolution == null)
-            {
-                foreach (var sps in parameters.SupportedPreviewSizes)
+                var availableResolutions = supportedPreviewSizes.Select(sps => new CameraResolution
                 {
-                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
+                    Width = sps.Width,
+                    Height = sps.Height
+                });
+
+                // Try and get a desired resolution from the options selector
+                resolution = _scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
+
+                // If the user did not specify a resolution, let's try and find a suitable one
+                if (resolution == null)
+                {
+                    foreach (var sps in supportedPreviewSizes)
                     {
-                        resolution = new CameraResolution
+                        if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
                         {
-                            Width = sps.Width,
-                            Height = sps.Height
-                        };
-                        break;
+                            resolution = new CameraResolution
+                            {
+                                Width = sps.Width,
+                                Height = sps.Height
+                            };
+                            break;
+                        }
                     }
                 }
             }
