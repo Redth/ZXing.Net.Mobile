@@ -11,7 +11,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>
             ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port. It works with Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight), and Windows Universal. The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.
-            
+
             See https://github.com/Redth/ZXing.Net.Mobile/releases for release notes.
         </description>
         <summary>ZXing Barcode Scanning for your Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight), and Windows Universal apps!</summary>
@@ -19,32 +19,67 @@
         <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
         <dependencies>
 
-        	<!-- Every platforms requires the ZXing.Net.Mobile and Xamarin.Forms packages -->
-        	<group>
+            <group targetFramework="net">
+            </group>
+            <group targetFramework="win">
+            </group>
+            <group targetFramework="wp">
+            </group>
+            <group targetFramework="wpa">
+            </group>
+            <group targetFramework="netstandard1.0">
+                <dependency id="NETStandard.Library" version="1.6.1" />
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.3.4.270" />
-        	</group>
-
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+            </group>
+            <group targetFramework="netstandard2.0">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+            </group>
+            <group targetFramework="MonoAndroid10">
+                <dependency id="Xamarin.Android.Support.v4" version="25.4.0.2" />
+                <dependency id="FastAndroidCamera" version="2.0.0" />
+            </group>
+            <group targetFramework="Xamarin.iOS10">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+            </group>
+            <group targetFramework="Xamarin.Mac20">
+            </group>
+            <group targetFramework="portable-net45+win+wpa81+wp80">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+            </group>
+            <group targetFramework="uap">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+            </group>
+            <group targetFramework="dotnet">
+            </group>
+            <group targetFramework="xamarintvos">
+            </group>
+            <group targetFramework="xamarinwatchos">
+            </group>
         </dependencies>
     </metadata>
     <files>
-        <!-- Android 4.0.3 and higher -->
-        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Forms.dll" />        
-        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Forms.Android.dll" />
+        <!-- Android 7.1 and higher -->
+        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Forms.Android.dll" />
 
         <!-- iOS Unified API -->
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.iOS.dll" />
         
         <!-- Windows RT / Store  -->
-        <!-- Not supported -->        
+        <!-- Not supported -->
 
-		<!-- Windows Universal  -->
+        <!-- Windows Universal  -->
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.dll" />
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.pri" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.pri" />
 
-        <!-- Portable PCL -->
-        <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXing.Net.Mobile.Forms.dll" />        
+        <!-- NetStandard 1.0+ -->
+        <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Forms.dll" />
     </files>
 </package>

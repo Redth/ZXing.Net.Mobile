@@ -19,18 +19,45 @@
         <tags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</tags>
         <dependencies>
 
-        	<group targetFramework="MonoAndroid403">
-                <dependency id="Xamarin.Android.Support.v4" version="23.3.0" />
+            <group targetFramework="net">
+            </group>
+            <group targetFramework="win">
+            </group>
+            <group targetFramework="wp">
+            </group>
+            <group targetFramework="wpa">
+            </group>
+            <group targetFramework="netstandard1.0">
+                <dependency id="NETStandard.Library" version="1.6.1" />
+            </group>
+            <group targetFramework="netstandard2.0">
+            </group>
+            <group targetFramework="MonoAndroid10">
+                <dependency id="Xamarin.Android.Support.v4" version="25.4.0.1" />
                 <dependency id="FastAndroidCamera" version="2.0.0" />
-        	</group>
+            </group>
+            <group targetFramework="Xamarin.iOS10">
+            </group>
+            <group targetFramework="Xamarin.Mac20">
+            </group>
+            <group targetFramework="portable-net45+win+wpa81+wp80">
+            </group>
+            <group targetFramework="uap">
+            </group>
+            <group targetFramework="dotnet">
+            </group>
+            <group targetFramework="xamarintvos">
+            </group>
+            <group targetFramework="xamarinwatchos">
+            </group>
 
         </dependencies>
     </metadata>
     <files>
         <!-- Android 4.0.3 and higher -->
-        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid403\zxing.portable.dll" />
-        <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid403\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid403\ZXingNetMobile.dll" />
+        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid71\zxing.portable.dll" />
+        <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid71\ZXingNetMobile.dll" />
 
         <!-- iOS Unified API -->
         <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />
@@ -47,9 +74,10 @@
         <file src="Build/Release/uwp/ZXingNetMobile.pri" target="lib\UAP10\ZXingNetMobile.pri" />
         <file src="Build/Release/uwp/ZXingNetMobile.xr.xml" target="lib\UAP10\ZXingNetMobile\ZXingNetMobile.xr.xml" />
 
-        <!-- Portable PCL -->
-        <file src="Build/Release/portable/zxing.portable.dll" target="lib\portable-net45+netcore45+wpa81+wp8\zxing.portable.dll" />
-        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\portable-net45+netcore45+wpa81+wp8\ZXingNetMobile.dll" />
+        <!-- NetStandard 1.0+ -->
+        <file src="Build/Release/portable/zxing.portable.dll" target="lib\netstandard1.0\zxing.portable.dll" />
+        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\netstandard1.0\ZXingNetMobile.dll" />
+
     </files>
 </package>
