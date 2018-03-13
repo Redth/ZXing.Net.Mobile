@@ -172,6 +172,7 @@ namespace ZXing.Mobile
 
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
+            captureElement.FlowDirection = mirroringPreview ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
