@@ -10,7 +10,8 @@
 
 var PREVIEW = "";
 var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.0");
-var NUGET_VERSION = VERSION;
+var NUGET_VERSION_SUFFIX = "-beta1";
+var NUGET_VERSION = VERSION + NUGET_VERSION_SUFFIX;
 
 var ANDROID_HOME = EnvironmentVariable ("ANDROID_HOME") ?? Argument ("android_home", "");
 
