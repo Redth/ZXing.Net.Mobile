@@ -4,7 +4,7 @@
 
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/zxing.net.mobile_128x128.png)
 
-ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port.  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
+ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
 
 ![AppVeyor CI Status](https://ci.appveyor.com/api/projects/status/github/Redth/ZXing.Net.Mobile?branch=master&svg=true)
 [![Bitrise CI Status](https://www.bitrise.io/app/379eeea5b638f470.svg?token=jEVeMXcISnOVDlVxcxl9Lg&branch=master)](https://www.bitrise.io/app/379eeea5b638f470)
@@ -53,7 +53,7 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 }
 ```
 
-The `Camera` permission should be automatically included for you in the `AndroidManifest.xml` however if you would like to use the Torch API's you will still need to add the `Flashlight` permission yourself.  You can do this by using the following assembly level attribute:
+The `Camera` permission should be automatically included for you in the `AndroidManifest.xml` however if you would like to use the [Flashlight API](https://developer.android.com/about/versions/marshmallow/android-6.0.html#flashlight) you will still need to add the `Flashlight` permission yourself.  You can do this by using the following assembly level attribute:
 
 ```csharp
 [assembly: UsesPermission (Android.Manifest.Permission.Flashlight)]
@@ -100,7 +100,7 @@ See [CHANGES.md](https://github.com/Redth/ZXing.Net.Mobile/blob/master/CHANGES.m
 ### Android Versions
 The component should work on Android 2.2 or higher.  In Xamarin.Android there are 3 places in the project settings relating to Android version.  YOU ***MUST*** set the Project Options -> Build -> General -> Target Framework to ***2.3*** or higher.  If you still want to use 2.2, you can set the Project Options -> Build -> Android Application -> Minimum Android version to 2.2, but be sure to set the Target Android version in this section to 2.3 or higher.
 
-###Custom Overlays
+### Custom Overlays
 By default, ZXing.Net.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
 
 If you want to customize the overlay, you must create your own View for each platform.  You can customize your overlay like this:
@@ -181,7 +181,7 @@ ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put togeth
 - John Carruthers - https://github.com/JohnACarruthers/zxing.MonoTouch
 - Martin Bowling - https://github.com/martinbowling
 - Alex Corrado - https://github.com/chkn/zxing.MonoTouch
-- ZXing.Net Project - http://zxingnet.codeplex.com - HUGE effort here to port ZXing to .NET
+- ZXing.Net Project - https://github.com/micjahn/ZXing.Net - HUGE effort here to port ZXing to .NET
 
 
 
@@ -191,13 +191,13 @@ This product includes software developed at The Apache Software Foundation (http
 
 ### ZXing.Net
 ZXing.Net is released under the Apache 2.0 license.
-ZXing.Net can be found here: http://code.google.com/p/zxing/
-A copy of the Apache 2.0 license can be found here: http://www.apache.org/licenses/LICENSE-2.0
+ZXing.Net can be found here: https://github.com/micjahn/ZXing.Net
+A copy of the Apache 2.0 license can be found here: https://github.com/micjahn/ZXing.Net/blob/master/COPYING
 
 ### ZXing
 ZXing is released under the Apache 2.0 license.
 ZXing can be found here: http://code.google.com/p/zxing/
-A copy of the Apache 2.0 license can be found here: http://www.apache.org/licenses/LICENSE-2.0
+A copy of the Apache 2.0 license can be found here: https://github.com/zxing/zxing/blob/master/LICENSE
 
 ### System.Drawing
 The System.Drawing classes included are from the mono source code which is property of Novell.
