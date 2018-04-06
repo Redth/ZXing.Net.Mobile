@@ -181,7 +181,7 @@ ZXing.Net.Mobile is a combination of a lot of peoples' work that I've put togeth
 - John Carruthers - https://github.com/JohnACarruthers/zxing.MonoTouch
 - Martin Bowling - https://github.com/martinbowling
 - Alex Corrado - https://github.com/chkn/zxing.MonoTouch
-- ZXing.Net Project - http://zxingnet.codeplex.com - HUGE effort here to port ZXing to .NET
+- ZXing.Net Project - https://github.com/micjahn/ZXing.Net - HUGE effort here to port ZXing to .NET
 
 
 
@@ -191,7 +191,7 @@ This product includes software developed at The Apache Software Foundation (http
 
 ### ZXing.Net
 ZXing.Net is released under the Apache 2.0 license.
-ZXing.Net can be found here: http://code.google.com/p/zxing/
+ZXing.Net can be found here: https://github.com/micjahn/ZXing.Net
 A copy of the Apache 2.0 license can be found here: http://www.apache.org/licenses/LICENSE-2.0
 
 ### ZXing
