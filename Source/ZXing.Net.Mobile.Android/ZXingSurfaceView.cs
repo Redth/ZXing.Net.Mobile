@@ -208,14 +208,14 @@ namespace ZXing.Mobile
         public override async void OnWindowFocusChanged(bool hasWindowFocus)
         {
             base.OnWindowFocusChanged(hasWindowFocus);
+            
+            if (!hasWindowFocus) return;
+            // SurfaceCreated/SurfaceChanged are not called on a resume
+            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
             //only refresh the camera if the surface has already been created. Fixed #569
             if (_surfaceCreated)
-            {
-                if (!hasWindowFocus) return;
-                // SurfaceCreated/SurfaceChanged are not called on a resume
-                await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
                 _cameraAnalyzer.RefreshCamera();
-            }
         }
     }
 }
