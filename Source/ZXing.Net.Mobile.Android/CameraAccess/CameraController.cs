@@ -133,10 +133,13 @@ namespace ZXing.Mobile.CameraAccess
             {
                 try
                 {
-                    //Camera.SetPreviewCallback(null);
-                    Camera.SetPreviewDisplay(null);
                     Camera.StopPreview();
                     Camera.SetNonMarshalingPreviewCallback(null);
+
+                    //Camera.SetPreviewCallback(null);
+
+                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"Calling SetPreviewDisplay: null");
+                    Camera.SetPreviewDisplay(null);
                 }
                 catch (Exception ex)
                 {
