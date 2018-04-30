@@ -74,10 +74,14 @@
         <file src="Build/Release/uwp/ZXingNetMobile.pri" target="lib\UAP10\ZXingNetMobile.pri" />
         <file src="Build/Release/uwp/ZXingNetMobile.xr.xml" target="lib\UAP10\ZXingNetMobile\ZXingNetMobile.xr.xml" />
 
+        <!-- Tizen 4.0 and higher -->
+        <file src="Build/Release/tizen40/zxing.portable.dll" target="lib\tizen40\zxing.portable.dll" />
+        <file src="Build/Release/tizen40/ZXing.Net.Mobile.Core.dll" target="lib\tizen40\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/tizen40/ZXingNetMobile.dll" target="lib\tizen40\ZXingNetMobile.dll" />
+
         <!-- NetStandard 1.0+ -->
         <file src="Build/Release/portable/zxing.portable.dll" target="lib\netstandard1.0\zxing.portable.dll" />
         <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\netstandard1.0\ZXingNetMobile.dll" />
-
     </files>
 </package>

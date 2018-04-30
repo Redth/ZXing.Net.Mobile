@@ -18,6 +18,9 @@ libraries:
   winuniversal-10.0:
     - ../Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll
     - ../Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll
+  tizen40:
+    - ../Build/Forms/Release/tizen40/ZXing.Net.Mobile.Forms.dll
+    - ../Build/Forms/Release/tizen40/ZXing.Net.Mobile.Forms.Tizen.dll 
   pcl:
     - ../Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll
 is_shell: true
@@ -25,6 +28,8 @@ packages:
   android:
     - ZXing.Net.Mobile.Forms, Version={VERSION}
   ios-unified:
+    - ZXing.Net.Mobile.Forms, Version={VERSION}
+  tizen40:
     - ZXing.Net.Mobile.Forms, Version={VERSION}
   winuniversal-10.0:
     - ZXing.Net.Mobile.Forms, Version={VERSION}
@@ -41,10 +46,12 @@ samples:
       - ZXing.Net.Mobile.WindowsRT
       - ZXing.Net.Mobile.iOS
       - ZXing.Net.Mobile.Android
-      - ZXing.Net.Mobile.WindowsUniversal
+      - ZXing.Net.Mobile.Tizen
+      - ZXing.Net.Mobile.WindowsUniversal      
       - ZXing.Net.Mobile.Forms
       - ZXing.Net.Mobile.Forms.iOS
       - ZXing.Net.Mobile.Forms.Android
+      - ZXing.Net.Mobile.Forms.Tizen
       - ZXing.Net.Mobile.Forms.WindowsUniversal
     installNuGets:
       - project: FormsSample
@@ -60,6 +67,10 @@ samples:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms
       - project: FormsSample.WindowsUniversal
+        packages:
+          - ZXing.Net.Mobile
+          - ZXing.Net.Mobile.Forms
+      - project: FormsSample.Tizen
         packages:
           - ZXing.Net.Mobile
           - ZXing.Net.Mobile.Forms

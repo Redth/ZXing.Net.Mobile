@@ -54,6 +54,10 @@
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
                 <dependency id="Xamarin.Forms" version="2.5.0.122203" />
             </group>
+            <group targetFramework="tizen40">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+            </group>
             <group targetFramework="dotnet">
             </group>
             <group targetFramework="xamarintvos">
@@ -78,6 +82,10 @@
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.dll" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.dll" />
         <file src="Build/Forms/Release/uwp/ZXing.Net.Mobile.Forms.WindowsUniversal.pri" target="lib\UAP10\ZXing.Net.Mobile.Forms.WindowsUniversal.pri" />
+
+        <!-- Tizen 4.0 and higher -->
+        <file src="Build/Forms/Release/tizen40/ZXing.Net.Mobile.Forms.dll" target="lib\tizen40\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/tizen40/ZXing.Net.Mobile.Forms.Tizen.dll" target="lib\tizen40\ZXing.Net.Mobile.Forms.Tizen.dll" />
 
         <!-- NetStandard 1.0+ -->
         <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Forms.dll" />

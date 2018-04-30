@@ -10,6 +10,7 @@ var NUNIT_PATH = GetFiles ("../packages/**/nunit.framework.dll").FirstOrDefault 
 
 Task ("Samples").Does (() =>
 {
+	Information ("Samples Does Task is start");
 	EnsureDirectoryExists ("../output");
 
 	var sampleSlns = new Dictionary<string, string> ();

@@ -17,7 +17,9 @@ var ANDROID_HOME = EnvironmentVariable ("ANDROID_HOME") ?? Argument ("android_ho
 
 var TARGET = Argument ("t", Argument ("target", "Default"));
 
-Task("externals").Does (() => {
+Task("externals")
+  .Does (() =>
+{
 	Information ("ANDROID_HOME: {0}", ANDROID_HOME);
 
 	var androidSdkSettings = new AndroidSdkManagerToolSettings { 
@@ -54,6 +56,7 @@ Task ("samples")
 	NuGetRestore ("./Samples/iOS/Sample.iOS.sln");
 	NuGetRestore ("./Samples/Forms/Sample.Forms.sln");
 	NuGetRestore ("./Samples/WindowsUniversal/Sample.WindowsUniversal.sln");
+  NuGetRestore ("./Samples/Tizen/Sample.Tizen.sln");
 
 	var config = "Release";
 	MSBuild ("./Samples/Android/Sample.Android.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
@@ -62,6 +65,7 @@ Task ("samples")
 	if (IsRunningOnWindows()) {
 		MSBuild ("./Samples/Forms/Sample.Forms.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
 		MSBuild ("./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+    MSBuild ("./Samples/Tizen/Sample.Tizen.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
 	}
 });
 
