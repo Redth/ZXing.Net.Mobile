@@ -31,7 +31,7 @@ namespace FormsSample
                     await DisplayAlert ("Scanned Barcode", result.Text, "OK");
 
                     // Navigate away
-                    await Navigation.PopAsync ();
+                    //await Navigation.PopAsync ();
                 });
 
             overlay = new ZXingDefaultOverlay
@@ -49,8 +49,42 @@ namespace FormsSample
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
             };
+
+            var stopButton = new Button
+            {
+                WidthRequest = 100,
+                HeightRequest = 50,
+                HorizontalOptions = LayoutOptions.Start,
+                VerticalOptions = LayoutOptions.End,
+                Text = "disable",
+                Command = new Command(() => zxing.IsScanning=false)
+            };
+
+            var cancelButton = new Button
+            {
+                WidthRequest = 100,
+                HeightRequest = 50,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.End,
+                Text = "cancel",
+                Command = new Command(async () => await Navigation.PopAsync())
+            };
+
+            var startButton = new Button
+            {
+                WidthRequest = 100,
+                HeightRequest = 50,
+                HorizontalOptions = LayoutOptions.End,
+                VerticalOptions = LayoutOptions.End,
+                Text = "enable",
+                Command = new Command(() => zxing.IsScanning = true)
+            };
+
             grid.Children.Add(zxing);
             grid.Children.Add(overlay);
+            grid.Children.Add(startButton);
+            grid.Children.Add(cancelButton);
+            grid.Children.Add(stopButton);
 
             // The root page of your application
             Content = grid;
