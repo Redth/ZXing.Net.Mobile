@@ -45,12 +45,6 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
                     zxingControl.Torch(formsView.IsTorchOn);
             }
 
-            // Shut the scanner down if necessary
-            if (formsView == null && e.NewElement == null && zxingControl != null)
-            {
-                zxingControl.StopScanning();
-            }
-
             base.OnElementChanged(e);
         }
 
