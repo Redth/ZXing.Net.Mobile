@@ -98,6 +98,9 @@ namespace ZXing.Mobile
 
         public void StartScanning(Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {
+            //make sure the camera is setup
+            _cameraAnalyzer.SetupCamera();
+
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
             _cameraAnalyzer.BarcodeFound += (sender, result) =>
