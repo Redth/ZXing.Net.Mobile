@@ -40,11 +40,13 @@ namespace ZXing.Mobile
 
         public async void SurfaceCreated(ISurfaceHolder holder)
         {
-            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
-
-            _cameraAnalyzer.SetupCamera();
-
-            _surfaceCreated = true;
+            //avoid duplicate setups, forcing the camera to be setup even when the camera was not scanning (this can happen when resuming the app)
+            if (!_surfaceCreated)
+            {
+                await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+                _cameraAnalyzer.SetupCamera();
+                _surfaceCreated = true;
+            }
         }
 
         public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
