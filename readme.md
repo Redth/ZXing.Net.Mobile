@@ -61,6 +61,12 @@ The `Camera` permission should be automatically included for you in the `Android
 
 ##### iOS
 
+```xml
+<key>NSCameraUsageDescription</key>
+<string>Require access to camera to scan barcodes</string>
+```
+This sets the text for the Camera Usage popup message.
+
 In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
 
 ```csharp
