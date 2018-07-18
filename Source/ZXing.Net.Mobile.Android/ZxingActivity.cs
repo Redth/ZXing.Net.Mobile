@@ -133,18 +133,45 @@ namespace ZXing.Mobile
             ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
+	private Result scanResult= null;
         void StartScanning ()
         {
-            scannerFragment.StartScanning (result => {
-                var h = ScanCompletedHandler;
-                if (h != null)
-                    h (result);
-
-                if (!ZxingActivity.ScanContinuously)
-                    this.Finish ();
-            }, ScanningOptions);
+	     scannerFragment.StartScanning (result => 
+	     {
+		if (!ZxingActivity.ScanContinuously)
+		{
+			scanResult = result;
+			this.Finish();
+		}
+		else
+		{
+			var scan = ScanCompletedHandler;
+			if (scan != null)
+				scan(result);
+		}
+	    }, ScanningOptions);
         }
-
+	
+	protected override void OnStop()
+	{
+	   base.OnStop();
+	   if (!ZxingActivity.ScanContinuously)
+	   {
+		if (scanResult != null)
+		{
+		var scan = ScanCompletedHandler;
+		if (scan != null)
+		   scan(scanResult);
+		}
+		else
+		{
+		   var h = CanceledHandler;
+		   if (h != null)
+		      h();
+		}
+	   }
+	}
+	
         public override void OnConfigurationChanged (Android.Content.Res.Configuration newConfig)
         {
             base.OnConfigurationChanged (newConfig);
@@ -165,9 +192,6 @@ namespace ZXing.Mobile
         public void CancelScan ()
         {
             Finish ();
-            var h = CanceledHandler;
-            if (h != null)
-                h ();
         }
 
         public override bool OnKeyDown (Keycode keyCode, KeyEvent e)
