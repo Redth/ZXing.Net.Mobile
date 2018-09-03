@@ -80,5 +80,8 @@ Task ("clean")
 	CleanDirectories ("./**/obj");
 });
 
+Task("Default")
+    .IsDependentOn("libs");
+
 RunTarget (TARGET);
 
