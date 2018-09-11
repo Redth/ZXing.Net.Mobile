@@ -41,6 +41,7 @@
     <Compile Include="Performance.cs" />
     <Compile Include="IScannerView.cs" />
     <Compile Include="IScannerSessionHost.cs" />
+    <Compile Include="ResultWithSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

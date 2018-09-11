@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Android.Graphics;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
 
@@ -23,7 +25,7 @@ namespace ZXing.Mobile.CameraAccess
             Torch = new Torch(_cameraController, surfaceView.Context);
         }
 
-        public event EventHandler<Result> BarcodeFound;
+        public event EventHandler<ResultWithSource> BarcodeFound;
 
         public Torch Torch { get; }
 
@@ -145,9 +147,6 @@ namespace ZXing.Mobile.CameraAccess
 
             result = barcodeReader.Decode(fast);
 
-            fastArray.Dispose();
-            fastArray = null;
-
             PerformanceCounter.Stop(start,
                 "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
                 rotate + ")");
@@ -155,11 +154,28 @@ namespace ZXing.Mobile.CameraAccess
             if (result != null)
             {
                 Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
-
                 _wasScanned = true;
-                BarcodeFound?.Invoke(this, result);
-                return;
+
+                byte[] bts = new byte[fastArray.Count];
+                fastArray.CopyTo(bts, 0);
+                YuvImage yuvImage = new YuvImage(bts, ImageFormatType.Nv21, width, height, null);
+                Android.Graphics.Rect rect = new Android.Graphics.Rect(0, 0, width, height);            
+                byte[] jpg = null;
+                using (var os = new MemoryStream())
+                {
+                    yuvImage.CompressToJpeg(rect, 100, os);
+                    jpg = os.ToArray();
+                    os.Close();
+                }
+
+                ZXing.Mobile.ResultWithSource resultWithSource = new ResultWithSource(result, jpg);
+                BarcodeFound?.Invoke(this, resultWithSource);
             }
+
+            fastArray.Dispose();
+            fastArray = null;
+
+            return;
         }
     }
 }

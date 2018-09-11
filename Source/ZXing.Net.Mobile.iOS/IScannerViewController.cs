@@ -17,7 +17,7 @@ namespace ZXing.Mobile
         void PauseAnalysis ();
         void ResumeAnalysis ();
 
-		event Action<ZXing.Result> OnScannedResult;
+		event Action<ResultWithSource> OnScannedResult;
 
 		MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		MobileBarcodeScanner Scanner { get;set; }

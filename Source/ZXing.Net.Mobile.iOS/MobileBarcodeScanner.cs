@@ -33,24 +33,24 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public Task<Result> Scan (bool useAVCaptureEngine)
+		public Task<ResultWithSource> Scan (bool useAVCaptureEngine)
 		{
 			return Scan (new MobileBarcodeScanningOptions (), useAVCaptureEngine);
 		}
 
 
-		public override Task<Result> Scan (MobileBarcodeScanningOptions options)
+		public override Task<ResultWithSource> Scan (MobileBarcodeScanningOptions options)
 		{
 			return Scan (options, false);
 		}
 
 
-        public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+        public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler)
         {
             ScanContinuously (options, false, scanHandler);
         }
 
-        public void ScanContinuously (MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<Result> scanHandler)
+        public void ScanContinuously (MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<ResultWithSource> scanHandler)
         {
             try
             {             
@@ -103,7 +103,7 @@ namespace ZXing.Mobile
             }
         }
 
-		public Task<Result> Scan (MobileBarcodeScanningOptions options, bool useAVCaptureEngine)
+		public Task<ResultWithSource> Scan (MobileBarcodeScanningOptions options, bool useAVCaptureEngine)
 		{
 			return Task.Factory.StartNew(() => {
 
@@ -111,7 +111,7 @@ namespace ZXing.Mobile
 				{
 					scanResultResetEvent.Reset();
 
-					Result result = null;
+                    ResultWithSource result = null;
 
 					Version sv = new Version (0, 0, 0);
 					Version.TryParse (UIDevice.CurrentDevice.SystemVersion, out sv);

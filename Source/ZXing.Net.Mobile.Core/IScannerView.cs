@@ -4,7 +4,7 @@ namespace ZXing.Mobile
 {
     public interface IScannerView
     {        
-        void StartScanning (Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null);
+        void StartScanning (Action<ResultWithSource> scanResultHandler, MobileBarcodeScanningOptions options = null);
         void StopScanning ();
 
         void PauseAnalysis();
