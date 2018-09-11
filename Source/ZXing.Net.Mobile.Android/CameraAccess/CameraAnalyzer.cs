@@ -156,19 +156,7 @@ namespace ZXing.Mobile.CameraAccess
                 Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
                 _wasScanned = true;
 
-                byte[] bts = new byte[fastArray.Count];
-                fastArray.CopyTo(bts, 0);
-                YuvImage yuvImage = new YuvImage(bts, ImageFormatType.Nv21, width, height, null);
-                Android.Graphics.Rect rect = new Android.Graphics.Rect(0, 0, width, height);            
-                byte[] jpg = null;
-                using (var os = new MemoryStream())
-                {
-                    yuvImage.CompressToJpeg(rect, 100, os);
-                    jpg = os.ToArray();
-                    os.Close();
-                }
-
-                ZXing.Mobile.ResultWithSource resultWithSource = new ResultWithSource(result, jpg);
+                ZXing.Mobile.ResultWithSource resultWithSource = new ResultWithSource(result, fastArray.ConvertToJpg(width, height));
                 BarcodeFound?.Invoke(this, resultWithSource);
             }
 
