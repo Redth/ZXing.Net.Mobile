@@ -29,7 +29,7 @@ namespace ZXing.Mobile
             Android.Manifest.Permission.Flashlight
         };
 
-        public static Action<ResultWithSource> ScanCompletedHandler;
+        public static Action<MobileResult> ScanCompletedHandler;
         public static Action CanceledHandler;
 
         public static Action CancelRequestedHandler;

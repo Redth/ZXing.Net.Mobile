@@ -49,12 +49,12 @@ namespace ZXing.Mobile
 				return Android.App.Application.Context;
 		}
 
-		public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler)
+		public override void ScanContinuously (MobileBarcodeScanningOptions options, Action<MobileResult> scanHandler)
 		{
 			ScanContinuously (null, options, scanHandler);
 		}
 
-		public void ScanContinuously (Context context, MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler)
+		public void ScanContinuously (Context context, MobileBarcodeScanningOptions options, Action<MobileResult> scanHandler)
 		{
 			var ctx = GetContext (context);
 			var scanIntent = new Intent(ctx, typeof(ZxingActivity));
@@ -68,7 +68,7 @@ namespace ZXing.Mobile
 			ZxingActivity.TopText = TopText;
 			ZxingActivity.BottomText = BottomText;
 
-			ZxingActivity.ScanCompletedHandler = (ResultWithSource result) => 
+			ZxingActivity.ScanCompletedHandler = (MobileResult result) => 
 			{
 				if (scanHandler != null)
 					scanHandler (result);
@@ -77,11 +77,11 @@ namespace ZXing.Mobile
 			ctx.StartActivity(scanIntent);
 		}
 
-		public override Task<ResultWithSource> Scan (MobileBarcodeScanningOptions options)
+		public override Task<MobileResult> Scan (MobileBarcodeScanningOptions options)
 		{
 			return Scan (null, options);
 		}
-		public Task<ResultWithSource> Scan (Context context, MobileBarcodeScanningOptions options)
+		public Task<MobileResult> Scan (Context context, MobileBarcodeScanningOptions options)
 		{
 			var ctx = GetContext (context);
 
@@ -100,14 +100,14 @@ namespace ZXing.Mobile
 				ZxingActivity.TopText = TopText;
 				ZxingActivity.BottomText = BottomText;
 
-                ResultWithSource scanResult = null;
+                MobileResult scanResult = null;
 
 				ZxingActivity.CanceledHandler = () => 
 				{
 					waitScanResetEvent.Set();
 				};
 
-				ZxingActivity.ScanCompletedHandler = (ResultWithSource result) => 
+				ZxingActivity.ScanCompletedHandler = (MobileResult result) => 
 				{
 					scanResult = result;
 					waitScanResetEvent.Set();

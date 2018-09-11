@@ -23,12 +23,12 @@ namespace ZXing.Mobile
     {
         NotSupportedException ex = new NotSupportedException("Windows Phone 8.1 Native (wpa81) and Windows 8 Store (win8) are not supported, please use Windows Universal (UWP) instead!");
 
-        public override Task<ResultWithSource> Scan(MobileBarcodeScanningOptions options)
+        public override Task<MobileResult> Scan(MobileBarcodeScanningOptions options)
         {
             throw ex;
         }
 
-        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler)
+        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<MobileResult> scanHandler)
         {
             throw ex;
         }

@@ -25,7 +25,7 @@ namespace ZXing.Mobile.CameraAccess
             Torch = new Torch(_cameraController, surfaceView.Context);
         }
 
-        public event EventHandler<ResultWithSource> BarcodeFound;
+        public event EventHandler<MobileResult> BarcodeFound;
 
         public Torch Torch { get; }
 
@@ -156,7 +156,7 @@ namespace ZXing.Mobile.CameraAccess
                 Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
                 _wasScanned = true;
 
-                ZXing.Mobile.ResultWithSource resultWithSource = new ResultWithSource(result, fastArray.ConvertToJpg(width, height));
+                ZXing.Mobile.MobileResult resultWithSource = new MobileResult(result, fastArray.ConvertToJpg(width, height));
                 BarcodeFound?.Invoke(this, resultWithSource);
             }
 

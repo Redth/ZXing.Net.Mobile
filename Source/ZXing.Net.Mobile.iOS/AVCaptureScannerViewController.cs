@@ -16,7 +16,7 @@ namespace ZXing.Mobile
 	{
 		AVCaptureScannerView scannerView;
 
-		public event Action<ResultWithSource> OnScannedResult;
+		public event Action<MobileResult> OnScannedResult;
 
 		public MobileBarcodeScanningOptions ScanningOptions { get;set; }
 		public MobileBarcodeScanner Scanner { get;set; }

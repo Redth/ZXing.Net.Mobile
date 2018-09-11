@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace ZXing.Mobile
 {
-    public class ResultWithSource
+    public class MobileResult
     {
         public ZXing.Result Result { get; private set; }
         public byte[] Jpg { get; private set; }
 
-        public ResultWithSource(ZXing.Result ZXing_Result)
+        public MobileResult(ZXing.Result ZXing_Result)
         {
             this.Result = ZXing_Result;
             this.Jpg = null;
         }
 
-        public ResultWithSource(ZXing.Result ZXing_Result, byte[] jpg)
+        public MobileResult(ZXing.Result ZXing_Result, byte[] jpg)
         {
             this.Result = ZXing_Result;
             this.Jpg = jpg;

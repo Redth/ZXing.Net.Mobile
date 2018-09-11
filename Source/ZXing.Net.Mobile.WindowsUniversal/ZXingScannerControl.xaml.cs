@@ -68,7 +68,7 @@ namespace ZXing.Mobile
         readonly SystemMediaTransportControls _systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
 
 
-        public async void StartScanning (Action<ResultWithSource> scanCallback, MobileBarcodeScanningOptions options = null)
+        public async void StartScanning (Action<MobileResult> scanCallback, MobileBarcodeScanningOptions options = null)
         {
             await StartScanningAsync(scanCallback, options);
         }
@@ -94,7 +94,7 @@ namespace ZXing.Mobile
             get { return isAnalyzing; }
         }
 
-        public async Task StartScanningAsync(Action<ResultWithSource> scanCallback, MobileBarcodeScanningOptions options = null)
+        public async Task StartScanningAsync(Action<MobileResult> scanCallback, MobileBarcodeScanningOptions options = null)
         {
             if (stopping)
                 return;
@@ -291,7 +291,7 @@ namespace ZXing.Mobile
                         delay = ScanningOptions.DelayBetweenContinuousScans;
                     }
 
-                    LastScanResult = new ResultWithSource(result);
+                    LastScanResult = new MobileResult(result);
                     ScanCallback(LastScanResult);
                 }
 
@@ -341,7 +341,7 @@ namespace ZXing.Mobile
         volatile bool processing = false;
         volatile bool isAnalyzing = false;
 
-        public Action<ResultWithSource> ScanCallback { get; set; }
+        public Action<MobileResult> ScanCallback { get; set; }
         public MobileBarcodeScanningOptions ScanningOptions { get; set; }
         public MobileBarcodeScannerBase Scanner { get; set; }
         public UIElement CustomOverlay { get; set; }
@@ -350,7 +350,7 @@ namespace ZXing.Mobile
         public bool UseCustomOverlay { get; set; }
         public bool ContinuousScanning { get; set; }
 
-        public ResultWithSource LastScanResult { get; set; }
+        public MobileResult LastScanResult { get; set; }
 
 
         public bool IsTorchOn

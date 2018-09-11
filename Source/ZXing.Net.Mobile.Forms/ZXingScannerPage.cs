@@ -89,7 +89,7 @@ namespace ZXing.Net.Mobile.Forms
 
         #endregion
 
-        public delegate void ScanResultDelegate (ResultWithSource result);
+        public delegate void ScanResultDelegate (MobileResult result);
         public event ScanResultDelegate OnScanResult;
 
         public View Overlay {

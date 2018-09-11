@@ -37,7 +37,7 @@ namespace ZXing.Mobile
 		//AVCaptureVideoDataOutput output;
 		//OutputRecorder outputRecorder;
 		//DispatchQueue queue;
-		Action<ResultWithSource> resultCallback;
+		Action<MobileResult> resultCallback;
 		volatile bool stopped = true;
 
 		volatile bool foundResult = false;
@@ -225,7 +225,7 @@ namespace ZXing.Mobile
                         var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
                         var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
-                        var resultWithSource = new ResultWithSource(rs, null);
+                        var resultWithSource = new MobileResult(rs, null);
                         resultCallback(resultWithSource);
                     } finally {
                         working = false;
@@ -433,7 +433,7 @@ namespace ZXing.Mobile
 
 
 		#region IZXingScanner implementation
-        public void StartScanning (Action<ResultWithSource> scanResultHandler, MobileBarcodeScanningOptions options = null)
+        public void StartScanning (Action<MobileResult> scanResultHandler, MobileBarcodeScanningOptions options = null)
 		{
 			if (!analyzing)
 				analyzing = true;

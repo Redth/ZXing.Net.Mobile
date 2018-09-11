@@ -96,7 +96,7 @@ namespace ZXing.Mobile
             _cameraAnalyzer.AutoFocus(x, y);
         }
 
-        public void StartScanning(Action<ResultWithSource> scanResultCallback, MobileBarcodeScanningOptions options = null)
+        public void StartScanning(Action<MobileResult> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 

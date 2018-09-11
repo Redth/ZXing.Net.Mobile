@@ -7,12 +7,12 @@ namespace ZXing.Mobile
     {
         NotSupportedException ex = new NotSupportedException ("Use the platform specific implementation instead!");
 
-        public override Task<ResultWithSource> Scan(MobileBarcodeScanningOptions options)
+        public override Task<MobileResult> Scan(MobileBarcodeScanningOptions options)
         {
             throw ex;
         }
 
-        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler)
+        public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<MobileResult> scanHandler)
         {
             throw ex;
         }

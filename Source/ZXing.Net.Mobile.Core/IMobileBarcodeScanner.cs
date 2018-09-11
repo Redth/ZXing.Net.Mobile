@@ -14,11 +14,11 @@ namespace ZXing.Mobile
 
 	public interface IMobileBarcodeScanner
 	{
-		Task<ResultWithSource> Scan(MobileBarcodeScanningOptions options);
-		Task<ResultWithSource> Scan();
+		Task<MobileResult> Scan(MobileBarcodeScanningOptions options);
+		Task<MobileResult> Scan();
 
-        void ScanContinuously(MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler);
-        void ScanContinuously(Action<ResultWithSource> scanHandler);
+        void ScanContinuously(MobileBarcodeScanningOptions options, Action<MobileResult> scanHandler);
+        void ScanContinuously(Action<MobileResult> scanHandler);
 
 		void Cancel();
 
@@ -56,19 +56,19 @@ namespace ZXing.Mobile
         public string FlashButtonText { get; set; }
         public string CameraUnsupportedMessage { get; set; }
 
-		public abstract Task<ResultWithSource> Scan(MobileBarcodeScanningOptions options);
+		public abstract Task<MobileResult> Scan(MobileBarcodeScanningOptions options);
 
-		public Task<ResultWithSource> Scan()
+		public Task<MobileResult> Scan()
 		{
 			return Scan(MobileBarcodeScanningOptions.Default);
 		}
 
-        public void ScanContinuously (Action<ResultWithSource> scanHandler)
+        public void ScanContinuously (Action<MobileResult> scanHandler)
         {
             ScanContinuously (MobileBarcodeScanningOptions.Default, scanHandler);
         }
 
-        public abstract void ScanContinuously (MobileBarcodeScanningOptions options, Action<ResultWithSource> scanHandler);
+        public abstract void ScanContinuously (MobileBarcodeScanningOptions options, Action<MobileResult> scanHandler);
 
 		public abstract void Cancel();
 
