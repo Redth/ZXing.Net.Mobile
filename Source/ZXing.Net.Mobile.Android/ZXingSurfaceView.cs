@@ -100,6 +100,9 @@ namespace ZXing.Mobile
 
         public void StartScanning(Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {
+            //fix Android 7 bug: camera freezes because surfacedestroyed function isn't always called correct, the old surfaceview was still visible.
+            this.Visibility = ViewStates.Visible;
+
             //make sure the camera is setup
             _cameraAnalyzer.SetupCamera();
 
@@ -115,6 +118,8 @@ namespace ZXing.Mobile
         public void StopScanning()
         {
             _cameraAnalyzer.ShutdownCamera();
+            //fix Android 7 bug: camera freezes because surfacedestroyed function isn't always called correct, the old surfaceview was still visible.
+            this.Visibility = ViewStates.Gone;
         }
 
         public void PauseAnalysis()
