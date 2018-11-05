@@ -64,6 +64,11 @@
         <file src="Build/Release/ios-unified/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS10\ZXingNetMobile.dll" />
 
+        <!-- Xamarin.Mac API -->
+        <file src="Build/Release/xammac/zxing.portable.dll" target="lib\Xamarin.Mac\zxing.portable.dll" />
+        <file src="Build/Release/xammac/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.Mac\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/xammac/ZXingNetMobile.dll" target="lib\Xamarin.Mac\ZXingNetMobile.dll" />
+
         <!-- Windows RT / Store  -->
         <!-- Not supported, the PCL's will get installed for this platform and throw implementation errors at runtime -->
 
