@@ -1,3 +1,23 @@
+/*
+* Copyright 2018 ZXing/Redth - https://github.com/Redth/ZXing.Net.Mobile
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* 
+* Edited by VK, Apacheta Corp 11/14/2018.
+* http://www.apacheta.com/
+* 
+*/
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -291,7 +311,9 @@ namespace ZXing.Mobile.CameraAccess
                             $" Setting Selected fps to Min:{selectedFps[0]}, Max {selectedFps[1]}");
 
                 /// <summary>
-                ///Scanning Improvement, VK 10/2018
+                ///Scanning Improvement, Apacheta corporation 11/14/2018
+                ///Changed the fps to use low and high. instead of low value and low value ie., selectedFps[0].
+                ///Old code ::  parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[0]);
                 /// </summary>
                 parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
             }
@@ -300,6 +322,7 @@ namespace ZXing.Mobile.CameraAccess
                 SetBestExposure(parameters, parameters.FlashMode != Camera.Parameters.FlashModeOn);
 
             /*
+             * Edited by VK - Apacheta corporation 11/14/2018
              * Improvements based on zxing android library
              * - Setting default auto focus areas instead of single focus point
              * - Setting Barcode scene mode if available for the device
@@ -368,7 +391,8 @@ namespace ZXing.Mobile.CameraAccess
         }
 
         /// <summary>
-        ///Scanning Improvement, VK 10/2018
+        ///Scanning Improvement, VK, Apacheta Corp 11/14/2018.
+        ///This method sets the best expsure setting for the device.
         /// </summary>
         private void SetBestExposure(Camera.Parameters parameters, bool lowLight)
         {
@@ -400,7 +424,8 @@ namespace ZXing.Mobile.CameraAccess
         }
 
         /// <summary>
-        ///Scanning Improvement, VK 10/2018
+        ///Scanning Improvement, VK Apacheta Corp 11/14/2018.
+        ///This method sets the focus area setting for the device. center rectangle
         /// </summary>
         private void SetDefaultFocusArea(Camera.Parameters parameters)
         {
@@ -416,8 +441,10 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
+
         /// <summary>
-        ///Scanning Improvement, VK 10/2018
+        ///Scanning Improvement, VK Apacheta Corp 11/14/2018.
+        ///This method sets the meter setting for the device. center rectangle
         /// </summary>
         private void SetMetering(Camera.Parameters parameters)
         {
@@ -434,7 +461,8 @@ namespace ZXing.Mobile.CameraAccess
         }
 
         /// <summary>
-        ///Scanning Improvement, VK 10/2018
+        ///Scanning Improvement, VK Apacheta Corp 11/14/2018.
+        ///This method builds the middle are i.e., center rectangle for the device
         /// </summary>
         private List<Camera.Area> BuildMiddleArea(int areaPer1000)
         {
@@ -444,8 +472,11 @@ namespace ZXing.Mobile.CameraAccess
                 };
         }
 
+
         /// <summary>
-        ///Scanning Improvement, VK 10/2018
+        ///Scanning Improvement, VK Apacheta Corp 11/14/2018.
+        ///This method sets the Video stabilization setting for the device. 
+        ///This method is not used in the code for now. 
         /// </summary>
         private void SetVideoStabilization(Camera.Parameters parameters)
         {
@@ -468,7 +499,8 @@ namespace ZXing.Mobile.CameraAccess
         }
 
         /// <summary>
-        ///Scanning Improvement, VK 10/2018
+        ///Scanning Improvement, VK Apacheta Corp 11/14/2018.
+        ///This method sets the scene to barcode for the device. If the device supports scenes.
         /// </summary>
         private void SetBarcodeSceneMode(Camera.Parameters parameters)
         {
