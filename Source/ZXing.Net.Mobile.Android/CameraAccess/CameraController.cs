@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Android.Content;
@@ -9,11 +9,15 @@ using Android.Runtime;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
 using Camera = Android.Hardware.Camera;
+using Android.Util;
 
 namespace ZXing.Mobile.CameraAccess
 {
     public class CameraController
     {
+        private const float MAX_EXPOSURE_COMPENSATION = 1.5f;
+        private const float MIN_EXPOSURE_COMPENSATION = 0.0f;
+        private const int AREA_PER_1000 = 300;
         private readonly Context _context;
         private readonly ISurfaceHolder _holder;
         private readonly SurfaceView _surfaceView;
@@ -75,9 +79,10 @@ namespace ZXing.Mobile.CameraAccess
                 var previewSize = previewParameters.PreviewSize;
                 var bitsPerPixel = ImageFormat.GetBitsPerPixel(previewParameters.PreviewFormat);
 
-
                 int bufferSize = (previewSize.Width * previewSize.Height * bitsPerPixel) / 8;
-				const int NUM_PREVIEW_BUFFERS = 5;
+
+               Log.Debug(MobileBarcodeScanner.TAG, $"bitsPerPixed={bitsPerPixel}; bufferSize={bufferSize}");
+                const int NUM_PREVIEW_BUFFERS = 5;
 				for (uint i = 0; i < NUM_PREVIEW_BUFFERS; ++i)
 				{
 					using (var buffer = new FastJavaByteArray(bufferSize))
@@ -92,7 +97,7 @@ namespace ZXing.Mobile.CameraAccess
             }
             catch (Exception ex)
             {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, ex.ToString());
+                Log.Debug(MobileBarcodeScanner.TAG, ex.ToString());
                 return;
             }
             finally
@@ -110,6 +115,20 @@ namespace ZXing.Mobile.CameraAccess
         public void AutoFocus()
         {
             AutoFocus(0, 0, false);
+        }
+
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        public void LowLightMode(bool on)
+        {
+            var parameters = Camera?.GetParameters();
+            if (parameters != null)
+            {
+                SetBestExposure(parameters, on);
+                Camera.SetParameters(parameters);
+            }
         }
 
         public void AutoFocus(int x, int y)
@@ -150,7 +169,7 @@ namespace ZXing.Mobile.CameraAccess
             }
             catch (Exception e)
             {
-                Android.Util.Log.Error(MobileBarcodeScanner.TAG, e.ToString());
+                Log.Error(MobileBarcodeScanner.TAG, e.ToString());
             }
 
             PerformanceCounter.Stop(perf, "Shutdown camera took {0}ms");
@@ -182,7 +201,7 @@ namespace ZXing.Mobile.CameraAccess
                         Camera.GetCameraInfo(i, camInfo);
                         if (camInfo.Facing == whichCamera)
                         {
-                            Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
+                            Log.Debug(MobileBarcodeScanner.TAG,
                                 "Found " + whichCamera + " Camera, opening...");
                             Camera = Camera.Open(i);
                             _cameraId = i;
@@ -193,7 +212,7 @@ namespace ZXing.Mobile.CameraAccess
 
                     if (!found)
                     {
-                        Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
+                        Log.Debug(MobileBarcodeScanner.TAG,
                             "Finding " + whichCamera + " camera failed, opening camera 0...");
                         Camera = Camera.Open(0);
                         _cameraId = 0;
@@ -232,29 +251,65 @@ namespace ZXing.Mobile.CameraAccess
             var supportedFocusModes = parameters.SupportedFocusModes;
             if (_scannerHost.ScanningOptions.DisableAutofocus)
                 parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+            else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
+                parameters.FocusMode = Camera.Parameters.FocusModeAuto;
             else if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
                 supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
                 parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
                 parameters.FocusMode = Camera.Parameters.FocusModeContinuousVideo;
-            else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
-                parameters.FocusMode = Camera.Parameters.FocusModeAuto;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
                 parameters.FocusMode = Camera.Parameters.FocusModeFixed;
 
+
+            Log.Debug(MobileBarcodeScanner.TAG,
+                              $"FocusMode ={parameters.FocusMode}");
             var selectedFps = parameters.SupportedPreviewFpsRange.FirstOrDefault();
             if (selectedFps != null)
             {
+                Log.Debug(MobileBarcodeScanner.TAG,
+                              $"Old Selected fps Min:{selectedFps[0]}, Max {selectedFps[1]}");
                 // This will make sure we select a range with the lowest minimum FPS
                 // and maximum FPS which still has the lowest minimum
                 // This should help maximize performance / support for hardware
+                //foreach (var fpsRange in parameters.SupportedPreviewFpsRange)
+                //{
+                //    if (fpsRange[0] < selectedFps[0] && fpsRange[1] >= selectedFps[1])
+                //        selectedFps = fpsRange;
+                //}
+
+                /// <summary>
+                ///Scanning Improvement, VK 10/2018
+                /// </summary>
                 foreach (var fpsRange in parameters.SupportedPreviewFpsRange)
                 {
-                    if (fpsRange[0] <= selectedFps[0] && fpsRange[1] > selectedFps[1])
+                    if (fpsRange[1] > selectedFps[1] || fpsRange[1] == selectedFps[1] && fpsRange[0] < selectedFps[0])
                         selectedFps = fpsRange;
                 }
+
+               Log.Debug(MobileBarcodeScanner.TAG,
+                            $" Setting Selected fps to Min:{selectedFps[0]}, Max {selectedFps[1]}");
+
+                /// <summary>
+                ///Scanning Improvement, VK 10/2018
+                /// </summary>
                 parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
             }
+            
+            if (_scannerHost.ScanningOptions.LowLightMode == true)
+                SetBestExposure(parameters, parameters.FlashMode != Camera.Parameters.FlashModeOn);
+
+            /*
+             * Improvements based on zxing android library
+             * - Setting default auto focus areas instead of single focus point
+             * - Setting Barcode scene mode if available for the device
+             * - Set metering to improve lighting/ exposure in the focused area (i.e., rectangular focus area in the center)
+             * - **** Imp ==> In UI project a layout should be created to mask other areas except the center rectangular area. 
+             *                  To inform the user that app/ camera only scans the center rectangular area of the device.
+             */
+            SetDefaultFocusArea(parameters);
+            SetBarcodeSceneMode(parameters);
+            SetMetering(parameters);
 
             CameraResolution resolution = null;
             var supportedPreviewSizes = parameters.SupportedPreviewSizes;
@@ -302,7 +357,7 @@ namespace ZXing.Mobile.CameraAccess
             // Hopefully a resolution was selected at some point
             if (resolution != null)
             {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
+                Log.Debug(MobileBarcodeScanner.TAG,
                     "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
                 parameters.SetPreviewSize(resolution.Width, resolution.Height);
             }
@@ -310,6 +365,177 @@ namespace ZXing.Mobile.CameraAccess
             Camera.SetParameters(parameters);
 
             SetCameraDisplayOrientation();
+        }
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        private void SetBestExposure(Camera.Parameters parameters, bool lowLight)
+        {
+            int minExposure = parameters.MinExposureCompensation;
+            int maxExposure = parameters.MaxExposureCompensation;
+            float step = parameters.ExposureCompensationStep;
+            if ((minExposure != 0 || maxExposure != 0) && step > 0.0f)
+            {
+                // Set low when light is on
+                float targetCompensation = MAX_EXPOSURE_COMPENSATION;
+                int compensationSteps = (int)(targetCompensation / step);
+                float actualCompensation = step * compensationSteps;
+                // Clamp value:
+                compensationSteps = lowLight ? Math.Max(Math.Min(compensationSteps, maxExposure), minExposure) : (int)MIN_EXPOSURE_COMPENSATION;
+                if (parameters.ExposureCompensation == compensationSteps)
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Exposure compensation already set to " + compensationSteps + " / " + actualCompensation);
+                }
+                else
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Setting exposure compensation to " + compensationSteps + " / " + actualCompensation);
+                    parameters.ExposureCompensation = compensationSteps;
+                }
+            }
+            else
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Camera does not support exposure compensation");
+            }
+        }
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        private void SetDefaultFocusArea(Camera.Parameters parameters)
+        {
+            if (parameters?.MaxNumFocusAreas > 0)
+            {
+                List<Camera.Area> middleArea = BuildMiddleArea(AREA_PER_1000);
+                Log.Debug(MobileBarcodeScanner.TAG, "Setting focus area to : " + middleArea.Select(f => f.Rect.FlattenToString()).Aggregate((first, next) => first + "; " + next));
+                parameters.FocusAreas = middleArea;
+            }
+            else
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Device does not support focus areas");
+            }
+        }
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        private void SetMetering(Camera.Parameters parameters)
+        {
+            if (parameters?.MaxNumMeteringAreas > 0)
+            {
+                List<Camera.Area> middleArea = BuildMiddleArea(AREA_PER_1000);
+                Log.Debug(MobileBarcodeScanner.TAG, "Setting metering areas: " + middleArea.Select(f => f.Rect.FlattenToString()).Aggregate((first, next) => first + "; " + next));
+                parameters.MeteringAreas = middleArea;
+            }
+            else
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Device does not support metering areas");
+            }
+        }
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        private List<Camera.Area> BuildMiddleArea(int areaPer1000)
+        {
+            return new List<Camera.Area>()
+                {
+                    new Camera.Area(new Rect(-areaPer1000, -areaPer1000, areaPer1000, areaPer1000), 1)
+                };
+        }
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        private void SetVideoStabilization(Camera.Parameters parameters)
+        {
+            if (parameters.IsVideoStabilizationSupported)
+            {
+                if (parameters.VideoStabilization)
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Video stabilization already enabled");
+                }
+                else
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Enabling video stabilization...");
+                    parameters.VideoStabilization = true;
+                }
+            }
+            else
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "This device does not support video stabilization");
+            }
+        }
+
+        /// <summary>
+        ///Scanning Improvement, VK 10/2018
+        /// </summary>
+        private void SetBarcodeSceneMode(Camera.Parameters parameters)
+        {
+            if (parameters.SceneMode ==  Camera.Parameters.SceneModeBarcode)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Barcode scene mode already set");
+                return;
+            }
+            var supportedSceneModes = parameters.SupportedSceneModes;
+            if (supportedSceneModes?.Contains(Camera.Parameters.SceneModeBarcode) == true)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, $"Previous SceneMode={parameters.SceneMode}");
+                parameters.SceneMode = Camera.Parameters.SceneModeBarcode;
+                Log.Debug(MobileBarcodeScanner.TAG, "Barcode scene mode is set");
+            }
+           
+        }
+
+       private void SetZoom(Camera.Parameters parameters, double targetZoomRatio)
+        {
+            if (parameters.IsZoomSupported)
+            {
+                var zoom = IndexOfClosestZoom(parameters, targetZoomRatio);
+                if (zoom == null)
+                {
+                    return;
+                }
+                if (parameters.Zoom == zoom)
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Zoom is already set to " + zoom);
+                }
+                else
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Setting zoom to " + zoom);
+                    parameters.Zoom = (int)zoom;
+                }
+            }
+            else
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Zoom is not supported");
+            }
+        }
+
+        private int? IndexOfClosestZoom(Camera.Parameters parameters, double targetZoomRatio)
+        {
+            var ratios = parameters.ZoomRatios.ToList();
+            Log.Debug(MobileBarcodeScanner.TAG, "Zoom ratios: " + ratios);
+            int maxZoom = parameters.MaxZoom;
+            if (ratios == null || ratios.Count == 0 || ratios.Count != maxZoom + 1)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Invalid zoom ratios!");
+                return null;
+            }
+            double target100 = 100.0 * targetZoomRatio;
+            double smallestDiff = Double.PositiveInfinity;
+            int closestIndex = 0;
+            for (int i = 0; i < ratios.Count; i++)
+            {
+                double diff = Math.Abs(ratios[i]?.LongValue() ?? 0 - target100);
+                if (diff < smallestDiff)
+                {
+                    smallestDiff = diff;
+                    closestIndex = i;
+                }
+            }
+            Log.Debug(MobileBarcodeScanner.TAG, "Chose zoom ratio of " + ((ratios[closestIndex]?.LongValue() ?? 0) / 100.0));
+            return closestIndex;
         }
 
         private void AutoFocus(int x, int y, bool useCoordinates)
@@ -360,6 +586,7 @@ namespace ZXing.Mobile.CameraAccess
                     {
                         new Camera.Area(new Rect(x, y, x + 20, y + 20), 1000)
                     };
+                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"AutoFocus Area =(x={x}, y={y}, right = {x + 20}, bottom ={y + 20})");
                     Camera.SetParameters(cameraParams);
                 }
 
