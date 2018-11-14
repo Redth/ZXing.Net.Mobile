@@ -1,3 +1,23 @@
+/*
+* Copyright 2018 ZXing/Redth - https://github.com/Redth/ZXing.Net.Mobile
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* 
+* Edited by VK, Apacheta Corp 11/14/2018.
+* http://www.apacheta.com/
+* 
+*/
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,14 +32,14 @@ namespace ZXing.Mobile.CameraAccess
     public class CameraAnalyzer
     {
         /// <summary>
-        ///START - Scanning Improvement, VK 10/2018
+        ///START - Scanning Improvement, VK 11/14/2018
         /// </summary>
         private const int MIN_FRAME_WIDTH = 240;
         private const int MIN_FRAME_HEIGHT = 240;
         private const int MAX_FRAME_WIDTH = 640; // = 5/8 * 1920
         private const int MAX_FRAME_HEIGHT = 480; // = 5/8 * 1080
         /// <summary>
-        /// END - Scanning Improvement, VK 10/2018
+        /// END - Scanning Improvement, VK 11/14/2018
         /// </summary>
         /// 
 
@@ -87,6 +107,7 @@ namespace ZXing.Mobile.CameraAccess
 
         /// <summary>
         ///Scanning Improvement, VK 10/2018
+        ///Removed this method for now.
         /// </summary>
         //public void LowLightMode(bool on)
         //{
@@ -185,7 +206,10 @@ namespace ZXing.Mobile.CameraAccess
             var start = PerformanceCounter.Start();
 
             /// <summary>
-            ///START - Scanning Improvement, VK 10/2018
+            ///START - Scanning Improvement, VK Apacheta Corp 11/14/2018
+            ///Added a new frame to get the center part of the captured image.
+            ///To create a FastJavaByteArray from the cropped captured frame and use it to decode the barcode.
+            ///To decrease the processing time drastically for higher resolution cameras.
             /// </summary>
             var frame_width = width * 3 / 5;
             var frame_height = height * 3 / 5;
@@ -201,7 +225,7 @@ namespace ZXing.Mobile.CameraAccess
                                                                             frame_height); // _area.Left, _area.Top, _area.Width, _area.Height);
 
             /// <summary>
-            ///END - Scanning Improvement, VK 10/2018
+            ///END - Scanning Improvement, VK Apacheta Corp 11/14/2018
             /// </summary>
             if (rotate)
                 fast = fast.rotateCounterClockwise();
