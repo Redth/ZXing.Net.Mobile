@@ -45,6 +45,8 @@
                 <dependency id="Xamarin.Forms" version="2.5.0.122203" />
             </group>
             <group targetFramework="Xamarin.Mac20">
+                <dependency id="ZXing.Net.Xamarin" version="$version$" />
+                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
             </group>
             <group targetFramework="portable-net45+win+wpa81+wp80">
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
@@ -70,6 +72,10 @@
         <!-- iOS Unified API -->
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.iOS.dll" />
+
+        <!-- Xamarin.Mac API -->
+        <file src="Build/Forms/Release/xammac/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.Mac\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/xammac/ZXing.Net.Mobile.Forms.macOS.dll" target="lib\Xamarin.Mac\ZXing.Net.Mobile.Forms.macOS.dll" />
         
         <!-- Windows RT / Store  -->
         <!-- Not supported -->
