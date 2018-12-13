@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -61,8 +62,20 @@ namespace WindowsUniversal
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
                 
+                var rendererAssemblies = new[]
+                {
+                    typeof(ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer).GetTypeInfo().Assembly,
+                    typeof(ZXing.Mobile.ZXingScannerControl).GetTypeInfo().Assembly,
+                    typeof(ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingBarcodeImageViewRenderer).GetTypeInfo().Assembly,
+                    typeof(Windows.UI.Xaml.Controls.Image).GetTypeInfo().Assembly
+                };
+
+                // Then call Init with these assembiles
+                Xamarin.Forms.Forms.Init(e, rendererAssemblies);
+
+                // replaces Xamarin.Forms.Forms.Init(e);
                 // add this line
-                Xamarin.Forms.Forms.Init(e); // requires the `e` parameter
+                // Xamarin.Forms.Forms.Init(e); // requires the `e` parameter
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
