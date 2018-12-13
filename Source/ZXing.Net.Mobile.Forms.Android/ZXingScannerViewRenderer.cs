@@ -12,16 +12,24 @@ using Android.Widget;
 using ZXing.Mobile;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
+using Android.Content;
 
 [assembly:ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Android
 {
     [Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingSurfaceView>
-    {       
-        public ZXingScannerViewRenderer () : base ()
+    {
+        private Context appContext;
+        public ZXingScannerViewRenderer() { }
+        public ZXingScannerViewRenderer(IntPtr a, JniHandleOwnership b) { }
+        public ZXingScannerViewRenderer(Context context)
         {
+            appContext = context;
         }
+        //public ZXingScannerViewRenderer () : base ()
+        //{
+        //}
 
         public static void Init ()
         {
@@ -52,12 +60,12 @@ namespace ZXing.Net.Mobile.Forms.Android
                     }
                 };
 
-                var activity = Context as Activity;
+                var activity = appContext as Activity;
 
                 if (activity != null)                
                     await ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync (activity);
                 
-                zxingSurface = new ZXingSurfaceView (Xamarin.Forms.Forms.Context as Activity, formsView.Options);
+                zxingSurface = new ZXingSurfaceView (appContext, formsView.Options);
                 zxingSurface.LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent);
 
                 base.SetNativeControl (zxingSurface);
