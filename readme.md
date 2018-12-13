@@ -4,7 +4,7 @@
 
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/zxing.net.mobile_128x128.png)
 
-ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
+ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android, Xamarin.Mac, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
 
 ![AppVeyor CI Status](https://ci.appveyor.com/api/projects/status/github/Redth/ZXing.Net.Mobile?branch=master&svg=true)
 [![Bitrise CI Status](https://www.bitrise.io/app/379eeea5b638f470.svg?token=jEVeMXcISnOVDlVxcxl9Lg&branch=master)](https://www.bitrise.io/app/379eeea5b638f470)
@@ -61,10 +61,26 @@ The `Camera` permission should be automatically included for you in the `Android
 
 ##### iOS
 
+On iOS you must declare `NSCameraUsageDescription` key in your _Info.plist_ to provide a message that will be displayed to the user when they are asked to allow the app to use the Camera:
+
+```xml
+<key>NSCameraUsageDescription</key>
+<string>Require access to camera to scan barcodes</string>
+```
+
 In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
 
 ```csharp
 ZXing.Net.Mobile.Forms.iOS.Platform.Init();
+```
+
+
+##### macOS
+
+In your `AppDelegate`'s `DidFinishedLaunching (..)` implementation, call:
+
+```csharp
+ZXing.Net.Mobile.Forms.macOS.Platform.Init();
 ```
 
 
@@ -88,6 +104,7 @@ If you notice that finishing scanning or pressing the back button is causing you
 
 ### Features
 - Xamarin.iOS
+- Xamarin.Mac (rendering only, not scanning)
 - Xamarin.Android (Including Google Glass)
 - Windows Phone 8
 - Simple API - Scan in as little as 2 lines of code!
