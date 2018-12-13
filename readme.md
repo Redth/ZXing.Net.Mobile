@@ -61,11 +61,12 @@ The `Camera` permission should be automatically included for you in the `Android
 
 ##### iOS
 
+On iOS you must declare `NSCameraUsageDescription` key in your _Info.plist_ to provide a message that will be displayed to the user when they are asked to allow the app to use the Camera:
+
 ```xml
 <key>NSCameraUsageDescription</key>
 <string>Require access to camera to scan barcodes</string>
 ```
-This sets the text for the Camera Usage popup message.
 
 In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
 
