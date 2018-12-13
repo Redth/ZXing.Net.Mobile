@@ -47,7 +47,7 @@ namespace ZXing.Net.Mobile.Forms.Android
 
         void regenerate ()
         {
-            if (formsView != null && formsView.BarcodeValue != null)
+            if (formsView != null && !string.IsNullOrWhiteSpace(formsView.BarcodeValue))
             {
                 var writer = new ZXing.Mobile.BarcodeWriter();
 
