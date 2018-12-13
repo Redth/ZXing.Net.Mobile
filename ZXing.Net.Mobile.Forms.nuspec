@@ -37,6 +37,7 @@
                 <dependency id="Xamarin.Forms" version="2.5.0.122203" />
             </group>
             <group targetFramework="MonoAndroid10">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
                 <dependency id="Xamarin.Android.Support.v4" version="25.4.0.2" />
                 <dependency id="FastAndroidCamera" version="2.0.0" />
             </group>
