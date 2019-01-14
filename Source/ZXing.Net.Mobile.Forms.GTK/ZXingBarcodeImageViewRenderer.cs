@@ -22,10 +22,17 @@ namespace ZXing.Net.Mobile.Forms.GTK
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Regenerate();
+            // in GTK there are a way to many properties that are changed compared to other platforms
+            if (e.PropertyName == ZXingBarcodeImageView.BarcodeValueProperty.PropertyName ||
+                e.PropertyName == ZXingBarcodeImageView.BarcodeFormatProperty.PropertyName ||
+                e.PropertyName == ZXingBarcodeImageView.BarcodeOptionsProperty.PropertyName)
+            {
+                Regenerate();
+            }
 
             base.OnElementPropertyChanged(sender, e);
         }
+        
         protected override void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
         {
             formsView = Element;
@@ -44,21 +51,23 @@ namespace ZXing.Net.Mobile.Forms.GTK
 
         void Regenerate ()
         {
-            if (formsView?.BarcodeValue == null) return;
-            var writer = new BarcodeWriter();
-
-            if (formsView != null && formsView.BarcodeOptions != null)
-                writer.Options = formsView.BarcodeOptions;
-            if (formsView != null && formsView.BarcodeFormat != null)
-                writer.Format = formsView.BarcodeFormat;
-
-            var value = formsView != null ? formsView.BarcodeValue : string.Empty;
-
-            Device.BeginInvokeOnMainThread(() =>
+            if (formsView != null && formsView.BarcodeValue != null)
             {
-                var pixBuf = writer.Write(value);
-                gtkImage.Pixbuf = pixBuf;
-            });
+                var writer = new BarcodeWriter();
+
+                if (formsView != null && formsView.BarcodeOptions != null)
+                    writer.Options = formsView.BarcodeOptions;
+                if (formsView != null && formsView.BarcodeFormat != null)
+                    writer.Format = formsView.BarcodeFormat;
+
+                var value = formsView != null ? formsView.BarcodeValue : string.Empty;
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    var pixBuf = writer.Write(value);
+                    gtkImage.Pixbuf = pixBuf;
+                });
+            }
         }
     }
 }
