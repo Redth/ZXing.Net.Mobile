@@ -12,14 +12,14 @@ namespace ZXing.Net.Mobile.GTK
             var black = new Cairo.Color(0, 0, 0);
             var white = new Cairo.Color(1, 1, 1);
             var surface = new ImageSurface(Format.RGB24, matrix.Width, matrix.Height);
-            var cr = new Context(surface) { LineWidth = 1.0 };
+            var cr = new Context(surface);
             for (var x = 0; x < matrix.Width; x++)
             {
                 for (var y = 0; y < matrix.Height; y++)
                 {
                     cr.SetSourceColor(matrix[x, y] ? black : white);
                     cr.MoveTo(x, y);
-                    cr.LineTo(x + surface.Stride, y);
+                    cr.LineTo(x + 1, y);
                     cr.Stroke();
                 }
             }
