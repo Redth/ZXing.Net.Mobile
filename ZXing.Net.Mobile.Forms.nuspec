@@ -21,6 +21,10 @@
 
             <group targetFramework="net">
             </group>
+            <group targetFramework="net45">
+                <dependency id="ZXing.Net.Mobile" version="$version$" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
+            </group>
             <group targetFramework="win">
             </group>
             <group targetFramework="wp">
@@ -70,6 +74,10 @@
         <!-- iOS Unified API -->
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.iOS.dll" />
+
+        <!-- GTK -->
+        <file src="Build/Forms/Release/xamgtk/ZXing.Net.Mobile.Forms.dll" target="lib\net45\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/xamgtk/ZXing.Net.Mobile.Forms.GTK.dll" target="lib\net45\ZXing.Net.Mobile.Forms.GTK.dll" />
         
         <!-- Windows RT / Store  -->
         <!-- Not supported -->
