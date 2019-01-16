@@ -40,11 +40,13 @@ namespace ZXing.Mobile
 
         public async void SurfaceCreated(ISurfaceHolder holder)
         {
-            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
-
-            _cameraAnalyzer.SetupCamera();
-
-            _surfaceCreated = true;
+            //avoid duplicate setups, forcing the camera to be setup even when the camera was not scanning (this can happen when resuming the app)
+            if (!_surfaceCreated)
+            {
+                await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+                _cameraAnalyzer.SetupCamera();
+                _surfaceCreated = true;
+            }
         }
 
         public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
@@ -98,6 +100,12 @@ namespace ZXing.Mobile
 
         public void StartScanning(Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
         {
+            //fix Android 7 bug: camera freezes because surfacedestroyed function isn't always called correct, the old surfaceview was still visible.
+            this.Visibility = ViewStates.Visible;
+
+            //make sure the camera is setup
+            _cameraAnalyzer.SetupCamera();
+
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
             _cameraAnalyzer.BarcodeFound += (sender, result) =>
@@ -110,6 +118,8 @@ namespace ZXing.Mobile
         public void StopScanning()
         {
             _cameraAnalyzer.ShutdownCamera();
+            //fix Android 7 bug: camera freezes because surfacedestroyed function isn't always called correct, the old surfaceview was still visible.
+            this.Visibility = ViewStates.Gone;
         }
 
         public void PauseAnalysis()

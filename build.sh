@@ -71,6 +71,7 @@ if [ ! -f "$PACKAGES_CONFIG_MD5" ] || [ "$( cat "$PACKAGES_CONFIG_MD5" | sed 's/
     find . -type d ! -name . | xargs rm -rf
 fi
 
+echo "Restoring tools from NuGet..."
 mono "$NUGET_EXE" install -ExcludeVersion
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet tools."
@@ -85,6 +86,7 @@ popd >/dev/null
 if [ -f "$ADDINS_PACKAGES_CONFIG" ]; then
     pushd "$ADDINS_DIR" >/dev/null
 
+    echo "Restoring addins from NuGet..."
     mono "$NUGET_EXE" install -ExcludeVersion
     if [ $? -ne 0 ]; then
         echo "Could not restore NuGet addins."
@@ -98,6 +100,7 @@ fi
 if [ -f "$MODULES_PACKAGES_CONFIG" ]; then
     pushd "$MODULES_DIR" >/dev/null
 
+    echo "Restoring modules from NuGet..."
     mono "$NUGET_EXE" install -ExcludeVersion
     if [ $? -ne 0 ]; then
         echo "Could not restore NuGet modules."
@@ -113,5 +116,6 @@ if [ ! -f "$CAKE_EXE" ]; then
     exit 1
 fi
 
+echo "Running Cake..."
 # Start Cake
 exec mono "$CAKE_EXE" $SCRIPT "${CAKE_ARGUMENTS[@]}"
