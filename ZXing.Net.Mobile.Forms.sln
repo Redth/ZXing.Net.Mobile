@@ -32,6 +32,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.GTK", "Source\ZXing.Net.Mobile.GTK\ZXing.Net.Mobile.GTK.csproj", "{007476EF-D7CA-4198-BDED-3544D0EBD546}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.Forms.GTK", "Source\ZXing.Net.Mobile.Forms.GTK\ZXing.Net.Mobile.Forms.GTK.csproj", "{7AA0ABCF-DBF1-4190-8E82-44DD736BE2F3}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.macOS", "Source\ZXing.Net.Mobile.macOS\ZXing.Net.Mobile.macOS.csproj", "{A7E26AE0-12AF-4CFD-9B1E-3101347CC6F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.Forms.macOS", "Source\ZXing.Net.Mobile.Forms.macOS\ZXing.Net.Mobile.Forms.macOS.csproj", "{B35BF95F-D2AA-4DD3-8BC9-44F85F8C4DA1}"
