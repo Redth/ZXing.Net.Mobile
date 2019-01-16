@@ -5,7 +5,7 @@
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/zxing.net.mobile_128x128.png)
 
 
-ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android,Xamarin.Mac, GTK# and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
+ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android, Xamarin.Mac, GTK# and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
 
 ![AppVeyor CI Status](https://ci.appveyor.com/api/projects/status/github/Redth/ZXing.Net.Mobile?branch=master&svg=true)
 [![Bitrise CI Status](https://www.bitrise.io/app/379eeea5b638f470.svg?token=jEVeMXcISnOVDlVxcxl9Lg&branch=master)](https://www.bitrise.io/app/379eeea5b638f470)
