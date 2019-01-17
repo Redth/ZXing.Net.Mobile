@@ -34,11 +34,11 @@
             <group targetFramework="netstandard1.0">
                 <dependency id="NETStandard.Library" version="1.6.1" />
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
             </group>
             <group targetFramework="netstandard2.0">
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
             </group>
             <group targetFramework="MonoAndroid10">
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
@@ -47,19 +47,19 @@
             </group>
             <group targetFramework="Xamarin.iOS10">
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
             </group>
             <group targetFramework="Xamarin.Mac20">
                 <dependency id="ZXing.Net.Xamarin" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
             </group>
             <group targetFramework="portable-net45+win+wpa81+wp80">
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
             </group>
             <group targetFramework="uap">
                 <dependency id="ZXing.Net.Mobile" version="$version$" />
-                <dependency id="Xamarin.Forms" version="2.5.0.122203" />
+                <dependency id="Xamarin.Forms" version="3.0.0.446417" />
             </group>
             <group targetFramework="dotnet">
             </group>
