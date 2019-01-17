@@ -17,7 +17,7 @@ namespace ZXing.Net.Mobile.GTK
             {
                 for (var y = 0; y < matrix.Height; y++)
                 {
-                    cr.SetSourceColor(matrix[x, y] ? black : white);
+                    SetSourceColor(cr, matrix[x, y] ? black : white);
                     cr.MoveTo(x, y);
                     cr.LineTo(x + 1, y);
                     cr.Stroke();
@@ -30,6 +30,11 @@ namespace ZXing.Net.Mobile.GTK
                 matrix.Width,
                 matrix.Height,
                 surface.Stride);
+        }
+
+        private void SetSourceColor(Context context, Cairo.Color color)
+        {
+            context.SetSourceRGB(color.R, color.G, color.B);
         }
 
         public Pixbuf Render(BitMatrix matrix, BarcodeFormat format, string content, EncodingOptions options)
