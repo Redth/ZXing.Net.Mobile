@@ -81,13 +81,6 @@
         <!-- GTK -->
         <file src="Build/Forms/Release/xamgtk/ZXing.Net.Mobile.Forms.dll" target="lib\net45\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/xamgtk/ZXing.Net.Mobile.Forms.GTK.dll" target="lib\net45\ZXing.Net.Mobile.Forms.GTK.dll" />
-        <file src="Build/Forms/Release/xamgtk/gdk-sharp.dll" target="lib\net45\gdk-sharp.dll" />
-        <file src="Build/Forms/Release/xamgtk/gdk-sharp.dll.config" target="lib\net45\gdk-sharp.dll.config" />        
-        <file src="Build/Forms/Release/xamgtk/glib-sharp.dll" target="lib\net45\glib-sharp.dll" />
-        <file src="Build/Forms/Release/xamgtk/glib-sharp.dll.config" target="lib\net45\glib-sharp.dll.config" />
-        <file src="Build/Forms/Release/xamgtk/gtk-sharp.dll" target="lib\net45\gtk-sharp.dll" />
-        <file src="Build/Forms/Release/xamgtk/gtk-sharp.dll.config" target="lib\net45\gtk-sharp.dll.config" />
-        <file src="Build/Forms/Release/xamgtk/Mono.Cairo.dll" target="lib\net45\Mono.Cairo.dll" />
       
         <!-- Xamarin.Mac API -->
         <file src="Build/Forms/Release/xammac/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.Mac\ZXing.Net.Mobile.Forms.dll" />

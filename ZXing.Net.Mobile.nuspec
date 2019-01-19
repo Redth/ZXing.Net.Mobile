@@ -68,13 +68,6 @@
         <file src="Build/Release/xamgtk/zxing.portable.dll" target="lib\net45\zxing.portable.dll" />
         <file src="Build/Release/xamgtk/ZXing.Net.Mobile.Core.dll" target="lib\net45\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/xamgtk/ZXingNetMobile.dll" target="lib\net45\ZXingNetMobile.dll" />
-        <file src="Build/Release/xamgtk/gdk-sharp.dll" target="lib\net45\gdk-sharp.dll" />
-        <file src="Build/Release/xamgtk/gdk-sharp.dll.config" target="lib\net45\gdk-sharp.dll.config" />        
-        <file src="Build/Release/xamgtk/glib-sharp.dll" target="lib\net45\glib-sharp.dll" />
-        <file src="Build/Release/xamgtk/glib-sharp.dll.config" target="lib\net45\glib-sharp.dll.config" />
-        <file src="Build/Release/xamgtk/gtk-sharp.dll" target="lib\net45\gtk-sharp.dll" />
-        <file src="Build/Release/xamgtk/gtk-sharp.dll.config" target="lib\net45\gtk-sharp.dll.config" />
-        <file src="Build/Release/xamgtk/Mono.Cairo.dll" target="lib\net45\Mono.Cairo.dll" />
       
         <!-- Xamarin.Mac API -->
         <file src="Build/Release/xammac/zxing.portable.dll" target="lib\Xamarin.Mac\zxing.portable.dll" />
