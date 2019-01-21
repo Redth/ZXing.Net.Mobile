@@ -25,10 +25,12 @@ namespace ZXing.Net.Mobile.GTK
                             cr.Stroke();
                         }
                     }
+
+                    const int bitsPerSample = 8;
                     return new Pixbuf(surface.Data,
                         Colorspace.Rgb,
                         true,
-                        8,
+                        bitsPerSample,
                         matrix.Width,
                         matrix.Height,
                         surface.Stride);
