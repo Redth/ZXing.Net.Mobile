@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using ZXing;
@@ -23,7 +24,7 @@ namespace ZXing.Mobile
 		}
 
 		public CameraResolutionSelectorDelegate CameraResolutionSelector { get;set; }
-		public List<BarcodeFormat> PossibleFormats { get;set; }
+		public IEnumerable<BarcodeFormat> PossibleFormats { get;set; }
 		public bool? TryHarder { get;set; } 
 		public bool? PureBarcode { get;set; }
 		public bool? AutoRotate { get;set; }
@@ -66,7 +67,7 @@ namespace ZXing.Mobile
             if (this.AssumeGS1.HasValue)
                 reader.Options.AssumeGS1 = this.AssumeGS1.Value;
 
-			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
+			if (this.PossibleFormats != null && this.PossibleFormats.Any())
 			{
 				reader.Options.PossibleFormats = new List<BarcodeFormat>();
 
@@ -88,7 +89,7 @@ namespace ZXing.Mobile
 			if (this.PureBarcode.HasValue && this.PureBarcode.Value)
 				hints.Add(DecodeHintType.PURE_BARCODE, this.PureBarcode.Value);
 
-			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
+			if (this.PossibleFormats != null && this.PossibleFormats.Any())
 			hints.Add(DecodeHintType.POSSIBLE_FORMATS, this.PossibleFormats);
 
 			reader.Hints = hints;
