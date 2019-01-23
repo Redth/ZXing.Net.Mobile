@@ -26,11 +26,11 @@ namespace ZXing.Net.Mobile.GTK
                         }
                     }
 
-                    const int bitsPerSample = 8;
+                    const int onlyBitsPerSampleValueSupportedByGdk = 8;
                     return new Pixbuf(surface.Data,
                         Colorspace.Rgb,
                         true,
-                        bitsPerSample,
+                        onlyBitsPerSampleValueSupportedByGdk,
                         matrix.Width,
                         matrix.Height,
                         surface.Stride);
