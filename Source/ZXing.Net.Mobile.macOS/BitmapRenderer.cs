@@ -1,18 +1,13 @@
 ﻿using System;
 using ZXing.Rendering;
-
-using Foundation;
-using CoreFoundation;
 using CoreGraphics;
 using AppKit;
-
 using ZXing.Common;
 
 namespace ZXing.Mobile
 {
     public class BitmapRenderer : IBarcodeRenderer<NSImage>
     {
-
         public NSImage Render(BitMatrix matrix, BarcodeFormat format, string content)
         {
             return Render(matrix, format, content, new EncodingOptions());
@@ -25,11 +20,12 @@ namespace ZXing.Mobile
             var black = new CGColor(0f, 0f, 0f);
             var white = new CGColor(1.0f, 1.0f, 1.0f);
 
-            for (int x = 0; x < matrix.Width; x++)
+            for (var x = 0; x < matrix.Width; x++)
             {
-                for (int y = 0; y < matrix.Height; y++)
+                for (var y = 0; y < matrix.Height; y++)
                 {
-                    context.SetFillColor(matrix[x, y] ? black : white);
+                    var (cgX, cgY) = TransformToCoreGraphicsCoords(x, y, matrix);
+                    context.SetFillColor(matrix[cgX, cgY] ? black : white);
                     context.FillRect(new CGRect(x, y, 1, 1));
                 }
             }
@@ -38,6 +34,11 @@ namespace ZXing.Mobile
             context.Dispose();
 
             return img;
+        }
+
+        private static (int cgX, int cgY) TransformToCoreGraphicsCoords(int x, int y, BitMatrix matrix)
+        {
+            return (x, Math.Abs(y - matrix.Height + 1));
         }
     }
 }
