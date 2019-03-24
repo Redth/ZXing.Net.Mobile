@@ -13,12 +13,12 @@ namespace ZXing.Mobile
 		//ZxingCameraViewController viewController;
 		IScannerViewController viewController;
 
-		UIViewController appController;
+		WeakReference<UIViewController> weakAppController;
 		ManualResetEvent scanResultResetEvent = new ManualResetEvent(false);
 
 		public MobileBarcodeScanner (UIViewController delegateController)
 		{
-			appController = delegateController;
+			weakAppController = new WeakReference<UIViewController>(delegateController);
 		}
 
 		public MobileBarcodeScanner ()
@@ -27,7 +27,7 @@ namespace ZXing.Mobile
 			{
 				if (window.RootViewController != null)
 				{
-					appController = window.RootViewController;
+					weakAppController = new WeakReference<UIViewController>(window.RootViewController);
 					break;
 				}
 			}
@@ -63,39 +63,43 @@ namespace ZXing.Mobile
                 if (useAVCaptureEngine)
                     allRequestedFormatsSupported = AVCaptureScannerView.SupportsAllRequestedBarcodeFormats(options.PossibleFormats);
 
-                this.appController.InvokeOnMainThread(() => {
+                UIViewController appController;
+                if (weakAppController.TryGetTarget(out appController))
+                {
+                    appController.InvokeOnMainThread(() => {
 
+                        if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
+                        {
+                            viewController = new AVCaptureScannerViewController(options, this);
+                            viewController.ContinuousScanning = true;
+                        }
+                        else
+                        {
+                            if (useAVCaptureEngine && !is7orgreater)
+                                Console.WriteLine("Not iOS 7 or greater, cannot use AVCapture for barcode decoding, using ZXing instead");
+                            else if (useAVCaptureEngine && !allRequestedFormatsSupported)
+                                Console.WriteLine("Not all requested barcode formats were supported by AVCapture, using ZXing instead");
 
-                    if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
-                    {
-                        viewController = new AVCaptureScannerViewController(options, this);
-                        viewController.ContinuousScanning = true;
-                    }
-                    else
-                    {           
-                        if (useAVCaptureEngine && !is7orgreater)
-                            Console.WriteLine("Not iOS 7 or greater, cannot use AVCapture for barcode decoding, using ZXing instead");
-                        else if (useAVCaptureEngine && !allRequestedFormatsSupported)
-                            Console.WriteLine("Not all requested barcode formats were supported by AVCapture, using ZXing instead");
-
-                        viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
-                        viewController.ContinuousScanning = true;
-                    }
-
-                    viewController.OnScannedResult += barcodeResult => {
-
-                        // If null, stop scanning was called
-                        if (barcodeResult == null) {
-                            ((UIViewController)viewController).InvokeOnMainThread(() => {
-                                ((UIViewController)viewController).DismissViewController(true, null);
-                            });
+                            viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
+                            viewController.ContinuousScanning = true;
                         }
 
-                        scanHandler (barcodeResult);
-                    };
+                        viewController.OnScannedResult += barcodeResult => {
 
-                    appController.PresentViewController((UIViewController)viewController, true, null);
-                });
+                            // If null, stop scanning was called
+                            if (barcodeResult == null)
+                            {
+                                ((UIViewController)viewController).InvokeOnMainThread(() => {
+                                    ((UIViewController)viewController).DismissViewController(true, null);
+                                });
+                            }
+
+                            scanHandler(barcodeResult);
+                        };
+
+                        appController.PresentViewController((UIViewController)viewController, true, null);
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -122,46 +126,57 @@ namespace ZXing.Mobile
 					if (useAVCaptureEngine)
 						allRequestedFormatsSupported = AVCaptureScannerView.SupportsAllRequestedBarcodeFormats(options.PossibleFormats);
 
-					this.appController.InvokeOnMainThread(() => {
+					UIViewController appController;
+				    if (weakAppController.TryGetTarget(out appController))
+				    {
+					appController.InvokeOnMainThread(() =>
+					{
 
-										
-						if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
+
+					    if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
+					    {
+						viewController = new AVCaptureScannerViewController(options, this);
+					    }
+					    else
+					    {
+						if (useAVCaptureEngine && !is7orgreater)
+						    Console.WriteLine("Not iOS 7 or greater, cannot use AVCapture for barcode decoding, using ZXing instead");
+						else if (useAVCaptureEngine && !allRequestedFormatsSupported)
+						    Console.WriteLine("Not all requested barcode formats were supported by AVCapture, using ZXing instead");
+
+						viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
+					    }
+
+					    viewController.OnScannedResult += barcodeResult =>
+					    {
+
+						((UIViewController)viewController).InvokeOnMainThread(() =>
 						{
-							viewController = new AVCaptureScannerViewController(options, this);							
-						}
-						else
-						{			
-							if (useAVCaptureEngine && !is7orgreater)
-								Console.WriteLine("Not iOS 7 or greater, cannot use AVCapture for barcode decoding, using ZXing instead");
-							else if (useAVCaptureEngine && !allRequestedFormatsSupported)
-								Console.WriteLine("Not all requested barcode formats were supported by AVCapture, using ZXing instead");
 
-							viewController = new ZXing.Mobile.ZXingScannerViewController(options, this);
-						}
+						    viewController.Cancel();
 
-						viewController.OnScannedResult += barcodeResult => {
+						    // Handle error situation that occurs when user manually closes scanner in the same moment that a QR code is detected
+						    try
+						    {
+							((UIViewController)viewController).DismissViewController(true, () =>
+							{
+							    result = barcodeResult;
+							    scanResultResetEvent.Set();
+							});
+						    }
+						    catch (ObjectDisposedException)
+						    {
+							// In all likelihood, iOS has decided to close the scanner at this point. But just in case it executes the
+							// post-scan code instead, set the result so we will not get a NullReferenceException.
+							result = barcodeResult;
+							scanResultResetEvent.Set();
+						    }
+						});
+					    };
 
-                            ((UIViewController)viewController).InvokeOnMainThread(() => {
-
-                                viewController.Cancel();
-
-                                // Handle error situation that occurs when user manually closes scanner in the same moment that a QR code is detected
-                                try {
-                                    ((UIViewController) viewController).DismissViewController(true, () => {
-                                        result = barcodeResult;
-                                        scanResultResetEvent.Set();
-                                    });
-                                } catch (ObjectDisposedException) {
-                                    // In all likelihood, iOS has decided to close the scanner at this point. But just in case it executes the
-                                    // post-scan code instead, set the result so we will not get a NullReferenceException.
-                                    result = barcodeResult;
-                                    scanResultResetEvent.Set();
-                                }
-                            });
-                        };
-
-						appController.PresentViewController((UIViewController)viewController, true, null);
+					    appController.PresentViewController((UIViewController)viewController, true, null);
 					});
+				    }
 
 					scanResultResetEvent.WaitOne();
 					((UIViewController)viewController).Dispose();
