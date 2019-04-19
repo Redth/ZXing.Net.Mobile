@@ -14,6 +14,7 @@ namespace ZXing.Mobile.CameraAccess
         private DateTime _lastPreviewAnalysis = DateTime.UtcNow;
         private bool _wasScanned;
         IScannerSessionHost _scannerHost;
+        private bool _cameraSetup;
 
         public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
         {
@@ -41,15 +42,23 @@ namespace ZXing.Mobile.CameraAccess
 
         public void ShutdownCamera()
         {
-            IsAnalyzing = false;
-            _cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
-            _cameraController.ShutdownCamera();
+            if (_cameraSetup)
+            {
+                IsAnalyzing = false;
+                _cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
+                _cameraController.ShutdownCamera();
+                _cameraSetup = false;
+            }
         }
 
         public void SetupCamera()
         {
-            _cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
-            _cameraController.SetupCamera();
+            if (!_cameraSetup)
+            {
+                _cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
+                _cameraController.SetupCamera();
+                _cameraSetup = true;
+            }
         }
 
         public void AutoFocus()
@@ -64,7 +73,9 @@ namespace ZXing.Mobile.CameraAccess
 
         public void RefreshCamera()
         {
-            _cameraController.RefreshCamera();
+            //only refresh the camera if it is actually setup
+            if(_cameraSetup)
+                _cameraController.RefreshCamera();
         }
 
         private bool CanAnalyzeFrame

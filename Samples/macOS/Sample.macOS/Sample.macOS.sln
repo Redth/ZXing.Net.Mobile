@@ -1,0 +1,29 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.macOS", "Sample.macOS.csproj", "{C6529362-90CE-46A8-8822-1782F897FAF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zxing.portable", "..\..\..\Source\ZXing.Net\Source\lib\zxing.portable.csproj", "{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZXing.Net.Mobile.macOS", "..\..\..\Source\ZXing.Net.Mobile.macOS\ZXing.Net.Mobile.macOS.csproj", "{A7E26AE0-12AF-4CFD-9B1E-3101347CC6F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C6529362-90CE-46A8-8822-1782F897FAF4}.Debug|x86.ActiveCfg = Debug|x86
+		{C6529362-90CE-46A8-8822-1782F897FAF4}.Debug|x86.Build.0 = Debug|x86
+		{C6529362-90CE-46A8-8822-1782F897FAF4}.Release|x86.ActiveCfg = Release|x86
+		{C6529362-90CE-46A8-8822-1782F897FAF4}.Release|x86.Build.0 = Release|x86
+		{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}.Debug|x86.Build.0 = Debug|Any CPU
+		{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}.Release|x86.ActiveCfg = Release|Any CPU
+		{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}.Release|x86.Build.0 = Release|Any CPU
+		{A7E26AE0-12AF-4CFD-9B1E-3101347CC6F4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A7E26AE0-12AF-4CFD-9B1E-3101347CC6F4}.Debug|x86.Build.0 = Debug|Any CPU
+		{A7E26AE0-12AF-4CFD-9B1E-3101347CC6F4}.Release|x86.ActiveCfg = Release|Any CPU
+		{A7E26AE0-12AF-4CFD-9B1E-3101347CC6F4}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

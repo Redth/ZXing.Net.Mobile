@@ -20,12 +20,12 @@ namespace ZXing.Net.Mobile.Forms.Android
     [Preserve(AllMembers = true)]
     public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingSurfaceView>
     {
-        public ZXingScannerViewRenderer() : base()
+        private Context appContext;
+        public ZXingScannerViewRenderer() : base () { }
+        public ZXingScannerViewRenderer(IntPtr a, JniHandleOwnership b) { }
+        public ZXingScannerViewRenderer(Context context) : base (context)
         {
-        }
-
-        public ZXingScannerViewRenderer (Context context) : base (context)
-        {
+            appContext = context;
         }
 
         public static void Init ()
@@ -56,25 +56,26 @@ namespace ZXing.Net.Mobile.Forms.Android
                     }
                 };
 
-                if (Context is Activity activity) { 
+                var activity = appContext as Activity;
+
+                if (activity != null)                
                     await ZXing.Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync (activity);
+                    
+                zxingSurface = new ZXingSurfaceView (appContext, formsView.Options)
+                {
+                    LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent)
+                };
 
-                    zxingSurface = new ZXingSurfaceView (activity, formsView.Options)
-                    {
-                        LayoutParameters = new LayoutParams (LayoutParams.MatchParent, LayoutParams.MatchParent)
-                    };
+                base.SetNativeControl (zxingSurface);
 
-                    base.SetNativeControl (zxingSurface);
+                if (formsView.IsScanning)
+                    zxingSurface.StartScanning (formsView.RaiseScanResult, formsView.Options);
 
-                    if (formsView.IsScanning)
-                        zxingSurface.StartScanning (formsView.RaiseScanResult, formsView.Options);
+                if (!formsView.IsAnalyzing)
+                    zxingSurface.PauseAnalysis ();
 
-                    if (!formsView.IsAnalyzing)
-                        zxingSurface.PauseAnalysis ();
-
-                    if (formsView.IsTorchOn)
-                        zxingSurface.Torch (true);
-                }
+                if (formsView.IsTorchOn)
+                    zxingSurface.Torch (true);
             }
         }
 
