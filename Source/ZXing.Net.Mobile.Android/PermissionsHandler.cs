@@ -142,7 +142,7 @@ namespace ZXing.Net.Mobile.Android
 
             global::Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Checking " + permission + "...");
 
-            if (!IsPermissionInManifest(context, permission) || !IsPermissionGranted(context, permission))
+            if (!IsPermissionInManifest(context, permission))
             {
                 result = false;
 
