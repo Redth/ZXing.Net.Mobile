@@ -125,10 +125,11 @@
       <Project>{1b000bca-4895-4acf-a0c6-3adf3a9bedf2}</Project>
       <Name>ZXing.Net.Mobile.WindowsUniversal</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
-      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
-      <Name>zxing.portable</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="zxing.portable">
+      <HintPath>..\..\Library\zxing.portable.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

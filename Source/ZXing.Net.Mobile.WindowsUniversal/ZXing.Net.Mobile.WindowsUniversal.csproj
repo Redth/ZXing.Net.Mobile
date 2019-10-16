@@ -134,10 +134,6 @@
       <Project>{7528dd0a-1781-47f4-adbf-eeddb011f6bb}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
-      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
-      <Name>zxing.portable</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Page Include="ScanPage.xaml">
@@ -148,6 +144,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="zxing.portable">
+      <HintPath>..\..\Library\zxing.portable.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
