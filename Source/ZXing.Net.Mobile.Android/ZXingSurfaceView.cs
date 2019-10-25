@@ -89,7 +89,7 @@ namespace ZXing.Mobile
             _cameraAnalyzer.Zoom(isZoomIn);
         }
 
-    public void AutoFocus()
+        public void AutoFocus()
         {
             _cameraAnalyzer.AutoFocus();
         }
