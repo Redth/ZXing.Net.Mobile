@@ -84,7 +84,12 @@ namespace ZXing.Mobile
             return r;
         }
 
-        public void AutoFocus()
+        public void Zoom(bool isZoomIn)
+        {
+            _cameraAnalyzer.Zoom(isZoomIn);
+        }
+
+    public void AutoFocus()
         {
             _cameraAnalyzer.AutoFocus();
         }

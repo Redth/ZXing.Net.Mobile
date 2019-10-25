@@ -52,6 +52,14 @@ namespace ZXing.Net.Mobile.Forms.Android
                     }
                 };
 
+                // Process requests for zoom
+                formsView.ZoomRequested += (v) => {
+                    if (zxingSurface != null)
+                    {
+                        zxingSurface.Zoom(v);
+                    }
+                };
+
                 var activity = Context as Activity;
 
                 if (activity != null)                

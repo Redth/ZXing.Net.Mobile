@@ -52,6 +52,11 @@ namespace ZXing.Mobile.CameraAccess
             _cameraController.SetupCamera();
         }
 
+        public void Zoom(bool isZoomIn)
+        {
+            _cameraController.Zoom(isZoomIn);
+        }
+
         public void AutoFocus()
         {
             _cameraController.AutoFocus();

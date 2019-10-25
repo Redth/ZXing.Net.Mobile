@@ -11,6 +11,7 @@ namespace ZXing.Net.Mobile.Forms
         public event ScanResultDelegate OnScanResult;
 
         public event Action<int, int> AutoFocusRequested;
+        public event Action<bool> ZoomRequested;
 
         public ZXingScannerView ()
         {
@@ -29,6 +30,11 @@ namespace ZXing.Net.Mobile.Forms
         public void ToggleTorch ()
         {
             IsTorchOn = !IsTorchOn;
+        }
+
+        public void Zoom(bool isZoomIn)
+        {
+            ZoomRequested?.Invoke(isZoomIn);
         }
 
         public void AutoFocus ()

@@ -131,7 +131,13 @@ namespace ZXing.Net.Mobile.Forms
                 zxing.IsAnalyzing = true;
         }
 
-        public void AutoFocus ()
+        public void Zoom(bool isZoomIn)
+        {
+            if (zxing != null)
+                zxing.Zoom(isZoomIn);
+        }
+
+    public void AutoFocus ()
         {
             if (zxing != null)
                 zxing.AutoFocus ();

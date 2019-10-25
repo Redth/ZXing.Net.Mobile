@@ -118,13 +118,14 @@ namespace ZXing.Mobile
 				{ AVCaptureSession.PresetMedium, new CameraResolution 	 { Width = 480,  Height = 360 } },	//480x360
 				{ AVCaptureSession.Preset640x480, new CameraResolution 	 { Width = 640,  Height = 480 } },
 				{ AVCaptureSession.Preset1280x720, new CameraResolution  { Width = 1280, Height = 720 } },
-				{ AVCaptureSession.Preset1920x1080, new CameraResolution { Width = 1920, Height = 1080 } }
-			};
+				{ AVCaptureSession.Preset1920x1080, new CameraResolution { Width = 1920, Height = 1080 } },
+                { AVCaptureSession.PresetPhoto, new CameraResolution { Width = 2592, Height = 1936 } }
+            };
 				
 			// configure the capture session for low resolution, change this if your code
 			// can cope with more data or volume
 			session = new AVCaptureSession () {
-				SessionPreset = AVCaptureSession.Preset640x480
+				SessionPreset = AVCaptureSession.PresetPhoto
 			};
 			
 			// create a device input and attach it to the session
@@ -163,7 +164,7 @@ namespace ZXing.Mobile
 					availableResolutions.Add (cr.Value);
 			}
 
-			resolution = ScanningOptions.GetResolution (availableResolutions);
+            resolution = consideredResolutions[AVCaptureSession.PresetPhoto];
 
 			// See if the user selected a resolution
 			if (resolution != null) {

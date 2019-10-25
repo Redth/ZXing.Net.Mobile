@@ -107,6 +107,30 @@ namespace ZXing.Mobile.CameraAccess
                 AutoFocus();
         }
 
+        public void Zoom(bool isZoomIn)
+        {
+            Camera.Parameters parameters = Camera?.GetParameters();
+            if (parameters?.IsZoomSupported == true)
+            {
+                int maxZoom = parameters.MaxZoom;
+                int zoom = parameters.Zoom;
+                if (isZoomIn && zoom<maxZoom)
+                {
+                    zoom++;
+                }
+                else if (zoom > 0)
+                {
+                    zoom--;
+                }
+                parameters.Zoom = zoom;
+                Camera.SetParameters(parameters);
+            }
+            else
+            {
+                Android.Util.Log.Error("lv", "zoom not supported or camera unavailable");
+            }
+        }
+
         public void AutoFocus()
         {
             AutoFocus(0, 0, false);
