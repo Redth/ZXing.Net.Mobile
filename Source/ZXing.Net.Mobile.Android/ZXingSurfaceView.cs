@@ -43,8 +43,6 @@ namespace ZXing.Mobile
             await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
 
             _cameraAnalyzer.SetupCamera();
-
-            _surfaceCreated = true;
         }
 
         public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
@@ -142,7 +140,6 @@ namespace ZXing.Mobile
         public bool IsAnalyzing => _cameraAnalyzer.IsAnalyzing;
 
         private CameraAnalyzer _cameraAnalyzer;
-        private bool _surfaceCreated;
 
         public bool HasTorch => _cameraAnalyzer.Torch.IsSupported;
 
@@ -208,14 +205,10 @@ namespace ZXing.Mobile
         public override async void OnWindowFocusChanged(bool hasWindowFocus)
         {
             base.OnWindowFocusChanged(hasWindowFocus);
-            
             if (!hasWindowFocus) return;
             // SurfaceCreated/SurfaceChanged are not called on a resume
             await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
-
-            //only refresh the camera if the surface has already been created. Fixed #569
-            if (_surfaceCreated)
-                _cameraAnalyzer.RefreshCamera();
+            _cameraAnalyzer.RefreshCamera();
         }
     }
 }
