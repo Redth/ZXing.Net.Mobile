@@ -45,12 +45,11 @@
       <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
-      <Project>{24b441f2-cbe9-4405-9fd0-72ebcbea0ec3}</Project>
-      <Name>zxing.portable</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="2.3.4.270" />
+    <PackageReference Include="ZXing.Net">
+      <Version>0.16.2</Version>
+    </PackageReference>
   </ItemGroup>
 </Project>
