@@ -42,9 +42,10 @@
       <Project>{7528DD0A-1781-47F4-ADBF-EEDDB011F6BB}</Project>
       <Name>ZXing.Net.Mobile.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ZXing.Net\Source\lib\zxing.portable.csproj">
-      <Project>{24B441F2-CBE9-4405-9FD0-72EBCBEA0EC3}</Project>
-      <Name>zxing.portable</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="zxing">
+      <HintPath>..\..\packages\ZXing.Net.0.16.2\lib\netstandard1.0\zxing.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

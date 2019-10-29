@@ -54,6 +54,7 @@
         </dependencies>
     </metadata>
     <files>
+
         <!-- Android 4.0.3 and higher -->
         <file src="packages/ZXing.Net.0.16.2/lib/netstandard1.0/zxing.dll" target="lib\MonoAndroid71\zxing.dll" />
         <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Core.dll" />
@@ -63,6 +64,11 @@
         <file src="packages/ZXing.Net.0.16.2/lib/netstandard1.0/zxing.dll" target="lib\Xamarin.iOS10\zxing.dll" />
         <file src="Build/Release/ios-unified/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS10\ZXingNetMobile.dll" />
+
+        <!-- NetStandard 1.0+ -->
+        <file src="packages/ZXing.Net.0.16.2/lib/netstandard1.0/zxing.dll" target="lib\netstandard1.0\zxing.dll" />
+        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\netstandard1.0\ZXingNetMobile.dll" />
 
     </files>
 </package>
