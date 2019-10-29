@@ -55,29 +55,14 @@
     </metadata>
     <files>
         <!-- Android 4.0.3 and higher -->
-        <file src="Build/Release/android/zxing.portable.dll" target="lib\MonoAndroid71\zxing.portable.dll" />
+        <file src="packages/ZXing.Net.0.16.2/lib/netstandard1.0/zxing.dll" target="lib\MonoAndroid71\zxing.dll" />
         <file src="Build/Release/android/ZXing.Net.Mobile.Core.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/android/ZXingNetMobile.dll" target="lib\MonoAndroid71\ZXingNetMobile.dll" />
 
         <!-- iOS Unified API -->
-        <file src="Build/Release/ios-unified/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />
+        <file src="packages/ZXing.Net.0.16.2/lib/netstandard1.0/zxing.dll" target="lib\Xamarin.iOS10\zxing.dll" />
         <file src="Build/Release/ios-unified/ZXing.Net.Mobile.Core.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll" />
         <file src="Build/Release/ios-unified/ZXingNetMobile.dll" target="lib\Xamarin.iOS10\ZXingNetMobile.dll" />
-
-        <!-- Windows RT / Store  -->
-        <!-- Not supported, the PCL's will get installed for this platform and throw implementation errors at runtime -->
-
-        <!-- Windows Universal  -->
-        <file src="Build/Release/uwp/zxing.portable.dll" target="lib\UAP10\zxing.portable.dll" />
-        <file src="Build/Release/uwp/ZXing.Net.Mobile.Core.dll" target="lib\UAP10\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/uwp/ZXingNetMobile.dll" target="lib\UAP10\ZXingNetMobile.dll" />
-        <file src="Build/Release/uwp/ZXingNetMobile.pri" target="lib\UAP10\ZXingNetMobile.pri" />
-        <file src="Build/Release/uwp/ZXingNetMobile.xr.xml" target="lib\UAP10\ZXingNetMobile\ZXingNetMobile.xr.xml" />
-
-        <!-- NetStandard 1.0+ -->
-        <file src="Build/Release/portable/zxing.portable.dll" target="lib\netstandard1.0\zxing.portable.dll" />
-        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\netstandard1.0\ZXingNetMobile.dll" />
 
     </files>
 </package>
