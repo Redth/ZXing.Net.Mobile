@@ -41,6 +41,13 @@ namespace ZXing.Net.Mobile.Forms.iOS
                     }
                 };
 
+                // Process requests for zoom
+                formsView.ZoomRequestediOS += (a, b, c) => {
+                                        if (zxingView != null)
+                                            {
+                        zxingView.Zoom(a, b, c);
+                                            }
+                                    };
 
                 zxingView = new ZXing.Mobile.ZXingScannerView ();
                 zxingView.UseCustomOverlayView = true;

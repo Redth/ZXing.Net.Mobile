@@ -12,6 +12,7 @@ namespace ZXing.Net.Mobile.Forms
 
         public event Action<int, int> AutoFocusRequested;
         public event Action<bool> ZoomRequested;
+        public event Action<bool, bool, float> ZoomRequestediOS;
 
         public ZXingScannerView ()
         {
@@ -37,7 +38,12 @@ namespace ZXing.Net.Mobile.Forms
             ZoomRequested?.Invoke(isZoomIn);
         }
 
-        public void AutoFocus ()
+        public void Zoom(bool began, bool changed, float scale)
+        {
+            ZoomRequestediOS?.Invoke(began, changed, scale);
+        }
+
+    public void AutoFocus ()
         {
             AutoFocusRequested?.Invoke (-1, -1);
         }

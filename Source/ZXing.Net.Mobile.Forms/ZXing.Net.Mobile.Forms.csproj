@@ -8,10 +8,11 @@
     <OutputType>Library</OutputType>
     <RootNamespace>ZXing.Net.Mobile.Forms</RootNamespace>
     <AssemblyName>ZXing.Net.Mobile.Forms</AssemblyName>
-    <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Profile49</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,8 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="2.3.4.270" />
-    <PackageReference Include="ZXing.Net">
-      <Version>0.16.2</Version>
-    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="zxing.portable">
+      <HintPath>..\..\packages\ZXing.Net.Mobile.2.4.1\lib\netstandard1.0\zxing.portable.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

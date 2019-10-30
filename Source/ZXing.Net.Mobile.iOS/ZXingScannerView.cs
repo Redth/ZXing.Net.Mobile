@@ -105,9 +105,9 @@ namespace ZXing.Mobile
 		
 		bool torch = false;
 		bool analyzing = true;
-	
 
-		bool SetupCaptureSession ()
+        private AVCaptureDevice captureDevice;
+        bool SetupCaptureSession ()
 		{
 			var started = DateTime.UtcNow;
 
@@ -130,7 +130,7 @@ namespace ZXing.Mobile
 			
 			// create a device input and attach it to the session
 //			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType (AVMediaType.Video);
-			AVCaptureDevice captureDevice = null;
+			captureDevice = null;
 			var devices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
 			foreach (var device in devices)
 			{
@@ -661,6 +661,41 @@ namespace ZXing.Mobile
         public void AutoFocus (int x, int y)
         {
             //Doesn't do much on iOS :(
+        }
+
+        private nfloat pivotPinchScale { get; set; }
+
+        public void Zoom(bool began, bool changed, float scale)
+        {
+            AVCaptureDevice device;
+            int i = 0, j = 0;
+            foreach (AVCaptureDeviceInput input in session.Inputs)
+            {
+                ++i;
+                if (input.Device == captureDevice)
+                {
+                    ++j;
+                    device = input.Device;
+
+                    //try
+                    //{
+                    NSError err;
+                    device.LockForConfiguration(out err);
+                    if (began)
+                    {
+                        pivotPinchScale = device.VideoZoomFactor;
+                    }
+                    else if (changed)
+                    {
+                        var factor = pivotPinchScale * scale;
+                        factor = (nfloat) Math.Max(1, Math.Min(factor, device.ActiveFormat.VideoMaxZoomFactor));
+                        device.VideoZoomFactor = factor;
+                    }
+                    device.UnlockForConfiguration();
+                    //}
+                    //catch { }
+                }
+            }
         }
 
 		public string TopText { get;set; }

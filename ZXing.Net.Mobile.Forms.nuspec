@@ -70,5 +70,8 @@
         <!-- iOS Unified API -->
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.iOS.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.iOS.dll" />
+
+        <!-- NetStandard 1.0+ -->
+        <file src="Build/Forms/Release/portable/ZXing.Net.Mobile.Forms.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Forms.dll" />
     </files>
 </package>

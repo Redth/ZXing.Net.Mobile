@@ -41,8 +41,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
-    <Reference Include="zxing">
-      <HintPath>..\..\packages\ZXing.Net.0.16.2\lib\netstandard1.0\zxing.dll</HintPath>
+    <Reference Include="zxing.portable">
+      <HintPath>..\..\packages\ZXing.Net.Mobile.2.4.1\lib\netstandard1.0\zxing.portable.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -78,8 +78,5 @@
     <PackageReference Include="Xamarin.Android.Support.v4" Version="23.3.0" />
     <PackageReference Include="FastAndroidCamera" Version="2.0.0" />
     <PackageReference Include="Xamarin.Forms" Version="2.3.4.270" />
-    <PackageReference Include="ZXing.Net">
-      <Version>0.16.2</Version>
-    </PackageReference>
   </ItemGroup>
 </Project>
