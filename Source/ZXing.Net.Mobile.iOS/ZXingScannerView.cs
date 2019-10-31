@@ -602,23 +602,23 @@ namespace ZXing.Mobile
                     ++j;
                     device = input.Device;
 
-                    //try
-                    //{
-                    NSError err;
-                    device.LockForConfiguration(out err);
-                    if (began)
+                    try
                     {
-                        pivotPinchScale = device.VideoZoomFactor;
+                        NSError err;
+                        device.LockForConfiguration(out err);
+                        if (began)
+                        {
+                            pivotPinchScale = device.VideoZoomFactor;
+                        }
+                        else if (changed)
+                        {
+                            var factor = pivotPinchScale * scale;
+                            factor = (nfloat) Math.Max(1, Math.Min(factor, device.ActiveFormat.VideoMaxZoomFactor));
+                            device.VideoZoomFactor = factor;
+                        }
+                        device.UnlockForConfiguration();
                     }
-                    else if (changed)
-                    {
-                        var factor = pivotPinchScale * scale;
-                        factor = (nfloat) Math.Max(1, Math.Min(factor, device.ActiveFormat.VideoMaxZoomFactor));
-                        device.VideoZoomFactor = factor;
-                    }
-                    device.UnlockForConfiguration();
-                    //}
-                    //catch { }
+                    catch { }
                 }
             }
         }
