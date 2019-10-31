@@ -77,23 +77,6 @@ namespace ZXing.Mobile
 
 			if (overlayView != null)
 			{
-				/*UITapGestureRecognizer tapGestureRecognizer = new UITapGestureRecognizer ();
-
-				tapGestureRecognizer.AddTarget (() => {
-
-					var pt = tapGestureRecognizer.LocationInView(overlayView);
-
-					Focus(pt);
-		
-					Console.WriteLine("OVERLAY TOUCH: " + pt.X + ", " + pt.Y);
-
-				});
-				tapGestureRecognizer.CancelsTouchesInView = false;
-				tapGestureRecognizer.NumberOfTapsRequired = 1;
-				tapGestureRecognizer.NumberOfTouchesRequired = 1;
-
-				overlayView.AddGestureRecognizer (tapGestureRecognizer);*/
-
 				overlayView.Frame = new CGRect(0, 0, this.Frame.Width, this.Frame.Height);
 				overlayView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 			}
