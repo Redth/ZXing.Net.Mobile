@@ -1,7 +1,7 @@
 # ZXing.Net.Mobile
 
 
-This is an improved version of the library that lets you zoom-in using a pinch gesture to scan barcodes that are far away.
+This is an improved version of the library that lets you zoom in using a pinch gesture to scan barcodes that are far away.
 
 
 
