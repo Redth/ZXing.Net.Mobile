@@ -39,7 +39,6 @@ namespace ZXing.Mobile
 
             if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
                 this.ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
-
         }
 
 		public UIViewController AsViewController()
