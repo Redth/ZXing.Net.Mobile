@@ -38,7 +38,7 @@ namespace ZXing.Mobile
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 
             if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
-                this.ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
+                this.ModalPresentationStyle = UIModalPresentationStyle.FullScreen; 
 
         }
 
