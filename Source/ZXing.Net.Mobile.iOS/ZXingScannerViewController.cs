@@ -53,39 +53,47 @@ namespace ZXing.Mobile
 
 		UIStatusBarStyle originalStatusBarStyle = UIStatusBarStyle.Default;
 
-		public override void ViewDidLoad ()
-		{
-			loadingBg = new UIView (this.View.Frame) { BackgroundColor = UIColor.Black, AutoresizingMask = UIViewAutoresizing.FlexibleDimensions };
-			loadingView = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.WhiteLarge)
-			{
-				AutoresizingMask = UIViewAutoresizing.FlexibleMargins
-			};
-			loadingView.Frame = new CGRect ((this.View.Frame.Width - loadingView.Frame.Width) / 2, 
-				(this.View.Frame.Height - loadingView.Frame.Height) / 2,
-				loadingView.Frame.Width, 
-				loadingView.Frame.Height);			
+        public override void ViewDidLoad()
+        {
+            loadingBg = new UIView(this.View.Frame) { BackgroundColor = UIColor.Black, AutoresizingMask = UIViewAutoresizing.FlexibleDimensions };
+            loadingView = new UIActivityIndicatorView(UIActivityIndicatorViewStyle.WhiteLarge)
+            {
+                AutoresizingMask = UIViewAutoresizing.FlexibleMargins
+            };
+            loadingView.Frame = new CGRect((this.View.Frame.Width - loadingView.Frame.Width) / 2,
+                (this.View.Frame.Height - loadingView.Frame.Height) / 2,
+                loadingView.Frame.Width,
+                loadingView.Frame.Height);
 
-			loadingBg.AddSubview (loadingView);
-			View.AddSubview (loadingBg);
-			loadingView.StartAnimating ();
+            loadingBg.AddSubview(loadingView);
+            View.AddSubview(loadingBg);
+            loadingView.StartAnimating();
 
-			scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height));
-			scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-			scannerView.UseCustomOverlayView = this.Scanner.UseCustomOverlay;
-			scannerView.CustomOverlayView = this.Scanner.CustomOverlay;
-			scannerView.TopText = this.Scanner.TopText;
-			scannerView.BottomText = this.Scanner.BottomText;
-			scannerView.CancelButtonText = this.Scanner.CancelButtonText;
-			scannerView.FlashButtonText = this.Scanner.FlashButtonText;
-            scannerView.OnCancelButtonPressed += delegate {                
-                Scanner.Cancel ();
+            scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height));
+            scannerView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+            scannerView.UseCustomOverlayView = this.Scanner.UseCustomOverlay;
+            scannerView.CustomOverlayView = this.Scanner.CustomOverlay;
+            scannerView.TopText = this.Scanner.TopText;
+            scannerView.BottomText = this.Scanner.BottomText;
+            scannerView.CancelButtonText = this.Scanner.CancelButtonText;
+            scannerView.FlashButtonText = this.Scanner.FlashButtonText;
+            scannerView.OnCancelButtonPressed += delegate
+            {
+                Scanner.Cancel();
             };
 
-			//this.View.AddSubview(scannerView);
-			this.View.InsertSubviewBelow (scannerView, loadingView);
+            //this.View.AddSubview(scannerView);
+            this.View.InsertSubviewBelow(scannerView, loadingView);
 
-			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-		}
+            this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
+
+            if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+            {
+                if (UIApplication.SharedApplication.KeyWindow != null)
+                    OverrideUserInterfaceStyle = UIApplication.SharedApplication.KeyWindow.RootViewController.OverrideUserInterfaceStyle;
+            }
+
+        }
 
 		public void Torch(bool on)
 		{
