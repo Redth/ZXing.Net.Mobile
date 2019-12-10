@@ -36,7 +36,10 @@ namespace ZXing.Mobile
 
 			this.View.Frame = new CGRect(0, 0, appFrame.Width, appFrame.Height);
 			this.View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-		}
+
+            if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+                this.ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
+        }
 
 		public UIViewController AsViewController()
 		{
