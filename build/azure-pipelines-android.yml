@@ -8,15 +8,6 @@ trigger:
 
 pool:
   vmImage: 'macos-latest'
-  name: PRG
-  demands:
-  - Cmd
-  - MSBuild
-  - Xamarin.Android
-  - msbuild
-  - vstest
-  - JDK
-  - AndroidSDK
 
 variables:
   buildConfiguration: 'Release'
