@@ -18,4 +18,4 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '**/Zxing.Net.Mobile.Core.csproj'
+    projects: 'Source/Zxing.Net.Mobile.Core/Zxing.Net.Mobile.Core.csproj'
