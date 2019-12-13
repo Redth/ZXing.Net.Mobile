@@ -10,6 +10,6 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: XamarinAndroid@1
+- task: MSBuild@1
   inputs:
-    projectFile: 'Source/Zxing.Net.Mobile.Core/Zxing.Net.Mobile.Core.csproj'
+    solution: 'Zxing.Net.Mobile.sln'
