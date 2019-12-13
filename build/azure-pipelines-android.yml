@@ -1,0 +1,15 @@
+# Xamarin.Android
+# Build a Xamarin.Android project.
+# Add steps that test, sign, and distribute an app, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/xamarin
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: XamarinAndroid@1
+  inputs:
+    projectFile: 'Source/Zxing.Net.Mobile.Core/Zxing.Net.Mobile.Core.csproj'
