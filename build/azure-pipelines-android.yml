@@ -19,9 +19,7 @@ steps:
 - task: NuGetCommand@2
   inputs:
     restoreSolution: '**/*.sln'
-
-- task: XamarinAndroid@1
+- task: DotNetCoreCLI@2
   inputs:
-    projectFile: '**/*droid*.csproj'
-    outputDirectory: '$(outputDirectory)'
-    configuration: '$(buildConfiguration)'
+    command: 'build'
+    projects: '**/Zxing.Net.Mobile.Core.csproj'
