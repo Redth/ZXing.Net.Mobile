@@ -5,23 +5,11 @@
 
 trigger:
 - master
-
+variables:
+  BuildConfiguration: 'Release'
 pool:
   vmImage: 'windows-latest'
-
 steps:
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: 'Zxing.Net.Mobile.sln'
-    feedsToUse: 'select'
-- task: MSBuild@1
-  inputs:
-    solution: 'Zxing.Net.Mobile.sln'
-- task: XamarinAndroid@1
-  inputs:
-    projectFile: 'Source/Zxing.Net.Mobile.Android/Zxing.Net.Mobile.Android.csproj'
-    jdkOption: 'JDKVersion'
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
@@ -30,7 +18,10 @@ steps:
 - task: MSBuild@1
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
-- task: XamarinAndroid@1
+    configuration: '$(BuildConfiguration)'
+    msbuildLocation: 'Build/$(BuildConfiguration)/portable'
+- task: NuGetCommand@2
   inputs:
-    projectFile: 'Source/Zxing.Net.Mobile.Forms.Android/Zxing.Net.Mobile.Forms.Android.csproj'
-    jdkOption: 'JDKVersion'
+    command: 'pack'
+    packagesToPack: 'Zxing.Net.Mobile.nuspec'
+    versioningScheme: 'off'
