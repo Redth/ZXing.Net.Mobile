@@ -9,12 +9,7 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  buildConfiguration: 'Release'
-  outputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)'
-
 steps:
-- task: NuGetToolInstaller@1
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
