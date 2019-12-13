@@ -19,7 +19,6 @@ steps:
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
     configuration: '$(BuildConfiguration)'
-    msbuildLocation: 'Build/$(BuildConfiguration)/portable'
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
