@@ -24,3 +24,8 @@ steps:
     command: 'pack'
     packagesToPack: 'Zxing.Net.Mobile.nuspec'
     versioningScheme: 'off'
+- task: NuGetCommand@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'Zxing.Net.Mobile.Forms.nuspec'
+    versioningScheme: 'off'
