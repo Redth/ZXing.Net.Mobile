@@ -25,6 +25,7 @@ steps:
     projectFile: 'Source/Zxing.Net.Mobile.Forms.Android/Zxing.Net.Mobile.Forms.Android.csproj'
     jdkOption: 'JDKVersion'
     configuration: '$(BuildConfiguration)'
+    outputDirectory: 'Build/$(BuildConfiguration)/android'
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
