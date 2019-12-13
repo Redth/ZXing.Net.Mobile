@@ -10,11 +10,6 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: 'Zxing.Net.Mobile.sln'
-    feedsToUse: config
-    nugetConfigPath: 'Source/Zxing.Net.Mobile.Core/packages.config'
 - task: MSBuild@1
   inputs:
     solution: 'Zxing.Net.Mobile.sln'
