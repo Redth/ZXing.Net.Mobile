@@ -10,6 +10,11 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: 'Zxing.Net.Mobile.sln'
+    feedsToUse: 'select'
 - task: MSBuild@1
   inputs:
     solution: 'Zxing.Net.Mobile.sln'
