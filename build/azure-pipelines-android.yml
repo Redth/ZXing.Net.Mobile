@@ -10,18 +10,6 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: UseDotNet@2
+- task: XamarinAndroid@1
   inputs:
-    version: 3.1.x
-- task: DotNetCoreCLI@2
-  inputs:
-    command: restore
-    projects: 'Source/Zxing.Net.Mobile.Core/Zxing.Net.Mobile.Core.csproj'
-    feedsToUse: config
-    nugetConfigPath: NuGet.config
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: 'build'
-    projects: 'Source/Zxing.Net.Mobile.Core/Zxing.Net.Mobile.Core.csproj'
-    arguments: '--configuration Release'
+    projectFile: 'Source/Zxing.Net.Mobile.Core/Zxing.Net.Mobile.Core.csproj'
