@@ -10,6 +10,9 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
+- task: UseDotNet@2
+  inputs:
+    version: 3.1.1
 - task: DotNetCoreCLI@2
   inputs:
     command: restore
