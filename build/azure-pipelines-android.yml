@@ -19,6 +19,7 @@ steps:
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
     configuration: '$(BuildConfiguration)'
+    msbuildLocation: 'Build/$(BuildConfiguration)/portable'
 - task: XamarinAndroid@1
   inputs:
     projectFile: 'Source/Zxing.Net.Mobile.Forms.Android/Zxing.Net.Mobile.Forms.Android.csproj'
