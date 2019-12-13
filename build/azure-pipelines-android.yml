@@ -13,18 +13,6 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
-    restoreSolution: 'Zxing.Net.Mobile.sln'
-    feedsToUse: 'select'
-- task: MSBuild@1
-  inputs:
-    solution: 'Zxing.Net.Mobile.sln'
-- task: XamarinAndroid@1
-  inputs:
-    projectFile: 'Source/Zxing.Net.Mobile.Android/Zxing.Net.Mobile.Android.csproj'
-    jdkOption: 'JDKVersion'
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
     restoreSolution: 'Zxing.Net.Mobile.Forms.sln'
     feedsToUse: 'select'
 - task: MSBuild@1
