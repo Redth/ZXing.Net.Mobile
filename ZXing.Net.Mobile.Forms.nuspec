@@ -64,8 +64,8 @@
     </metadata>
     <files>
         <!-- Android 7.1 and higher -->
-        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Forms.dll" />
-        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll" target="lib\MonoAndroid71\ZXing.Net.Mobile.Forms.Android.dll" />
+        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.dll" target="lib\MonoAndroid90\ZXing.Net.Mobile.Forms.dll" />
+        <file src="Build/Forms/Release/android/ZXing.Net.Mobile.Forms.Android.dll" target="lib\MonoAndroid90\ZXing.Net.Mobile.Forms.Android.dll" />
 
         <!-- iOS Unified API -->
         <file src="Build/Forms/Release/ios-unified/ZXing.Net.Mobile.Forms.dll" target="lib\Xamarin.iOS10\ZXing.Net.Mobile.Forms.dll" />
