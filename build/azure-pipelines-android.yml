@@ -12,7 +12,7 @@ pool:
 steps:
 - task: UseDotNet@2
   inputs:
-    version: 3.1.1
+    version: 3.1.x
 - task: DotNetCoreCLI@2
   inputs:
     command: restore
