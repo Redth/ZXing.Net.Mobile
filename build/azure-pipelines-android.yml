@@ -5,10 +5,10 @@
 
 trigger:
 - master
-
+variables:
+  BuildConfiguration: 'Release'
 pool:
   vmImage: 'windows-latest'
-
 steps:
 - task: NuGetCommand@2
   inputs:
@@ -18,10 +18,12 @@ steps:
 - task: MSBuild@1
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
+    configuration: '$(BuildConfiguration)'
 - task: XamarinAndroid@1
   inputs:
     projectFile: 'Source/Zxing.Net.Mobile.Forms.Android/Zxing.Net.Mobile.Forms.Android.csproj'
     jdkOption: 'JDKVersion'
+    configuration: '$(BuildConfiguration)'
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
