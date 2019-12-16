@@ -13,16 +13,21 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
-    restoreSolution: 'Bentley.Forms.CarouselView.sln'
+    restoreSolution: 'Zxing.Net.Mobile.Forms.sln'
     feedsToUse: 'select'
 - task: MSBuild@1
   inputs:
-    solution: 'Bentley.Forms.CarouselView.sln'
+    solution: 'Zxing.Net.Mobile.Forms.sln'
     configuration: '$(BuildConfiguration)'
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
-    packagesToPack: 'Bentley.Forms.CarouselView.nuspec'
+    packagesToPack: 'Zxing.Net.Mobile.nuspec'
+    versioningScheme: 'off'
+- task: NuGetCommand@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'Zxing.Net.Mobile.Forms.nuspec'
     versioningScheme: 'off'
 
 - task: PublishBuildArtifacts@1
