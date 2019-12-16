@@ -19,10 +19,6 @@ steps:
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
     configuration: '$(BuildConfiguration)'
-- task: XamarinAndroid@1
-  inputs:
-    projectFile: 'Source/Zxing.Net.Mobile.Android/Zxing.Net.Mobile.Android.csproj'
-    jdkOption: 'JDKVersion'
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
