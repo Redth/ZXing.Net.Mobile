@@ -66,8 +66,8 @@
         <file src="packages/ZXing.Net.Mobile.2.4.1/lib/netstandard1.0/zxing.portable.dll" target="lib\Xamarin.iOS10\zxing.portable.dll" />
 
         <!-- NetStandard 1.0+ -->
-        <file src="Build/Release/core/ZXing.Net.Mobile.Core.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Core.dll" />
-        <file src="Build/Release/core/ZXingNetMobile.dll" target="lib\netstandard1.0\ZXingNetMobile.dll" />
+        <file src="Build/Release/portable/ZXing.Net.Mobile.Core.dll" target="lib\netstandard1.0\ZXing.Net.Mobile.Core.dll" />
+        <file src="Build/Release/portable/ZXingNetMobile.dll" target="lib\netstandard1.0\ZXingNetMobile.dll" />
         <file src="packages/ZXing.Net.Mobile.2.4.1/lib/netstandard1.0/zxing.portable.dll" target="lib\netstandard1.0\zxing.portable.dll" />
     </files>
 </package>
