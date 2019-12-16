@@ -19,6 +19,12 @@ steps:
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
     configuration: '$(BuildConfiguration)'
+- task: XamariniOS@2
+  inputs:
+    solutionFile: 'Zxing.Net.Mobile.Forms.sln'
+    configuration: 'Release'
+    packageApp: true
+    runNugetRestore: false
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
@@ -29,3 +35,9 @@ steps:
     command: 'pack'
     packagesToPack: 'Zxing.Net.Mobile.Forms.nuspec'
     versioningScheme: 'off'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
