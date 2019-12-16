@@ -19,12 +19,6 @@ steps:
   inputs:
     solution: 'Zxing.Net.Mobile.Forms.sln'
     configuration: '$(BuildConfiguration)'
-- task: XamariniOS@2
-  inputs:
-    solutionFile: 'Zxing.Net.Mobile.Forms.sln'
-    configuration: 'Release'
-    packageApp: true
-    runNugetRestore: false
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
