@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>ZXing.Net.Mobile</id>
-        <version>2.4.2</version>
+        <version>2.4.3</version>
         <title>ZXing.Net.Mobile Barcode Scanner</title>
         <authors>Redth</authors>
         <licenseUrl>http://raw.github.com/Redth/ZXing.Net.Mobile/master/License.md</licenseUrl>
