@@ -100,7 +100,7 @@ namespace ZXing.Mobile
         {
             ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 
-            _cameraAnalyzer.BarcodeFound += (sender, result) =>
+            _cameraAnalyzer.BarcodeFound = (result) =>
             {
                 scanResultCallback?.Invoke(result);
             };
