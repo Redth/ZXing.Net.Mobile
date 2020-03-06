@@ -154,7 +154,7 @@ namespace FormsSample
 ```
 
 
-##Custom Overlays
+## Custom Overlays
 
 It's very simple to use a custom overlay.  If you are using the `ZXingScannerPage` you can pass in any `View` for the `customOverlay` parameter in the constructor.
 
