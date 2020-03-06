@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -51,7 +52,7 @@ namespace ZXing.Mobile
 
             await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                rootFrame.Navigate(typeof(ScanPage), new ScanPageNavigationParameters
+                var pageOptions = new ScanPageNavigationParameters
                 {
                     Options = options,
                     ResultHandler = r =>
@@ -59,8 +60,11 @@ namespace ZXing.Mobile
                         tcsScanResult.SetResult(r);
                     },
                     Scanner = this,
-                    ContinuousScanning = false
-                });
+                    ContinuousScanning = false,
+                    CameraInitialized = () => { OnCameraInitialized?.Invoke(); },
+                    CameraError = (errors) => { OnCameraError?.Invoke(errors); }
+                };
+                rootFrame.Navigate(typeof(ScanPage), pageOptions);
             });
             
             var result = await tcsScanResult.Task;
@@ -73,6 +77,12 @@ namespace ZXing.Mobile
 
             return result;
         }
+
+        public event ScannerOpened OnCameraInitialized;
+        public delegate void ScannerOpened();
+
+        public event ScannerError OnCameraError;
+        public delegate void ScannerError(IEnumerable<string> errors);
 
         public override async void Cancel()
         {

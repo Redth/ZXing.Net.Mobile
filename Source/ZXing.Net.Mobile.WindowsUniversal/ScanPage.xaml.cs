@@ -41,6 +41,8 @@ namespace ZXing.Mobile
                 return;
 
             Parameters = e.Parameter as ScanPageNavigationParameters;
+            scannerControl.OnCameraInitialized += ScannerControl_OnCameraInitialized;
+            scannerControl.OnScannerError += ScannerControl_OnScannerError;
 
             if (Parameters != null)
                 Parameters.Scanner.ScanPage = this;
@@ -56,8 +58,21 @@ namespace ZXing.Mobile
 
             scannerControl.StartScanning(Parameters?.ResultHandler, Parameters?.Options);
         }
+
+        private void ScannerControl_OnCameraInitialized()
+        {
+            Parameters.CameraInitialized?.Invoke();
+        }
+
+        private void ScannerControl_OnScannerError(IEnumerable<string> errors)
+        {
+            Parameters.CameraError?.Invoke(errors);
+        }
+
         
-        protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        
+
+    protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
         {
             try
             {
@@ -183,5 +198,8 @@ namespace ZXing.Mobile
         public bool ContinuousScanning { get; set; }
         public MobileBarcodeScanningOptions Options { get; set; }
         public Action<ZXing.Result> ResultHandler { get; set; }
+
+        public Action CameraInitialized { get; set; }
+        public Action<IEnumerable<string>> CameraError { get; set; }
     }
 }

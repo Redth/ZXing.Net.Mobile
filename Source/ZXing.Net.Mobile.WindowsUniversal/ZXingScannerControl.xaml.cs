@@ -37,7 +37,11 @@ namespace ZXing.Mobile
             displayOrientation = displayInformation.CurrentOrientation;
             displayInformation.OrientationChanged += displayInformation_OrientationChanged; 
         }
+        public event ScannerOpened OnCameraInitialized;
+        public delegate void ScannerOpened();
 
+        public event ScannerError OnScannerError;
+        public delegate void ScannerError(IEnumerable<string> errors);
         async void displayInformation_OrientationChanged(DisplayInformation sender, object args)
         {
             //This safeguards against a null reference if the device is rotated *before* the first call to StartScanning
@@ -97,7 +101,12 @@ namespace ZXing.Mobile
         public async Task StartScanningAsync(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
         {
             if (stopping)
+            {
+                var error = "Camera is closing";
+                OnScannerError?.Invoke(new[] { error });
                 return;
+            }
+                
 
             displayRequest.RequestActive();
 
@@ -127,8 +136,10 @@ namespace ZXing.Mobile
             var preferredCamera = await GetFilteredCameraOrDefaultAsync(ScanningOptions);
             if (preferredCamera == null)
             {
-                System.Diagnostics.Debug.WriteLine("No camera available");
+                var error = "No camera available";
+                System.Diagnostics.Debug.WriteLine(error);
                 isMediaCaptureInitialized = false;
+                OnScannerError?.Invoke(new[] { error });
                 return;
             }
 
@@ -168,7 +179,12 @@ namespace ZXing.Mobile
             }
 
             if (!isMediaCaptureInitialized)
+            {
+                var error = "Unexpected error on Camera initialisation";
+                OnScannerError?.Invoke(new[] { error });
                 return;
+            }
+                
 
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
@@ -176,6 +192,11 @@ namespace ZXing.Mobile
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
+
+            if(mediaCapture.CameraStreamState == CameraStreamState.Streaming)
+            {
+                OnCameraInitialized?.Invoke();
+            }
 
             // Get all the available resolutions for preview
             var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
@@ -189,6 +210,13 @@ namespace ZXing.Mobile
             CameraResolution previewResolution = null;
             if (ScanningOptions.CameraResolutionSelector != null)
                 previewResolution = ScanningOptions.CameraResolutionSelector(availableResolutions);
+
+            if(availableResolutions == null || availableResolutions.Count < 1)
+            {
+                var error = "Camera is busy. Try to close all applications that use camera.";
+                OnScannerError?.Invoke(new[] { error });
+                return;
+            }
 
             // If the user did not specify a resolution, let's try and find a suitable one
             if (previewResolution == null)
@@ -324,12 +352,12 @@ namespace ZXing.Mobile
             return selectedCamera;
         }
 
-        protected override async void OnPointerPressed(PointerRoutedEventArgs e)
+        protected override void OnPointerPressed(PointerRoutedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("AutoFocus requested");
             base.OnPointerPressed(e);
             var pt = e.GetCurrentPoint(captureElement);
-            await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true);
+            new Task(() => { AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true); });
         }
 
         Timer timerPreview;
@@ -450,7 +478,7 @@ namespace ZXing.Mobile
             if (ScanningOptions.DisableAutofocus)
                 return;
 
-            if (IsFocusSupported)
+            if (IsFocusSupported && mediaCapture?.CameraStreamState == CameraStreamState.Streaming)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
                 var roiControl = mediaCapture.VideoDeviceController.RegionsOfInterestControl;
