@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if __UNIFIED__
 using Foundation;
 using CoreFoundation;
 using AVFoundation;
@@ -14,26 +13,13 @@ using CoreMedia;
 using CoreVideo;
 using ObjCRuntime;
 using UIKit;
-#else
-using MonoTouch.AVFoundation;
-using MonoTouch.CoreFoundation;
-using MonoTouch.CoreGraphics;
-using MonoTouch.CoreMedia;
-using MonoTouch.CoreVideo;
-using MonoTouch.Foundation;
-using MonoTouch.ObjCRuntime;
-using MonoTouch.UIKit;
-
-using CGRect = global::System.Drawing.RectangleF;
-using CGPoint = global::System.Drawing.PointF;
-#endif
 
 using ZXing.Common;
 using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-	public class ZXingScannerView : UIView, IZXingScanner<UIView>
+	public class ZXingScannerView : UIView, IZXingScanner<UIView>, IScannerSessionHost
 	{
 		public delegate void ScannerSetupCompleteDelegate();
 		public event ScannerSetupCompleteDelegate OnScannerSetupComplete;
@@ -57,17 +43,18 @@ namespace ZXing.Mobile
 		DispatchQueue queue;
 		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = true;
-		//BarcodeReader barcodeReader;
 
 		UIView layerView;
 		UIView overlayView = null;
+
+		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
         public event Action OnCancelButtonPressed;
 
 		public string CancelButtonText { get;set; }
 		public string FlashButtonText { get;set; }
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		bool shouldRotatePreviewBuffer = false;
 
 		void Setup(CGRect frame)
 		{
@@ -147,12 +134,12 @@ namespace ZXing.Mobile
 			foreach (var device in devices)
 			{
 				captureDevice = device;
-				if (options.UseFrontCameraIfAvailable.HasValue &&
-				    options.UseFrontCameraIfAvailable.Value &&
+				if (ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
+				    ScanningOptions.UseFrontCameraIfAvailable.Value &&
 				    device.Position == AVCaptureDevicePosition.Front)
 
 					break; //Front camera successfully set
-				else if (device.Position == AVCaptureDevicePosition.Back && (!options.UseFrontCameraIfAvailable.HasValue || !options.UseFrontCameraIfAvailable.Value))
+				else if (device.Position == AVCaptureDevicePosition.Back && (!ScanningOptions.UseFrontCameraIfAvailable.HasValue || !ScanningOptions.UseFrontCameraIfAvailable.Value))
 					break; //Back camera succesfully set
 			}
 			if (captureDevice == null){
@@ -176,7 +163,7 @@ namespace ZXing.Mobile
 					availableResolutions.Add (cr.Value);
 			}
 
-			resolution = options.GetResolution (availableResolutions);
+			resolution = ScanningOptions.GetResolution (availableResolutions);
 
 			// See if the user selected a resolution
 			if (resolution != null) {
@@ -205,13 +192,11 @@ namespace ZXing.Mobile
 				session.AddInput (input);
 
 
-			var startedAVPreviewLayerAlloc = DateTime.UtcNow;
+			var startedAVPreviewLayerAlloc = PerformanceCounter.Start();
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
 
-			var totalAVPreviewLayerAlloc = DateTime.UtcNow - startedAVPreviewLayerAlloc;
-
-			Console.WriteLine ("PERF: Alloc AVCaptureVideoPreviewLayer took {0} ms.", totalAVPreviewLayerAlloc.TotalMilliseconds);
+			PerformanceCounter.Stop(startedAVPreviewLayerAlloc, "Alloc AVCaptureVideoPreviewLayer took {0} ms.");
 
 
 			// //Framerate set here (15 fps)
@@ -282,78 +267,28 @@ namespace ZXing.Mobile
 			// configure the output
 			queue = new DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
 
-			var barcodeReader = new BarcodeReaderiOS(null, (img) => 	
+			var barcodeReader = ScanningOptions.BuildBarcodeReader();
+
+			outputRecorder = new OutputRecorder (this, img =>
 			{
-				var src = new RGBLuminanceSourceiOS(img); //, bmp.Width, bmp.Height);
+				var ls = img;
 
-				//Don't try and rotate properly if we're autorotating anyway
-				if (ScanningOptions.AutoRotate.HasValue && ScanningOptions.AutoRotate.Value)
-					return src;
-
-				var tmpInterfaceOrientation = UIInterfaceOrientation.Portrait;
-				InvokeOnMainThread(() => tmpInterfaceOrientation = UIApplication.SharedApplication.StatusBarOrientation);
-
-				switch (tmpInterfaceOrientation)
-				{
-					case UIInterfaceOrientation.Portrait:
-						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-					case UIInterfaceOrientation.PortraitUpsideDown:
-						return src.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-					case UIInterfaceOrientation.LandscapeLeft:
-						return src;
-					case UIInterfaceOrientation.LandscapeRight:
-						return src;
-				}
-
-				return src;
-
-			}, null, null); //(p, w, h, f) => new RGBLuminanceSource(p, w, h, RGBLuminanceSource.BitmapFormat.Unknown));
-
-			if (ScanningOptions.TryHarder.HasValue)
-			{
-				Console.WriteLine("TRY_HARDER: " + ScanningOptions.TryHarder.Value);
-				barcodeReader.Options.TryHarder = ScanningOptions.TryHarder.Value;
-			}
-			if (ScanningOptions.PureBarcode.HasValue)
-				barcodeReader.Options.PureBarcode = ScanningOptions.PureBarcode.Value;
-			if (ScanningOptions.AutoRotate.HasValue)
-			{
-				Console.WriteLine("AUTO_ROTATE: " + ScanningOptions.AutoRotate.Value);
-				barcodeReader.AutoRotate = ScanningOptions.AutoRotate.Value;
-			}
-			if (ScanningOptions.UseCode39ExtendedMode.HasValue)
- 				barcodeReader.Options.UseCode39ExtendedMode = ScanningOptions.UseCode39ExtendedMode.Value;
-			if (!string.IsNullOrEmpty (ScanningOptions.CharacterSet))
-				barcodeReader.Options.CharacterSet = ScanningOptions.CharacterSet;
-			if (ScanningOptions.TryInverted.HasValue)
-				barcodeReader.TryInverted = ScanningOptions.TryInverted.Value;
-
-			if (ScanningOptions.PossibleFormats != null && ScanningOptions.PossibleFormats.Count > 0)
-			{
-				barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
-				
-				foreach (var pf in ScanningOptions.PossibleFormats)
-					barcodeReader.Options.PossibleFormats.Add(pf);
-			}
-
-			outputRecorder = new OutputRecorder (ScanningOptions, img => 
-			{
 				if (!IsAnalyzing)
 					return false;
 
 				try
 				{
-					//var sw = new System.Diagnostics.Stopwatch();
-					//sw.Start();
+					var perfDecode = PerformanceCounter.Start();
 
-                    var rs = barcodeReader.Decode(img);
+					if (shouldRotatePreviewBuffer)
+						ls = ls.rotateCounterClockwise();
+					
+					var result = barcodeReader.Decode(ls);
 
-					//sw.Stop();
+					PerformanceCounter.Stop(perfDecode, "Decode Time: {0} ms");
 
-					//Console.WriteLine("Decode Time: {0} ms", sw.ElapsedMilliseconds);
-
-                    if (rs != null) {
-						resultCallback(rs);
+                    if (result != null) {
+						resultCallback(result);
                         return true;
                     }
 				}
@@ -379,10 +314,14 @@ namespace ZXing.Mobile
 			NSError err = null;
 			if (captureDevice.LockForConfiguration(out err))
 			{
-				if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
-					captureDevice.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
-				else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.AutoFocus))
-					captureDevice.FocusMode = AVCaptureFocusMode.AutoFocus;
+				if (ScanningOptions.DisableAutofocus) {
+					captureDevice.FocusMode = AVCaptureFocusMode.Locked;
+				} else {
+					if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
+					else if (captureDevice.IsFocusModeSupported(AVCaptureFocusMode.AutoFocus))
+						captureDevice.FocusMode = AVCaptureFocusMode.AutoFocus;
+				}
 
 				if (captureDevice.IsExposureModeSupported (AVCaptureExposureMode.ContinuousAutoExposure))
 					captureDevice.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;
@@ -425,6 +364,8 @@ namespace ZXing.Mobile
 
 		public void ResizePreview (UIInterfaceOrientation orientation)
 		{
+			shouldRotatePreviewBuffer = orientation == UIInterfaceOrientation.Portrait || orientation == UIInterfaceOrientation.PortraitUpsideDown;
+
 			if (previewLayer == null)
 				return;
 
@@ -481,13 +422,13 @@ namespace ZXing.Mobile
 
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate 
 		{
-            public OutputRecorder(MobileBarcodeScanningOptions options, Func<LuminanceSource, bool> handleImage) : base()
+            public OutputRecorder(IScannerSessionHost scannerHost, Func<LuminanceSource, bool> handleImage) : base()
             {
                 HandleImage = handleImage;
-                this.options = options;
+				this.scannerHost = scannerHost;
             }
 
-			MobileBarcodeScanningOptions options;
+			IScannerSessionHost scannerHost;
             Func<LuminanceSource, bool> HandleImage;
 
 			DateTime lastAnalysis = DateTime.MinValue;
@@ -495,7 +436,7 @@ namespace ZXing.Mobile
             volatile bool wasScanned = false;
 
 			[Export ("captureOutput:didDropSampleBuffer:fromConnection:")]
-			public void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
+			public override void DidDropSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
 				//Console.WriteLine("Dropped Sample Buffer");
 			}
@@ -507,11 +448,17 @@ namespace ZXing.Mobile
 			{
                 var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
                     
-                if (msSinceLastPreview < options.DelayBetweenAnalyzingFrames
-                    || (wasScanned && msSinceLastPreview < options.DelayBetweenContinuousScans)
+                if (msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames
+                    || (wasScanned && msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
                     || working
 				    || CancelTokenSource.IsCancellationRequested)
 				{
+
+					if (msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
+						Console.WriteLine("Too soon between frames");
+					if (wasScanned && msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
+						Console.WriteLine("Too soon since last scan");
+					
 					if (sampleBuffer != null)
 					{
 						sampleBuffer.Dispose ();
@@ -532,7 +479,7 @@ namespace ZXing.Mobile
                         // Lock the base address
                         pixelBuffer.Lock(CVPixelBufferLock.ReadOnly); // MAYBE NEEDS READ/WRITE
 
-                        CVPixelBufferARGB32LuminanceSource luminanceSource;
+                        LuminanceSource luminanceSource;
 
                         // Let's access the raw underlying data and create a luminance source from it
                         unsafe
@@ -540,10 +487,11 @@ namespace ZXing.Mobile
                             var rawData = (byte*)pixelBuffer.BaseAddress.ToPointer();
                             var rawDatalen = (int)(pixelBuffer.Height * pixelBuffer.Width * 4); //This drops 8 bytes from the original length to give us the expected length
 
-                            luminanceSource = new CVPixelBufferARGB32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
+                            luminanceSource = new CVPixelBufferBGRA32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
                         }
 
-                        HandleImage(luminanceSource);
+                        if (HandleImage(luminanceSource))
+                            wasScanned = true;
 
                         pixelBuffer.Unlock(CVPixelBufferLock.ReadOnly);
                     }
@@ -560,8 +508,11 @@ namespace ZXing.Mobile
 				} catch (Exception e){
 					Console.WriteLine (e);
 				}
+                finally
+                {
+                    working = false;
+                }
 
-				working = false;
 			}
 		}
 	
@@ -577,7 +528,7 @@ namespace ZXing.Mobile
 
 			Setup (this.Frame);
 
-			this.options = options ?? MobileBarcodeScanningOptions.Default;
+			this.ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 			this.resultCallback = scanResultHandler;
 
 			Console.WriteLine("StartScanning");
@@ -717,7 +668,6 @@ namespace ZXing.Mobile
 
 		public UIView CustomOverlayView { get; set; }
 		public bool UseCustomOverlayView { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get { return options; } }
 		public bool IsAnalyzing { get { return analyzing; } }
 		public bool IsTorchOn { get { return torch; } }
 
@@ -735,4 +685,3 @@ namespace ZXing.Mobile
 		#endregion
 	}
 }
-

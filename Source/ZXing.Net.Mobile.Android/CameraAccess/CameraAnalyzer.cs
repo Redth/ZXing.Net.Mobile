@@ -9,18 +9,17 @@ namespace ZXing.Mobile.CameraAccess
     public class CameraAnalyzer
     {
         private readonly CameraController _cameraController;
-        private readonly MobileBarcodeScanningOptions _scanningOptions;
         private readonly CameraEventsListener _cameraEventListener;
         private Task _processingTask;
         private DateTime _lastPreviewAnalysis = DateTime.UtcNow;
         private bool _wasScanned;
-        private BarcodeReaderGeneric<FastJavaByteArrayYUVLuminanceSource> _barcodeReader;
+        IScannerSessionHost _scannerHost;
 
-        public CameraAnalyzer(SurfaceView surfaceView, MobileBarcodeScanningOptions scanningOptions)
+        public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
         {
-            _scanningOptions = scanningOptions;
+            _scannerHost = scannerHost;
             _cameraEventListener = new CameraEventsListener();
-            _cameraController = new CameraController(surfaceView, _cameraEventListener, scanningOptions);
+            _cameraController = new CameraController(surfaceView, _cameraEventListener, scannerHost);
             Torch = new Torch(_cameraController, surfaceView.Context);
         }
 
@@ -81,11 +80,11 @@ namespace ZXing.Mobile.CameraAccess
                     return false;
                 
                 var elapsedTimeMs = (DateTime.UtcNow - _lastPreviewAnalysis).TotalMilliseconds;
-				if (elapsedTimeMs < _scanningOptions.DelayBetweenAnalyzingFrames)
+				if (elapsedTimeMs < _scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
 					return false;
 				
 				// Delay a minimum between scans
-				if (_wasScanned && elapsedTimeMs < _scanningOptions.DelayBetweenContinuousScans)
+				if (_wasScanned && elapsedTimeMs < _scannerHost.ScanningOptions.DelayBetweenContinuousScans)
 					return false;
 				
 				return true;
@@ -115,16 +114,13 @@ namespace ZXing.Mobile.CameraAccess
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        byte[] _matrix;
-        byte[] _rotatedMatrix;
-
         private void DecodeFrame(FastJavaByteArray fastArray)
         {
             var cameraParameters = _cameraController.Camera.GetParameters();
             var width = cameraParameters.PreviewSize.Width;
             var height = cameraParameters.PreviewSize.Height;
 
-            InitBarcodeReaderIfNeeded();
+            var barcodeReader = _scannerHost.ScanningOptions.BuildBarcodeReader();
 
             var rotate = false;
             var newWidth = width;
@@ -143,19 +139,11 @@ namespace ZXing.Mobile.CameraAccess
             ZXing.Result result = null;
             var start = PerformanceCounter.Start();
 
-            LuminanceSource luminanceSource;
-
-            var fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
+            LuminanceSource fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
             if (rotate)
-            {
-                fast.CopyMatrix(ref _matrix);
-                RotateCounterClockwise(_matrix, ref _rotatedMatrix, width, height); // _area.Width, _area.Height);
-                luminanceSource = new PlanarYUVLuminanceSource(_rotatedMatrix, height, width, 0, 0, height, width, false); // _area.Height, _area.Width, 0, 0, _area.Height, _area.Width, false);
-            }
-            else
-                luminanceSource = fast;
-            
-            result = _barcodeReader.Decode(luminanceSource);
+                fast = fast.rotateCounterClockwise();
+
+            result = barcodeReader.Decode(fast);
 
             fastArray.Dispose();
             fastArray = null;
@@ -164,60 +152,14 @@ namespace ZXing.Mobile.CameraAccess
                 "Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
                 rotate + ")");
 
-			if (result != null)
-			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found: " + result.Text);
-
-				_wasScanned = true;
-				BarcodeFound?.Invoke(this, result);
-				return;
-			}
-        }
-
-        private void InitBarcodeReaderIfNeeded()
-        {
-            if (_barcodeReader != null)
-                return;
-
-            _barcodeReader = new BarcodeReaderGeneric<FastJavaByteArrayYUVLuminanceSource>();
-
-            if (_scanningOptions.TryHarder.HasValue)
-                _barcodeReader.Options.TryHarder = _scanningOptions.TryHarder.Value;
-            if (_scanningOptions.PureBarcode.HasValue)
-                _barcodeReader.Options.PureBarcode = _scanningOptions.PureBarcode.Value;
-            if (!string.IsNullOrEmpty(_scanningOptions.CharacterSet))
-                _barcodeReader.Options.CharacterSet = _scanningOptions.CharacterSet;
-            if (_scanningOptions.TryInverted.HasValue)
-                _barcodeReader.TryInverted = _scanningOptions.TryInverted.Value;
-            if (_scanningOptions.UseCode39ExtendedMode.HasValue)
-                _barcodeReader.Options.UseCode39ExtendedMode = _scanningOptions.UseCode39ExtendedMode.Value;
-
-            if (_scanningOptions.PossibleFormats != null && _scanningOptions.PossibleFormats.Count > 0)
+            if (result != null)
             {
-                _barcodeReader.Options.PossibleFormats = new List<BarcodeFormat>();
+                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
 
-                foreach (var pf in _scanningOptions.PossibleFormats)
-                    _barcodeReader.Options.PossibleFormats.Add(pf);
+                _wasScanned = true;
+                BarcodeFound?.Invoke(this, result);
+                return;
             }
-        }
-
-        private static byte[] RotateCounterClockwise(byte[] data, int width, int height)
-        {
-            var rotatedData = new byte[data.Length];
-            for (var y = 0; y < height; y++)
-                for (var x = 0; x < width; x++)
-                    rotatedData[x*height + height - y - 1] = data[x + y*width];
-            return rotatedData;
-        }
-
-        private void RotateCounterClockwise(byte[] source, ref byte[] target, int width, int height)
-        {
-            if (source.Length != (target?.Length ?? -1))
-                target = new byte[source.Length];
-
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    target[x * height + height - y - 1] = source[x + y * width];
         }
     }
 }

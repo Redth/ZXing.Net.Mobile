@@ -31,6 +31,10 @@ namespace ZXing.Mobile
 		public string CharacterSet { get;set; }
 		public bool? TryInverted { get;set; }
 		public bool? UseFrontCameraIfAvailable { get; set; }
+        public bool? AssumeGS1 { get; set; }
+
+
+		public bool DisableAutofocus { get; set; }
 
         public bool UseNativeScanning { get; set; }
 
@@ -59,6 +63,8 @@ namespace ZXing.Mobile
 				reader.Options.CharacterSet = this.CharacterSet;
 			if (this.TryInverted.HasValue)
 				reader.TryInverted = this.TryInverted.Value;
+            if (this.AssumeGS1.HasValue)
+                reader.Options.AssumeGS1 = this.AssumeGS1.Value;
 
 			if (this.PossibleFormats != null && this.PossibleFormats.Count > 0)
 			{

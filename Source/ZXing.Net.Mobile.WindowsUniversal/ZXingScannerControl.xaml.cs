@@ -28,7 +28,7 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IDisposable
+    public sealed partial class ZXingScannerControl : UserControl, IScannerView, IScannerSessionHost, IDisposable
     {
         public ZXingScannerControl()
         {
@@ -188,9 +188,11 @@ namespace ZXing.Mobile
 
             // Set the capture element's source to show it in the UI
             captureElement.Source = mediaCapture;
+            captureElement.FlowDirection = mirroringPreview ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
+
             if(mediaCapture.CameraStreamState == CameraStreamState.Streaming)
             {
                 OnCameraInitialized?.Invoke();
@@ -238,6 +240,12 @@ namespace ZXing.Mobile
 
             if (previewResolution == null)
                 previewResolution = availableResolutions.LastOrDefault();
+            
+            if (previewResolution == null)
+            {
+                System.Diagnostics.Debug.WriteLine("No preview resolution available. Camera may be in use by another application.");
+                return;
+            }
 
             MobileBarcodeScanner.Log("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
 
@@ -400,6 +408,15 @@ namespace ZXing.Mobile
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;
 
                 var focusSettings = new FocusSettings();
+
+                if (ScanningOptions.DisableAutofocus)
+                {
+                    focusSettings.Mode = FocusMode.Manual;
+                    focusSettings.Distance = ManualFocusDistance.Nearest;
+                    focusControl.Configure(focusSettings);
+                    return;
+                }
+
                 focusSettings.AutoFocusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
                     ? AutoFocusRange.FullRange
                     : focusControl.SupportedFocusRanges.FirstOrDefault();
@@ -458,6 +475,9 @@ namespace ZXing.Mobile
 
         public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
         {
+            if (ScanningOptions.DisableAutofocus)
+                return;
+
             if (IsFocusSupported && mediaCapture?.CameraStreamState == CameraStreamState.Streaming)
             {
                 var focusControl = mediaCapture.VideoDeviceController.FocusControl;

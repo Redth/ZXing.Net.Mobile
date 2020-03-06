@@ -15,20 +15,19 @@ namespace ZXing.Mobile.CameraAccess
     public class CameraController
     {
         private readonly Context _context;
-        private readonly MobileBarcodeScanningOptions _scanningOptions;
         private readonly ISurfaceHolder _holder;
         private readonly SurfaceView _surfaceView;
         private readonly CameraEventsListener _cameraEventListener;
         private int _cameraId;
+		IScannerSessionHost _scannerHost;
 
-        public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener,
-            MobileBarcodeScanningOptions scanningOptions)
+        public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
         {
             _context = surfaceView.Context;
             _holder = surfaceView.Holder;
             _surfaceView = surfaceView;
             _cameraEventListener = cameraEventListener;
-            _scanningOptions = scanningOptions;
+			_scannerHost = scannerHost;
         }
 
         public Camera Camera { get; private set; }
@@ -134,10 +133,13 @@ namespace ZXing.Mobile.CameraAccess
             {
                 try
                 {
-                    //Camera.SetPreviewCallback(null);
-                    Camera.SetPreviewDisplay(null);
                     Camera.StopPreview();
                     Camera.SetNonMarshalingPreviewCallback(null);
+
+                    //Camera.SetPreviewCallback(null);
+
+                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"Calling SetPreviewDisplay: null");
+                    Camera.SetPreviewDisplay(null);
                 }
                 catch (Exception ex)
                 {
@@ -171,8 +173,8 @@ namespace ZXing.Mobile.CameraAccess
 
                     var whichCamera = CameraFacing.Back;
 
-                    if (_scanningOptions.UseFrontCameraIfAvailable.HasValue &&
-                        _scanningOptions.UseFrontCameraIfAvailable.Value)
+					if (_scannerHost.ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
+                        _scannerHost.ScanningOptions.UseFrontCameraIfAvailable.Value)
                         whichCamera = CameraFacing.Front;
 
                     for (var i = 0; i < numCameras; i++)
@@ -216,11 +218,21 @@ namespace ZXing.Mobile.CameraAccess
 
         private void ApplyCameraSettings()
         {
+            if (Camera == null)
+            {
+                OpenCamera();
+            }
+
+            // do nothing if something wrong with camera
+            if (Camera == null) return;
+
             var parameters = Camera.GetParameters();
             parameters.PreviewFormat = ImageFormatType.Nv21;
 
             var supportedFocusModes = parameters.SupportedFocusModes;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
+            if (_scannerHost.ScanningOptions.DisableAutofocus)
+                parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+            else if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
                 supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
                 parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
             else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
@@ -244,28 +256,33 @@ namespace ZXing.Mobile.CameraAccess
                 parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
             }
 
-            var availableResolutions = parameters.SupportedPreviewSizes.Select(sps => new CameraResolution
+            CameraResolution resolution = null;
+            var supportedPreviewSizes = parameters.SupportedPreviewSizes;
+            if (supportedPreviewSizes != null)
             {
-                Width = sps.Width,
-                Height = sps.Height
-            });
-
-            // Try and get a desired resolution from the options selector
-            var resolution = _scanningOptions.GetResolution(availableResolutions.ToList());
-
-            // If the user did not specify a resolution, let's try and find a suitable one
-            if (resolution == null)
-            {
-                foreach (var sps in parameters.SupportedPreviewSizes)
+                var availableResolutions = supportedPreviewSizes.Select(sps => new CameraResolution
                 {
-                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
+                    Width = sps.Width,
+                    Height = sps.Height
+                });
+
+                // Try and get a desired resolution from the options selector
+                resolution = _scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
+
+                // If the user did not specify a resolution, let's try and find a suitable one
+                if (resolution == null)
+                {
+                    foreach (var sps in supportedPreviewSizes)
                     {
-                        resolution = new CameraResolution
+                        if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
                         {
-                            Width = sps.Width,
-                            Height = sps.Height
-                        };
-                        break;
+                            resolution = new CameraResolution
+                            {
+                                Width = sps.Width,
+                                Height = sps.Height
+                            };
+                            break;
+                        }
                     }
                 }
             }
@@ -298,6 +315,13 @@ namespace ZXing.Mobile.CameraAccess
         private void AutoFocus(int x, int y, bool useCoordinates)
         {
             if (Camera == null) return;
+
+			if (_scannerHost.ScanningOptions.DisableAutofocus)
+			{
+				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Disabled");
+				return;
+			}
+
             var cameraParams = Camera.GetParameters();
 
             Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");

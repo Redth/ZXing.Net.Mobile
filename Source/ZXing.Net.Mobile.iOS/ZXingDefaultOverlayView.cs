@@ -1,27 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-#if __UNIFIED__
 using Foundation;
 using CoreGraphics;
 using CoreFoundation;
 using UIKit;
 using AVFoundation;
-#else
-using MonoTouch.CoreFoundation;
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-using MonoTouch.AVFoundation;
-using System.Drawing;
-
-using CGRect = global::System.Drawing.RectangleF;
-using CGPoint = global::System.Drawing.PointF;
-using CGSize = global::System.Drawing.SizeF;
-#endif
-
 
 using ZXing.Mobile;
-
 
 namespace ZXing.Mobile
 {

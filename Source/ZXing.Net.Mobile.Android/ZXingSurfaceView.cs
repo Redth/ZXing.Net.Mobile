@@ -7,7 +7,7 @@ using ZXing.Mobile.CameraAccess;
 
 namespace ZXing.Mobile
 {
-    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView
+    public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView, IScannerSessionHost
     {
         public ZXingSurfaceView(Context context, MobileBarcodeScanningOptions options)
             : base(context)
@@ -22,11 +22,20 @@ namespace ZXing.Mobile
             Init();
         }
 
+		bool addedHolderCallback = false;
+
         private void Init()
         {
-            _cameraAnalyzer = new CameraAnalyzer(this, ScanningOptions);
-            Holder.AddCallback(this);
-            Holder.SetType(SurfaceType.PushBuffers);
+			if (_cameraAnalyzer == null)
+	            _cameraAnalyzer = new CameraAnalyzer(this, this);
+
+			_cameraAnalyzer.ResumeAnalysis();
+
+			if (!addedHolderCallback) {
+				Holder.AddCallback(this);
+				Holder.SetType(SurfaceType.PushBuffers);
+				addedHolderCallback = true;
+			}
         }
 
         public async void SurfaceCreated(ISurfaceHolder holder)
@@ -34,6 +43,8 @@ namespace ZXing.Mobile
             await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
 
             _cameraAnalyzer.SetupCamera();
+
+            _surfaceCreated = true;
         }
 
         public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
@@ -46,6 +57,13 @@ namespace ZXing.Mobile
         public async void SurfaceDestroyed(ISurfaceHolder holder)
         {
             await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
+            try {
+				if (addedHolderCallback) {
+					Holder.RemoveCallback(this);
+					addedHolderCallback = false;
+				}
+            } catch { }
 
             _cameraAnalyzer.ShutdownCamera();
         }
@@ -117,13 +135,14 @@ namespace ZXing.Mobile
             _cameraAnalyzer.Torch.Toggle();
         }
 
-        public MobileBarcodeScanningOptions ScanningOptions { get; private set; }
+        public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
         public bool IsTorchOn => _cameraAnalyzer.Torch.IsEnabled;
 
         public bool IsAnalyzing => _cameraAnalyzer.IsAnalyzing;
 
         private CameraAnalyzer _cameraAnalyzer;
+        private bool _surfaceCreated;
 
         public bool HasTorch => _cameraAnalyzer.Torch.IsSupported;
 
@@ -170,5 +189,33 @@ namespace ZXing.Mobile
         //        }
 
         #endregion
+
+		protected override void OnAttachedToWindow()
+		{
+			base.OnAttachedToWindow();
+
+			// Reinit things
+			Init();
+		}
+
+		protected override void OnWindowVisibilityChanged(ViewStates visibility)
+		{
+			base.OnWindowVisibilityChanged(visibility);
+			if (visibility == ViewStates.Visible)
+				Init();
+		}
+
+        public override async void OnWindowFocusChanged(bool hasWindowFocus)
+        {
+            base.OnWindowFocusChanged(hasWindowFocus);
+            
+            if (!hasWindowFocus) return;
+            // SurfaceCreated/SurfaceChanged are not called on a resume
+            await ZXing.Net.Mobile.Android.PermissionsHandler.PermissionRequestTask;
+
+            //only refresh the camera if the surface has already been created. Fixed #569
+            if (_surfaceCreated)
+                _cameraAnalyzer.RefreshCamera();
+        }
     }
 }

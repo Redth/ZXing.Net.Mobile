@@ -77,7 +77,7 @@ namespace Sample.WindowsUniversal
             scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
 
             //Start scanning
-            scanner.ScanContinuously(async (result) =>
+            scanner.ScanContinuously(new MobileBarcodeScanningOptions { DelayBetweenContinuousScans = 3000 }, async (result) =>
             {
                 var msg = "Found Barcode: " + result.Text;
 
@@ -113,7 +113,7 @@ namespace Sample.WindowsUniversal
             scanner.UseCustomOverlay = true;
 
             //Start scanning
-            scanner.Scan().ContinueWith(t =>
+            scanner.Scan(new MobileBarcodeScanningOptions { AutoRotate = true }).ContinueWith(t =>
             {
                 if (t.Result != null)
                     HandleScanResult(t.Result);

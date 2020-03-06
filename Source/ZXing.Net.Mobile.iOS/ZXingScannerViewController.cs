@@ -3,21 +3,10 @@ using System.Text;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-#if __UNIFIED__
 using UIKit;
 using Foundation;
 using AVFoundation;
 using CoreGraphics;
-#else
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
-using MonoTouch.AVFoundation;
-using MonoTouch.CoreGraphics;
-using System.Drawing;
-
-using CGSize = System.Drawing.SizeF;
-using CGRect = System.Drawing.RectangleF;
-#endif
 
 using ZXing;
 

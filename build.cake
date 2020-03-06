@@ -1,5 +1,6 @@
 #tool nuget:?package=XamarinComponent
 
+#addin nuget:?package=Cake.Android.SdkManager
 #addin nuget:?package=Cake.XCode
 #addin nuget:?package=Cake.Xamarin
 #addin nuget:?package=Cake.Xamarin.Build
@@ -8,110 +9,76 @@
 #addin nuget:?package=Cake.MonoApiTools
 
 var PREVIEW = "";
-var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.1.9999");
-var NUGET_VERSION = VERSION;
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.0");
+var NUGET_VERSION_SUFFIX = "";
+var NUGET_VERSION = VERSION + NUGET_VERSION_SUFFIX;
+
+var ANDROID_HOME = EnvironmentVariable ("ANDROID_HOME") ?? Argument ("android_home", "");
 
 var TARGET = Argument ("t", Argument ("target", "Default"));
 
-// Build a semver string out of the preview if it's specified
-if (!string.IsNullOrEmpty (PREVIEW)) {
-	var sv = ParseSemVer (VERSION);
-	NUGET_VERSION = CreateSemVer (sv.Major, sv.Minor, sv.Patch, PREVIEW).ToString ();
-}
+Task("externals").Does (() => {
+	Information ("ANDROID_HOME: {0}", ANDROID_HOME);
 
-var buildSpec = new BuildSpec {
-
-	Samples = new [] {
-		new DefaultSolutionBuilder { SolutionPath = "./Samples/Android/Sample.Android.sln", BuildsOn = BuildPlatforms.Windows | BuildPlatforms.Mac },
-		new IOSSolutionBuilder { SolutionPath = "./Samples/iOS/Sample.iOS.sln", BuildsOn = BuildPlatforms.Mac },
-		new WpSolutionBuilder { SolutionPath = "./Samples/WindowsPhone/Sample.WindowsPhone.sln", BuildsOn = BuildPlatforms.Windows },
-		new DefaultSolutionBuilder { SolutionPath = "./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", BuildsOn = BuildPlatforms.Windows },
-		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.sln", BuildsOn = BuildPlatforms.Windows },
-		new WpSolutionBuilder { SolutionPath = "./Samples/Forms/Sample.Forms.WP8.sln", BuildsOn = BuildPlatforms.Windows },
-	},
-
-	// These should only get populated on windows where all the binaries will exist
-	NuGets = new NuGetInfo [] {},
-	Components = new Component [] {},
-};
-
-if (IsRunningOnWindows ()) {
-
-	buildSpec.Libs = new [] {
-		new WpSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.sln",
-			Configuration = "ReleaseWin",
-			BuildsOn = BuildPlatforms.Windows,
-		},
-		new WpSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
-			Configuration = "ReleaseWin",
-			BuildsOn = BuildPlatforms.Windows,
-		},
-		new WpSolutionBuilder { 
-			SolutionPath = "./ZXing.Net.Mobile.WP8.sln",
-			BuildsOn = BuildPlatforms.Windows 
-		},
+	var androidSdkSettings = new AndroidSdkManagerToolSettings { 
+		SdkRoot = ANDROID_HOME,
+		SkipVersionCheck = true
 	};
 
-	buildSpec.NuGets = new [] {
-		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.nuspec", Version = NUGET_VERSION },
-		new NuGetInfo { NuSpec = "./ZXing.Net.Mobile.Forms.nuspec", Version = NUGET_VERSION },
-	};
+	try { AcceptLicenses (androidSdkSettings); } catch { }
 
-	buildSpec.Components = new [] {
-		new Component { ManifestDirectory = "./Component" },
-		new Component { ManifestDirectory = "./Component-Forms" },
-	};
-} else {
-	buildSpec.Libs = new [] {
-		new DefaultSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.sln",
-			Configuration = "ReleaseMac",
-			BuildsOn = BuildPlatforms.Mac,
-		},
-		new DefaultSolutionBuilder {
-			SolutionPath = "./ZXing.Net.Mobile.Forms.sln",
-			Configuration = "ReleaseMac",
-			BuildsOn = BuildPlatforms.Mac,
-		}
-	};
-}
-
-
-Task ("component-setup")
-	.IsDependentOn ("samples")
-	.IsDependentOn ("nuget")
-	.Does (() =>
-{
-	var compVersion = VERSION;
-	if (compVersion.Contains ("-"))
-		compVersion = compVersion.Substring (0, compVersion.IndexOf ("-"));
-
-	// Clear out xml files from build (they interfere with the component packaging)
-	DeleteFiles ("./Build/**/*.xml");
-
-	// Generate component.yaml files from templates
-	CopyFile ("./Component/component.template.yaml", "./Component/component.yaml");
-	CopyFile ("./Component-Forms/component.template.yaml", "./Component-Forms/component.yaml");
-
-	// Replace version in template files
-	ReplaceTextInFiles ("./**/component.yaml", "{VERSION}", compVersion);
+	AndroidSdkManagerInstall (new [] { 
+			"platforms;android-15",
+			"platforms;android-23",
+			"platforms;android-25",
+			"platforms;android-26"
+		}, androidSdkSettings);
 });
 
-Task ("component").IsDependentOn ("component-setup").IsDependentOn ("component-base");
-
-Task ("Default").IsDependentOn ("component");
-
-Task ("clean").IsDependentOn ("clean-base").Does (() =>
+Task("libs")
+	.Does(() =>
 {
-	CleanDirectories ("./Build/");
+	NuGetRestore("./ZXing.Net.Mobile.sln");
+	NuGetRestore("./ZXing.Net.Mobile.Forms.sln");
 
+	var config = IsRunningOnWindows() ? "ReleaseWin" : "ReleaseMac";
+	MSBuild ("./ZXing.Net.Mobile.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+	MSBuild ("./ZXing.Net.Mobile.Forms.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+});
+
+Task ("samples")
+	.IsDependentOn("libs")
+	.Does (() =>
+{
+	NuGetRestore ("./Samples/Android/Sample.Android.sln");
+	NuGetRestore ("./Samples/iOS/Sample.iOS.sln");
+	NuGetRestore ("./Samples/Forms/Sample.Forms.sln");
+	NuGetRestore ("./Samples/WindowsUniversal/Sample.WindowsUniversal.sln");
+
+	var config = "Release";
+	MSBuild ("./Samples/Android/Sample.Android.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+	MSBuild ("./Samples/iOS/Sample.iOS.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+
+	if (IsRunningOnWindows()) {
+		MSBuild ("./Samples/Forms/Sample.Forms.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+		MSBuild ("./Samples/WindowsUniversal/Sample.WindowsUniversal.sln", c => c.SetConfiguration(config).SetMSBuildPlatform(MSBuildPlatform.x86));
+	}
+});
+
+Task ("nuget")
+	.IsDependentOn("libs")
+	.Does (() =>
+{
+	NuGetPack ("./ZXing.Net.Mobile.nuspec", new NuGetPackSettings { Version = NUGET_VERSION });
+	NuGetPack ("./ZXing.Net.Mobile.Forms.nuspec", new NuGetPackSettings { Version = NUGET_VERSION });
+});
+
+Task ("clean")
+	.Does (() =>
+{
 	CleanDirectories ("./**/bin");
 	CleanDirectories ("./**/obj");
 });
-
-SetupXamarinBuildTasks (buildSpec, Tasks, Task);
 
 RunTarget (TARGET);
 
