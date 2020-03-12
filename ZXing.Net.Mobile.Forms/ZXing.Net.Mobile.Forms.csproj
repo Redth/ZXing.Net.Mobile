@@ -32,6 +32,7 @@
 		<PackageProjectUrl>http://github.com/Redth/ZXing.Net.Mobile</PackageProjectUrl>
 		<DebugType>portable</DebugType>
 		<Configurations>Debug;Release</Configurations>
+		<IncludeProjectPriFile>false</IncludeProjectPriFile>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
 		<DebugSymbols>true</DebugSymbols>
