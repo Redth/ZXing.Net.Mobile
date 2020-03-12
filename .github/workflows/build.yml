@@ -21,9 +21,9 @@ jobs:
         run: echo ::set-env name=NUPKG_VER::${GITHUB_REF/refs\/tags\//}
       - name: Setup Environment
         run: mkdir ./artifacts
-      - name: Build Project
+      - name: NuGet Restore ZXing.Net.Mobile
         run: msbuild /t:Restore /p:Configuration=Release ./ZXing.Net.Mobile.sln
-      - name: Build Project
+      - name: Build ZXing.Net.Mobile
         run: msbuild /t:Build /p:Configuration=Release ./ZXing.Net.Mobile.sln
       - name: NuGet Pack ZXing.Net.Mobile
         run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile/ZXing.Net.Mobile.csproj
