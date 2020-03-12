@@ -15,25 +15,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Define CI Version
-        run: echo ::set-env name=NUPKG_VER::$NUPKG_MAJOR-pre$GITHUB_RUN_ID
+        run: $env:NUPKG_VER = ($env:NUPKG_MAJOR + "-" + $env:GITHUB_RUN_ID)
       - name: Define Release Version
         if: github.event_name == 'release'
-        run: echo ::set-env name=NUPKG_VER::${GITHUB_REF/refs\/tags\//}
+        run: $env:NUPKG_VER = $env:GITHUB_REF.Substring($env:GITHUB_REF.LastIndexOf('/') + 1)
       - name: Setup Environment
-        run: mkdir ./artifacts
+        run: New-Item -ItemType Directory -Force -Path .\artifacts
       - name: NuGet Restore ZXing.Net.Mobile
-        run: msbuild /t:Restore /p:Configuration=Release ./ZXing.Net.Mobile.sln
+        run: msbuild /t:Restore /p:Configuration=Release .\ZXing.Net.Mobile.sln
       - name: Build ZXing.Net.Mobile
-        run: msbuild /t:Build /p:Configuration=Release ./ZXing.Net.Mobile.sln
+        run: msbuild /t:Build /p:Configuration=Release .\ZXing.Net.Mobile.sln
       - name: NuGet Pack ZXing.Net.Mobile
-        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile/ZXing.Net.Mobile.csproj
+        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj
       - name: NuGet Pack ZXing.Net.Mobile.Forms
-        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile.Forms/ZXing.Net.Mobile.Forms.csproj
+        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1
         with:
           name: NuGet
-          path: ./artifacts
+          path: .\artifacts
 
     publish-gh:
       name: Publish to GitHub Packages
