@@ -181,8 +181,17 @@ namespace ZXing.Mobile
 			captureElement.Source = mediaCapture;
 			captureElement.FlowDirection = mirroringPreview ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 
-			// Start the preview
-			await mediaCapture.StartPreviewAsync();
+			try
+			{
+				// Start the preview
+				await mediaCapture.StartPreviewAsync();
+			}
+			catch (Exception ex)
+			{
+				var error = "Unexpected error on Camera initialisation";
+				OnScannerError?.Invoke(new[] { error });
+				return;
+			}
 
 			if (mediaCapture.CameraStreamState == CameraStreamState.Streaming)
 			{
