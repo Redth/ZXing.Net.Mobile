@@ -1,0 +1,76 @@
+name: Build
+
+on: 
+  push:
+  release:
+    types: [published]
+    
+jobs:
+    build:
+      name: Build
+      env:
+        NUPKG_MAJOR: 3.0
+      runs-on: macos-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Define CI Version
+        run: echo ::set-env name=NUPKG_VER::$NUPKG_MAJOR-pre$GITHUB_RUN_ID
+      - name: Define Release Version
+        if: github.event_name == 'release'
+        run: echo ::set-env name=NUPKG_VER::${GITHUB_REF/refs\/tags\//}
+      - name: Setup Environment
+        run: mkdir ./artifacts
+      - name: NuGet Restore ZXing.Net.Mobile
+        run: msbuild /t:Restore /p:Configuration=Release ./ZXing.Net.Mobile.sln
+      - name: Build ZXing.Net.Mobile
+        run: msbuild /t:Build /p:Configuration=Release ./ZXing.Net.Mobile.sln
+      - name: NuGet Pack ZXing.Net.Mobile
+        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile/ZXing.Net.Mobile.csproj
+      - name: NuGet Pack ZXing.Net.Mobile.Forms
+        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile.Forms/ZXing.Net.Mobile.Forms.csproj
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: NuGet
+          path: ./artifacts
+
+    publish-gh:
+      name: Publish to GitHub Packages
+      needs: build
+      runs-on: windows-latest
+      if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'release')
+      steps:
+        - name: Download Artifacts
+          uses: actions/download-artifact@v1
+          with:
+            name: NuGet
+        - name: Setup NuGet
+          uses: nuget/setup-nuget@v1
+          with:
+            nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+            nuget-version: 'latest'
+        - name: Push NuGet
+          run: |
+            nuget sources add -Name "GPR" -Source "https://nuget.pkg.github.com/Redth/index.json" -UserName Redth -Password ${{ secrets.GITHUB_TOKEN }}
+            nuget setApiKey ${{ secrets.NUGET_API_KEY }} -Source "GPR"
+            nuget push NuGet\*.nupkg -Source "GPR"
+    
+    publish-nugetorg:
+      name: Publish to NuGet.org
+      needs: build
+      runs-on: windows-latest
+      if: github.event_name == 'release'
+      steps:
+        - name: Download Artifacts
+          uses: actions/download-artifact@v1
+          with:
+            name: NuGet
+        - name: Setup NuGet
+          uses: nuget/setup-nuget@v1
+          with:
+            nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+            nuget-version: 'latest'
+        - name: Push NuGet
+          run: |
+            nuget push NuGet\*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_ORG_API_KEY }}

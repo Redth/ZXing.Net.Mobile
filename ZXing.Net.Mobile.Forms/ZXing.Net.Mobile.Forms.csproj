@@ -1,0 +1,107 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.Mac20;MonoAndroid90;MonoAndroid10.0;tizen40</TargetFrameworks>
+		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
+		<AssemblyName>ZXing.Net.Mobile.Forms</AssemblyName>
+		<RootNamespace>ZXing.Net.Mobile.Forms</RootNamespace>
+		<PackageId>ZXing.Net.Mobile.Forms</PackageId>
+		<PackageIcon>icon.png</PackageIcon>
+		<Summary>ZXing Barcode Scanning for your Xamarin.iOS, Xamarin.Android and Windows Universal apps!</Summary>
+		<PackageTags>barcode, zxing, zxing.net, qr, scan, scanning, scanner</PackageTags>
+		<Title>ZXing.Net.Mobile Barcode Scanner for Xamarin.Forms</Title>
+		<Description>
+			ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: ZXing (Zebra Crossing), using the ZXing.Net Port. It works with Xamarin.iOS, Xamarin.Android, Windows Phone (Silverlight) and Windows Universal. The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.
+
+			See https://github.com/Redth/ZXing.Net.Mobile/releases for release notes.
+		</Description>
+		<Product>$(AssemblyName) ($(TargetFramework))</Product>
+		<AssemblyVersion>3.0.0.0</AssemblyVersion>
+		<AssemblyFileVersion>3.0.0.0</AssemblyFileVersion>
+		<Version>3.0.0</Version>
+		<PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+		<Authors>Redth</Authors>
+		<Owners>Redth</Owners>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Copyright>© Redth</Copyright>
+		<RepositoryUrl>https://github.com/redth/ZXing.Net.Mobile</RepositoryUrl>
+		<PackageReleaseNotes>See: https://github.com/Redth/ZXing.Net.Mobile/releases</PackageReleaseNotes>
+		<DefineConstants>$(DefineConstants);</DefineConstants>
+		<UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>http://github.com/Redth/ZXing.Net.Mobile</PackageProjectUrl>
+		<DebugType>portable</DebugType>
+		<Configurations>Debug;Release</Configurations>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+		<!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<!-- sourcelink: Include PDB in the built .nupkg -->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+	<ItemGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\Art\ZXing.Net.Mobile-Icon.png" PackagePath="icon.png" Pack="true" />
+		<Compile Include="**\*.shared.cs" />
+		<Compile Include="**\*.shared.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<Compile Include="**\*.netstandard.cs" />
+		<Compile Include="**\*.netstandard.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9" />
+		<Compile Include="**\*.uwp.cs" />
+		<Compile Include="**\*.uwp.*.cs" />
+		<SDKReference Include="WindowsMobile, Version=10.0.16299.0">
+			<Name>Windows Mobile Extensions for the UWP</Name>
+		</SDKReference>
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<Compile Include="**\*.android.cs" />
+		<Compile Include="**\*.android.*.cs" />
+		<AndroidResource Include="Resources\xml\*.xml" />
+	</ItemGroup>
+	<!-- NOTE: When Android 11.x comes out we neeed to make this check more robust -->
+	<ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) And '$(TargetFramework)' != 'MonoAndroid10.0'">
+		<PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
+	</ItemGroup>
+	<!-- NOTE: When Android 11.x comes out we neeed to make this check more robust -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid10.0'">
+		<PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.1.0" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+		<Compile Include="**\*.ios.cs" />
+		<Compile Include="**\*.ios.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.Mac')) ">
+		<Reference Include="Xamarin.Mac" />
+		<Reference Include="netstandard" />
+		<Compile Include="**\*.macos.cs" />
+		<Compile Include="**\*.macos.*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
+		<PackageReference Include="Tizen.NET" Version="5.0.0.14562" />
+		<Compile Include="**\*.tizen.cs" />
+		<Compile Include="**\*.tizen.*.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Xamarin.Essentials" Version="1.5.1" />
+		<PackageReference Include="Xamarin.Forms" Version="4.5.0.356" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="zxing">
+			<HintPath>..\ZXing.Net\zxing.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>
