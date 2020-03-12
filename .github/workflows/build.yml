@@ -10,7 +10,7 @@ jobs:
       name: Build
       env:
         NUPKG_MAJOR: 3.0
-      runs-on: macos-latest
+      runs-on: windows-latest
       steps:
       - name: Checkout
         uses: actions/checkout@v2
