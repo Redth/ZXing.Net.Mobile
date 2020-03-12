@@ -29,7 +29,8 @@ namespace ZXing.Mobile
 			{
 				for (var y = 0; y < matrix.Height; y++)
 				{
-					context.SetFillColor(matrix[x, y] ? black : white);
+					var (cgX, cgY) = TransformToCoreGraphicsCoords(x, y, matrix);
+					context.SetFillColor(matrix[cgX, cgY] ? black : white);
 					context.FillRect(new CGRect(x, y, 1, 1));
 				}
 			}
@@ -39,5 +40,8 @@ namespace ZXing.Mobile
 
 			return img;
 		}
+
+		static (int cgX, int cgY) TransformToCoreGraphicsCoords(int x, int y, BitMatrix matrix)
+			=> (x, Math.Abs(y - matrix.Height + 1));
 	}
 }
