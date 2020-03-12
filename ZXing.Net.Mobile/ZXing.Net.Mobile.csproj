@@ -118,5 +118,12 @@
 		<Reference Include="zxing">
 			<HintPath>..\ZXing.Net\zxing.dll</HintPath>
 		</Reference>
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\monoandroid10.0" />
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\monoandroid90" />
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\netstandard2.0" />
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\tizen40" />
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\uap10.0.16299" />
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\xamarinios10" />
+		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\xamarinmac20" />
 	</ItemGroup>
 </Project>
