@@ -1,0 +1,60 @@
+﻿<UserControl
+    x:Class="ZXing.Mobile.ZXingScannerControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<CaptureElement  
+            Grid.Row="0"
+            Grid.Column="0"
+            x:Name="captureElement"  
+            Stretch="Fill" />
+
+
+		<Grid Visibility="Collapsed" x:Name="gridCustomOverlay" Grid.Row="0" Grid.Column="0">
+
+		</Grid>
+
+		<Grid x:Name="gridDefaultOverlay" Grid.Row="0" Grid.Column="0">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+				<RowDefinition Height="*" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+
+			<Rectangle Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="Black" Opacity="0.3">
+			</Rectangle>
+
+			<Border Grid.Row="0" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="80">
+				<Button x:Name="buttonToggleFlash" Click="ButtonToggleFlash_Click">Flash</Button>
+			</Border>
+			<Border Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+				<TextBlock x:Name="topText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
+			</Border>
+
+
+			<Rectangle Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="4" Fill="Red" Opacity="0.5"></Rectangle>
+			<Line Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Height="4" Stroke="Red" StrokeThickness="4" Fill="Red"></Line>
+
+			<Rectangle Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Fill="Black" Opacity="0.3"></Rectangle>
+
+			<Border Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+				<TextBlock x:Name="bottomText" TextAlignment="Center" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"></TextBlock>
+			</Border>
+
+		</Grid>
+
+	</Grid>
+</UserControl>
