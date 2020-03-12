@@ -4,10 +4,8 @@
 
 ![ZXing.Net.Mobile Logo](https://raw.github.com/Redth/ZXing.Net.Mobile/master/zxing.net.mobile_128x128.png)
 
-ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android, and Windows Phone.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.  The new iOS7 AVCaptureSession barcode scanning is now also supported!
+ZXing.Net.Mobile is a C#/.NET library based on the open source Barcode Library: [ZXing (Zebra Crossing)](https://github.com/zxing/zxing), using the [ZXing.Net Port](https://github.com/micjahn/ZXing.Net).  It works with Xamarin.iOS, Xamarin.Android, Tizen, and UWP.  The goal of ZXing.Net.Mobile is to make scanning barcodes as effortless and painless as possible in your own applications.
 
-![AppVeyor CI Status](https://ci.appveyor.com/api/projects/status/github/Redth/ZXing.Net.Mobile?branch=master&svg=true)
-[![Bitrise CI Status](https://www.bitrise.io/app/379eeea5b638f470.svg?token=jEVeMXcISnOVDlVxcxl9Lg&branch=master)](https://www.bitrise.io/app/379eeea5b638f470)
 [![NuGet](https://img.shields.io/nuget/v/ZXing.Net.Mobile.svg)](https://www.nuget.org/packages/ZXing.Net.Mobile/)
 [![NuGet](https://img.shields.io/nuget/dt/ZXing.Net.Mobile.svg)](https://www.nuget.org/packages/ZXing.Net.Mobile/)
 
@@ -68,13 +66,6 @@ ZXing.Net.Mobile.Forms.iOS.Platform.Init();
 ```
 
 
-##### Windows Phone
-In your main `Page`'s constructor, you should add:
-
-```csharp
-ZXing.Net.Mobile.Forms.WindowsPhone.ZXingScannerViewRenderer.Init();
-```
-
 ##### Windows Universal UWP
 
 In your main `Page`'s constructor, you should add:
@@ -88,17 +79,11 @@ If you notice that finishing scanning or pressing the back button is causing you
 
 ### Features
 - Xamarin.iOS
-- Xamarin.Android (Including Google Glass)
-- Windows Phone 8
+- Xamarin.Android
+- Tizen
+- UWP
 - Simple API - Scan in as little as 2 lines of code!
 - Scanner as a View - UIView (iOS) / Fragment (Android) / Control (WP)
-
-### Changes
-See [CHANGES.md](https://github.com/Redth/ZXing.Net.Mobile/blob/master/CHANGES.md) for changelog
-
-   
-### Android Versions
-The component should work on Android 2.2 or higher.  In Xamarin.Android there are 3 places in the project settings relating to Android version.  YOU ***MUST*** set the Project Options -> Build -> General -> Target Framework to ***2.3*** or higher.  If you still want to use 2.2, you can set the Project Options -> Build -> Android Application -> Minimum Android version to 2.2, but be sure to set the Target Android version in this section to 2.3 or higher.
 
 ### Custom Overlays
 By default, ZXing.Net.Mobile provides a very simple overlay for your barcode scanning interface.  This overlay consists of a horizontal red line centered in the scanning 'window' and semi-transparent borders on the top and bottom of the non-scanning area.  You also have the opportunity to customize the top and bottom text that appears in this overlay.
@@ -117,7 +102,7 @@ Keep in mind that when using a Custom Overlay, you are responsible for the entir
 
 - Xamarin.iOS => **UIView**
 - Xamarin.Android => **View**
-- Windows Phone => **UIElement**
+- UWP => **UIElement**
 
 All of the platform samples have examples of custom overlays.
 
@@ -142,7 +127,7 @@ var result = await scanner.Scan(options);
 ```
 
 ### Samples
-Samples for implementing ZXing.Net.Mobile can be found in the /*sample*/ folder.  There is a sample for each platform including examples of how to use custom overlays.
+There is a sample for each platform including examples of how to use custom overlays.
 
 ### Using the ZXingScanner View / Fragment / Control
 On each platform, the ZXing scanner has been implemented as a reusable component (view, fragment, or control), and it is possible to use the reusable component directly without using the MobileBarcodeScanner class at all.  On each platform, the instance of the view/fragment/control contains the necessary properties and methods required to control your scanner.  By default, the default overlay is automatically used, unless you set the CustomOverlay property as well as the UseCustomOverlay property on the instance of the view/fragment/control.  You can use methods such as ToggleTorch() or StopScanning() on the view/fragment/control, however you are responsible for calling StartScanning(...) with a callback and an instance of MobileBarcodeScanningOptions when you are ready for the view's scanning to begin.  You are also responsible for stopping scanning if you want to cancel at any point.
@@ -152,7 +137,7 @@ The view/fragment/control classes for each platform are:
  - iOS: ZXingScannerView (UIView) - See ZXingScannerViewController.cs View Controller for an example of how to use this view
  - iOS: AVCaptureScannerView (UIView) - This is API equivalent to ZXingScannerView, but uses Apple's AVCaptureSession Metadata engine to scan the barcodes instead of ZXing.Net.  See AVCaptureScannerViewController.cs View Controller for an example of how to use this view
  - Android: ZXingScannerFragment (Fragment) - See ZXingActivity.cs Activity for an example of how to use this fragment
- - Windows Phone: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
+ - UWP: ZXingScannerControl (UserControl) - See ScanPage.xaml Page for an example of how to use this Control
 
 ### Using Apple's AVCaptureSession (iOS7 Built in) Barcode Scanning
 In iOS7, Apple added some API's to allow for scanning of barcodes in an AVCaptureSession.  The latest version of ZXing.Net.Mobile gives you the option of using this instead of the ZXing scanning engine.  You can use the `AVCaptureScannerView` or the `AVCaptureScannerViewController` classes directly just the same as you would use their ZXing* equivalents.  Or, in your `MobileBarcodeScanner`, there is now an overload to use the AV Capture Engine:
