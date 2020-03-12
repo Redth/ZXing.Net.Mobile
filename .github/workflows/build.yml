@@ -26,9 +26,9 @@ jobs:
       - name: Build Project
         run: msbuild /t:Build /p:Configuration=Release ./ZXing.Net.Mobile.sln
       - name: NuGet Pack ZXing.Net.Mobile
-        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER ./ZXing.Net.Mobile/ZXing.Net.Mobile.csproj
+        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile/ZXing.Net.Mobile.csproj
       - name: NuGet Pack ZXing.Net.Mobile.Forms
-        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER ./ZXing.Net.Mobile.Forms/ZXing.Net.Mobile.Forms.csproj
+        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=../artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg ./ZXing.Net.Mobile.Forms/ZXing.Net.Mobile.Forms.csproj
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1
         with:
