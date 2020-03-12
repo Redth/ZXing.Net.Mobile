@@ -16,21 +16,19 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.0
-      - name: Define CI Version
-        run: $env:NUPKG_VER = ($env:NUPKG_MAJOR + "-" + $env:GITHUB_RUN_ID)
-      - name: Define Release Version
-        if: github.event_name == 'release'
-        run: $env:NUPKG_VER = $env:GITHUB_REF.Substring($env:GITHUB_REF.LastIndexOf('/') + 1)
-      - name: Setup Environment
-        run: New-Item -ItemType Directory -Force -Path .\artifacts
-      - name: NuGet Restore ZXing.Net.Mobile
+      - name: NuGet Restore
         run: msbuild /t:Restore /p:Configuration=Release .\ZXing.Net.Mobile.sln
-      - name: Build ZXing.Net.Mobile
+      - name: Build
         run: msbuild /t:Build /p:Configuration=Release .\ZXing.Net.Mobile.sln
-      - name: NuGet Pack ZXing.Net.Mobile
-        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj
-      - name: NuGet Pack ZXing.Net.Mobile.Forms
-        run: msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$NUPKG_VER /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj
+      - name: Package NuGets
+        run: |
+          $pkgVer = ($env:NUPKG_MAJOR + "-alpha" + $env:GITHUB_RUN_ID)
+          if ($env:GITHUB_EVENT_NAME -eq "release") {
+            $pkgVer = $env:GITHUB_REF.Substring($env:GITHUB_REF.LastIndexOf('/') + 1)
+          }
+          New-Item -ItemType Directory -Force -Path .\artifacts
+          msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj
+          msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1
         with:
