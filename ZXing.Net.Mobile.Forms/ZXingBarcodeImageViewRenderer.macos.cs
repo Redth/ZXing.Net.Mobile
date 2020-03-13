@@ -27,21 +27,22 @@ namespace ZXing.Net.Mobile.Forms.MacOS
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			Regenerate();
+			if (e.PropertyName == nameof(ZXingBarcodeImageView.BarcodeValue)
+				|| e.PropertyName == nameof(ZXingBarcodeImageView.BarcodeOptions)
+				|| e.PropertyName == nameof(ZXingBarcodeImageView.BarcodeFormat))
+				Regenerate();
 
 			base.OnElementPropertyChanged(sender, e);
 		}
 
-		protected override async void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
+		protected override void OnElementChanged(ElementChangedEventArgs<ZXingBarcodeImageView> e)
 		{
 			formsView = Element;
 
-			if (imageView == null)
+			if (formsView != null && imageView == null)
 			{
-
 				imageView = new NSImageView();
-
-				base.SetNativeControl(imageView);
+				SetNativeControl(imageView);
 			}
 
 			Regenerate();
@@ -51,24 +52,34 @@ namespace ZXing.Net.Mobile.Forms.MacOS
 
 		void Regenerate()
 		{
-			if (formsView != null && formsView.BarcodeValue != null)
+			BarcodeWriter writer = null;
+			string barcodeValue = null;
+
+			if (formsView != null
+				&& !string.IsNullOrWhiteSpace(formsView.BarcodeValue)
+				&& formsView.BarcodeFormat != BarcodeFormat.All_1D)
 			{
-				var writer = new ZXing.Mobile.BarcodeWriter();
-
-				if (formsView != null && formsView.BarcodeOptions != null)
+				barcodeValue = formsView.BarcodeValue;
+				writer = new BarcodeWriter { Format = formsView.BarcodeFormat };
+				if (formsView.BarcodeOptions != null)
 					writer.Options = formsView.BarcodeOptions;
-				if (formsView != null && formsView.BarcodeFormat != null)
-					writer.Format = formsView.BarcodeFormat;
-
-				var value = formsView != null ? formsView.BarcodeValue : string.Empty;
-
-				Device.BeginInvokeOnMainThread(() =>
-				{
-					var image = writer.Write(value);
-
-					imageView.Image = image;
-				});
 			}
+
+			// Update or clear out the image depending if we had enough info
+			// to instantiate the barcode writer, otherwise null the image
+			Device.BeginInvokeOnMainThread(() =>
+			{
+				try
+				{
+					var image = writer?.Write(barcodeValue);
+					if (imageView != null)
+						imageView.Image = image;
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Failed to update image: {ex}");
+				}
+			});
 		}
 	}
 }
