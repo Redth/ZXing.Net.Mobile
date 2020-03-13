@@ -222,7 +222,7 @@ namespace ZXing.Mobile
 			session.AddOutput(metadataOutput);
 
 			//Setup barcode formats
-			if (ScanningOptions.PossibleFormats != null && ScanningOptions.PossibleFormats.Count > 0)
+			if (ScanningOptions?.PossibleFormats?.Any() ?? false)
 			{
 				var formats = AVMetadataObjectType.None;
 
