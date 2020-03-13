@@ -11,24 +11,14 @@ namespace ZXing.Mobile
 	public partial class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
 		IScannerViewController viewController;
-
-		WeakReference<UIViewController> weakAppController;
-		ManualResetEvent scanResultResetEvent = new ManualResetEvent(false);
+		readonly WeakReference<UIViewController> weakAppController;
+		readonly ManualResetEvent scanResultResetEvent = new ManualResetEvent(false);
 
 		public MobileBarcodeScanner(UIViewController delegateController)
 			=> weakAppController = new WeakReference<UIViewController>(delegateController);
 
 		public MobileBarcodeScanner()
-		{
-			foreach (var window in UIApplication.SharedApplication.Windows)
-			{
-				if (window.RootViewController != null)
-				{
-					weakAppController = new WeakReference<UIViewController>(window.RootViewController);
-					break;
-				}
-			}
-		}
+			=> weakAppController = new WeakReference<UIViewController>(Xamarin.Essentials.Platform.GetCurrentUIViewController());
 
 		public Task<Result> Scan(bool useAVCaptureEngine)
 			=> Scan(new MobileBarcodeScanningOptions(), useAVCaptureEngine);
@@ -56,12 +46,11 @@ namespace ZXing.Mobile
 				if (useAVCaptureEngine)
 					allRequestedFormatsSupported = AVCaptureScannerView.SupportsAllRequestedBarcodeFormats(options.PossibleFormats);
 
-				UIViewController appController;
-				if (weakAppController.TryGetTarget(out appController))
+				if (weakAppController.TryGetTarget(out var appController))
 				{
 					var tcs = new TaskCompletionSource<object>();
 
-					appController.InvokeOnMainThread(() =>
+					appController?.InvokeOnMainThread(() =>
 					{
 						if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
 						{
@@ -93,7 +82,7 @@ namespace ZXing.Mobile
 							scanHandler(barcodeResult);
 						};
 
-						appController.PresentViewController((UIViewController)viewController, true, null);
+						appController?.PresentViewController((UIViewController)viewController, true, null);
 					});
 				}
 			}
@@ -122,10 +111,8 @@ namespace ZXing.Mobile
 
 				if (weakAppController.TryGetTarget(out var appController))
 				{
-					appController.InvokeOnMainThread(() =>
+					appController?.InvokeOnMainThread(() =>
 					{
-
-
 						if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
 						{
 							viewController = new AVCaptureScannerViewController(options, this);
@@ -167,7 +154,7 @@ namespace ZXing.Mobile
 							});
 						};
 
-						appController.PresentViewController((UIViewController)viewController, true, null);
+						appController?.PresentViewController((UIViewController)viewController, true, null);
 					});
 				}
 
