@@ -37,6 +37,7 @@ namespace ZXing.Mobile
 		}
 
 		AVCaptureSession session;
+		AVCaptureDevice captureDevice = null;
 		AVCaptureVideoPreviewLayer previewLayer;
 		AVCaptureVideoDataOutput output;
 		OutputRecorder outputRecorder;
@@ -56,7 +57,9 @@ namespace ZXing.Mobile
 
 		bool shouldRotatePreviewBuffer = false;
 
-		void Setup(CGRect frame)
+		AVConfigs captureDeviceOriginalConfig;
+
+		void Setup()
 		{
 			var started = DateTime.UtcNow;
 
@@ -91,7 +94,6 @@ namespace ZXing.Mobile
 		bool torch = false;
 		bool analyzing = true;
 
-
 		bool SetupCaptureSession()
 		{
 			var started = DateTime.UtcNow;
@@ -114,8 +116,6 @@ namespace ZXing.Mobile
 			};
 
 			// create a device input and attach it to the session
-			//			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType (AVMediaType.Video);
-			AVCaptureDevice captureDevice = null;
 			var devices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
 			foreach (var device in devices)
 			{
@@ -273,9 +273,25 @@ namespace ZXing.Mobile
 
 			var perf5 = PerformanceCounter.Start();
 
-			NSError err = null;
-			if (captureDevice.LockForConfiguration(out err))
+			if (captureDevice.LockForConfiguration(out var err))
 			{
+				captureDeviceOriginalConfig = new AVConfigs
+				{
+					FocusMode = captureDevice.FocusMode,
+					ExposureMode = captureDevice.ExposureMode,
+					WhiteBalanceMode = captureDevice.WhiteBalanceMode,
+					AutoFocusRangeRestriction = captureDevice.AutoFocusRangeRestriction,
+				};
+
+				if (captureDevice.HasFlash)
+					captureDeviceOriginalConfig.FlashMode = captureDevice.FlashMode;
+				if (captureDevice.HasTorch)
+					captureDeviceOriginalConfig.TorchMode = captureDevice.TorchMode;
+				if (captureDevice.FocusPointOfInterestSupported)
+					captureDeviceOriginalConfig.FocusPointOfInterest = captureDevice.FocusPointOfInterest;
+				if (captureDevice.ExposurePointOfInterestSupported)
+					captureDeviceOriginalConfig.ExposurePointOfInterest = captureDevice.ExposurePointOfInterest;
+
 				if (ScanningOptions.DisableAutofocus)
 				{
 					captureDevice.FocusMode = AVCaptureFocusMode.Locked;
@@ -299,7 +315,9 @@ namespace ZXing.Mobile
 					captureDevice.WhiteBalanceMode = AVCaptureWhiteBalanceMode.AutoWhiteBalance;
 
 				if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0) && captureDevice.AutoFocusRangeRestrictionSupported)
+				{
 					captureDevice.AutoFocusRangeRestriction = AVCaptureAutoFocusRangeRestriction.Near;
+				}
 
 				if (captureDevice.FocusPointOfInterestSupported)
 					captureDevice.FocusPointOfInterest = new PointF(0.5f, 0.5f);
@@ -489,7 +507,7 @@ namespace ZXing.Mobile
 
 			var perf = PerformanceCounter.Start();
 
-			Setup(Frame);
+			Setup();
 
 			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
 			resultCallback = scanResultHandler;
@@ -506,10 +524,11 @@ namespace ZXing.Mobile
 
 				if (Runtime.Arch == Arch.SIMULATOR)
 				{
-					var simView = new UIView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height));
-					simView.BackgroundColor = UIColor.LightGray;
-					simView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
-					InsertSubview(simView, 0);
+					InsertSubview(new UIView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height))
+					{
+						BackgroundColor = UIColor.LightGray,
+						AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+					}, 0);
 
 				}
 			});
@@ -539,6 +558,30 @@ namespace ZXing.Mobile
 
 			if (outputRecorder != null)
 				outputRecorder.CancelTokenSource.Cancel();
+
+			// Revert camera settings to original
+			if (captureDevice != null && captureDevice.LockForConfiguration(out var err))
+			{
+				captureDevice.FocusMode = captureDeviceOriginalConfig.FocusMode;
+				captureDevice.ExposureMode = captureDeviceOriginalConfig.ExposureMode;
+				captureDevice.WhiteBalanceMode = captureDeviceOriginalConfig.WhiteBalanceMode;
+
+				if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0) && captureDevice.AutoFocusRangeRestrictionSupported)
+					captureDevice.AutoFocusRangeRestriction = captureDeviceOriginalConfig.AutoFocusRangeRestriction;
+
+				if (captureDevice.FocusPointOfInterestSupported)
+					captureDevice.FocusPointOfInterest = captureDeviceOriginalConfig.FocusPointOfInterest;
+
+				if (captureDevice.ExposurePointOfInterestSupported)
+					captureDevice.ExposurePointOfInterest = captureDeviceOriginalConfig.ExposurePointOfInterest;
+
+				if (captureDevice.HasFlash)
+					captureDevice.FlashMode = captureDeviceOriginalConfig.FlashMode;
+				if (captureDevice.HasTorch)
+					captureDevice.TorchMode = captureDeviceOriginalConfig.TorchMode;
+
+				captureDevice.UnlockForConfiguration();
+			}
 
 			//Try removing all existing outputs prior to closing the session
 			try
@@ -572,34 +615,35 @@ namespace ZXing.Mobile
 		{
 			try
 			{
-				NSError err;
-
-				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
-
-				if (device.HasTorch || device.HasFlash)
+				var device = captureDevice ?? AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+				if (device != null && (device.HasTorch || device.HasFlash))
 				{
+					device.LockForConfiguration(out var err);
 
-					device.LockForConfiguration(out err);
-
-					if (on)
+					if (err != null)
 					{
-						if (device.HasTorch)
-							device.TorchMode = AVCaptureTorchMode.On;
-						if (device.HasFlash)
-							device.FlashMode = AVCaptureFlashMode.On;
-					}
-					else
-					{
-						if (device.HasTorch)
-							device.TorchMode = AVCaptureTorchMode.Off;
-						if (device.HasFlash)
-							device.FlashMode = AVCaptureFlashMode.Off;
+						if (on)
+						{
+							if (device.HasTorch)
+								device.TorchMode = AVCaptureTorchMode.On;
+							if (device.HasFlash)
+								device.FlashMode = AVCaptureFlashMode.On;
+						}
+						else
+						{
+							if (device.HasTorch)
+								device.TorchMode = AVCaptureTorchMode.Off;
+							if (device.HasFlash)
+								device.FlashMode = AVCaptureFlashMode.Off;
+						}
 					}
 
-					device.UnlockForConfiguration();
+					try
+					{
+						device.UnlockForConfiguration();
+					}
+					catch { }
 				}
-				device = null;
-
 
 				torch = on;
 			}
@@ -636,11 +680,23 @@ namespace ZXing.Mobile
 				if (hasTorch.HasValue)
 					return hasTorch.Value;
 
-				var device = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
+				var device = captureDevice ?? AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
 				hasTorch = device.HasFlash || device.HasTorch;
 				return hasTorch.Value;
 			}
 		}
 		#endregion
+	}
+
+	struct AVConfigs
+	{
+		public AVCaptureFocusMode FocusMode;
+		public AVCaptureExposureMode ExposureMode;
+		public AVCaptureWhiteBalanceMode WhiteBalanceMode;
+		public AVCaptureAutoFocusRangeRestriction AutoFocusRangeRestriction;
+		public CGPoint FocusPointOfInterest;
+		public CGPoint ExposurePointOfInterest;
+		public AVCaptureFlashMode FlashMode;
+		public AVCaptureTorchMode TorchMode;
 	}
 }
