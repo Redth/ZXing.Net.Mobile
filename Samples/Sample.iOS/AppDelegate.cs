@@ -2,13 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-#if __UNIFIED__
 using Foundation;
 using UIKit;
-#else
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-#endif
 
 namespace Sample.iOS
 {
@@ -32,7 +27,7 @@ namespace Sample.iOS
 		//
 		public override bool FinishedLaunching(UIApplication app, NSDictionary options)
 		{
-			Xamarin.Calabash.Start();
+			//Xamarin.Calabash.Start();
 
 			// create a new window instance based on the screen size
 			window = new UIWindow(UIScreen.MainScreen.Bounds);
