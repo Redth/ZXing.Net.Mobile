@@ -526,7 +526,14 @@ namespace ZXing.Mobile
 			stopping = true;
 			isAnalyzing = false;
 
-			displayRequest.RequestRelease();
+			try
+			{
+				displayRequest?.RequestRelease();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Release Request Failed: {ex}");
+			}
 
 			try
 			{
