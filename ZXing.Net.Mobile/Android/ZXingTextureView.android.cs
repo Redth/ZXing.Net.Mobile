@@ -14,10 +14,6 @@ namespace ZXing.Mobile
 {
 	public class ZXingTextureView : TextureView, TextureView.ISurfaceTextureListener, IScannerSessionHost, IScannerView
 	{
-		LayoutInflater layoutInflater;
-		Camera camera;
-		View cameraView;
-		float transparentLevel;
 		CameraAnalyzer cameraAnalyzer;
 		internal ZXingScannerFragment parentFragment;
 
@@ -41,6 +37,8 @@ namespace ZXing.Mobile
 		public bool IsAnalyzing { get; }
 		public bool HasTorch { get; }
 
+		Action<ZXing.Result> scanResultHandler = null;
+
 		public ZXingTextureView(Context context)
 			: base(context)
 			=> Init();
@@ -62,56 +60,68 @@ namespace ZXing.Mobile
 			SurfaceTextureListener = this;
 
 			if (cameraAnalyzer == null)
-				cameraAnalyzer = new CameraAnalyzer(this, this);
+			{
+				cameraAnalyzer = new CameraAnalyzer(this, this)
+				{
+					BarcodeFound = (result) => scanResultHandler?.Invoke(result)
+				};
+			}
 
-			cameraAnalyzer.ResumeAnalysis();
+			cameraAnalyzer?.ResumeAnalysis();
 		}
 
 		public async void OnSurfaceTextureAvailable(SurfaceTexture surface, int width, int height)
 		{
 			await Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync();
 
-			cameraAnalyzer.SetupCamera(surface);
+			cameraAnalyzer?.SetupCamera(surface);
 		}
 
 		public bool OnSurfaceTextureDestroyed(SurfaceTexture surface)
 		{
-			cameraAnalyzer.ShutdownCamera();
+			cameraAnalyzer?.ShutdownCamera();
 			return false;
 		}
 
 		public void OnSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height)
-			=> cameraAnalyzer.RefreshCamera(surface);
+			=> cameraAnalyzer?.RefreshCamera(surface);
 
 		public void OnSurfaceTextureUpdated(SurfaceTexture surface)
-			=> cameraAnalyzer.RefreshCamera(surface);
+		{ }
 
 		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
-		{ }
+		{
+			this.scanResultHandler = scanResultHandler;
+			cameraAnalyzer?.ResumeAnalysis();
+		}
 
 		public void StopScanning()
-		{
-			// throw new NotImplementedException();
-		}
+			=> cameraAnalyzer?.ShutdownCamera();
 
 		public void PauseAnalysis()
-			=> cameraAnalyzer.PauseAnalysis();
+			=> cameraAnalyzer?.PauseAnalysis();
 
 		public void ResumeAnalysis()
-			=> cameraAnalyzer.ResumeAnalysis();
+			=> cameraAnalyzer?.ResumeAnalysis();
 
 		public void Torch(bool on)
-		{ }
+		{
+			if (cameraAnalyzer != null)
+			{
+				if (on)
+					cameraAnalyzer.Torch?.TurnOn();
+				else
+					cameraAnalyzer.Torch?.TurnOff();
+			}
+		}
 
 		public void AutoFocus()
-			=> cameraAnalyzer.AutoFocus();
+			=> cameraAnalyzer?.AutoFocus();
 
 		public void AutoFocus(int x, int y)
-			=> cameraAnalyzer.AutoFocus();
+			=> cameraAnalyzer?.AutoFocus(x, y);
 
 		public void ToggleTorch()
-		{
-
-		}
+			=> cameraAnalyzer?.Torch?.Toggle();
 	}
 }
