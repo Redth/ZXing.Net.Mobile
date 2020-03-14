@@ -12,12 +12,11 @@ using SurfaceTexture = Android.Graphics.SurfaceTexture;
 
 namespace ZXing.Mobile
 {
-	public class ZXingTextureView : View, TextureView.ISurfaceTextureListener, IScannerSessionHost, IScannerView
+	public class ZXingTextureView : TextureView, TextureView.ISurfaceTextureListener, IScannerSessionHost, IScannerView
 	{
 		LayoutInflater layoutInflater;
 		Camera camera;
 		View cameraView;
-		TextureView textureView;
 		float transparentLevel;
 		CameraAnalyzer cameraAnalyzer;
 		internal ZXingScannerFragment parentFragment;
@@ -44,43 +43,34 @@ namespace ZXing.Mobile
 
 		public ZXingTextureView(Context context)
 			: base(context)
-		{
-			textureView = new TextureView(context);
-			Init();
-		}
+			=> Init();
 
 		public ZXingTextureView(Context context, IAttributeSet attr)
 			: base(context, attr)
-		{
-			textureView = new TextureView(context, attr);
-			Init();
-		}
+			=> Init();
 
 		public ZXingTextureView(Context context, IAttributeSet attr, int defStyleAttr)
 			: base(context, attr, defStyleAttr)
-		{
-			textureView = new TextureView(context, attr, defStyleAttr);
-			Init();
-		}
+			=> Init();
 
 		public ZXingTextureView(Context context, IAttributeSet attr, int defStyleAttr, int defStyleRes)
 			: base(context, attr, defStyleAttr, defStyleRes)
-		{
-			textureView = new TextureView(context, attr, defStyleAttr, defStyleRes);
-			Init();
-		}
+			=> Init();
 
 		void Init()
 		{
+			SurfaceTextureListener = this;
+
 			if (cameraAnalyzer == null)
-				cameraAnalyzer = new CameraAnalyzer(textureView, this);
+				cameraAnalyzer = new CameraAnalyzer(this, this);
 
 			cameraAnalyzer.ResumeAnalysis();
-
 		}
 
-		public void OnSurfaceTextureAvailable(SurfaceTexture surface, int width, int height)
+		public async void OnSurfaceTextureAvailable(SurfaceTexture surface, int width, int height)
 		{
+			await Net.Mobile.Android.PermissionsHandler.RequestPermissionsAsync();
+
 			cameraAnalyzer.SetupCamera(surface);
 		}
 
@@ -91,14 +81,10 @@ namespace ZXing.Mobile
 		}
 
 		public void OnSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height)
-		{
-			cameraAnalyzer.RefreshCamera(surface);
-		}
+			=> cameraAnalyzer.RefreshCamera(surface);
 
 		public void OnSurfaceTextureUpdated(SurfaceTexture surface)
-		{
-			cameraAnalyzer.RefreshCamera(surface);
-		}
+			=> cameraAnalyzer.RefreshCamera(surface);
 
 		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
 		{ }
@@ -125,7 +111,7 @@ namespace ZXing.Mobile
 
 		public void ToggleTorch()
 		{
-			
+
 		}
 	}
 }
