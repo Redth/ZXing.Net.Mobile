@@ -152,10 +152,6 @@
       <Project>{bc6f43c4-0ffa-487b-b74f-b26a8c8b3809}</Project>
       <Name>ZXing.Net.Mobile.Forms</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj">
-      <Project>{8b7a8ab6-35a4-4c9c-83e1-96ba8be3c941}</Project>
-      <Name>ZXing.Net.Mobile</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Sample.Forms\Sample.Forms.csproj">
       <Project>{FC123F7F-D384-4A65-A102-330F84774766}</Project>
       <Name>Sample.Forms</Name>
