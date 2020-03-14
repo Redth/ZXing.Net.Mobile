@@ -72,6 +72,12 @@ namespace ZXing.Mobile
 
 		ZXingScannerFragment scannerFragment;
 
+		internal MobileBarcodeScanningOptions scanningOptions
+		{
+			get => ScanningOptions;
+			set => ScanningOptions = value;
+		}
+
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
@@ -81,12 +87,13 @@ namespace ZXing.Mobile
 			Window.AddFlags(WindowManagerFlags.Fullscreen); //to show
 			Window.AddFlags(WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
 
-			if (ScanningOptions.AutoRotate.HasValue && !ScanningOptions.AutoRotate.Value)
+			if (scanningOptions.AutoRotate.HasValue && !scanningOptions.AutoRotate.Value)
 				RequestedOrientation = ScreenOrientation.Nosensor;
 
 			SetContentView(ZXing.Net.Mobile.Resource.Layout.zxingscanneractivitylayout);
 
 			scannerFragment = new ZXingScannerFragment();
+			scannerFragment.parentActivity = this;
 			scannerFragment.CustomOverlayView = CustomOverlayView;
 			scannerFragment.UseCustomOverlayView = UseCustomOverlayView;
 			scannerFragment.TopText = TopText;
@@ -122,7 +129,7 @@ namespace ZXing.Mobile
 
 				if (!ZxingActivity.ScanContinuously)
 					Finish();
-			}, ScanningOptions);
+			}, scanningOptions);
 		}
 
 		public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)

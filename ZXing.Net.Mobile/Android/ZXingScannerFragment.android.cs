@@ -28,7 +28,8 @@ namespace ZXing.Mobile
 			try
 			{
 				scanner = new ZXingTextureView(Activity);
-				//scanner.ScanningOptions = ScanningOptions;
+				scanner.parentFragment = this;
+				scanner.ScanningOptions = ScanningOptions ?? new MobileBarcodeScanningOptions();
 				frame.AddView(scanner, layoutParams);
 
 
@@ -98,7 +99,23 @@ namespace ZXing.Mobile
 
 		public View CustomOverlayView { get; set; }
 		public bool UseCustomOverlayView { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		// We want to check if the parent was set and use IT'S options
+		// Otherwise use a local set since someone used the fragment directly
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentActivity?.scanningOptions ?? options;
+			set
+			{
+				if (parentActivity != null)
+					parentActivity.scanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
 		public string TopText { get; set; }
 		public string BottomText { get; set; }
 
@@ -150,5 +167,7 @@ namespace ZXing.Mobile
 
 		public bool HasTorch
 			=> scanner?.HasTorch ?? false;
+
+		internal ZxingActivity parentActivity { get; set; }
 	}
 }

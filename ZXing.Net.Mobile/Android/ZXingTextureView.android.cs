@@ -20,8 +20,24 @@ namespace ZXing.Mobile
 		TextureView textureView;
 		float transparentLevel;
 		CameraAnalyzer cameraAnalyzer;
+		internal ZXingScannerFragment parentFragment;
 
-		public MobileBarcodeScanningOptions ScanningOptions { get; }
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		// We want to check if the parent was set and use IT'S options
+		// Otherwise use a local set since someone used the fragment directly
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentFragment?.ScanningOptions ?? options;
+			set
+			{
+				if (parentFragment != null)
+					parentFragment.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
 		public bool IsTorchOn { get; }
 		public bool IsAnalyzing { get; }
 		public bool HasTorch { get; }
