@@ -11,6 +11,12 @@ namespace Sample.Forms
 
 		public BarcodePage()
 		{
+			var stackLayout = new StackLayout
+			{
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				VerticalOptions = LayoutOptions.FillAndExpand,
+			};
+
 			barcode = new ZXingBarcodeImageView
 			{
 				HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -23,8 +29,21 @@ namespace Sample.Forms
 			barcode.BarcodeOptions.Margin = 10;
 			barcode.BarcodeValue = "ZXing.Net.Mobile";
 
-			Content = barcode;
+			var text = new Entry
+			{
+				HorizontalOptions = LayoutOptions.FillAndExpand,
+				Text = "ZXing Sample"
+			};
+			text.TextChanged += Text_TextChanged;
+
+			stackLayout.Children.Add(barcode);
+			stackLayout.Children.Add(text);
+
+			Content = stackLayout;
 		}
+
+		void Text_TextChanged(object sender, TextChangedEventArgs e)
+			=> barcode.BarcodeValue = e.NewTextValue;
 	}
 }
 

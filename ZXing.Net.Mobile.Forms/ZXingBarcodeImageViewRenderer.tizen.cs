@@ -4,6 +4,7 @@ using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Tizen;
+using ZXing.Mobile;
 using ZXing.Net.Mobile.Forms;
 using ZXing.Net.Mobile.Forms.Tizen;
 
@@ -23,7 +24,10 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			Regenerate();
+			if (e.PropertyName == nameof(ZXingBarcodeImageView.BarcodeValue)
+				|| e.PropertyName == nameof(ZXingBarcodeImageView.BarcodeOptions)
+				|| e.PropertyName == nameof(ZXingBarcodeImageView.BarcodeFormat))
+				Regenerate();
 
 			base.OnElementPropertyChanged(sender, e);
 		}
@@ -32,10 +36,10 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 		{
 			formsView = Element;
 
-			if (imageView == null)
+			if (formsView != null && imageView == null)
 			{
 				imageView = new EvasImage(Xamarin.Forms.Forms.NativeParent);
-				base.SetNativeControl(imageView);
+				SetNativeControl(imageView);
 			}
 			
 			Regenerate();
@@ -45,26 +49,40 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 
 		void Regenerate()
 		{
-			if (formsView != null && formsView.BarcodeValue != null)
+			BarcodeWriter writer = null;
+			string barcodeValue = null;
+
+			if (formsView != null
+				&& imageView != null
+				&& !string.IsNullOrWhiteSpace(formsView.BarcodeValue)
+				&& formsView.BarcodeFormat != BarcodeFormat.All_1D)
 			{
-				var writer = new ZXing.Mobile.BarcodeWriter(Xamarin.Forms.Forms.NativeParent);
-
-				if (formsView != null && formsView.BarcodeOptions != null)
+				barcodeValue = formsView.BarcodeValue;
+				writer = new BarcodeWriter(imageView.Parent) { Format = formsView.BarcodeFormat };
+				if (formsView.BarcodeOptions != null)
 					writer.Options = formsView.BarcodeOptions;
-				if (formsView != null && formsView.BarcodeFormat != null)
-					writer.Format = formsView.BarcodeFormat;
-
-				var value = formsView != null ? formsView.BarcodeValue : string.Empty;
-
-				Device.BeginInvokeOnMainThread(() =>
-				{
-					var image = writer.Write(value);
-					imageView.SetSource(image);
-					imageView.IsFilled = true;
-					imageView.Resize(image.Size.Height, image.Size.Width);
-					imageView.Show();
-				});
 			}
+
+			// Update or clear out the image depending if we had enough info
+			// to instantiate the barcode writer, otherwise null the image
+			Device.BeginInvokeOnMainThread(() =>
+			{
+				try
+				{
+					var image = writer.Write(barcodeValue);
+					if (imageView != null)
+					{
+						imageView.SetSource(image);
+						imageView.IsFilled = true;
+						imageView.Resize(image.Size.Height, image.Size.Width);
+						imageView.Show();
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Failed to update image: {ex}");
+				}
+			});
 		}
 	}
 }

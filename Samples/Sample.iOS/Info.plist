@@ -32,5 +32,7 @@
 	<string>LaunchScreen</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Please allow the camera to be used for Scanning Barcodes</string>
+	<key>CFBundleName</key>
+	<string>ZXing Sample</string>
 </dict>
 </plist>
