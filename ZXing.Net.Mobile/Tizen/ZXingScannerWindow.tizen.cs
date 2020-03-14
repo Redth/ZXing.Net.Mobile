@@ -8,10 +8,7 @@ namespace ZXing.Mobile
 		public Action<Result> ScanCompletedHandler { get; set; }
 		public bool ScanContinuously { get; set; }
 
-		public MobileBarcodeScanningOptions ScanningOptions {
-			get => zxingMediaView?.ScanningOptions ?? new MobileBarcodeScanningOptions();
-			set => zxingMediaView.ScanningOptions = value;
-		}
+		public MobileBarcodeScanningOptions ScanningOptions { get; set; } = new MobileBarcodeScanningOptions();
 
 		public bool IsTorchOn => zxingMediaView.IsTorchOn;
 
@@ -68,6 +65,7 @@ namespace ZXing.Mobile
 				AlignmentY = -1,
 				WeightX = 1,
 				WeightY = 1,
+				parentWindow = this
 			};
 			zxingMediaView.Show();
 			mBackground.SetContent(zxingMediaView);

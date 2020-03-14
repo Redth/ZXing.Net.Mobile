@@ -73,6 +73,20 @@ namespace ZXing.Mobile
 		// For listening to media property changes
 		readonly SystemMediaTransportControls systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
 
+		internal ScanPage parentPage = null;
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentPage?.ScanningOptions ?? options;
+			set
+			{
+				if (parentPage != null)
+					parentPage.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
 
 		public async void StartScanning(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
 			=> await StartScanningAsync(scanCallback, options);
@@ -372,7 +386,6 @@ namespace ZXing.Mobile
 		volatile bool isAnalyzing = false;
 
 		public Action<Result> ScanCallback { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 		public MobileBarcodeScannerBase Scanner { get; set; }
 		public UIElement CustomOverlay { get; set; }
 		public string TopText { get; set; }

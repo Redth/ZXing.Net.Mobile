@@ -51,7 +51,21 @@ namespace ZXing.Mobile
 		public string CancelButtonText { get; set; }
 		public string FlashButtonText { get; set; }
 
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
+		internal AVCaptureScannerViewController parentViewController = null;
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentViewController?.ScanningOptions ?? options;
+			set
+			{
+				if (parentViewController != null)
+					parentViewController.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
 
 		void Setup()
 		{

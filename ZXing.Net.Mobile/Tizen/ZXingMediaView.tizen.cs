@@ -17,7 +17,7 @@ namespace ZXing.Mobile
 			AlignmentY = -1;
 			WeightX = 1;
 			WeightY = 1;
-			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this);
+			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this) { parentView = this };
 
 			showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);
 			showCallback.On += (s, e) =>
@@ -28,10 +28,19 @@ namespace ZXing.Mobile
 
 		}
 
-		internal MobileBarcodeScanningOptions ScanningOptions
+		internal ZxingScannerWindow parentWindow = null;
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
 		{
-			get => zxingScannerCamera?.ScanningOptions ?? new MobileBarcodeScanningOptions();
-			set => zxingScannerCamera.ScanningOptions = value;
+			get => parentWindow?.ScanningOptions ?? options;
+			set
+			{
+				if (parentWindow != null)
+					parentWindow.ScanningOptions = value;
+				else
+					options = value;
+			}
 		}
 
 		public bool IsTorchOn => zxingScannerCamera.IsTorchOn;

@@ -29,7 +29,7 @@ namespace ZXing.Mobile
 
 		public ZXingScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
 		{
-			ScanningOptions = options;
+			ScanningOptions = options ?? new MobileBarcodeScanningOptions();
 			Scanner = scanner;
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
@@ -73,7 +73,8 @@ namespace ZXing.Mobile
 				TopText = Scanner.TopText,
 				BottomText = Scanner.BottomText,
 				CancelButtonText = Scanner.CancelButtonText,
-				FlashButtonText = Scanner.FlashButtonText
+				FlashButtonText = Scanner.FlashButtonText,
+				parentViewController = this
 			};
 			scannerView.OnCancelButtonPressed += delegate
 			{

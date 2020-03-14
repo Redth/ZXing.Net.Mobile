@@ -11,9 +11,23 @@ namespace ZXing.Mobile
 		bool isDisposed;
 		bool torchFlag;
 		CameraFlashMode torchMode;
-		
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
-		
+
+		internal ZXingMediaView parentView = null;
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentView?.ScanningOptions ?? options;
+			set
+			{
+				if (parentView != null)
+					parentView.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+
 		public bool IsTorchOn
 		{
 			get => Settings.FlashMode == CameraFlashMode.On;

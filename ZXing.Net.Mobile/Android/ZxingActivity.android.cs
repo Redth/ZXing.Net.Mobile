@@ -62,7 +62,7 @@ namespace ZXing.Mobile
 
 		public static bool UseCustomOverlayView { get; set; }
 
-		public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
+		public static MobileBarcodeScanningOptions ScanningOptions { get; set; } = new MobileBarcodeScanningOptions();
 
 		public static string TopText { get; set; }
 

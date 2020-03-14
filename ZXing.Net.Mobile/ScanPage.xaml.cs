@@ -26,6 +26,20 @@ namespace ZXing.Mobile
 	{
 		ScanPageNavigationParameters Parameters { get; set; }
 
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => Parameters?.Options ?? options;
+			set
+			{
+				if (Parameters != null)
+					Parameters.Options = value;
+				else
+					options = value;
+			}
+		}
+
 		public ScanPage()
 		{
 			InitializeComponent();
@@ -39,6 +53,8 @@ namespace ZXing.Mobile
 			// so let's ignore it
 			if (e.Parameter == null)
 				return;
+
+			scannerControl.parentPage = this;
 
 			Parameters = e.Parameter as ScanPageNavigationParameters;
 			scannerControl.OnCameraInitialized += ScannerControl_OnCameraInitialized;
