@@ -15,34 +15,31 @@ namespace ZXing.Mobile.CameraAccess
 	public class CameraController
 	{
 		readonly Context context;
-		readonly ISurfaceHolder holder;
-		readonly SurfaceView surfaceView;
+		readonly TextureView textureView;
 		readonly CameraEventsListener cameraEventListener;
 		int cameraId;
 		IScannerSessionHost scannerHost;
 
-		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
+		public CameraController(TextureView textureView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
 		{
-			context = surfaceView.Context;
-			holder = surfaceView.Holder;
-			this.surfaceView = surfaceView;
+			context = textureView.Context;
+			this.textureView = textureView;
 			this.cameraEventListener = cameraEventListener;
 			this.scannerHost = scannerHost;
 		}
 
 		public Camera Camera { get; private set; }
+		SurfaceTexture surfaceTexture = null;
 
 		public int LastCameraDisplayOrientationDegree { get; private set; }
 
-		public void RefreshCamera()
+		public void RefreshCamera(SurfaceTexture surface)
 		{
-			if (holder == null) return;
-
 			ApplyCameraSettings();
 
 			try
 			{
-				Camera.SetPreviewDisplay(holder);
+				Camera.SetPreviewTexture(surface);
 				Camera.StartPreview();
 			}
 			catch (Exception ex)
@@ -51,7 +48,7 @@ namespace ZXing.Mobile.CameraAccess
 			}
 		}
 
-		public void SetupCamera()
+		public void SetupCamera(SurfaceTexture surface)
 		{
 			if (Camera != null)
 				return;
@@ -67,8 +64,7 @@ namespace ZXing.Mobile.CameraAccess
 
 			try
 			{
-				Camera.SetPreviewDisplay(holder);
-
+				Camera.SetPreviewTexture(surface);
 
 				var previewParameters = Camera.GetParameters();
 				var previewSize = previewParameters.PreviewSize;
@@ -105,16 +101,14 @@ namespace ZXing.Mobile.CameraAccess
 		}
 
 		public void AutoFocus()
-		{
-			AutoFocus(0, 0, false);
-		}
+			=> AutoFocus(0, 0, false);
 
 		public void AutoFocus(int x, int y)
 		{
 			// The bounds for focus areas are actually -1000 to 1000
 			// So we need to translate the touch coordinates to this scale
-			var focusX = x / surfaceView.Width * 2000 - 1000;
-			var focusY = y / surfaceView.Height * 2000 - 1000;
+			var focusX = 0;// x / surfaceView.Width * 2000 - 1000;
+			var focusY = 0;// y / surfaceView.Height * 2000 - 1000;
 
 			// Call the autofocus with our coords
 			AutoFocus(focusX, focusY, true);
@@ -136,7 +130,7 @@ namespace ZXing.Mobile.CameraAccess
 					//Camera.SetPreviewCallback(null);
 
 					Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"Calling SetPreviewDisplay: null");
-					Camera.SetPreviewDisplay(null);
+					Camera.SetPreviewTexture(null);
 				}
 				catch (Exception ex)
 				{
@@ -200,11 +194,6 @@ namespace ZXing.Mobile.CameraAccess
 				{
 					Camera = Camera.Open();
 				}
-
-				//if (Camera != null)
-				//    Camera.SetPreviewCallback(_cameraEventListener);
-				//else
-				//    MobileBarcodeScanner.LogWarn(MobileBarcodeScanner.TAG, "Camera is null :(");
 			}
 			catch (Exception ex)
 			{
@@ -216,9 +205,7 @@ namespace ZXing.Mobile.CameraAccess
 		void ApplyCameraSettings()
 		{
 			if (Camera == null)
-			{
 				OpenCamera();
-			}
 
 			// do nothing if something wrong with camera
 			if (Camera == null) return;

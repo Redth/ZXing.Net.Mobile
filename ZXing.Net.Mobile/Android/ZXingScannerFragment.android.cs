@@ -27,8 +27,8 @@ namespace ZXing.Mobile
 
 			try
 			{
-				scanner = new ZXingSurfaceView(Activity, ScanningOptions);
-
+				scanner = new ZXingTextureView(Activity);
+				//scanner.ScanningOptions = ScanningOptions;
 				frame.AddView(scanner, layoutParams);
 
 
@@ -102,7 +102,7 @@ namespace ZXing.Mobile
 		public string TopText { get; set; }
 		public string BottomText { get; set; }
 
-		ZXingSurfaceView scanner;
+		ZXingTextureView scanner;
 		ZxingOverlayView zxingOverlay;
 
 		public void Torch(bool on)

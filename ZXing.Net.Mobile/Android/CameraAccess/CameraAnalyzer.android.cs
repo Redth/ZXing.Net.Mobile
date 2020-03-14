@@ -15,12 +15,12 @@ namespace ZXing.Mobile.CameraAccess
 		bool wasScanned;
 		IScannerSessionHost scannerHost;
 
-		public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
+		public CameraAnalyzer(TextureView textureView, IScannerSessionHost scannerHost)
 		{
 			this.scannerHost = scannerHost;
 			cameraEventListener = new CameraEventsListener();
-			cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
-			Torch = new Torch(cameraController, surfaceView.Context);
+			cameraController = new CameraController(textureView, cameraEventListener, scannerHost);
+			Torch = new Torch(cameraController, textureView.Context);
 		}
 
 		public Action<Result> BarcodeFound;
@@ -42,10 +42,10 @@ namespace ZXing.Mobile.CameraAccess
 			cameraController.ShutdownCamera();
 		}
 
-		public void SetupCamera()
+		public void SetupCamera(Android.Graphics.SurfaceTexture surface)
 		{
 			cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
-			cameraController.SetupCamera();
+			cameraController.SetupCamera(surface);
 		}
 
 		public void AutoFocus()
@@ -54,8 +54,8 @@ namespace ZXing.Mobile.CameraAccess
 		public void AutoFocus(int x, int y)
 			=> cameraController.AutoFocus(x, y);
 
-		public void RefreshCamera()
-			=> cameraController.RefreshCamera();
+		public void RefreshCamera(Android.Graphics.SurfaceTexture surface)
+			=> cameraController.RefreshCamera(surface);
 
 		bool CanAnalyzeFrame
 		{
