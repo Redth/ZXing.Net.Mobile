@@ -1,6 +1,7 @@
 name: Build
 
-on: 
+on:
+  pull_request:
   push:
   release:
     types: [published]
