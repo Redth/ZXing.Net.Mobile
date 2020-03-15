@@ -40,6 +40,7 @@ For Xamarin Forms there is a bit more setup needed.  You will need to initialize
 On Android, in your main `Activity`'s `OnCreate (..)` implementation, call:
 
 ```csharp
+Xamarin.Essentials.Platform.Init(Application);
 ZXing.Net.Mobile.Forms.Android.Platform.Init();
 ```
 
