@@ -21,15 +21,17 @@ namespace Sample.Forms
 				VerticalOptions = LayoutOptions.FillAndExpand,
 				AutomationId = "zxingScannerView",
 			};
-			zxing.OnScanResult += (result) =>
+			zxing.OnScanResult += (results) =>
 				Device.BeginInvokeOnMainThread(async () =>
 				{
 
 					// Stop analysis until we navigate away so we don't keep reading barcodes
 					zxing.IsAnalyzing = false;
 
+					var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+
 					// Show an alert
-					await DisplayAlert("Scanned Barcode", result.Text, "OK");
+					await DisplayAlert("Scanned Barcode (s)", str, "OK");
 
 					// Navigate away
 					await Navigation.PopAsync();
@@ -56,20 +58,6 @@ namespace Sample.Forms
 
 			// The root page of your application
 			Content = grid;
-		}
-
-		protected override void OnAppearing()
-		{
-			base.OnAppearing();
-
-			zxing.IsScanning = true;
-		}
-
-		protected override void OnDisappearing()
-		{
-			zxing.IsScanning = false;
-
-			base.OnDisappearing();
 		}
 	}
 }

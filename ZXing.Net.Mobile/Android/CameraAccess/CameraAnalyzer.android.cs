@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Android.Views;
@@ -146,13 +147,18 @@ namespace ZXing.UI
 				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
 				rotate + ")");
 
-			if (results != null && results.Length > 0 && results[0] != null)
+			if (results != null && results.Length > 0)
 			{
-				Logger.Info("Barcode Found");
+				var filteredResults = results.Where(r => r != null && !string.IsNullOrWhiteSpace(r.Text)).ToArray();
 
-				wasScanned = true;
-				ResultHandler?.Invoke(results);
-				return;
+				if (filteredResults.Any())
+				{
+					Logger.Info("Barcode Found(s)");
+
+					wasScanned = true;
+					ResultHandler?.Invoke(filteredResults);
+					return;
+				}
 			}
 		}
 	}

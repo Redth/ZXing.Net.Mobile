@@ -29,14 +29,14 @@ namespace Sample.Forms
 			buttonScanDefaultOverlay.Clicked += async delegate
 			{
 				scanPage = new ZXingScannerPage();
-				scanPage.OnScanResult += (result) =>
+				scanPage.OnScanResult += (results) =>
 				{
-					scanPage.IsScanning = false;
-
 					Device.BeginInvokeOnMainThread(async () =>
 					{
 						await Navigation.PopAsync();
-						await DisplayAlert("Scanned Barcode", result.Text, "OK");
+						var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+
+						await DisplayAlert("Scanned Barcode", str, "OK");
 					});
 				};
 
@@ -67,15 +67,14 @@ namespace Sample.Forms
 				};
 				customOverlay.Children.Add(torch);
 
-				scanPage = new ZXingScannerPage(new ZXing.Mobile.MobileBarcodeScanningOptions { AutoRotate = true }, customOverlay: customOverlay);
-				scanPage.OnScanResult += (result) =>
+				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScanningOptions { AutoRotate = true }, customOverlay: customOverlay);
+				scanPage.OnScanResult += (results) =>
 				{
-					scanPage.IsScanning = false;
-
 					Device.BeginInvokeOnMainThread(async () =>
 					{
 						await Navigation.PopAsync();
-						await DisplayAlert("Scanned Barcode", result.Text, "OK");
+						var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+						await DisplayAlert("Scanned Barcode(s)", str, "OK");
 					});
 				};
 				await Navigation.PushAsync(scanPage);
@@ -89,10 +88,14 @@ namespace Sample.Forms
 			};
 			buttonScanContinuously.Clicked += async delegate
 			{
-				scanPage = new ZXingScannerPage(new ZXing.Mobile.MobileBarcodeScanningOptions { DelayBetweenContinuousScans = 3000 });
-				scanPage.OnScanResult += (result) =>
+				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScanningOptions { DelayBetweenContinuousScans = 3000 });
+				scanPage.OnScanResult += (results) =>
 					Device.BeginInvokeOnMainThread(async () =>
-					   await DisplayAlert("Scanned Barcode", result.Text, "OK"));
+					{
+						var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+
+						await DisplayAlert("Scanned Barcode", str, "OK");
+					});
 
 				await Navigation.PushAsync(scanPage);
 			};

@@ -257,8 +257,13 @@ namespace ZXing.UI
 
 					if (result != null && result.Length > 0 && result[0] != null)
 					{
-						OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(result));
-						return true;
+						var filteredResults = result.Where(r => r != null && !string.IsNullOrWhiteSpace(r.Text)).ToArray();
+
+						if (filteredResults.Any())
+						{
+							OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(filteredResults));
+							return true;
+						}
 					}
 				}
 				catch (Exception ex)

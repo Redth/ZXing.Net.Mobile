@@ -93,8 +93,13 @@ namespace ZXing.UI
 
 			var result = await TizenBarcodeAnalyzer.AnalyzeBarcodeAsync(e.MainImage, Options?.ScanMultiple ?? false);
 
-			if (result != null && result.Length > 0 && result[0] != null)
-				OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(result));
+			if (result != null && result.Length > 0)
+			{
+				var filteredResults = result.Where(r => r != null && !string.IsNullOrWhiteSpace(r.Text)).ToArray();
+
+				if (filteredResults.Any())
+					OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(filteredResults));
+			}
 		}
 
 		void FocusStateChangedHandler(object sender, CameraFocusStateChangedEventArgs e)

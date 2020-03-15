@@ -49,7 +49,6 @@ namespace ZXing.UI
 		//AVCaptureVideoDataOutput output;
 		//OutputRecorder outputRecorder;
 		//DispatchQueue queue;
-		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = true;
 
 		volatile bool foundResult = false;
@@ -213,25 +212,37 @@ namespace ZXing.UI
 					wasScanned = false;
 					lastAnalysis = DateTime.UtcNow;
 
-					var mdo = metaDataObjects.FirstOrDefault();
+					var scannedResults = new List<ZXing.Result>();
 
-					if (!(mdo is AVMetadataMachineReadableCodeObject readableObj))
-						return;
+					foreach (var mdoOn in metaDataObjects)
+					{
+						if (!(mdoOn is AVMetadataMachineReadableCodeObject readableObj))
+							continue;
 
-					if (readableObj.Type == AVMetadataObjectType.CatBody
-						|| readableObj.Type == AVMetadataObjectType.DogBody
-						|| readableObj.Type == AVMetadataObjectType.Face
-						|| readableObj.Type == AVMetadataObjectType.HumanBody
-						|| readableObj.Type == AVMetadataObjectType.SalientObject)
-						return;
+						if (readableObj.Type == AVMetadataObjectType.CatBody
+							|| readableObj.Type == AVMetadataObjectType.DogBody
+							|| readableObj.Type == AVMetadataObjectType.Face
+							|| readableObj.Type == AVMetadataObjectType.HumanBody
+							|| readableObj.Type == AVMetadataObjectType.SalientObject)
+							continue;
 
 						wasScanned = true;
 
-					var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
+						if (!string.IsNullOrWhiteSpace(readableObj.StringValue) && !string.IsNullOrWhiteSpace(readableObj.Type.ToString()))
+						{
+							var zxingFormat = ZXingBarcodeFormatFromAVCaptureBarcodeFormat(readableObj.Type.ToString());
 
-					var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
+							var rs = new ZXing.Result(readableObj.StringValue, null, null, zxingFormat);
 
-					resultCallback(rs);
+							scannedResults.Add(rs);
+						}
+
+						if (!Options.ScanMultiple)
+							break;
+					}
+
+					if (scannedResults.Any())
+						OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(scannedResults.ToArray()));
 				}
 				finally
 				{
@@ -258,10 +269,10 @@ namespace ZXing.UI
 			{
 				var availableMetaObjTypes = metadataOutput.AvailableMetadataObjectTypes;
 
-				
+
 				metadataOutput.MetadataObjectTypes = metadataOutput.AvailableMetadataObjectTypes;
 
-				
+
 			}
 
 			previewLayer = new AVCaptureVideoPreviewLayer(session);
@@ -463,10 +474,10 @@ namespace ZXing.UI
 		public Task AutoFocusAsync(int x, int y) => Task.CompletedTask;
 
 		public bool IsAnalyzing
-        {
+		{
 			get => analyzing;
 			set => analyzing = value;
-        }
+		}
 
 		public bool IsTorchOn => torch;
 

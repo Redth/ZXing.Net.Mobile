@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using ZXing.Net.Mobile.Forms;
@@ -31,7 +32,7 @@ namespace Sample.Forms
 		{
 			var expectedFormat = ZXing.BarcodeFormat.QR_CODE;
 			Enum.TryParse(param, out expectedFormat);
-			var opts = new ZXing.Mobile.MobileBarcodeScanningOptions
+			var opts = new ZXing.UI.BarcodeScanningOptions
 			{
 				PossibleFormats = new List<ZXing.BarcodeFormat> { expectedFormat }
 			};
@@ -41,16 +42,16 @@ namespace Sample.Forms
 			var scanPage = new ZXingScannerPage(opts);
 			scanPage.OnScanResult += (result) =>
 			{
-				scanPage.IsScanning = false;
-
-				Device.BeginInvokeOnMainThread(() =>
+				if (result != null && result.Length > 0 && result[0] != null)
 				{
-					var format = result?.BarcodeFormat.ToString() ?? string.Empty;
-					var value = result?.Text ?? string.Empty;
+					Device.BeginInvokeOnMainThread(() =>
+					{
+						var str = result.Select(r => $"{r.Text} | {r.BarcodeFormat}");
 
-					MainPage.Navigation.PopAsync();
-					MainPage.DisplayAlert("Barcode Result", format + "|" + value, "OK");
-				});
+						MainPage.Navigation.PopAsync();
+						MainPage.DisplayAlert("Barcode Result(s)", string.Join("; ", str), "OK");
+					});
+				}
 			};
 
 			MainPage.Navigation.PushAsync(scanPage);

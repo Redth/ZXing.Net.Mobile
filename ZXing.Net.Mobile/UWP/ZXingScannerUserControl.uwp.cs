@@ -415,11 +415,16 @@ namespace ZXing.UI
 				}
 
 				// Check if a result was found
-				if (results != null && results.Length > 0 && results[0] != null)
+				if (results != null && results.Length > 0)
 				{
-					delay = Options.DelayBetweenContinuousScans;
+					var filteredResults = results.Where(r => r != null && !string.IsNullOrWhiteSpace(r.Text)).ToArray();
 
-					OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(results));
+					if (filteredResults.Any())
+					{
+						delay = Options.DelayBetweenContinuousScans;
+
+						OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(filteredResults));
+					}
 				}
 
 				processing = false;
