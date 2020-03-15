@@ -16,18 +16,29 @@ namespace ZXing.Mobile
 	{
 		AVCaptureScannerView scannerView;
 
-		public event Action<ZXing.Result> OnScannedResult;
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
-		public MobileBarcodeScanner Scanner { get; set; }
-		public bool ContinuousScanning { get; set; }
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => Scanner?.ScanningOptions ?? options;
+			set
+			{
+				if (Scanner != null)
+					Scanner.ScanningOptions = value;
+				options = value;
+			}
+		}
+		public MobileBarcodeScanner Scanner { get; private set; }
+
+		public ScannerOverlaySettings<UIView> OverlaySettings { get; private set; }
 
 		UIActivityIndicatorView loadingView;
 		UIView loadingBg;
 
-		public AVCaptureScannerViewController(MobileBarcodeScanningOptions options, MobileBarcodeScanner scanner)
+		internal AVCaptureScannerViewController(MobileBarcodeScanner scanner, ScannerOverlaySettings<UIView> overlaySettings)
 		{
-			ScanningOptions = options;
+			OverlaySettings = overlaySettings;
 			Scanner = scanner;
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
@@ -40,7 +51,7 @@ namespace ZXing.Mobile
 			=> this;
 
 		public void Cancel()
-			=> InvokeOnMainThread(() => scannerView.StopScanning());
+			=> InvokeOnMainThread(() => scannerView.Stop());
 
 		UIStatusBarStyle originalStatusBarStyle = UIStatusBarStyle.Default;
 
@@ -64,15 +75,9 @@ namespace ZXing.Mobile
 			View.AddSubview(loadingBg);
 			loadingView.StartAnimating();
 
-			scannerView = new AVCaptureScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height))
+			scannerView = new AVCaptureScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), OverlaySettings, this)
 			{
 				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
-				UseCustomOverlayView = Scanner.UseCustomOverlay,
-				CustomOverlayView = Scanner.CustomOverlay,
-				TopText = Scanner.TopText,
-				BottomText = Scanner.BottomText,
-				CancelButtonText = Scanner.CancelButtonText,
-				FlashButtonText = Scanner.FlashButtonText
 			};
 			scannerView.OnCancelButtonPressed += () =>
 				Scanner.Cancel();
@@ -89,6 +94,10 @@ namespace ZXing.Mobile
 
 		public bool IsTorchOn
 			=> scannerView?.IsTorchOn ?? false;
+
+		public bool IsAnalyzing => scannerView?.IsAnalyzing ?? false;
+
+		public bool HasTorch => scannerView?.HasTorch ?? false;
 
 		public void PauseAnalysis()
 			=> scannerView?.PauseAnalysis();
@@ -110,22 +119,15 @@ namespace ZXing.Mobile
 
 			Console.WriteLine("Starting to scan...");
 
-			scannerView.StartScanning(result =>
-			{
-				if (!ContinuousScanning)
-				{
-					Console.WriteLine("Stopping scan...");
-					scannerView.StopScanning();
-				}
-
-				OnScannedResult?.Invoke(result);
-			}, ScanningOptions);
+			scannerView.OnBarcodeScanned += OnBarcodeScanned;
 		}
 
 		public override void ViewDidDisappear(bool animated)
 		{
+			scannerView.OnBarcodeScanned -= OnBarcodeScanned;
+
 			if (scannerView != null)
-				scannerView.StopScanning();
+				scannerView.Stop();
 		}
 
 		public override void ViewWillDisappear(bool animated)
@@ -147,6 +149,12 @@ namespace ZXing.Mobile
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations()
 			=> UIInterfaceOrientationMask.All;
+
+		public void AutoFocus()
+			=> scannerView?.AutoFocus();
+
+		public void AutoFocus(int x, int y)
+			=> scannerView?.AutoFocus(x, y);
 
 		//void HandleOnScannerSetupComplete()
 		//{

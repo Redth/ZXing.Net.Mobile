@@ -1,6 +1,8 @@
 ﻿using Android.Content;
 using Android.Content.PM;
 using Android.Hardware;
+using Android.Util;
+using Java.IO;
 
 namespace ZXing.Mobile.CameraAccess
 {
@@ -25,13 +27,13 @@ namespace ZXing.Mobile.CameraAccess
 
 				if (!context.PackageManager.HasSystemFeature(PackageManager.FeatureCameraFlash))
 				{
-					Android.Util.Log.Info(MobileBarcodeScanner.TAG, "Flash not supported on this device");
+					Logger.Warn("Flash not supported on this device");
 					return false;
 				}
 
 				if (cameraController.Camera == null)
 				{
-					Android.Util.Log.Info(MobileBarcodeScanner.TAG, "Run camera first");
+					Logger.Error("Run camera first");
 					return false;
 				}
 
@@ -62,7 +64,7 @@ namespace ZXing.Mobile.CameraAccess
 
 			if (cameraController.Camera == null)
 			{
-				Android.Util.Log.Info(MobileBarcodeScanner.TAG, "NULL Camera, cannot toggle torch");
+				Logger.Error("NULL Camera, cannot toggle torch");
 				return;
 			}
 

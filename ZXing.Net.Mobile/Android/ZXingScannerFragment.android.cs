@@ -10,14 +10,40 @@ using Android.Support.V4.App;
 
 namespace ZXing.Mobile
 {
-	public class ZXingScannerFragment : Fragment, IZXingScanner<View>, IScannerView
+	public class ZXingScannerFragment : Fragment, IScannerView
 	{
-		public ZXingScannerFragment()
+		internal ZXingScannerFragment(ZxingActivity parentActivity, ScannerOverlaySettings<Android.Views.View> overlaySettings)
 		{
-			UseCustomOverlayView = false;
+			ParentActivity = parentActivity;
+			OverlaySettings = overlaySettings;
+		}
+
+		public ZXingScannerFragment(ScannerOverlaySettings<View> overlaySettings)
+			: this(null, overlaySettings) { }
+
+		public ZXingScannerFragment()
+			: this(null, null) { }
+
+		public ScannerOverlaySettings<Android.Views.View> OverlaySettings { get; private set; }
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => ParentActivity != null ? ZxingActivity.ScanningOptions : options;
+			set
+			{
+				if (ParentActivity != null)
+					ZxingActivity.ScanningOptions = value;
+				else
+					options = value;
+			}
 		}
 
 		FrameLayout frame;
+
+		internal ZxingActivity ParentActivity { get; private set; }
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public override View OnCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle)
 		{
@@ -27,30 +53,27 @@ namespace ZXing.Mobile
 
 			try
 			{
-				scanner = new ZXingSurfaceView(Activity, ScanningOptions);
+				scanner = new ZXingSurfaceView(Activity);
+				scanner.OnBarcodeScanned += OnBarcodeScanned;
 
 				frame.AddView(scanner, layoutParams);
 
 
-				if (!UseCustomOverlayView)
+				if (OverlaySettings?.CustomOverlay == null)
 				{
-					zxingOverlay = new ZxingOverlayView(Activity);
-					zxingOverlay.TopText = TopText ?? "";
-					zxingOverlay.BottomText = BottomText ?? "";
-
+					zxingOverlay = new ZxingOverlayView(Activity, OverlaySettings);
+					
 					frame.AddView(zxingOverlay, layoutParams);
 				}
-				else if (CustomOverlayView != null)
+				else
 				{
-					frame.AddView(CustomOverlayView, layoutParams);
+					frame.AddView(OverlaySettings.CustomOverlay, layoutParams);
 				}
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("Create Surface View Failed: " + ex);
 			}
-
-			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "ZXingScannerFragment->OnResume exit");
 
 			return frame;
 		}
@@ -65,10 +88,10 @@ namespace ZXing.Mobile
 				// reattach scanner and overlay views.
 				frame.AddView(scanner, layoutParams);
 
-				if (!UseCustomOverlayView)
+				if (OverlaySettings?.CustomOverlay == null)
 					frame.AddView(zxingOverlay, layoutParams);
-				else if (CustomOverlayView != null)
-					frame.AddView(CustomOverlayView, layoutParams);
+				else
+					frame.AddView(OverlaySettings.CustomOverlay, layoutParams);
 			}
 		}
 
@@ -77,14 +100,14 @@ namespace ZXing.Mobile
 			if (scanner != null)
 			{
 				scanner.StopScanning();
-
+				scanner.OnBarcodeScanned -= OnBarcodeScanned;
 				frame.RemoveView(scanner);
 			}
 
-			if (!UseCustomOverlayView)
+			if (OverlaySettings?.CustomOverlay == null)
 				frame.RemoveView(zxingOverlay);
-			else if (CustomOverlayView != null)
-				frame.RemoveView(CustomOverlayView);
+			else
+				frame.RemoveView(OverlaySettings.CustomOverlay);
 
 			base.OnStop();
 		}
@@ -95,12 +118,6 @@ namespace ZXing.Mobile
 			layoutParams.Weight = 1;
 			return layoutParams;
 		}
-
-		public View CustomOverlayView { get; set; }
-		public bool UseCustomOverlayView { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
-		public string TopText { get; set; }
-		public string BottomText { get; set; }
 
 		ZXingSurfaceView scanner;
 		ZxingOverlayView zxingOverlay;
@@ -115,23 +132,6 @@ namespace ZXing.Mobile
 			=> scanner?.AutoFocus(x, y);
 
 		Action<Result> scanCallback;
-
-		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
-		{
-			ScanningOptions = options;
-			scanCallback = scanResultHandler;
-
-			if (scanner == null)
-				return;
-
-			Scan();
-		}
-
-		void Scan()
-			=> scanner?.StartScanning(scanCallback, ScanningOptions);
-
-		public void StopScanning()
-			=> scanner?.StopScanning();
 
 		public void PauseAnalysis()
 			=> scanner?.PauseAnalysis();

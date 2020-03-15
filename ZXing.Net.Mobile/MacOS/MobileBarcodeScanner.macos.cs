@@ -3,14 +3,14 @@ using System.Threading.Tasks;
 
 namespace ZXing.Mobile
 {
-	public partial class MobileBarcodeScanner : MobileBarcodeScannerBase
+	public partial class MobileBarcodeScanner
 	{
 		NotSupportedException ex = new NotSupportedException("MobileBarcodeScanner is unsupported on this platform.");
 
-		Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
-			=> throw ex;
+		void PlatformInit()
+		{ }
 
-		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		void PlatformScan(Action<ZXing.Result[]> scanHandler)
 			=> throw ex;
 
 		void PlatformCancel()

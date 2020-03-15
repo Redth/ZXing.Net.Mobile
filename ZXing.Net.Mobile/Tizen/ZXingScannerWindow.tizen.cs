@@ -5,39 +5,66 @@ namespace ZXing.Mobile
 {
 	class ZxingScannerWindow : Window
 	{
-		public Action<Result> ScanCompletedHandler { get; set; }
-		public bool ScanContinuously { get; set; }
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
 
-		public MobileBarcodeScanningOptions ScanningOptions {
-			get => zxingMediaView?.ScanningOptions ?? new MobileBarcodeScanningOptions();
-			set => zxingMediaView.ScanningOptions = value;
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => scanner?.ScanningOptions ?? options;
+			set
+			{
+				if (scanner != null)
+					scanner.ScanningOptions = value;
+				else
+					options = value;
+			}
 		}
 
-		public bool IsTorchOn => zxingMediaView.IsTorchOn;
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public bool UseCustomOverlayView { get; set; }
-		public Container CustomOverlayView { get; set; }
-		public string TopText { get; internal set; }
-		public string BottomText { get; internal set; }
+		public ScannerOverlaySettings<Container> OverlaySettings { get; private set; }
+
+		readonly MobileBarcodeScanner scanner;
+
+
+		public bool IsTorchOn => zxingMediaView.IsTorchOn;
 
 		ZXingMediaView zxingMediaView;
 		Background overlayBackground;
 
-		public ZxingScannerWindow() : base("ZXingScannerWindow")
+		public ZxingScannerWindow()
+			: this(null, null)
+		{ }
+
+		public ZxingScannerWindow(ScannerOverlaySettings<Container> overlaySettings)
+			: this(null, overlaySettings)
+		{ }
+
+		public ZxingScannerWindow(MobileBarcodeScanner scanner, ScannerOverlaySettings<Container> overlaySettings) : base("ZXingScannerWindow")
 		{
-			TopText = "";
-			BottomText = "";
+			this.scanner = scanner;
+			OverlaySettings = overlaySettings;
 			AvailableRotations = DisplayRotation.Degree_0 | DisplayRotation.Degree_180 | DisplayRotation.Degree_270 | DisplayRotation.Degree_90;
 			BackButtonPressed += (s, ex) =>
 			{
-				zxingMediaView?.StopScanning();
+				zxingMediaView?.Dispose();
 				Unrealize();
 			};
 			InitView();
 			var showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);
 			showCallback.On += (s, e) =>
 			{
-				StartScanning();
+				if (OverlaySettings?.CustomOverlay != null)
+				{
+					overlayBackground.SetContent(OverlaySettings.CustomOverlay);
+					OverlaySettings.CustomOverlay.Show();
+				}
+				else
+				{
+					var defaultOverlay = new ZXingDefaultOverlay(this);
+					defaultOverlay.SetText(OverlaySettings?.TopText ?? string.Empty, OverlaySettings?.BottomText ?? string.Empty);
+					overlayBackground.SetContent(defaultOverlay);
+					defaultOverlay.Show();
+				}
 			};
 		}
 
@@ -57,7 +84,7 @@ namespace ZXing.Mobile
 				BackgroundColor = Color.Transparent,
 			};
 			overlayBackground.Show();
-			
+
 			var oConformant = new Conformant(this);
 			oConformant.Show();
 			oConformant.SetContent(overlayBackground);
@@ -73,30 +100,6 @@ namespace ZXing.Mobile
 			mBackground.SetContent(zxingMediaView);
 		}
 
-		public void StartScanning()
-		{
-			if (UseCustomOverlayView)
-			{
-				overlayBackground.SetContent(CustomOverlayView);
-				CustomOverlayView.Show();
-			}
-			else
-			{
-				var defaultOverlay = new ZXingDefaultOverlay(this);
-				defaultOverlay.SetText(TopText, BottomText);
-				overlayBackground.SetContent(defaultOverlay);
-				defaultOverlay.Show();
-			}
-			zxingMediaView.StartScanning(result =>
-			{
-				ScanCompletedHandler?.Invoke(result);
-				if (!ScanContinuously)
-				{
-					zxingMediaView.StopScanning();
-					Unrealize();
-				}
-			}, ScanningOptions);
-		}
 
 		public void AutoFocus()
 			=> zxingMediaView?.AutoFocus();

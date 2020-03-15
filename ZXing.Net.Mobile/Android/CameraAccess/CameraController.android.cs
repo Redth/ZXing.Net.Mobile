@@ -47,7 +47,7 @@ namespace ZXing.Mobile.CameraAccess
 			}
 			catch (Exception ex)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, ex.ToString());
+				Logger.Error(ex, "Failed to start camera preview");
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace ZXing.Mobile.CameraAccess
 			}
 			catch (Exception ex)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, ex.ToString());
+				Logger.Error(ex, "Failed to start camera preview and callback");
 				return;
 			}
 			finally
@@ -135,19 +135,19 @@ namespace ZXing.Mobile.CameraAccess
 
 					//Camera.SetPreviewCallback(null);
 
-					Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"Calling SetPreviewDisplay: null");
+					Logger.Info("Calling SetPreviewDisplay: null");
 					Camera.SetPreviewDisplay(null);
 				}
 				catch (Exception ex)
 				{
-					Android.Util.Log.Error(MobileBarcodeScanner.TAG, ex.ToString());
+					Logger.Error(ex, "Failed to stop preview");
 				}
 				Camera.Release();
 				Camera = null;
 			}
 			catch (Exception e)
 			{
-				Android.Util.Log.Error(MobileBarcodeScanner.TAG, e.ToString());
+				Logger.Error(e);
 			}
 
 			PerformanceCounter.Stop(perf, "Shutdown camera took {0}ms");
@@ -161,12 +161,12 @@ namespace ZXing.Mobile.CameraAccess
 
 				if (version >= BuildVersionCodes.Gingerbread)
 				{
-					Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Checking Number of cameras...");
+					Logger.Info("Checking Number of cameras...");
 
 					var numCameras = Camera.NumberOfCameras;
 					var camInfo = new Camera.CameraInfo();
 					var found = false;
-					Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Found " + numCameras + " cameras...");
+					Logger.Info("Found " + numCameras + " cameras...");
 
 					var whichCamera = CameraFacing.Back;
 
@@ -179,8 +179,7 @@ namespace ZXing.Mobile.CameraAccess
 						Camera.GetCameraInfo(i, camInfo);
 						if (camInfo.Facing == whichCamera)
 						{
-							Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
-								"Found " + whichCamera + " Camera, opening...");
+							Logger.Info($"Found {whichCamera} Camera, opening...");
 							Camera = Camera.Open(i);
 							cameraId = i;
 							found = true;
@@ -190,8 +189,7 @@ namespace ZXing.Mobile.CameraAccess
 
 					if (!found)
 					{
-						Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
-							"Finding " + whichCamera + " camera failed, opening camera 0...");
+						Logger.Info($"Finding {whichCamera} camera failed, opening camera 0...");
 						Camera = Camera.Open(0);
 						cameraId = 0;
 					}
@@ -200,16 +198,11 @@ namespace ZXing.Mobile.CameraAccess
 				{
 					Camera = Camera.Open();
 				}
-
-				//if (Camera != null)
-				//    Camera.SetPreviewCallback(_cameraEventListener);
-				//else
-				//    MobileBarcodeScanner.LogWarn(MobileBarcodeScanner.TAG, "Camera is null :(");
 			}
 			catch (Exception ex)
 			{
 				ShutdownCamera();
-				MobileBarcodeScanner.LogError("Setup Error: {0}", ex);
+				Logger.Error(ex, "Setup Error");
 			}
 		}
 
@@ -299,8 +292,7 @@ namespace ZXing.Mobile.CameraAccess
 			// Hopefully a resolution was selected at some point
 			if (resolution != null)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
-					"Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+				Logger.Info($"Selected Resolution: {resolution.Width}x{resolution.Height}");
 				parameters.SetPreviewSize(resolution.Width, resolution.Height);
 			}
 
@@ -315,13 +307,13 @@ namespace ZXing.Mobile.CameraAccess
 
 			if (scannerHost.ScanningOptions.DisableAutofocus)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Disabled");
+				Logger.Info("AutoFocus Disabled");
 				return;
 			}
 
 			var cameraParams = Camera.GetParameters();
 
-			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
+			Logger.Info("AutoFocus Requested");
 
 			// Cancel any previous requests
 			Camera.CancelAutoFocus();
@@ -365,7 +357,7 @@ namespace ZXing.Mobile.CameraAccess
 			}
 			catch (Exception ex)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
+				Logger.Error(ex, "AutoFocus Failed");
 			}
 		}
 
@@ -374,7 +366,7 @@ namespace ZXing.Mobile.CameraAccess
 			var degrees = GetCameraDisplayOrientation();
 			LastCameraDisplayOrientationDegree = degrees;
 
-			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Changing Camera Orientation to: " + degrees);
+			Logger.Info($"Changing Camera Orientation to: {degrees}");
 
 			try
 			{
@@ -382,7 +374,7 @@ namespace ZXing.Mobile.CameraAccess
 			}
 			catch (Exception ex)
 			{
-				Android.Util.Log.Error(MobileBarcodeScanner.TAG, ex.ToString());
+				Logger.Error(ex);
 			}
 		}
 

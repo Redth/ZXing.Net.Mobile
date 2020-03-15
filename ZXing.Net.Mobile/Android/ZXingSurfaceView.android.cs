@@ -10,12 +10,34 @@ namespace ZXing.Mobile
 {
 	public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView, IScannerSessionHost
 	{
-		public ZXingSurfaceView(Context context, MobileBarcodeScanningOptions options)
+		public ZXingSurfaceView(Context context)
+			: this(null, context)
+		{
+		}
+
+		internal ZXingSurfaceView(ZXingScannerFragment parentFragment, Context context)
 			: base(context)
 		{
-			ScanningOptions = options ?? new MobileBarcodeScanningOptions();
+			ParentFragment = parentFragment;
 			Init();
 		}
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => ParentFragment?.ScanningOptions ?? options;
+			set
+			{
+				if (ParentFragment != null)
+					ParentFragment.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+		internal ZXingScannerFragment ParentFragment { get; private set; }
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		protected ZXingSurfaceView(IntPtr javaReference, JniHandleOwnership transfer)
 			: base(javaReference, transfer) => Init();
@@ -25,7 +47,8 @@ namespace ZXing.Mobile
 		void Init()
 		{
 			if (cameraAnalyzer == null)
-				cameraAnalyzer = new CameraAnalyzer(this, this);
+				cameraAnalyzer = new CameraAnalyzer(this, this,
+					r => OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(r)));
 
 			cameraAnalyzer.ResumeAnalysis();
 
@@ -88,17 +111,6 @@ namespace ZXing.Mobile
 		public void AutoFocus(int x, int y)
 			=> cameraAnalyzer.AutoFocus(x, y);
 
-		public void StartScanning(Action<Result> scanResultCallback, MobileBarcodeScanningOptions options = null)
-		{
-			cameraAnalyzer.SetupCamera();
-
-			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
-
-			cameraAnalyzer.BarcodeFound = (result) =>
-				scanResultCallback?.Invoke(result);
-			cameraAnalyzer.ResumeAnalysis();
-		}
-
 		public void StopScanning()
 			=> cameraAnalyzer.ShutdownCamera();
 
@@ -118,8 +130,6 @@ namespace ZXing.Mobile
 
 		public void ToggleTorch()
 			=> cameraAnalyzer.Torch.Toggle();
-
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
 		public bool IsTorchOn => cameraAnalyzer.Torch.IsEnabled;
 

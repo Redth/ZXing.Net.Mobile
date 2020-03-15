@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
@@ -14,16 +15,16 @@ namespace ZXing.Mobile.CameraAccess
 		DateTime lastPreviewAnalysis = DateTime.UtcNow;
 		bool wasScanned;
 		IScannerSessionHost scannerHost;
+		Action<ZXing.Result[]> resultHandler;
 
-		public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
+		public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost, Action<ZXing.Result[]> resultHandler)
 		{
 			this.scannerHost = scannerHost;
+			this.resultHandler = resultHandler;
 			cameraEventListener = new CameraEventsListener();
 			cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
 			Torch = new Torch(cameraController, surfaceView.Context);
 		}
-
-		public Action<Result> BarcodeFound;
 
 		public Torch Torch { get; }
 
@@ -102,7 +103,7 @@ namespace ZXing.Mobile.CameraAccess
 			}).ContinueWith(task =>
 			{
 				if (task.IsFaulted)
-					Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "DecodeFrame exception occurs");
+					Logger.Error(task.Exception, "DecodeFrame exception occurred");
 			}, TaskContinuationOptions.OnlyOnFaulted);
 		}
 
@@ -128,14 +129,18 @@ namespace ZXing.Mobile.CameraAccess
 				newHeight = width;
 			}
 
-			ZXing.Result result = null;
+			ZXing.Result[] results = null;
 			var start = PerformanceCounter.Start();
 
 			LuminanceSource fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
 			if (rotate)
 				fast = fast.rotateCounterClockwise();
 
-			result = barcodeReader.Decode(fast);
+			if (scannerHost.ScanningOptions.ScanMultiple)
+				results = barcodeReader.DecodeMultiple(fast);
+			else
+				results = new[] { barcodeReader.Decode(fast) };
+			
 
 			fastArray.Dispose();
 			fastArray = null;
@@ -144,12 +149,12 @@ namespace ZXing.Mobile.CameraAccess
 				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
 				rotate + ")");
 
-			if (result != null)
+			if (results != null && results.Length > 0 && results[0] != null)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
+				Logger.Info("Barcode Found");
 
 				wasScanned = true;
-				BarcodeFound?.Invoke(result);
+				resultHandler?.Invoke(results);
 				return;
 			}
 		}

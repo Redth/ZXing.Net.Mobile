@@ -2,20 +2,19 @@ using ElmSharp;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tizen.Maps;
 
 namespace ZXing.Mobile
 {
-	public partial class MobileBarcodeScanner : MobileBarcodeScannerBase
+	public partial class MobileBarcodeScanner
 	{
-		readonly ZxingScannerWindow zxingScannerWindow;
-
-		public Container CustomOverlay { set; get; }
+		ZxingScannerWindow zxingScannerWindow;
 
 		public Window MainWindow { get; internal set; }
 
-		public MobileBarcodeScanner() : base()
+		void PlatformInit()
 		{
-			zxingScannerWindow = new ZxingScannerWindow();
+			zxingScannerWindow = new ZxingScannerWindow(this, OverlaySettings.WithView<Container>());
 			MainWindow = zxingScannerWindow;
 		}
 
@@ -33,44 +32,11 @@ namespace ZXing.Mobile
 		void PlatformResumeAnalysis()
 			=> zxingScannerWindow.ResumeAnalysis();
 
-		Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		void PlatformScan(Action<Result[]> scanHandler)
 		{
-			var task = Task.Factory.StartNew(() =>
-			{
-				var waitScanResetEvent = new ManualResetEvent(false);
-				Result result = null;
+			zxingScannerWindow.OnBarcodeScanned +=
+				(s, e) => scanHandler(e.Results);
 
-				zxingScannerWindow.ScanningOptions = options;
-				zxingScannerWindow.ScanContinuously = false;
-				zxingScannerWindow.UseCustomOverlayView = UseCustomOverlay;
-				zxingScannerWindow.CustomOverlayView = CustomOverlay;
-				zxingScannerWindow.TopText = TopText;
-				zxingScannerWindow.BottomText = BottomText;
-
-				zxingScannerWindow.ScanCompletedHandler = (Result r) =>
-				{
-					result = r;
-					waitScanResetEvent.Set();
-				};
-				zxingScannerWindow.Show();
-				waitScanResetEvent.WaitOne();
-				return result;
-			});
-			return task;
-		}
-
-		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
-		{
-			zxingScannerWindow.UseCustomOverlayView = UseCustomOverlay;
-			zxingScannerWindow.CustomOverlayView = CustomOverlay;
-			zxingScannerWindow.ScanningOptions = options;
-			zxingScannerWindow.ScanContinuously = true;
-			zxingScannerWindow.TopText = TopText;
-			zxingScannerWindow.BottomText = BottomText;
-			zxingScannerWindow.ScanCompletedHandler = (Result r) =>
-			{
-				scanHandler?.Invoke(r);
-			};
 			zxingScannerWindow.Show();
 		}
 

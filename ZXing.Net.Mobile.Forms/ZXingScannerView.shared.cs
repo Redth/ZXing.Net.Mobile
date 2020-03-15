@@ -7,8 +7,10 @@ namespace ZXing.Net.Mobile.Forms
 {
 	public class ZXingScannerView : View
 	{
-		public delegate void ScanResultDelegate(Result result);
+		public delegate void ScanResultDelegate(Result[] results);
 		public event ScanResultDelegate OnScanResult;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public event Action<int, int> AutoFocusRequested;
 
@@ -18,11 +20,10 @@ namespace ZXing.Net.Mobile.Forms
 			HorizontalOptions = LayoutOptions.FillAndExpand;
 		}
 
-		public void RaiseScanResult(Result result)
+		public void RaiseOnBarcodeScanned(Result[] results)
 		{
-			Result = result;
-			OnScanResult?.Invoke(Result);
-			ScanResultCommand?.Execute(Result);
+			OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(results));
+			ScanResultCommand?.Execute(results);
 		}
 
 		public void ToggleTorch()
@@ -41,15 +42,6 @@ namespace ZXing.Net.Mobile.Forms
 		{
 			get => (MobileBarcodeScanningOptions)GetValue(OptionsProperty);
 			set => SetValue(OptionsProperty, value);
-		}
-
-		public static readonly BindableProperty IsScanningProperty =
-			BindableProperty.Create(nameof(IsScanning), typeof(bool), typeof(ZXingScannerView), false);
-
-		public bool IsScanning
-		{
-			get => (bool)GetValue(IsScanningProperty);
-			set => SetValue(IsScanningProperty, value);
 		}
 
 		public static readonly BindableProperty IsTorchOnProperty =

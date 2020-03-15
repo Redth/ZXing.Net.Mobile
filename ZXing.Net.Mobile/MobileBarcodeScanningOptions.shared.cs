@@ -53,10 +53,10 @@ namespace ZXing.Mobile
 		public int DelayBetweenAnalyzingFrames { get; set; }
 		public int InitialDelayBeforeAnalyzingFrames { get; set; }
 
+		public bool ScanMultiple { get; set; } = false;
+
 		public static MobileBarcodeScanningOptions Default
-		{
-			get { return new MobileBarcodeScanningOptions(); }
-		}
+			=> new MobileBarcodeScanningOptions();
 
 		public BarcodeReader BuildBarcodeReader()
 		{

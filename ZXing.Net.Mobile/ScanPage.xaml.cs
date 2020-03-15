@@ -22,9 +22,28 @@ namespace ZXing.Mobile
 	/// <summary>
 	/// An empty page that can be used on its own or navigated to within a Frame.
 	/// </summary>
-	public sealed partial class ScanPage : Page, IMobileBarcodeScanner
+	public sealed partial class ScanPage : Page, IScannerView
 	{
-		ScanPageNavigationParameters Parameters { get; set; }
+		public static ScanPageNavigationParameters Parameters { get; set; }
+
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => scanner?.ScanningOptions ?? options;
+			set
+			{
+				if (scanner != null)
+					scanner.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+		MobileBarcodeScanner scanner;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public ScanPage()
 		{
@@ -35,42 +54,17 @@ namespace ZXing.Mobile
 		{
 			base.OnNavigatedTo(e);
 
-			// If no parameters were passed, we navigated here for some other reason
-			// so let's ignore it
-			if (e.Parameter == null)
-				return;
+			scannerControl.parentPage = this;
+			scannerControl.OverlaySettings = Parameters.OverlaySettings.WithView<UIElement>();
 
-			Parameters = e.Parameter as ScanPageNavigationParameters;
-			scannerControl.OnCameraInitialized += ScannerControl_OnCameraInitialized;
-			scannerControl.OnScannerError += ScannerControl_OnScannerError;
-
-			if (Parameters != null)
-				Parameters.Scanner.ScanPage = this;
-
-			scannerControl.TopText = Parameters?.Scanner?.TopText ?? "";
-			scannerControl.BottomText = Parameters?.Scanner?.BottomText ?? "";
-
-			scannerControl.CustomOverlay = Parameters?.Scanner?.CustomOverlay;
-			scannerControl.UseCustomOverlay = Parameters?.Scanner?.UseCustomOverlay ?? false;
-
-			scannerControl.ScanningOptions = Parameters?.Options ?? new MobileBarcodeScanningOptions();
-			scannerControl.ContinuousScanning = Parameters?.ContinuousScanning ?? false;
-
-			scannerControl.StartScanning(Parameters?.ResultHandler, Parameters?.Options);
+			scannerControl.OnBarcodeScanned += OnBarcodeScanned;
 		}
-
-		void ScannerControl_OnCameraInitialized()
-			=> Parameters.CameraInitialized?.Invoke();
-
-		void ScannerControl_OnScannerError(IEnumerable<string> errors)
-			=> Parameters.CameraError?.Invoke(errors);
 
 		protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
 		{
 			try
 			{
 				MobileBarcodeScanner.Log("OnNavigatingFrom, stopping camera...");
-				await scannerControl.StopScanningAsync();
 			}
 			catch (Exception ex)
 			{
@@ -80,72 +74,12 @@ namespace ZXing.Mobile
 			base.OnNavigatingFrom(e);
 		}
 
-		#region IMobileBarcodeScanner Implementation
-		public bool UseCustomOverlay
-			=> scannerControl.UseCustomOverlay;
-
-		public string TopText
-		{
-			get => scannerControl.TopText;
-			set => scannerControl.TopText = value;
-		}
-
-		public string BottomText
-		{
-			get => scannerControl.BottomText;
-			set => scannerControl.BottomText = value;
-		}
-
-		public string CancelButtonText
-		{
-			get => string.Empty;
-			set { }
-		}
-
-		public string FlashButtonText
-		{
-			get => string.Empty;
-			set { }
-		}
-
-		public string CameraUnsupportedMessage
-		{
-			get => string.Empty;
-			set { }
-		}
-
 		public bool IsTorchOn
 			=> scannerControl.IsTorchOn;
 
-		public Task<Result> Scan(MobileBarcodeScanningOptions options)
-		{
-			var tcsResult = new TaskCompletionSource<Result>();
+		public bool IsAnalyzing => scannerControl?.IsAnalyzing ?? false;
 
-			scannerControl.ContinuousScanning = false;
-			scannerControl.StartScanning(r =>
-			{
-				scannerControl.StopScanning();
-
-				tcsResult.SetResult(r);
-			}, options ?? Parameters?.Options);
-
-			return tcsResult.Task;
-		}
-
-		public Task<Result> Scan()
-			=> Scan(new MobileBarcodeScanningOptions());
-
-		public void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
-		{
-			scannerControl.ContinuousScanning = true;
-			scannerControl.StartScanning(scanHandler, options ?? Parameters?.Options);
-		}
-
-		public void ScanContinuously(Action<Result> scanHandler)
-			=> ScanContinuously(new MobileBarcodeScanningOptions(), scanHandler);
-
-		public void Cancel()
-			=> scannerControl?.Cancel();
+		public bool HasTorch => scannerControl?.HasTorch ?? false;
 
 		public void Torch(bool on)
 			=> scannerControl?.Torch(on);
@@ -161,17 +95,14 @@ namespace ZXing.Mobile
 
 		public void ResumeAnalysis()
 			=> scannerControl?.ResumeAnalysis();
-		#endregion
+
+		public void AutoFocus(int x, int y)
+			=> scannerControl?.AutoFocus(x, y);
 	}
 
 	public class ScanPageNavigationParameters
 	{
 		public MobileBarcodeScanner Scanner { get; set; }
-		public bool ContinuousScanning { get; set; }
-		public MobileBarcodeScanningOptions Options { get; set; }
-		public Action<ZXing.Result> ResultHandler { get; set; }
-
-		public Action CameraInitialized { get; set; }
-		public Action<IEnumerable<string>> CameraError { get; set; }
+		public ScannerOverlaySettings<UIElement> OverlaySettings { get; set; }
 	}
 }

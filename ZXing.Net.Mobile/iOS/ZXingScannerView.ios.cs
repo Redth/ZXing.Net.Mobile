@@ -19,13 +19,25 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-	public class ZXingScannerView : UIView, IZXingScanner<UIView>, IScannerSessionHost
+	public class ZXingScannerView : UIView, IScannerSessionHost
 	{
 		public delegate void ScannerSetupCompleteDelegate();
 		public event ScannerSetupCompleteDelegate OnScannerSetupComplete;
 
+		public ScannerOverlaySettings<UIView> OverlaySettings { get; private set; }
+
 		public ZXingScannerView()
+			: this(null)
+		{ }
+
+		public ZXingScannerView(ScannerOverlaySettings<UIView> overlaySettings)
+			: this(overlaySettings, null)
+		{ }
+
+		internal ZXingScannerView(ScannerOverlaySettings<UIView> overlaySettings, ZXingScannerViewController parentViewController)
 		{
+			this.parentViewController = parentViewController;
+			OverlaySettings = overlaySettings;
 		}
 
 		public ZXingScannerView(IntPtr handle) : base(handle)
@@ -36,24 +48,50 @@ namespace ZXing.Mobile
 		{
 		}
 
+		public ZXingScannerView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings)
+			: this(frame, overlaySettings, null)
+		{
+		}
+
+		internal ZXingScannerView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings, ZXingScannerViewController parentViewController) 
+			: base(frame)
+        {
+			this.parentViewController = parentViewController;
+			OverlaySettings = overlaySettings;
+		}
+
+
+
+		ZXingScannerViewController parentViewController;
+
 		AVCaptureSession session;
 		AVCaptureDevice captureDevice = null;
 		AVCaptureVideoPreviewLayer previewLayer;
 		AVCaptureVideoDataOutput output;
 		OutputRecorder outputRecorder;
 		DispatchQueue queue;
-		Action<ZXing.Result> resultCallback;
 		volatile bool stopped = true;
 
 		UIView layerView;
 		UIView overlayView = null;
 
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentViewController?.ScanningOptions ?? options;
+			set
+			{
+				if (parentViewController != null)
+					parentViewController.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public event Action OnCancelButtonPressed;
-
-		public string CancelButtonText { get; set; }
-		public string FlashButtonText { get; set; }
 
 		bool shouldRotatePreviewBuffer = false;
 
@@ -66,18 +104,13 @@ namespace ZXing.Mobile
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview();
 
-			if (UseCustomOverlayView)
-				overlayView = CustomOverlayView;
+			if (OverlaySettings?.CustomOverlay != null)
+				overlayView = OverlaySettings.CustomOverlay;
 			else
 			{
 				overlayView = new ZXingDefaultOverlayView(new CGRect(0, 0, Frame.Width, Frame.Height),
-					TopText, BottomText, CancelButtonText, FlashButtonText,
-					() =>
-					{
-						var evt = OnCancelButtonPressed;
-						if (evt != null)
-							evt();
-					}, ToggleTorch);
+					OverlaySettings,
+					() => OnCancelButtonPressed?.Invoke(), ToggleTorch);
 			}
 
 			if (overlayView != null)
@@ -246,13 +279,15 @@ namespace ZXing.Mobile
 					if (shouldRotatePreviewBuffer)
 						ls = ls.rotateCounterClockwise();
 
-					var result = barcodeReader.Decode(ls);
+					var result = ScanningOptions.ScanMultiple
+						? barcodeReader.DecodeMultiple(ls)
+						: new[] { barcodeReader.Decode(ls) };
 
 					PerformanceCounter.Stop(perfDecode, "Decode Time: {0} ms");
 
-					if (result != null)
+					if (result != null && result.Length > 0 && result[0] != null)
 					{
-						resultCallback(result);
+						OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(result));
 						return true;
 					}
 				}
@@ -498,7 +533,7 @@ namespace ZXing.Mobile
 		}
 
 		#region IZXingScanner implementation
-		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
+		public void Start()
 		{
 			if (!stopped)
 				return;
@@ -510,7 +545,6 @@ namespace ZXing.Mobile
 			Setup();
 
 			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
-			resultCallback = scanResultHandler;
 
 			Console.WriteLine("StartScanning");
 
@@ -541,7 +575,7 @@ namespace ZXing.Mobile
 			OnScannerSetupComplete?.Invoke();
 		}
 
-		public void StopScanning()
+		public void Stop()
 		{
 			if (overlayView != null)
 			{
@@ -663,14 +697,8 @@ namespace ZXing.Mobile
 			//Doesn't do much on iOS :(
 		}
 
-		public string TopText { get; set; }
-		public string BottomText { get; set; }
-
-
-		public UIView CustomOverlayView { get; set; }
-		public bool UseCustomOverlayView { get; set; }
-		public bool IsAnalyzing { get { return analyzing; } }
-		public bool IsTorchOn { get { return torch; } }
+		public bool IsAnalyzing => analyzing;
+		public bool IsTorchOn => torch;
 
 		bool? hasTorch = null;
 		public bool HasTorch

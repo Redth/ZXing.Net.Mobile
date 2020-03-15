@@ -34,8 +34,12 @@ namespace ZXing.Mobile
 		int scannerAlpha;
 		List<ZXing.ResultPoint> possibleResultPoints;
 
-		public ZxingOverlayView(Context context) : base(context)
+		public ScannerOverlaySettings<View> OverlaySettings { get; private set; }
+
+		public ZxingOverlayView(Context context, ScannerOverlaySettings<View> overlaySettings) : base(context)
 		{
+			OverlaySettings = overlaySettings;
+
 			// Initialize these once for performance rather than calling them every time in onDraw().
 			paint = new Paint(PaintFlags.AntiAlias);
 
@@ -64,9 +68,6 @@ namespace ZXing.Mobile
 			return framingRect;
 		}
 
-		public string TopText { get; set; }
-		public string BottomText { get; set; }
-
 		protected override void OnDraw(Canvas canvas)
 		{
 
@@ -92,11 +93,12 @@ namespace ZXing.Mobile
 			textPaint.Color = Color.White;
 			textPaint.TextSize = 16 * scale;
 
-			var topTextLayout = new StaticLayout(this.TopText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
+			var topText = OverlaySettings?.TopText ?? string.Empty;
+			var topTextLayout = new StaticLayout(topText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
 			canvas.Save();
 			var topBounds = new Rect();
 
-			textPaint.GetTextBounds(this.TopText, 0, this.TopText.Length, topBounds);
+			textPaint.GetTextBounds(topText, 0, topText.Length, topBounds);
 			canvas.Translate(0, frame.Top / 2 - (topTextLayout.Height / 2));
 
 			//canvas.Translate(topBounds.Left, topBounds.Bottom);
@@ -104,12 +106,13 @@ namespace ZXing.Mobile
 
 			canvas.Restore();
 
+			var bottomText = OverlaySettings?.BottomText ?? string.Empty;
 
-			var botTextLayout = new StaticLayout(this.BottomText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
+			var botTextLayout = new StaticLayout(bottomText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
 			canvas.Save();
 			var botBounds = new Rect();
 
-			textPaint.GetTextBounds(this.BottomText, 0, this.BottomText.Length, botBounds);
+			textPaint.GetTextBounds(bottomText, 0, bottomText.Length, botBounds);
 			canvas.Translate(0, (frame.Bottom + (canvas.Height - frame.Bottom) / 2) - (botTextLayout.Height / 2));
 
 			//canvas.Translate(topBounds.Left, topBounds.Bottom);

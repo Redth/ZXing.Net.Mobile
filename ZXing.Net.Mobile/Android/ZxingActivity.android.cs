@@ -34,7 +34,7 @@ namespace ZXing.Mobile
 			Android.Manifest.Permission.Flashlight
 		};
 
-		public static Action<ZXing.Result> ScanCompletedHandler;
+		public static Action<ZXing.Result[]> ScannedHandler;
 		public static Action CanceledHandler;
 
 		public static Action CancelRequestedHandler;
@@ -42,6 +42,9 @@ namespace ZXing.Mobile
 		public static Action AutoFocusRequestedHandler;
 		public static Action PauseAnalysisHandler;
 		public static Action ResumeAnalysisHandler;
+		public static Func<bool> IsTorchOnHandler;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public static void RequestCancel()
 			=> CancelRequestedHandler?.Invoke();
@@ -58,17 +61,16 @@ namespace ZXing.Mobile
 		public static void RequestResumeAnalysis()
 			=> ResumeAnalysisHandler?.Invoke();
 
-		public static View CustomOverlayView { get; set; }
+		public static void ToggleTorch()
+			=> RequestTorch(!IsTorchOn);
 
-		public static bool UseCustomOverlayView { get; set; }
+		public static bool IsTorchOn
+			=> IsTorchOnHandler?.Invoke() ?? false;
 
+		
 		public static MobileBarcodeScanningOptions ScanningOptions { get; set; }
 
-		public static string TopText { get; set; }
-
-		public static string BottomText { get; set; }
-
-		public static bool ScanContinuously { get; set; }
+		public static ScannerOverlaySettings<Android.Views.View> OverlaySettings { get; set; }
 
 		ZXingScannerFragment scannerFragment;
 
@@ -86,12 +88,9 @@ namespace ZXing.Mobile
 
 			SetContentView(ZXing.Net.Mobile.Resource.Layout.zxingscanneractivitylayout);
 
-			scannerFragment = new ZXingScannerFragment();
-			scannerFragment.CustomOverlayView = CustomOverlayView;
-			scannerFragment.UseCustomOverlayView = UseCustomOverlayView;
-			scannerFragment.TopText = TopText;
-			scannerFragment.BottomText = BottomText;
-
+			scannerFragment = new ZXingScannerFragment(this, OverlaySettings);
+			scannerFragment.OnBarcodeScanned += OnBarcodeScanned;
+			
 			SupportFragmentManager.BeginTransaction()
 				.Replace(ZXing.Net.Mobile.Resource.Id.contentFrame, scannerFragment, "ZXINGFRAGMENT")
 				.Commit();
@@ -101,36 +100,18 @@ namespace ZXing.Mobile
 			TorchRequestedHandler = SetTorch;
 			PauseAnalysisHandler = scannerFragment.PauseAnalysis;
 			ResumeAnalysisHandler = scannerFragment.ResumeAnalysis;
+			IsTorchOnHandler = () => scannerFragment?.IsTorchOn ?? false;
 		}
 
-		protected override async void OnResume()
+		protected override void OnDestroy()
 		{
-			base.OnResume();
+			base.OnDestroy();
 
-
-			StartScanning();
+			scannerFragment.OnBarcodeScanned -= OnBarcodeScanned;
 		}
 
 		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
 			=> Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-		void StartScanning()
-		{
-			scannerFragment.StartScanning(result =>
-			{
-				ScanCompletedHandler?.Invoke(result);
-
-				if (!ZxingActivity.ScanContinuously)
-					Finish();
-			}, ScanningOptions);
-		}
-
-		public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
-		{
-			base.OnConfigurationChanged(newConfig);
-
-			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Configuration Changed");
-		}
 
 		public void SetTorch(bool on)
 			=> scannerFragment.Torch(on);

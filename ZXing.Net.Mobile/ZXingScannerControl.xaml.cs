@@ -36,6 +36,8 @@ namespace ZXing.Mobile
 
 			displayOrientation = displayInformation.CurrentOrientation;
 			displayInformation.OrientationChanged += DisplayInformation_OrientationChanged;
+
+			StartScanningAsync();
 		}
 
 		public event ScannerOpened OnCameraInitialized;
@@ -44,10 +46,31 @@ namespace ZXing.Mobile
 		public event ScannerError OnScannerError;
 		public delegate void ScannerError(IEnumerable<string> errors);
 
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentPage?.ScanningOptions ?? options;
+			set
+			{
+				if (parentPage != null)
+					parentPage.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+		internal ScanPage parentPage;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
+
+		public ScannerOverlaySettings<UIElement> OverlaySettings { get; internal set; }
+
 		async void DisplayInformation_OrientationChanged(DisplayInformation sender, object args)
 		{
 			//This safeguards against a null reference if the device is rotated *before* the first call to StartScanning
-			if (mediaCapture == null) return;
+			if (mediaCapture == null)
+				return;
 
 			displayOrientation = sender.CurrentOrientation;
 			var props = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview);
@@ -61,7 +84,6 @@ namespace ZXing.Mobile
 
 		// Information about the camera device.
 		bool mirroringPreview = false;
-		bool externalCamera = false;
 
 		// Rotation metadata to apply to the preview stream (MF_MT_VIDEO_ROTATION)
 		// Reference: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
@@ -73,13 +95,6 @@ namespace ZXing.Mobile
 		// For listening to media property changes
 		readonly SystemMediaTransportControls systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
 
-
-		public async void StartScanning(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
-			=> await StartScanningAsync(scanCallback, options);
-
-		public async void StopScanning()
-			=> await StopScanningAsync();
-
 		public void PauseAnalysis()
 			=> isAnalyzing = false;
 
@@ -89,7 +104,7 @@ namespace ZXing.Mobile
 		public bool IsAnalyzing
 			=> isAnalyzing;
 
-		public async Task StartScanningAsync(Action<ZXing.Result> scanCallback, MobileBarcodeScanningOptions options = null)
+		async Task StartScanningAsync()
 		{
 			if (stopping)
 			{
@@ -102,17 +117,14 @@ namespace ZXing.Mobile
 			displayRequest.RequestActive();
 
 			isAnalyzing = true;
-			ScanCallback = scanCallback;
-			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
+			
+			topText.Text = OverlaySettings?.TopText ?? string.Empty;
+			bottomText.Text = OverlaySettings?.BottomText ?? string.Empty;
 
-			topText.Text = TopText ?? string.Empty;
-			bottomText.Text = BottomText ?? string.Empty;
-
-			if (UseCustomOverlay)
+			if (OverlaySettings?.CustomOverlay != null)
 			{
 				gridCustomOverlay.Children.Clear();
-				if (CustomOverlay != null)
-					gridCustomOverlay.Children.Add(CustomOverlay);
+				gridCustomOverlay.Children.Add(OverlaySettings.CustomOverlay);
 
 				gridCustomOverlay.Visibility = Visibility.Visible;
 				gridDefaultOverlay.Visibility = Visibility.Collapsed;
@@ -137,12 +149,12 @@ namespace ZXing.Mobile
 			if (preferredCamera.EnclosureLocation == null || preferredCamera.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Unknown)
 			{
 				// No information on the location of the camera, assume it's an external camera, not integrated on the device.
-				externalCamera = true;
+				//externalCamera = true;
 			}
 			else
 			{
 				// Camera is fixed on the device.
-				externalCamera = false;
+				//externalCamera = false;
 
 				// Only mirror the preview if the camera is on the front panel.
 				mirroringPreview = preferredCamera.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Front;
@@ -295,13 +307,17 @@ namespace ZXing.Mobile
 					MobileBarcodeScanner.Log("GetPreviewFrame Failed: {0}", ex);
 				}
 
-				ZXing.Result result = null;
+				ZXing.Result[] results = null;
 
 				try
 				{
 					// Try decoding the image
 					if (luminanceSource != null)
-						result = zxing.Decode(luminanceSource);
+					{
+						results = ScanningOptions?.ScanMultiple ?? false
+							? zxing.DecodeMultiple(luminanceSource)
+							: new[] { zxing.Decode(luminanceSource) };
+					}
 				}
 				catch (Exception ex)
 				{
@@ -309,20 +325,11 @@ namespace ZXing.Mobile
 				}
 
 				// Check if a result was found
-				if (result != null && !string.IsNullOrEmpty(result.Text))
+				if (results != null && results.Length > 0 && results[0] != null)
 				{
-					if (!ContinuousScanning)
-					{
-						delay = Timeout.Infinite;
-						await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => { await StopScanningAsync(); });
-					}
-					else
-					{
-						delay = ScanningOptions.DelayBetweenContinuousScans;
-					}
+					delay = ScanningOptions.DelayBetweenContinuousScans;
 
-					LastScanResult = result;
-					ScanCallback(result);
+					OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(results));
 				}
 
 				processing = false;
@@ -370,18 +377,7 @@ namespace ZXing.Mobile
 
 		volatile bool processing = false;
 		volatile bool isAnalyzing = false;
-
-		public Action<Result> ScanCallback { get; set; }
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
-		public MobileBarcodeScannerBase Scanner { get; set; }
-		public UIElement CustomOverlay { get; set; }
-		public string TopText { get; set; }
-		public string BottomText { get; set; }
-		public bool UseCustomOverlay { get; set; }
-		public bool ContinuousScanning { get; set; }
-
-		public Result LastScanResult { get; set; }
-
+		
 
 		public bool IsTorchOn
 			=> HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
@@ -518,7 +514,7 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public async Task StopScanningAsync()
+		async Task StopAsync()
 		{
 			if (stopping)
 				return;
@@ -541,8 +537,8 @@ namespace ZXing.Mobile
 					Torch(false);
 				if (isMediaCaptureInitialized)
 					await mediaCapture.StopPreviewAsync();
-				if (UseCustomOverlay && CustomOverlay != null)
-					gridCustomOverlay.Children.Remove(CustomOverlay);
+				if (OverlaySettings?.CustomOverlay != null)
+					gridCustomOverlay.Children.Remove(OverlaySettings.CustomOverlay);
 			}
 			catch { }
 			finally
@@ -560,18 +556,9 @@ namespace ZXing.Mobile
 			stopping = false;
 		}
 
-		public async Task Cancel()
-		{
-			LastScanResult = null;
-
-			await StopScanningAsync();
-
-			ScanCallback?.Invoke(null);
-		}
-
 		public async void Dispose()
 		{
-			await StopScanningAsync();
+			await StopAsync();
 			gridCustomOverlay?.Children?.Clear();
 		}
 

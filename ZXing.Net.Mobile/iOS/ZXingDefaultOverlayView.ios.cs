@@ -13,6 +13,10 @@ namespace ZXing.Mobile
 {
 	public class ZXingDefaultOverlayView : UIView
 	{
+		public ZXingDefaultOverlayView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings, Action onCancel, Action onTorch)
+			: this(frame, overlaySettings?.TopText, overlaySettings?.BottomText, overlaySettings?.CancelButtonText, overlaySettings?.FlashButtonText, onCancel, onTorch)
+		{ }
+
 		public ZXingDefaultOverlayView(CGRect frame, string topText,
 										string bottomText, string cancelText, string flashText,
 										Action onCancel, Action onTorch) : base(frame)

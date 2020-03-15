@@ -17,84 +17,68 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 			// Cause the assembly to load
 		}
 
-		protected ZXingScannerView formsView;
-
-		protected ZXing.Mobile.ZXingScannerControl zxingControl;
-
-		protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
+		protected override void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
 		{
-			formsView = Element;
-
-			if (formsView != null && zxingControl == null)
+			if (e.OldElement != null)
 			{
-				formsView.AutoFocusRequested += FormsView_AutoFocusRequested;
+				e.OldElement.AutoFocusRequested -= FormsView_AutoFocusRequested;
 
-				var cameraPermission = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>();
-				if (cameraPermission != Xamarin.Essentials.PermissionStatus.Granted)
+				// Unsubscribe from event handlers and cleanup any resources
+				if (Control != null)
 				{
-					Console.WriteLine("Missing Camera Permission");
-					return;
+					Control.OnBarcodeScanned -= Control_OnBarcodeScanned;
+					Control.Dispose();
+					SetNativeControl(null);
 				}
-
-				zxingControl = new ZXing.Mobile.ZXingScannerControl();
-				zxingControl.ContinuousScanning = true;
-				zxingControl.UseCustomOverlay = true;
-
-				base.SetNativeControl(zxingControl);
-
-				if (formsView.IsScanning)
-					zxingControl.StartScanning(formsView.RaiseScanResult, formsView.Options);
-
-				if (!formsView.IsAnalyzing)
-					zxingControl.PauseAnalysis();
-
-				if (formsView.IsTorchOn)
-					zxingControl.Torch(formsView.IsTorchOn);
 			}
 
-			// Shut the scanner down if necessary
-			if (formsView == null && e.NewElement == null && zxingControl != null)
+			if (e.NewElement != null)
 			{
-				zxingControl.StopScanning();
+				if (Control == null)
+				{
+					var ctrl = new ZXing.Mobile.ZXingScannerControl();
+					SetNativeControl(ctrl);
+				}
+
+				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
+				e.NewElement.AutoFocusRequested += FormsView_AutoFocusRequested;
 			}
 
 			base.OnElementChanged(e);
 		}
 
+		private void Control_OnBarcodeScanned(object sender, ZXing.Mobile.BarcodeScannedEventArgs e)
+			=> Element?.RaiseOnBarcodeScanned(e.Results);
+
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
 
-			if (zxingControl == null)
+			if (Control == null)
 				return;
 
 			switch (e.PropertyName)
 			{
 				case nameof(ZXingScannerView.IsTorchOn):
-					zxingControl.Torch(formsView.IsTorchOn);
-					break;
-				case nameof(ZXingScannerView.IsScanning):
-					if (formsView.IsScanning)
-						zxingControl.StartScanning(formsView.RaiseScanResult, formsView.Options);
-					else
-						zxingControl.StopScanning();
+					Control.Torch(Element.IsTorchOn);
 					break;
 				case nameof(ZXingScannerView.IsAnalyzing):
-					if (formsView.IsAnalyzing)
-						zxingControl.ResumeAnalysis();
+					if (Element.IsAnalyzing)
+						Control.ResumeAnalysis();
 					else
-						zxingControl.PauseAnalysis();
+						Control.PauseAnalysis();
 					break;
 			}
 		}
 
 		void FormsView_AutoFocusRequested(int x, int y)
-			=> zxingControl.AutoFocus(x, y);
+			=> Control.AutoFocus(x, y);
 
-		protected override async void OnDisconnectVisualChildren()
-		{
-			await zxingControl?.StopScanningAsync();
-			base.OnDisconnectVisualChildren();
-		}
+		//protected override void OnDisconnectVisualChildren()
+		//{
+		//	Control?.Dispose();
+		//	zxingControl = null;
+		//	base.OnDisconnectVisualChildren();
+		//}
 	}
 }

@@ -4,8 +4,7 @@ namespace ZXing.Mobile
 {
 	public interface IScannerView
 	{
-		void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null);
-		void StopScanning();
+		event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		void PauseAnalysis();
 		void ResumeAnalysis();
@@ -18,5 +17,18 @@ namespace ZXing.Mobile
 		bool IsAnalyzing { get; }
 
 		bool HasTorch { get; }
+	}
+
+	public class BarcodeScannedEventArgs : EventArgs
+	{
+		public BarcodeScannedEventArgs(ZXing.Result[] results)
+			: base()
+			=> Results = results;
+
+		public BarcodeScannedEventArgs(ZXing.Result result)
+			: base()
+			=> Results = new[] { result };
+
+		public ZXing.Result[] Results { get; private set; }
 	}
 }

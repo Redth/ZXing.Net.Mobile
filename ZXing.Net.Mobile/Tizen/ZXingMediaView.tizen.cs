@@ -7,16 +7,23 @@ using Tizen.Multimedia;
 
 namespace ZXing.Mobile
 {
-	public class ZXingMediaView : MediaView, IScannerView
+	public class ZXingMediaView : MediaView, IScannerView, IDisposable
 	{
 		ZXingScannerCamera zxingScannerCamera;
 		EvasObjectEvent showCallback;
-		public ZXingMediaView(EvasObject parent) : base(parent)
+
+		public ZXingMediaView(EvasObject parent)
+			: this(parent, null)
+		{
+		}
+
+		internal ZXingMediaView(EvasObject parent, ZxingScannerWindow parentWindow) : base(parent)
 		{
 			AlignmentX = -1;
 			AlignmentY = -1;
 			WeightX = 1;
 			WeightY = 1;
+			this.parentWindow = parentWindow;
 			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this);
 
 			showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);
@@ -26,13 +33,28 @@ namespace ZXing.Mobile
 					zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this);
 			};
 
+			StartScanning();
 		}
 
-		internal MobileBarcodeScanningOptions ScanningOptions
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		public MobileBarcodeScanningOptions ScanningOptions
 		{
-			get => zxingScannerCamera?.ScanningOptions ?? new MobileBarcodeScanningOptions();
-			set => zxingScannerCamera.ScanningOptions = value;
+			get => parentWindow?.ScanningOptions ?? options;
+			set
+			{
+				if (parentWindow != null)
+					parentWindow.ScanningOptions = value;
+				else
+					options = value;
+			}
 		}
+
+		ZxingScannerWindow parentWindow;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
+
+		public ScannerOverlaySettings<Container> OverlaySettings { get; private set; }
 
 		public bool IsTorchOn => zxingScannerCamera.IsTorchOn;
 
@@ -52,22 +74,24 @@ namespace ZXing.Mobile
 		public void ResumeAnalysis()
 			=> zxingScannerCamera?.ResumeAnalysis();
 
-		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
+		void StartScanning()
 		{
 			IsAnalyzing = true;
 			Show();
 			zxingScannerCamera.ScanningOptions = options;
-			zxingScannerCamera?.Scan(scanResultHandler);
+			zxingScannerCamera.OnBarcodeScanned += OnBarcodeScanned;
 			IsAnalyzing = false;
 		}
-
-		public void StopScanning()
-			=> zxingScannerCamera?.StopScanning();
 
 		public void ToggleTorch()
 			=> zxingScannerCamera?.ToggleTorch();
 
 		public void Torch(bool on)
 			=> zxingScannerCamera?.Torch(on);
+
+		public void Dispose()
+		{
+			zxingScannerCamera?.Dispose();
+		}
 	}
 }

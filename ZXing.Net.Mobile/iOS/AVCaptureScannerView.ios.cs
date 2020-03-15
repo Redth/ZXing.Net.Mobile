@@ -18,10 +18,22 @@ using ZXing.Mobile;
 
 namespace ZXing.Mobile
 {
-	public class AVCaptureScannerView : UIView, IZXingScanner<UIView>, IScannerSessionHost
+	public class AVCaptureScannerView : UIView, IScannerSessionHost
 	{
+		public ScannerOverlaySettings<UIView> OverlaySettings { get; private set; }
+
 		public AVCaptureScannerView()
+			: this(null)
+		{ }
+
+		public AVCaptureScannerView(ScannerOverlaySettings<UIView> overlaySettings)
+			: this(overlaySettings, null)
+		{ }
+
+		internal AVCaptureScannerView(ScannerOverlaySettings<UIView> overlaySettings, AVCaptureScannerViewController parentViewController)
 		{
+			this.parentViewController = parentViewController;
+			OverlaySettings = overlaySettings;
 		}
 
 		public AVCaptureScannerView(IntPtr handle) : base(handle)
@@ -31,6 +43,23 @@ namespace ZXing.Mobile
 		public AVCaptureScannerView(CGRect frame) : base(frame)
 		{
 		}
+
+		public AVCaptureScannerView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings)
+			: this(frame, overlaySettings, null)
+		{
+		}
+
+		internal AVCaptureScannerView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings, AVCaptureScannerViewController parentViewController)
+			: base(frame)
+		{
+			this.parentViewController = parentViewController;
+			OverlaySettings = overlaySettings;
+		}
+
+
+
+		AVCaptureScannerViewController parentViewController;
+
 
 		AVCaptureSession session;
 		AVCaptureVideoPreviewLayer previewLayer;
@@ -48,10 +77,22 @@ namespace ZXing.Mobile
 
 		public event Action OnCancelButtonPressed;
 
-		public string CancelButtonText { get; set; }
-		public string FlashButtonText { get; set; }
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
 
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentViewController?.ScanningOptions ?? options;
+			set
+			{
+				if (parentViewController != null)
+					parentViewController.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
+
 
 		void Setup()
 		{
@@ -63,7 +104,7 @@ namespace ZXing.Mobile
 			else
 			{
 				overlayView = new ZXingDefaultOverlayView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height),
-					TopText, BottomText, CancelButtonText, FlashButtonText,
+					OverlaySettings,
 					() => OnCancelButtonPressed?.Invoke(), ToggleTorch);
 			}
 
@@ -400,7 +441,7 @@ namespace ZXing.Mobile
 		}
 
 
-		public void StopScanning()
+		public void Stop()
 		{
 			if (stopped)
 				return;

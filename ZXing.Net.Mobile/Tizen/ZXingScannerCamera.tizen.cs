@@ -5,15 +5,31 @@ using Tizen.Multimedia;
 
 namespace ZXing.Mobile
 {
-	class ZXingScannerCamera : Camera
+	class ZXingScannerCamera : Camera, IScannerView, IDisposable
 	{
 		Action<Result> resultHandler;
 		bool isDisposed;
 		bool torchFlag;
 		CameraFlashMode torchMode;
-		
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
-		
+
+		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
+
+		public MobileBarcodeScanningOptions ScanningOptions
+		{
+			get => parentView?.ScanningOptions ?? options;
+			set
+			{
+				if (parentView != null)
+					parentView.ScanningOptions = value;
+				else
+					options = value;
+			}
+		}
+
+		ZXingMediaView parentView;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
+
 		public bool IsTorchOn
 		{
 			get => Settings.FlashMode == CameraFlashMode.On;
@@ -23,8 +39,15 @@ namespace ZXing.Mobile
 		public bool HasTorch
 			=> Capabilities.SupportedFlashModes.ToList().Count > 0;
 
-		public ZXingScannerCamera(CameraDevice device, MediaView mediaView) : base(device)
+		public bool IsAnalyzing { get; set; }
+
+		public ZXingScannerCamera(CameraDevice device, MediaView mediaView)
+			: this(device, mediaView, null)
+		{ }
+
+		internal ZXingScannerCamera(CameraDevice device, MediaView mediaView, ZXingMediaView parentView) : base(device)
 		{
+			this.parentView = parentView;
 			Display = new Display(mediaView);
 			Settings.ImageQuality = 100;
 			Settings.PreviewPixelFormat = Capabilities.SupportedPreviewPixelFormats.FirstOrDefault();
@@ -60,17 +83,20 @@ namespace ZXing.Mobile
 			{
 				if (ScanningOptions?.DelayBetweenContinuousScans > 0)
 					await Task.Delay(ScanningOptions.DelayBetweenContinuousScans);
-		
+
 				StartPreview();
 			}
 		}
 
 		async void CapturingHandler(object sender, CameraCapturingEventArgs e)
 		{
-			var result = await TizenBarcodeAnalyzer.AnalyzeBarcodeAsync(e.MainImage);
-			
-			if (result != null)
-				resultHandler?.Invoke(result);
+			if (!IsAnalyzing)
+				return;
+
+			var result = await TizenBarcodeAnalyzer.AnalyzeBarcodeAsync(e.MainImage, ScanningOptions?.ScanMultiple ?? false);
+
+			if (result != null && result.Length > 0 && result[0] != null)
+				OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(result));
 		}
 
 		void FocusStateChangedHandler(object sender, CameraFocusStateChangedEventArgs e)
@@ -79,26 +105,23 @@ namespace ZXing.Mobile
 				StartCapture();
 		}
 
-		public void Scan(Action<Result> scanResultHandler)
-		{
-			resultHandler = scanResultHandler;
-			StartFocusing(true);
-		}
-
 		public void ResumeAnalysis()
 			=> StartFocusing(true);
 
 		public void PauseAnalysis()
 			=> StopFocusing();
 
-		public void StopScanning()
+		protected override void Dispose(bool disposing)
 		{
-			FocusStateChanged -= FocusStateChangedHandler;
-			Capturing -= CapturingHandler;
-			CaptureCompleted -= CaptureCompleteHandler;
-			StateChanged -= StateChangeHandler;
-			isDisposed = true;
-			Dispose();
+			if (disposing)
+			{
+				FocusStateChanged -= FocusStateChangedHandler;
+				Capturing -= CapturingHandler;
+				CaptureCompleted -= CaptureCompleteHandler;
+				StateChanged -= StateChangeHandler;
+				isDisposed = true;
+			}
+			base.Dispose(disposing);
 		}
 
 		public void ToggleTorch()

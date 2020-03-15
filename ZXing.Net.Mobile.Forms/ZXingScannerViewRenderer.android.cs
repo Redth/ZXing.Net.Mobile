@@ -39,52 +39,50 @@ namespace ZXing.Net.Mobile.Forms.Android
 		{
 			base.OnElementChanged(e);
 
-			formsView = Element;
-
-			if (zxingSurface == null)
+			if (e.OldElement != null)
 			{
+				e.OldElement.AutoFocusRequested -= FormsView_AutoFocusRequested;
 
-				// Process requests for autofocus
-				formsView.AutoFocusRequested += (x, y) =>
+				// Unsubscribe from event handlers and cleanup any resources
+				if (Control != null)
 				{
-					if (zxingSurface != null)
-					{
-						if (x < 0 && y < 0)
-							zxingSurface.AutoFocus();
-						else
-							zxingSurface.AutoFocus(x, y);
-					}
-				};
-
-				var cameraPermission = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>();
-				if (cameraPermission != Xamarin.Essentials.PermissionStatus.Granted)
-				{
-					Console.WriteLine("Missing Camera Permission");
-					return;
+					Control.OnBarcodeScanned -= Control_OnBarcodeScanned;
+					Control.Dispose();
+					SetNativeControl(null);
 				}
-
-				if (Xamarin.Essentials.Permissions.IsDeclaredInManifest("android.permission.FLASHLIGHT"))
-				{
-					var fp = await Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Flashlight>();
-					if (fp != Xamarin.Essentials.PermissionStatus.Granted)
-					{
-						Console.WriteLine("Missing Flashlight Permission");
-						return;
-					}
-				}
-
-				zxingSurface = new ZXingSurfaceView(Context as Activity, formsView.Options);
-				zxingSurface.LayoutParameters = new LayoutParams(LayoutParams.MatchParent, LayoutParams.MatchParent);
-
-				base.SetNativeControl(zxingSurface);
-
-				if (formsView.IsScanning)
-					zxingSurface.StartScanning(formsView.RaiseScanResult, formsView.Options);
-
-				if (formsView.IsTorchOn)
-					zxingSurface.Torch(true);
 			}
+
+			if (e.NewElement != null)
+			{
+				if (Control == null)
+				{
+					var ctrl = new ZXing.Mobile.ZXingSurfaceView(Context);
+					SetNativeControl(ctrl);
+				}
+
+				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
+				e.NewElement.AutoFocusRequested += FormsView_AutoFocusRequested;
+			}
+
+			base.OnElementChanged(e);
 		}
+
+		private void Control_OnBarcodeScanned(object sender, ZXing.Mobile.BarcodeScannedEventArgs e)
+			=> Element?.RaiseOnBarcodeScanned(e.Results);
+
+		
+				// Process requests for autofocus
+				//formsView.AutoFocusRequested += (x, y) =>
+				//{
+				//	if (zxingSurface != null)
+				//	{
+				//		if (x < 0 && y < 0)
+				//			zxingSurface.AutoFocus();
+				//		else
+				//			zxingSurface.AutoFocus(x, y);
+				//	}
+				//};
+
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
@@ -97,12 +95,6 @@ namespace ZXing.Net.Mobile.Forms.Android
 			{
 				case nameof(ZXingScannerView.IsTorchOn):
 					zxingSurface.Torch(formsView.IsTorchOn);
-					break;
-				case nameof(ZXingScannerView.IsScanning):
-					if (formsView.IsScanning)
-						zxingSurface.StartScanning(formsView.RaiseScanResult, formsView.Options);
-					else
-						zxingSurface.StopScanning();
 					break;
 				case nameof(ZXingScannerView.IsAnalyzing):
 					if (formsView.IsAnalyzing)

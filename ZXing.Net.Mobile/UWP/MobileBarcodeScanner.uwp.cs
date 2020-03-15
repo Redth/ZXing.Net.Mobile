@@ -7,88 +7,37 @@ using Windows.UI.Xaml.Controls;
 
 namespace ZXing.Mobile
 {
-	public partial class MobileBarcodeScanner : MobileBarcodeScannerBase
+	public partial class MobileBarcodeScanner
 	{
-		public MobileBarcodeScanner() : base()
-		{
-		}
-
-		public MobileBarcodeScanner(CoreDispatcher dispatcher) : base()
-		{
-			Dispatcher = dispatcher;
-		}
-
 		internal ScanPage ScanPage { get; set; }
 
 		public CoreDispatcher Dispatcher { get; set; }
 
 		public Frame RootFrame { get; set; }
 
-		async void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
-		{
-			//Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
-			var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
-			var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
+		void PlatformInit()
+		{ }
 
-			await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-			{
-				rootFrame.Navigate(typeof(ScanPage), new ScanPageNavigationParameters
-				{
-					Options = options,
-					ResultHandler = scanHandler,
-					Scanner = this,
-					ContinuousScanning = true
-				});
-			});
-		}
-
-		async Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		async void PlatformScan(Action<ZXing.Result[]> scanHandler)
 		{
 			var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
 			var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
-
-			var tcsScanResult = new TaskCompletionSource<Result>();
 
 			await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
 			{
 				var pageOptions = new ScanPageNavigationParameters
 				{
-					Options = options,
-					ResultHandler = r =>
-					{
-						tcsScanResult.SetResult(r);
-					},
 					Scanner = this,
-					ContinuousScanning = false,
-					CameraInitialized = () => { OnCameraInitialized?.Invoke(); },
-					CameraError = (errors) => { OnCameraError?.Invoke(errors); }
+					OverlaySettings = this.OverlaySettings.WithView<UIElement>()
 				};
 				rootFrame.Navigate(typeof(ScanPage), pageOptions);
 			});
-
-			var result = await tcsScanResult.Task;
-
-			await dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
-			{
-				if (rootFrame.CanGoBack)
-					rootFrame.GoBack();
-			});
-
-			return result;
 		}
-
-		public event ScannerOpened OnCameraInitialized;
-		public delegate void ScannerOpened();
-
-		public event ScannerError OnCameraError;
-		public delegate void ScannerError(IEnumerable<string> errors);
 
 		async void PlatformCancel()
 		{
 			var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
 			var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
-
-			ScanPage?.Cancel();
 
 			await dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
 			{
