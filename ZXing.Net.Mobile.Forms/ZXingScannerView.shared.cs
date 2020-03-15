@@ -7,9 +7,6 @@ namespace ZXing.Net.Mobile.Forms
 {
 	public class ZXingScannerView : View
 	{
-		public delegate void ScanResultDelegate(Result[] results);
-		public event ScanResultDelegate OnScanResult;
-
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public event Action<int, int> AutoFocusRequested;

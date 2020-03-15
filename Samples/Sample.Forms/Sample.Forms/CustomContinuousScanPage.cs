@@ -21,10 +21,11 @@ namespace Sample.Forms
 				VerticalOptions = LayoutOptions.FillAndExpand,
 				AutomationId = "zxingScannerView",
 			};
-			zxing.OnScanResult += (results) =>
+			zxing.OnBarcodeScanned += (s, e) =>
 				Device.BeginInvokeOnMainThread(async () =>
 				{
-					var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+					Console.WriteLine("Found barcode");
+					var str = string.Join("; ", e.Results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
 
 					// Show an alert
 					await DisplayAlert("Scanned Barcode(s)", str, "OK");

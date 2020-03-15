@@ -21,21 +21,24 @@ namespace Sample.Forms
 				VerticalOptions = LayoutOptions.FillAndExpand,
 				AutomationId = "zxingScannerView",
 			};
-			zxing.OnScanResult += (results) =>
+			zxing.OnBarcodeScanned += (s, e) =>
+			{
+				Console.Write("Found Barcode...");
 				Device.BeginInvokeOnMainThread(async () =>
 				{
 
 					// Stop analysis until we navigate away so we don't keep reading barcodes
 					zxing.IsAnalyzing = false;
 
-					var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
-
-					// Show an alert
-					await DisplayAlert("Scanned Barcode (s)", str, "OK");
+					var str = string.Join("; ", e.Results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
 
 					// Navigate away
 					await Navigation.PopAsync();
+
+					// Show an alert
+					await DisplayAlert("Scanned Barcode (s)", str, "OK");
 				});
+			};
 
 			overlay = new ZXingDefaultOverlay
 			{

@@ -29,12 +29,12 @@ namespace Sample.Forms
 			buttonScanDefaultOverlay.Clicked += async delegate
 			{
 				scanPage = new ZXingScannerPage();
-				scanPage.OnScanResult += (results) =>
+				scanPage.OnBarcodeScanned += (s, e) =>
 				{
 					Device.BeginInvokeOnMainThread(async () =>
 					{
 						await Navigation.PopAsync();
-						var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+						var str = string.Join("; ", e.Results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
 
 						await DisplayAlert("Scanned Barcode", str, "OK");
 					});
@@ -68,12 +68,12 @@ namespace Sample.Forms
 				customOverlay.Children.Add(torch);
 
 				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScanningOptions { AutoRotate = true }, customOverlay: customOverlay);
-				scanPage.OnScanResult += (results) =>
+				scanPage.OnBarcodeScanned += (s, e) =>
 				{
 					Device.BeginInvokeOnMainThread(async () =>
 					{
 						await Navigation.PopAsync();
-						var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+						var str = string.Join("; ", e.Results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
 						await DisplayAlert("Scanned Barcode(s)", str, "OK");
 					});
 				};
@@ -89,10 +89,10 @@ namespace Sample.Forms
 			buttonScanContinuously.Clicked += async delegate
 			{
 				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScanningOptions { DelayBetweenContinuousScans = 3000 });
-				scanPage.OnScanResult += (results) =>
+				scanPage.OnBarcodeScanned += (s, e) =>
 					Device.BeginInvokeOnMainThread(async () =>
 					{
-						var str = string.Join("; ", results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
+						var str = string.Join("; ", e.Results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
 
 						await DisplayAlert("Scanned Barcode", str, "OK");
 					});

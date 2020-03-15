@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Xamarin.Forms;
 using ZXing.UI;
 
 namespace ZXing.Net.Mobile.Forms
@@ -7,6 +8,8 @@ namespace ZXing.Net.Mobile.Forms
 	{
 		readonly ZXingScannerView zxing;
 		readonly ZXingDefaultOverlay defaultOverlay = null;
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
 		public ZXingScannerPage(BarcodeScanningOptions options = null, View customOverlay = null)
 			: base()
@@ -24,8 +27,8 @@ namespace ZXing.Net.Mobile.Forms
 			zxing.SetBinding(ZXingScannerView.HasTorchProperty, new Binding(nameof(HasTorch)));
 			zxing.SetBinding(ZXingScannerView.ResultProperty, new Binding(nameof(Result)));
 
-			zxing.OnScanResult += (result)
-				=> OnScanResult?.Invoke(result);
+			zxing.OnBarcodeScanned += (s, e)
+				=> this.OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(e.Results));
 
 			if (customOverlay == null)
 			{
@@ -90,9 +93,6 @@ namespace ZXing.Net.Mobile.Forms
 		}
 
 		#endregion
-
-		public delegate void ScanResultDelegate(Result[] result);
-		public event ScanResultDelegate OnScanResult;
 
 		public View Overlay { get; private set; }
 
