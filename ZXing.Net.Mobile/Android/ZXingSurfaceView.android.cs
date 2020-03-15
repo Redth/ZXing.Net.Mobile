@@ -3,39 +3,24 @@ using Android.Content;
 using Android.Runtime;
 using Android.Views;
 using Android.Graphics;
-using ZXing.Mobile.CameraAccess;
 using ZXing.Net.Mobile.Android;
+using System.Threading.Tasks;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView, IScannerSessionHost
+	public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView
 	{
-		public ZXingSurfaceView(Context context)
-			: this(null, context)
-		{
-		}
-
-		internal ZXingSurfaceView(ZXingScannerFragment parentFragment, Context context)
+		public ZXingSurfaceView(Context context, BarcodeScanningOptions options = null, BarcodeScannerOverlay<View> overlay = null)
 			: base(context)
 		{
-			ParentFragment = parentFragment;
+			Options = options ?? new BarcodeScanningOptions();
+			Overlay = overlay;
+
 			Init();
 		}
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => ParentFragment?.ScanningOptions ?? options;
-			set
-			{
-				if (ParentFragment != null)
-					ParentFragment.ScanningOptions = value;
-				else
-					options = value;
-			}
-		}
-
-		internal ZXingScannerFragment ParentFragment { get; private set; }
+		public BarcodeScanningOptions Options { get; }
+		public new BarcodeScannerOverlay<View> Overlay { get; }
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
@@ -47,10 +32,10 @@ namespace ZXing.Mobile
 		void Init()
 		{
 			if (cameraAnalyzer == null)
-				cameraAnalyzer = new CameraAnalyzer(this, this,
+				cameraAnalyzer = new CameraAnalyzer(this, Options,
 					r => OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(r)));
 
-			cameraAnalyzer.ResumeAnalysis();
+			cameraAnalyzer.IsAnalyzing = true;
 
 			if (!addedHolderCallback)
 			{
@@ -98,42 +83,47 @@ namespace ZXing.Mobile
 				case MotionEventActions.Up:
 					var touchX = e.GetX();
 					var touchY = e.GetY();
-					AutoFocus((int)touchX, (int)touchY);
+					AutoFocusAsync((int)touchX, (int)touchY);
 					break;
 			}
 
 			return r;
 		}
 
-		public void AutoFocus()
-			=> cameraAnalyzer.AutoFocus();
+		public Task AutoFocusAsync()
+			=> cameraAnalyzer.AutoFocusAsync();
 
-		public void AutoFocus(int x, int y)
-			=> cameraAnalyzer.AutoFocus(x, y);
+		public Task AutoFocusAsync(int x, int y)
+			=> cameraAnalyzer.AutoFocusAsync(x, y);
 
-		public void StopScanning()
-			=> cameraAnalyzer.ShutdownCamera();
-
-		public void PauseAnalysis()
-			=> cameraAnalyzer.PauseAnalysis();
-
-		public void ResumeAnalysis()
-			=> cameraAnalyzer.ResumeAnalysis();
-
-		public void Torch(bool on)
+		public new void Dispose()
 		{
-			if (on)
-				cameraAnalyzer.Torch.TurnOn();
-			else
-				cameraAnalyzer.Torch.TurnOff();
+			cameraAnalyzer.ShutdownCamera();
+			base.Dispose();
 		}
 
-		public void ToggleTorch()
-			=> cameraAnalyzer.Torch.Toggle();
+		public bool IsAnalyzing
+		{
+			get => cameraAnalyzer?.IsAnalyzing ?? false;
+			set { if (cameraAnalyzer != null) cameraAnalyzer.IsAnalyzing = value; }
+		}
+
+		public Task TorchAsync(bool on)
+		{
+			if (on)
+				cameraAnalyzer?.Torch?.TurnOn();
+			else
+				cameraAnalyzer?.Torch?.TurnOff();
+			return Task.CompletedTask;
+		}
+
+		public Task ToggleTorchAsync()
+		{
+			cameraAnalyzer?.Torch?.Toggle();
+			return Task.CompletedTask;
+		}
 
 		public bool IsTorchOn => cameraAnalyzer.Torch.IsEnabled;
-
-		public bool IsAnalyzing => cameraAnalyzer.IsAnalyzing;
 
 		CameraAnalyzer cameraAnalyzer;
 		bool surfaceCreated;

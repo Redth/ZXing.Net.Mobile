@@ -5,12 +5,13 @@ using ZXing.Net.Mobile.Forms.WindowsUniversal;
 using Xamarin.Forms.Platform.UWP;
 using System.ComponentModel;
 using System.Reflection;
+using ZXing.UI;
 
 [assembly: ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 {
 	//[Preserve(AllMembers = true)]
-	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingScannerControl>
+	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXingScannerUserControl>
 	{
 		public static void Init()
 		{
@@ -36,7 +37,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 			{
 				if (Control == null)
 				{
-					var ctrl = new ZXing.Mobile.ZXingScannerControl();
+					var ctrl = new ZXingScannerUserControl();
 					SetNativeControl(ctrl);
 				}
 
@@ -47,7 +48,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 			base.OnElementChanged(e);
 		}
 
-		private void Control_OnBarcodeScanned(object sender, ZXing.Mobile.BarcodeScannedEventArgs e)
+		private void Control_OnBarcodeScanned(object sender, BarcodeScannedEventArgs e)
 			=> Element?.RaiseOnBarcodeScanned(e.Results);
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -60,19 +61,16 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 			switch (e.PropertyName)
 			{
 				case nameof(ZXingScannerView.IsTorchOn):
-					Control.Torch(Element.IsTorchOn);
+					Control.TorchAsync(Element.IsTorchOn);
 					break;
 				case nameof(ZXingScannerView.IsAnalyzing):
-					if (Element.IsAnalyzing)
-						Control.ResumeAnalysis();
-					else
-						Control.PauseAnalysis();
+					Control.IsAnalyzing = Element.IsAnalyzing;
 					break;
 			}
 		}
 
 		void FormsView_AutoFocusRequested(int x, int y)
-			=> Control.AutoFocus(x, y);
+			=> Control.AutoFocusAsync(x, y);
 
 		//protected override void OnDisconnectVisualChildren()
 		//{

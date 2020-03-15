@@ -3,24 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using ZXing.OneD;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public partial class MobileBarcodeScanner : IMobileBarcodeScanner
+	public partial class BarcodeScanner : IBarcodeScanner
 	{
-		public MobileBarcodeScanner(MobileBarcodeScanningOptions options)
-			: this(options, null)
+		public BarcodeScanner(BarcodeScanningOptions options = null, BarcodeScannerOverlay overlay = null)
 		{
-		}
-
-		public MobileBarcodeScanner(ScannerOverlaySettings overlaySettings)
-			: this(null, overlaySettings)
-		{
-		}
-
-		public MobileBarcodeScanner(MobileBarcodeScanningOptions options, ScannerOverlaySettings overlaySettings)
-		{
-			ScanningOptions = options ?? new MobileBarcodeScanningOptions();
-			OverlaySettings = overlaySettings;
+			this.options = options ?? new BarcodeScanningOptions();
+			this.overlay = overlay;
 			Init();
 		}
 
@@ -29,13 +19,17 @@ namespace ZXing.Mobile
 		void Init()
 			=> PlatformInit();
 
-		public Task<Result[]> ScanAsync()
+		public Task<Result[]> ScanOnceAsync()
 		{
 			scanCompletionSource = new TaskCompletionSource<Result[]>();
 
-			PlatformScan(r =>
+			PlatformScan(async (r) =>
 			{
-				Cancel();
+				try
+				{
+					await CancelAsync();
+				} catch { }
+
 				scanCompletionSource.TrySetResult(r);
 			});
 
@@ -51,30 +45,32 @@ namespace ZXing.Mobile
 			return scanCompletionSource.Task;
 		}
 
-		public void Cancel()
-			=> PlatformCancel();
+		public Task CancelAsync()
+			=> PlatformCancelAsync();
 
-		public void AutoFocus()
-			=> PlatformAutoFocus();
+		public Task AutoFocusAsync()
+			=> PlatformAutoFocusAsync();
 
-		public void Torch(bool on)
-			=> PlatformTorch(on);
+		public Task TorchAsync(bool on)
+			=> PlatformTorchAsync(on);
 
-		public void ToggleTorch()
-			=> PlatformToggleTorch();
-
-		public void PauseAnalysis()
-			=> PlatformPauseAnalysis();
-
-		public void ResumeAnalysis()
-			=> PlatformResumeAnalysis();
+		public Task ToggleTorchAsync()
+			=> PlatformToggleTorchAsync();
 
 		public bool IsTorchOn
 			=> PlatformIsTorchOn;
 
-		public MobileBarcodeScanningOptions ScanningOptions { get; set; } = new MobileBarcodeScanningOptions();
+		public bool IsAnalyzing
+		{
+			get => PlatformIsAnalyzing;
+			set => PlatformIsAnalyzing = value;
+		}
 
-		public ScannerOverlaySettings OverlaySettings { get; private set; }
+		readonly BarcodeScanningOptions options;
+		public BarcodeScanningOptions Options => options;
+
+		readonly BarcodeScannerOverlay overlay;
+		public BarcodeScannerOverlay Overlay => overlay;
 	}
 
 	public enum LogLevel
@@ -94,6 +90,9 @@ namespace ZXing.Mobile
 		public static void Warn(string message)
 			=> Log(LogLevel.Warn, message);
 
+		public static void Warn(Exception ex, string message)
+			=> Log(LogLevel.Warn, message + Environment.NewLine + ex);
+
 		public static void Error(string message)
 			=> Log(LogLevel.Error, message);
 
@@ -107,22 +106,27 @@ namespace ZXing.Mobile
 		public static void Log(LogLevel logLevel, string message)
 		{
 			if ((int)logLevel <= (int)Level)
+            {
+				if (System.Diagnostics.Debugger.IsAttached)
+					System.Diagnostics.Debug.WriteLine(message);
+
 				Console.WriteLine(message);
+			}
 		}
 	}
 
-	public class ScannerOverlaySettings<TView> : ScannerOverlaySettings
+	public class BarcodeScannerOverlay<TView> : BarcodeScannerOverlay
 	{
 		public TView CustomOverlay { get; set; }
 	}
 
-	public class ScannerOverlaySettings
+	public class BarcodeScannerOverlay
 	{
-		public ScannerOverlaySettings<TView> WithView<TView>()
+		public BarcodeScannerOverlay<TView> WithView<TView>()
 			=> WithView<TView>(default);
 
-		public ScannerOverlaySettings<TView> WithView<TView>(TView customOverlay)
-			=> new ScannerOverlaySettings<TView>
+		public BarcodeScannerOverlay<TView> WithView<TView>(TView customOverlay)
+			=> new BarcodeScannerOverlay<TView>
 			{
 				CustomOverlay = customOverlay,
 				TopText = this.TopText,

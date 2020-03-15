@@ -7,19 +7,19 @@ using CoreFoundation;
 using UIKit;
 using AVFoundation;
 
-using ZXing.Mobile;
+using System.Threading.Tasks;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class ZXingDefaultOverlayView : UIView
 	{
-		public ZXingDefaultOverlayView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings, Action onCancel, Action onTorch)
-			: this(frame, overlaySettings?.TopText, overlaySettings?.BottomText, overlaySettings?.CancelButtonText, overlaySettings?.FlashButtonText, onCancel, onTorch)
+		public ZXingDefaultOverlayView(CGRect frame, BarcodeScannerOverlay<UIView> overlay, Func<Task> onCancel, Func<Task> onTorch)
+			: this(frame, overlay?.TopText, overlay?.BottomText, overlay?.CancelButtonText, overlay?.FlashButtonText, onCancel, onTorch)
 		{ }
 
 		public ZXingDefaultOverlayView(CGRect frame, string topText,
 										string bottomText, string cancelText, string flashText,
-										Action onCancel, Action onTorch) : base(frame)
+										Func<Task> onCancel, Func<Task> onTorch) : base(frame)
 		{
 			this.cancelText = cancelText ?? "Cancel";
 			this.flashText = flashText ?? "Flash";
@@ -36,8 +36,8 @@ namespace ZXing.Mobile
 		readonly string topText;
 		readonly string bottomText;
 
-		readonly Action onCancel;
-		readonly Action onTorch;
+		readonly Func<Task> onCancel;
+		readonly Func<Task> onTorch;
 
 		UIView topBg;
 		UIView bottomBg;

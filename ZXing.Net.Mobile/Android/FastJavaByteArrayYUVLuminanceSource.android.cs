@@ -19,7 +19,7 @@ using ApxLabs.FastAndroidCamera;
 
 using System;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	/// <summary>
 	/// This object extends LuminanceSource around an array of YUV data returned from the camera driver,

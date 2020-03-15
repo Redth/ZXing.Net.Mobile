@@ -4,9 +4,9 @@ using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Tizen;
-using ZXing.Mobile;
 using ZXing.Net.Mobile.Forms;
 using ZXing.Net.Mobile.Forms.Tizen;
+using ZXing.UI;
 
 [assembly: ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Tizen

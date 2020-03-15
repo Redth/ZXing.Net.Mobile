@@ -6,8 +6,8 @@ using Android.Runtime;
 using Xamarin.Forms.Platform.Android;
 using System.ComponentModel;
 using Android.Widget;
-using ZXing.Mobile;
 using Android.Graphics;
+using ZXing.UI;
 
 [assembly: ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Android
@@ -85,7 +85,7 @@ namespace ZXing.Net.Mobile.Forms.Android
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Failed to update image: {ex}");
+					ZXing.UI.Logger.Error($"Failed to update image: {ex}");
 				}
 			});
 		}

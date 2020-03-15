@@ -1,21 +1,19 @@
 ﻿using System;
+using System.Threading.Tasks;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public interface IScannerView
 	{
 		event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		void PauseAnalysis();
-		void ResumeAnalysis();
+		bool IsAnalyzing { get; set; }
 
-		void Torch(bool on);
-		void AutoFocus();
-		void AutoFocus(int x, int y);
-		void ToggleTorch();
+		Task TorchAsync(bool on);
+		Task AutoFocusAsync();
+		Task AutoFocusAsync(int x, int y);
+		Task ToggleTorchAsync();
 		bool IsTorchOn { get; }
-		bool IsAnalyzing { get; }
-
 		bool HasTorch { get; }
 	}
 

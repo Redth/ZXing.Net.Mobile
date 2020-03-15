@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using CoreVideo;
 using ZXing;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class CVPixelBufferBGRA32LuminanceSource : BaseLuminanceSource
 	{

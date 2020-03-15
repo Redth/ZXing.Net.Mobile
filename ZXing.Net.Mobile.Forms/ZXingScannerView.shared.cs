@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using Xamarin.Forms;
-using ZXing.Mobile;
+using ZXing.UI;
 
 namespace ZXing.Net.Mobile.Forms
 {
@@ -36,11 +36,11 @@ namespace ZXing.Net.Mobile.Forms
 			=> AutoFocusRequested?.Invoke(x, y);
 
 		public static readonly BindableProperty OptionsProperty =
-			BindableProperty.Create(nameof(Options), typeof(MobileBarcodeScanningOptions), typeof(ZXingScannerView), MobileBarcodeScanningOptions.Default);
+			BindableProperty.Create(nameof(Options), typeof(BarcodeScanningOptions), typeof(ZXingScannerView), new BarcodeScanningOptions());
 
-		public MobileBarcodeScanningOptions Options
+		public BarcodeScanningOptions Options
 		{
-			get => (MobileBarcodeScanningOptions)GetValue(OptionsProperty);
+			get => (BarcodeScanningOptions)GetValue(OptionsProperty);
 			set => SetValue(OptionsProperty, value);
 		}
 

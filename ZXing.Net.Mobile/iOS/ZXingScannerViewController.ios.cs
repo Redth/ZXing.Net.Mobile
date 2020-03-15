@@ -10,42 +10,25 @@ using CoreGraphics;
 
 using ZXing;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public class ZXingScannerViewController : UIViewController, IScannerViewController
+	public class ZXingScannerViewController : UIViewController, IScannerView
 	{
 		ZXingScannerView scannerView;
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => Scanner?.ScanningOptions ?? options;
-			set
-			{
-				if (Scanner != null)
-					Scanner.ScanningOptions = value;
-				options = value;
-			}
-		}
-
 		UIActivityIndicatorView loadingView;
 		UIView loadingBg;
 
-		public MobileBarcodeScanner Scanner { get; private set; }
+		public BarcodeScanningOptions Options { get; }
 
-		public ScannerOverlaySettings<UIView> OverlaySettings { get; private set; }
+		public BarcodeScannerOverlay<UIView> Overlay { get; }
 
-		public ZXingScannerViewController(ScannerOverlaySettings<UIView> scannerOverlaySettings)
-			: this(null, scannerOverlaySettings)
+		public ZXingScannerViewController(BarcodeScanningOptions options, BarcodeScannerOverlay<UIView> overlay)
 		{
-		}
-
-		internal ZXingScannerViewController(MobileBarcodeScanner scanner, ScannerOverlaySettings<UIView> scannerOverlaySettings)
-		{
-			Scanner = scanner;
-			OverlaySettings = scannerOverlaySettings;
+			Options = options;
+			Overlay = overlay;
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
 
@@ -55,9 +38,6 @@ namespace ZXing.Mobile
 			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 				ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
 		}
-
-		public void Cancel()
-			=> InvokeOnMainThread(scannerView.Stop);
 
 		UIStatusBarStyle originalStatusBarStyle = UIStatusBarStyle.Default;
 
@@ -77,13 +57,9 @@ namespace ZXing.Mobile
 			View.AddSubview(loadingBg);
 			loadingView.StartAnimating();
 
-			scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), OverlaySettings, this)
+			scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), Options, Overlay)
 			{
 				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
-			};
-			scannerView.OnCancelButtonPressed += delegate
-			{
-				Cancel();
 			};
 
 			scannerView.OnBarcodeScanned += OnBarcodeScanned;
@@ -100,30 +76,28 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public void Torch(bool on)
-			=> scannerView?.Torch(on);
+		public Task TorchAsync(bool on)
+			=> scannerView?.TorchAsync(on);
 
-		public void ToggleTorch()
-			=> scannerView?.ToggleTorch();
-
-		public void PauseAnalysis()
-			=> scannerView?.PauseAnalysis();
-
-		public void ResumeAnalysis()
-			=> scannerView?.ResumeAnalysis();
+		public Task ToggleTorchAsync()
+			=> scannerView?.ToggleTorchAsync();
 
 		public bool IsTorchOn
 			=> scannerView?.IsTorchOn ?? false;
 
-		public bool IsAnalyzing => scannerView?.IsAnalyzing ?? false;
+		public bool IsAnalyzing
+		{
+			get => scannerView?.IsAnalyzing ?? false;
+			set { if (scannerView != null) scannerView.IsAnalyzing = value; }
+		}
 
 		public bool HasTorch => scannerView?.HasTorch ?? false;
 
-		public void AutoFocus()
-			=> scannerView?.AutoFocus();
+		public Task AutoFocusAsync()
+			=> scannerView?.AutoFocusAsync();
 
-		public void AutoFocus(int x, int y)
-			=> scannerView?.AutoFocus(x, y);
+		public Task AutoFocusAsync(int x, int y)
+			=> scannerView?.AutoFocusAsync(x, y);
 
 		public override void ViewDidAppear(bool animated)
 		{
@@ -139,7 +113,7 @@ namespace ZXing.Mobile
 			else
 				UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
 
-			Console.WriteLine("Starting to scan...");
+			Logger.Info("Starting to scan...");
 
 			Task.Factory.StartNew(() =>
 				BeginInvokeOnMainThread(() => scannerView.Start()));
@@ -159,14 +133,14 @@ namespace ZXing.Mobile
 			=> scannerView?.DidRotate(this.InterfaceOrientation);
 
 		public override bool ShouldAutorotate()
-			=> ScanningOptions?.AutoRotate ?? false;
+			=> Options?.AutoRotate ?? false;
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations()
 			=> UIInterfaceOrientationMask.All;
 
 		[Obsolete("Deprecated in iOS6. Replace it with both GetSupportedInterfaceOrientations and PreferredInterfaceOrientationForPresentation")]
 		public override bool ShouldAutorotateToInterfaceOrientation(UIInterfaceOrientation toInterfaceOrientation)
-			=> ScanningOptions?.AutoRotate ?? false;
+			=> Options?.AutoRotate ?? false;
 
 		void HandleOnScannerSetupComplete()
 			=> BeginInvokeOnMainThread(() =>

@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using ZXing.Mobile;
+using ZXing.UI;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -27,70 +27,59 @@ namespace Sample.Uwp
 	public sealed partial class MainPage : Page
 	{
 		UIElement customOverlayElement = null;
-		MobileBarcodeScanner scanner;
 
 		public MainPage()
 		{
 			InitializeComponent();
 
+			Logger.Level = LogLevel.Info;
+		}
+
+
+		async void buttonScanDefault_Click(object sender, RoutedEventArgs e)
+		{
 			//Create a new instance of our scanner
-			scanner = new MobileBarcodeScanner(this.Dispatcher);
-			scanner.RootFrame = this.Frame;
-			scanner.Dispatcher = this.Dispatcher;
-			scanner.OnCameraError += Scanner_OnCameraError;
-			scanner.OnCameraInitialized += Scanner_OnCameraInitialized; ;
-		}
-
-		void Scanner_OnCameraInitialized()
-		{
-			//handle initialization
-		}
-
-		void Scanner_OnCameraError(IEnumerable<string> errors)
-		{
-			if (errors != null)
+			var scanner = new BarcodeScanner(overlay: new BarcodeScannerOverlay
 			{
-				errors.ToList().ForEach(async e => await MessageBox(e));
-			}
-		}
-
-
-		void buttonScanDefault_Click(object sender, RoutedEventArgs e)
-		{
-			//Tell our scanner to use the default overlay
-			scanner.UseCustomOverlay = false;
-			//We can customize the top and bottom text of our default overlay
-			scanner.TopText = "Hold camera up to barcode";
-			scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
-			//Start scanning
-			scanner.Scan().ContinueWith(t =>
+				TopText = "Hold camera up to barcode",
+				BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
+			})
 			{
-				if (t.Result != null)
-					HandleScanResult(t.Result);
-			});
-		}
-
-		void buttonScanContinuously_Click(object sender, RoutedEventArgs e)
-		{
-			//Tell our scanner to use the default overlay
-			scanner.UseCustomOverlay = false;
-			//We can customize the top and bottom text of our default overlay
-			scanner.TopText = "Hold camera up to barcode";
-			scanner.BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel";
+				RootFrame = Frame,
+				Dispatcher = Dispatcher
+			};
 
 			//Start scanning
-			scanner.ScanContinuously(new MobileBarcodeScanningOptions { DelayBetweenContinuousScans = 3000 }, async (result) =>
-			{
-				var msg = "Found Barcode: " + result.Text;
+			var t = await scanner.ScanOnceAsync();
+			HandleScanResult(t);
+		}
 
-				await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+		async void buttonScanContinuously_Click(object sender, RoutedEventArgs e)
+		{
+			//Create a new instance of our scanner
+			var scanner = new BarcodeScanner(
+				new BarcodeScanningOptions
 				{
-					await MessageBox(msg);
-				});
+					DelayBetweenContinuousScans = 3000
+				},
+				new BarcodeScannerOverlay
+				{
+					TopText = "Hold camera up to barcode",
+					BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
+				})
+			{
+				RootFrame = Frame,
+				Dispatcher = Dispatcher
+			};
+
+			//Start scanning
+			await scanner.ScanContinuouslyAsync(r =>
+			{
+				HandleScanResult(r);
 			});
 		}
 
-		private void buttonScanCustom_Click(object sender, RoutedEventArgs e)
+		async void buttonScanCustom_Click(object sender, RoutedEventArgs e)
 		{
 			//Get our UIElement from the MainPage.xaml (this) file 
 			// to use as our custom overlay
@@ -100,34 +89,39 @@ namespace Sample.Uwp
 				customOverlay.Children.RemoveAt(0);
 			}
 
-			//Wireup our buttons from the custom overlay
-			buttonCancel.Click += (s, e2) =>
+			//Create a new instance of our scanner
+			var scanner = new BarcodeScanner(
+				new BarcodeScanningOptions
+				{
+					DelayBetweenContinuousScans = 3000,
+					AutoRotate = true
+				},
+				new BarcodeScannerOverlay
+				{
+					TopText = "Hold camera up to barcode",
+					BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
+				})
 			{
-				scanner.Cancel();
-			};
-			buttonFlash.Click += (s, e2) =>
-			{
-				scanner.ToggleTorch();
+				CustomOverlay = customOverlay,
+				RootFrame = Frame,
+				Dispatcher = Dispatcher
 			};
 
-			//Set our custom overlay and enable it
-			scanner.CustomOverlay = customOverlayElement;
-			scanner.UseCustomOverlay = true;
+			//Wireup our buttons from the custom overlay
+			buttonCancel.Click += (s, e2) => scanner.CancelAsync();
+			buttonFlash.Click += (s, e2) => scanner.ToggleTorchAsync();
 
 			//Start scanning
-			scanner.Scan(new MobileBarcodeScanningOptions { AutoRotate = true }).ContinueWith(t =>
-			{
-				if (t.Result != null)
-					HandleScanResult(t.Result);
-			});
+			var r = await scanner.ScanOnceAsync();
+			HandleScanResult(r);
 		}
 
-		async void HandleScanResult(ZXing.Result result)
+		async void HandleScanResult(ZXing.Result[] results)
 		{
 			var msg = "";
 
-			if (result != null && !string.IsNullOrEmpty(result.Text))
-				msg = "Found Barcode: " + result.Text;
+			if (results != null && results.Any(r => !string.IsNullOrEmpty(r.Text)))
+				msg = "Found Barcodes: " + string.Join("; ", results.Select(r => r.Text));
 			else
 				msg = "Scanning Canceled!";
 

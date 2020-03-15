@@ -30,7 +30,7 @@ using ZXing.Common;
 using ZXing.OneD;
 using ZXing.Rendering;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	/// <summary>
 	/// Renders a <see cref="BitMatrix" /> to a <see cref="WriteableBitmap" />

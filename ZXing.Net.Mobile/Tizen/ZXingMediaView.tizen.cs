@@ -3,28 +3,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Tizen.Multimedia;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class ZXingMediaView : MediaView, IScannerView, IDisposable
 	{
 		ZXingScannerCamera zxingScannerCamera;
 		EvasObjectEvent showCallback;
 
-		public ZXingMediaView(EvasObject parent)
-			: this(parent, null)
-		{
-		}
+		public BarcodeScanningOptions Options { get; }
 
-		internal ZXingMediaView(EvasObject parent, ZxingScannerWindow parentWindow) : base(parent)
+		public ZXingMediaView(EvasObject parent, BarcodeScanningOptions options) : base(parent)
 		{
+			Options = options ?? new BarcodeScanningOptions();
+
 			AlignmentX = -1;
 			AlignmentY = -1;
 			WeightX = 1;
 			WeightY = 1;
-			this.parentWindow = parentWindow;
-			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this);
+
+			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this, Options);
 
 			showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);
 			showCallback.On += (s, e) =>
@@ -36,62 +36,40 @@ namespace ZXing.Mobile
 			StartScanning();
 		}
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => parentWindow?.ScanningOptions ?? options;
-			set
-			{
-				if (parentWindow != null)
-					parentWindow.ScanningOptions = value;
-				else
-					options = value;
-			}
-		}
-
-		ZxingScannerWindow parentWindow;
-
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
-
-		public ScannerOverlaySettings<Container> OverlaySettings { get; private set; }
 
 		public bool IsTorchOn => zxingScannerCamera.IsTorchOn;
 
-		public bool IsAnalyzing { get; private set; }
-
 		public bool HasTorch => zxingScannerCamera.HasTorch;
 
-		public void AutoFocus()
-			=> zxingScannerCamera?.AutoFocus();
+		public bool IsAnalyzing
+		{
+			get => zxingScannerCamera?.IsAnalyzing ?? false;
+			set { if (zxingScannerCamera != null) zxingScannerCamera.IsAnalyzing = value; }
+		}
 
-		public void AutoFocus(int x, int y)
-			=> zxingScannerCamera?.AutoFocus(x, y);
+		public Task AutoFocusAsync()
+			=> zxingScannerCamera?.AutoFocusAsync();
 
-		public void PauseAnalysis()
-			=> zxingScannerCamera?.PauseAnalysis();
+		public Task AutoFocusAsync(int x, int y)
+			=> zxingScannerCamera?.AutoFocusAsync(x, y);
 
-		public void ResumeAnalysis()
-			=> zxingScannerCamera?.ResumeAnalysis();
 
 		void StartScanning()
 		{
 			IsAnalyzing = true;
 			Show();
-			zxingScannerCamera.ScanningOptions = options;
 			zxingScannerCamera.OnBarcodeScanned += OnBarcodeScanned;
 			IsAnalyzing = false;
 		}
 
-		public void ToggleTorch()
-			=> zxingScannerCamera?.ToggleTorch();
+		public Task ToggleTorchAsync()
+			=> zxingScannerCamera?.ToggleTorchAsync();
 
-		public void Torch(bool on)
-			=> zxingScannerCamera?.Torch(on);
+		public Task TorchAsync(bool on)
+			=> zxingScannerCamera?.TorchAsync(on);
 
 		public void Dispose()
-		{
-			zxingScannerCamera?.Dispose();
-		}
+			=> zxingScannerCamera?.Dispose();
 	}
 }

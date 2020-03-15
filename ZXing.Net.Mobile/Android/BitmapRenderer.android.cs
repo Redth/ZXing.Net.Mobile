@@ -19,7 +19,7 @@ using Android.Graphics;
 using ZXing.Common;
 using ZXing.Rendering;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	/// <summary>
 	/// Renders a <see cref="BitMatrix" /> to a <see cref="Bitmap" /> image

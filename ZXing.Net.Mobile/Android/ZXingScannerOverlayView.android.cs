@@ -14,9 +14,9 @@ using Android.Widget;
 using Android.Graphics;
 using Android.Text;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public class ZxingOverlayView : View
+	public class ZXingScannerOverlayView : View
 	{
 		int[] SCANNER_ALPHA = { 0, 64, 128, 192, 255, 192, 128, 64 };
 		const long ANIMATION_DELAY = 80L;
@@ -34,11 +34,11 @@ namespace ZXing.Mobile
 		int scannerAlpha;
 		List<ZXing.ResultPoint> possibleResultPoints;
 
-		public ScannerOverlaySettings<View> OverlaySettings { get; private set; }
+		public new BarcodeScannerOverlay<View> Overlay { get; }
 
-		public ZxingOverlayView(Context context, ScannerOverlaySettings<View> overlaySettings) : base(context)
+		public ZXingScannerOverlayView(Context context, BarcodeScannerOverlay<View> overlay) : base(context)
 		{
-			OverlaySettings = overlaySettings;
+			Overlay = overlay;
 
 			// Initialize these once for performance rather than calling them every time in onDraw().
 			paint = new Paint(PaintFlags.AntiAlias);
@@ -93,7 +93,7 @@ namespace ZXing.Mobile
 			textPaint.Color = Color.White;
 			textPaint.TextSize = 16 * scale;
 
-			var topText = OverlaySettings?.TopText ?? string.Empty;
+			var topText = Overlay?.TopText ?? string.Empty;
 			var topTextLayout = new StaticLayout(topText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
 			canvas.Save();
 			var topBounds = new Rect();
@@ -106,7 +106,7 @@ namespace ZXing.Mobile
 
 			canvas.Restore();
 
-			var bottomText = OverlaySettings?.BottomText ?? string.Empty;
+			var bottomText = Overlay?.BottomText ?? string.Empty;
 
 			var botTextLayout = new StaticLayout(bottomText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
 			canvas.Save();

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms.Platform.MacOS;
 using Foundation;
 using AppKit;
+using ZXing.UI;
 
 [assembly: ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 

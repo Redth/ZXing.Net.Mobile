@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using UIKit;
-using ZXing.Mobile;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class UIImageBarcodeReader : BarcodeReader<UIImage>, IBarcodeReader
 	{

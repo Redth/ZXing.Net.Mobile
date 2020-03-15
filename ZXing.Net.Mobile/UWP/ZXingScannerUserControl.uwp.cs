@@ -1,70 +1,180 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.Media;
 using Windows.Media.Capture;
 using Windows.Media.Devices;
 using Windows.Media.MediaProperties;
 using Windows.System.Display;
-using Windows.UI.Core;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-using ZXing.Mobile;
+using Windows.UI.Xaml.Shapes;
 
-// The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
-
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public sealed partial class ZXingScannerControl : UserControl, IScannerView, IScannerSessionHost, IDisposable
+	public class ZXingScannerUserControl : UserControl, IScannerView
 	{
-		public ZXingScannerControl()
+		Grid rootGrid;
+		CaptureElement captureElement;
+		Grid gridCustomOverlay;
+		Grid gridDefaultOverlay;
+		TextBlock bottomText;
+
+		public BarcodeScanningOptions Options { get; }
+
+		public BarcodeScannerOverlay<UIElement> Overlay { get; }
+
+		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
+
+		public bool IsAnalyzing { get; set; }
+
+		public bool IsTorchOn
+			=> HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
+
+		public Task TorchAsync(bool on)
 		{
-			InitializeComponent();
+			if (HasTorch)
+				mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
+			return Task.CompletedTask;
+		}
+
+		public async Task ToggleTorchAsync()
+		{
+			if (HasTorch)
+				await TorchAsync(!IsTorchOn);
+		}
+
+		public async Task AutoFocusAsync()
+			=> await AutoFocusAsync(0, 0, false);
+
+		public async Task AutoFocusAsync(int x, int y)
+			=> await AutoFocusAsync(x, y, true);
+
+		public ZXingScannerUserControl(BarcodeScanningOptions options = null, BarcodeScannerOverlay<UIElement> overlay = null)
+		{
+			Options = options ?? new BarcodeScanningOptions();
+			Overlay = overlay;
+
+			rootGrid = new Grid { VerticalAlignment = VerticalAlignment.Stretch, HorizontalAlignment = HorizontalAlignment.Stretch };
+
+			captureElement = new CaptureElement { Stretch = Stretch.UniformToFill };
+			rootGrid.Children.Add(captureElement);
+			
+			gridCustomOverlay = new Grid
+			{
+				Visibility = Visibility.Collapsed,
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				VerticalAlignment = VerticalAlignment.Stretch
+			};
+			rootGrid.Children.Add(gridCustomOverlay);
+
+			gridDefaultOverlay = new Grid
+			{
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				VerticalAlignment = VerticalAlignment.Stretch
+			};
+			gridDefaultOverlay.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+			gridDefaultOverlay.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+			gridDefaultOverlay.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+			var topRect = new Rectangle
+			{
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				VerticalAlignment = VerticalAlignment.Stretch,
+				Fill = new SolidColorBrush(Colors.Black),
+				Opacity = 0.3
+			};
+			Grid.SetRow(topRect, 0);
+			gridDefaultOverlay.Children.Add(topRect);
+
+			var topBorder = new Border
+			{
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				VerticalAlignment = VerticalAlignment.Stretch,
+			};
+			Grid.SetRow(topBorder, 0);
+
+			var topText = new TextBlock
+			{
+				HorizontalAlignment = HorizontalAlignment.Center,
+				VerticalAlignment = VerticalAlignment.Center,
+				TextAlignment = TextAlignment.Center,
+				TextWrapping = TextWrapping.WrapWholeWords,
+				Foreground = new SolidColorBrush(Colors.White),
+				Text = overlay?.TopText ?? string.Empty
+			};
+			topBorder.Child = topText;
+			gridDefaultOverlay.Children.Add(topBorder);
+
+			var lineRect = new Rectangle
+			{
+				VerticalAlignment = VerticalAlignment.Center,
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				Fill = new SolidColorBrush(Colors.Red),
+				Height = 4,
+				Opacity = 0.5
+			};
+			Grid.SetRow(lineRect, 1);
+			gridDefaultOverlay.Children.Add(lineRect);
+			var line = new Line
+			{
+				VerticalAlignment = VerticalAlignment.Center,
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				Fill = new SolidColorBrush(Colors.Red),
+				Height = 4,
+				StrokeThickness = 4,
+				Stroke = new SolidColorBrush(Colors.Red)
+			};
+			Grid.SetRow(line, 1);
+			gridDefaultOverlay.Children.Add(line);
+
+			var botRect = new Rectangle
+			{
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				VerticalAlignment = VerticalAlignment.Stretch,
+				Fill = new SolidColorBrush(Colors.Black),
+				Opacity = 0.3
+			};
+			Grid.SetRow(botRect, 2);
+			gridDefaultOverlay.Children.Add(botRect);
+
+			var botBorder = new Border
+			{
+				HorizontalAlignment = HorizontalAlignment.Stretch,
+				VerticalAlignment = VerticalAlignment.Stretch,
+			};
+			Grid.SetRow(botBorder, 2);
+
+			bottomText = new TextBlock
+			{
+				HorizontalAlignment = HorizontalAlignment.Center,
+				VerticalAlignment = VerticalAlignment.Center,
+				TextAlignment = TextAlignment.Center,
+				TextWrapping = TextWrapping.WrapWholeWords,
+				Foreground = new SolidColorBrush(Colors.White),
+				Text = overlay?.BottomText ?? string.Empty
+			};
+			botBorder.Child = bottomText;
+			gridDefaultOverlay.Children.Add(botBorder);
+
+			rootGrid.Children.Add(gridDefaultOverlay);
+
+			Content = rootGrid;
 
 			displayOrientation = displayInformation.CurrentOrientation;
 			displayInformation.OrientationChanged += DisplayInformation_OrientationChanged;
 
 			StartScanningAsync();
 		}
-
-		public event ScannerOpened OnCameraInitialized;
-		public delegate void ScannerOpened();
-
-		public event ScannerError OnScannerError;
-		public delegate void ScannerError(IEnumerable<string> errors);
-
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => parentPage?.ScanningOptions ?? options;
-			set
-			{
-				if (parentPage != null)
-					parentPage.ScanningOptions = value;
-				else
-					options = value;
-			}
-		}
-
-		internal ScanPage parentPage;
-
-		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
-
-		public ScannerOverlaySettings<UIElement> OverlaySettings { get; internal set; }
 
 		async void DisplayInformation_OrientationChanged(DisplayInformation sender, object args)
 		{
@@ -95,36 +205,24 @@ namespace ZXing.Mobile
 		// For listening to media property changes
 		readonly SystemMediaTransportControls systemMediaControls = SystemMediaTransportControls.GetForCurrentView();
 
-		public void PauseAnalysis()
-			=> isAnalyzing = false;
-
-		public void ResumeAnalysis()
-			=> isAnalyzing = true;
-
-		public bool IsAnalyzing
-			=> isAnalyzing;
 
 		async Task StartScanningAsync()
 		{
 			if (stopping)
 			{
-				var error = "Camera is closing";
-				OnScannerError?.Invoke(new[] { error });
+				Logger.Warn("Camera is already closing");
 				return;
 			}
 
 
 			displayRequest.RequestActive();
 
-			isAnalyzing = true;
-			
-			topText.Text = OverlaySettings?.TopText ?? string.Empty;
-			bottomText.Text = OverlaySettings?.BottomText ?? string.Empty;
+			IsAnalyzing = true;
 
-			if (OverlaySettings?.CustomOverlay != null)
+			if (Overlay?.CustomOverlay != null)
 			{
 				gridCustomOverlay.Children.Clear();
-				gridCustomOverlay.Children.Add(OverlaySettings.CustomOverlay);
+				gridCustomOverlay.Children.Add(Overlay.CustomOverlay);
 
 				gridCustomOverlay.Visibility = Visibility.Visible;
 				gridDefaultOverlay.Visibility = Visibility.Collapsed;
@@ -136,13 +234,12 @@ namespace ZXing.Mobile
 			}
 
 			// Find which device to use
-			var preferredCamera = await GetFilteredCameraOrDefaultAsync(ScanningOptions);
+			var preferredCamera = await GetFilteredCameraOrDefaultAsync(Options);
 			if (preferredCamera == null)
 			{
 				var error = "No camera available";
-				System.Diagnostics.Debug.WriteLine(error);
+				Logger.Error(error);
 				isMediaCaptureInitialized = false;
-				OnScannerError?.Invoke(new[] { error });
 				return;
 			}
 
@@ -174,17 +271,16 @@ namespace ZXing.Mobile
 			}
 			catch (UnauthorizedAccessException)
 			{
-				System.Diagnostics.Debug.WriteLine("Denied access to the camera");
+				Logger.Error("Denied access to the camera");
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine("Exception when init MediaCapture: {0}", ex);
+				Logger.Error(ex, "Exception when init MediaCapture");
 			}
 
 			if (!isMediaCaptureInitialized)
 			{
-				var error = "Unexpected error on Camera initialisation";
-				OnScannerError?.Invoke(new[] { error });
+				Logger.Error("Unexpected error on Camera initialisation");
 				return;
 			}
 
@@ -200,15 +296,12 @@ namespace ZXing.Mobile
 			}
 			catch (Exception ex)
 			{
-				var error = "Unexpected error on Camera initialisation";
-				OnScannerError?.Invoke(new[] { error });
+				Logger.Error(ex, "Unexpected error on Camera initialisation");
 				return;
 			}
 
 			if (mediaCapture.CameraStreamState == CameraStreamState.Streaming)
-			{
-				OnCameraInitialized?.Invoke();
-			}
+				Logger.Info("Camera Initialized and streaming");
 
 			// Get all the available resolutions for preview
 			var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
@@ -216,17 +309,14 @@ namespace ZXing.Mobile
 			foreach (var ap in availableProperties)
 			{
 				var vp = (VideoEncodingProperties)ap;
-				System.Diagnostics.Debug.WriteLine("Camera Preview Resolution: {0}x{1}", vp.Width, vp.Height);
+				Logger.Info($"Camera Preview Resolution: {vp.Width}x{vp.Height}");
 				availableResolutions.Add(new CameraResolution { Width = (int)vp.Width, Height = (int)vp.Height });
 			}
-			CameraResolution previewResolution = null;
-			if (ScanningOptions.CameraResolutionSelector != null)
-				previewResolution = ScanningOptions.CameraResolutionSelector(availableResolutions);
+			var previewResolution =  Options?.CameraResolutionSelector?.Invoke(availableResolutions);
 
 			if (availableResolutions == null || availableResolutions.Count < 1)
 			{
-				var error = "Camera is busy. Try to close all applications that use camera.";
-				OnScannerError?.Invoke(new[] { error });
+				Logger.Error("Camera is busy. Try to close all applications that use camera.");
 				return;
 			}
 
@@ -255,11 +345,11 @@ namespace ZXing.Mobile
 
 			if (previewResolution == null)
 			{
-				System.Diagnostics.Debug.WriteLine("No preview resolution available. Camera may be in use by another application.");
+				Logger.Info("No preview resolution available. Camera may be in use by another application.");
 				return;
 			}
 
-			MobileBarcodeScanner.Log("Using Preview Resolution: {0}x{1}", previewResolution.Width, previewResolution.Height);
+			Logger.Info($"Using Preview Resolution: {previewResolution.Width}x{previewResolution.Height}");
 
 			// Find the matching property based on the selection, again
 			var chosenProp = availableProperties.FirstOrDefault(ap => ((VideoEncodingProperties)ap).Width == previewResolution.Width && ((VideoEncodingProperties)ap).Height == previewResolution.Height);
@@ -275,14 +365,14 @@ namespace ZXing.Mobile
 
 			await SetupAutoFocus();
 
-			var zxing = ScanningOptions.BuildBarcodeReader();
+			var zxing = Options.BuildBarcodeReader();
 
 			timerPreview = new Timer(async (state) =>
 			{
 
-				var delay = ScanningOptions.DelayBetweenAnalyzingFrames;
+				var delay = Options.DelayBetweenAnalyzingFrames;
 
-				if (stopping || processing || !isAnalyzing
+				if (stopping || processing || !IsAnalyzing
 				|| (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
 				{
 					timerPreview.Change(delay, Timeout.Infinite);
@@ -304,7 +394,7 @@ namespace ZXing.Mobile
 				}
 				catch (Exception ex)
 				{
-					MobileBarcodeScanner.Log("GetPreviewFrame Failed: {0}", ex);
+					Logger.Error(ex, "GetPreviewFrame Failed: {0}");
 				}
 
 				ZXing.Result[] results = null;
@@ -314,20 +404,20 @@ namespace ZXing.Mobile
 					// Try decoding the image
 					if (luminanceSource != null)
 					{
-						results = ScanningOptions?.ScanMultiple ?? false
+						results = Options?.ScanMultiple ?? false
 							? zxing.DecodeMultiple(luminanceSource)
 							: new[] { zxing.Decode(luminanceSource) };
 					}
 				}
 				catch (Exception ex)
 				{
-					MobileBarcodeScanner.Log("Warning: zxing.Decode Failed: {0}", ex);
+					Logger.Warn(ex, "Warning: zxing.Decode Failed");
 				}
 
 				// Check if a result was found
 				if (results != null && results.Length > 0 && results[0] != null)
 				{
-					delay = ScanningOptions.DelayBetweenContinuousScans;
+					delay = Options.DelayBetweenContinuousScans;
 
 					OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(results));
 				}
@@ -336,10 +426,10 @@ namespace ZXing.Mobile
 
 				timerPreview.Change(delay, Timeout.Infinite);
 
-			}, null, ScanningOptions.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
+			}, null, Options.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
 		}
 
-		async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(MobileBarcodeScanningOptions options)
+		async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(BarcodeScanningOptions options)
 		{
 			var videoCaptureDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
 
@@ -354,7 +444,7 @@ namespace ZXing.Mobile
 			if (selectedCamera == null)
 			{
 				var whichCamera = useFront ? "front" : "back";
-				System.Diagnostics.Debug.WriteLine("Finding " + whichCamera + " camera failed, opening first available camera");
+				Logger.Info("Finding " + whichCamera + " camera failed, opening first available camera");
 				selectedCamera = videoCaptureDevices.FirstOrDefault();
 			}
 
@@ -363,10 +453,10 @@ namespace ZXing.Mobile
 
 		protected override void OnPointerPressed(PointerRoutedEventArgs e)
 		{
-			System.Diagnostics.Debug.WriteLine("AutoFocus requested");
+			Logger.Info("AutoFocus requested");
 			base.OnPointerPressed(e);
 			var pt = e.GetCurrentPoint(captureElement);
-			new Task(() => { AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true); });
+			new Task(async () => { await AutoFocusAsync((int)pt.Position.X, (int)pt.Position.Y, true); });
 		}
 
 		Timer timerPreview;
@@ -376,11 +466,6 @@ namespace ZXing.Mobile
 		bool isMediaCaptureInitialized = false;
 
 		volatile bool processing = false;
-		volatile bool isAnalyzing = false;
-		
-
-		public bool IsTorchOn
-			=> HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
 
 		public bool IsFocusSupported
 			=> mediaCapture != null
@@ -397,7 +482,7 @@ namespace ZXing.Mobile
 
 				var focusSettings = new FocusSettings();
 
-				if (ScanningOptions.DisableAutofocus)
+				if (Options.DisableAutofocus)
 				{
 					focusSettings.Mode = FocusMode.Manual;
 					focusSettings.Distance = ManualFocusDistance.Nearest;
@@ -428,33 +513,15 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public void Torch(bool on)
-		{
-			if (HasTorch)
-				mediaCapture.VideoDeviceController.TorchControl.Enabled = on;
-		}
-
-		public void ToggleTorch()
-		{
-			if (HasTorch)
-				Torch(!IsTorchOn);
-		}
-
 		public bool HasTorch
 			=> mediaCapture != null
 					&& mediaCapture.VideoDeviceController != null
 					&& mediaCapture.VideoDeviceController.TorchControl != null
 					&& mediaCapture.VideoDeviceController.TorchControl.Supported;
 
-		public async void AutoFocus()
-			=> await AutoFocusAsync(0, 0, false);
-
-		public async void AutoFocus(int x, int y)
-			=> await AutoFocusAsync(x, y, true);
-
 		public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
 		{
-			if (ScanningOptions.DisableAutofocus)
+			if (Options.DisableAutofocus)
 				return;
 
 			if (IsFocusSupported && mediaCapture?.CameraStreamState == CameraStreamState.Streaming)
@@ -509,7 +576,7 @@ namespace ZXing.Mobile
 				}
 				catch (Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine("AutoFocusAsync Error: {0}", ex);
+					Logger.Error(ex, "AutoFocusAsync Error");
 				}
 			}
 		}
@@ -520,7 +587,7 @@ namespace ZXing.Mobile
 				return;
 
 			stopping = true;
-			isAnalyzing = false;
+			IsAnalyzing = false;
 
 			try
 			{
@@ -528,17 +595,17 @@ namespace ZXing.Mobile
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Release Request Failed: {ex}");
+				Logger.Error(ex, "Release Request Failed");
 			}
 
 			try
 			{
 				if (IsTorchOn)
-					Torch(false);
+					await TorchAsync(false);
 				if (isMediaCaptureInitialized)
 					await mediaCapture.StopPreviewAsync();
-				if (OverlaySettings?.CustomOverlay != null)
-					gridCustomOverlay.Children.Remove(OverlaySettings.CustomOverlay);
+				if (Overlay?.CustomOverlay != null)
+					gridCustomOverlay.Children.Remove(Overlay.CustomOverlay);
 			}
 			catch { }
 			finally
@@ -565,8 +632,8 @@ namespace ZXing.Mobile
 		protected override void OnTapped(TappedRoutedEventArgs e)
 			=> base.OnTapped(e);
 
-		void ButtonToggleFlash_Click(object sender, RoutedEventArgs e)
-			=> ToggleTorch();
+		//void ButtonToggleFlash_Click(object sender, RoutedEventArgs e)
+		//	=> ToggleTorch();
 
 		/// <summary>
 		/// Gets the current orientation of the UI in relation to the device and applies a corrective rotation to the preview

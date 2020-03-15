@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	[ComImport]
 	[Guid("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")]
@@ -79,7 +79,7 @@ namespace ZXing.Mobile
 						}
 						catch (Exception ex)
 						{
-							System.Diagnostics.Debug.WriteLine("Luminance Source Failed: {0}", ex);
+							Logger.Error(ex, "Luminance Source Failed");
 						}
 					}
 				}

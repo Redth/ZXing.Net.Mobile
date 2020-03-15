@@ -61,23 +61,6 @@
 		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9" />
 		<Compile Include="**\*.uwp.cs" />
 		<Compile Include="**\*.uwp.*.cs" />
-		<Compile Include="ScanPage.xaml.cs">
-			<DependentUpon>ScanPage.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="ZXingScannerControl.xaml.cs">
-			<DependentUpon>ZXingScannerControl.xaml</DependentUpon>
-		</Compile>
-		<Page Include="ScanPage.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Include="ZXingScannerControl.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<None Update="ZXingScannerControl.xaml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 		<SDKReference Include="WindowsMobile, Version=10.0.16299.0">
 			<Name>Windows Mobile Extensions for the UWP</Name>
 		</SDKReference>

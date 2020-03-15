@@ -16,7 +16,7 @@
 
 using ZXing.Rendering;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	/// <summary>
 	/// A smart class to encode some content to a barcode image

@@ -4,11 +4,11 @@ using ZXing.Net.Mobile.Forms;
 using ZXing.Net.Mobile.Forms.iOS;
 using System.ComponentModel;
 using System.Reflection;
-using ZXing.Mobile;
 using System.Threading.Tasks;
 using Xamarin.Forms.Platform.iOS;
 using Foundation;
 using UIKit;
+using ZXing.UI;
 
 [assembly: ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.iOS

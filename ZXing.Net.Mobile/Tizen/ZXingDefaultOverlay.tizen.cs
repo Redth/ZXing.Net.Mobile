@@ -1,6 +1,6 @@
 using ElmSharp;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	class ZXingDefaultOverlay : Box
 	{

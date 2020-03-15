@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Tizen;
-using ZXing.Mobile;
+using ZXing.UI;
 using ZXing.Net.Mobile.Forms;
 using ZXing.Net.Mobile.Forms.Tizen;
 
@@ -10,7 +10,7 @@ using ZXing.Net.Mobile.Forms.Tizen;
 
 namespace ZXing.Net.Mobile.Forms.Tizen
 {
-	class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingMediaView>
+	class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.UI.ZXingMediaView>
 	{
 		protected ZXingScannerView formsView;
 		protected ZXingMediaView zxingWindow;
@@ -23,7 +23,7 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 
 		protected override void Dispose(bool disposing)
 		{
-			zxingWindow?.StopScanning();
+			zxingWindow?.Dispose();
 			base.Dispose(disposing);
 		}
 		
@@ -39,22 +39,20 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 					if (zxingWindow != null)
 					{
 						if (x < 0 && y < 0)
-							zxingWindow.AutoFocus();
+							zxingWindow.AutoFocusAsync();
 						else
-							zxingWindow.AutoFocus(x, y);
+							zxingWindow.AutoFocusAsync(x, y);
 					}
 				};
 				
-				zxingWindow = new ZXing.Mobile.ZXingMediaView(Xamarin.Forms.Forms.NativeParent);
+				zxingWindow = new ZXing.UI.ZXingMediaView(Xamarin.Forms.Forms.NativeParent, zxingWindow.Options);
 				zxingWindow.Show();
 				base.SetNativeControl(zxingWindow);
 
-				if (formsView.IsScanning)
-					zxingWindow.StartScanning(formsView.RaiseScanResult, formsView.Options);
 				if (!formsView.IsAnalyzing)
-					zxingWindow.PauseAnalysis();
+					zxingWindow.IsAnalyzing = false;
 				if (formsView.IsTorchOn)
-					zxingWindow.Torch(formsView.IsTorchOn);
+					zxingWindow.TorchAsync(formsView.IsTorchOn);
 			}
 		}
 
@@ -67,19 +65,10 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 				switch (e.PropertyName)
 				{
 					case nameof(ZXingScannerView.IsTorchOn):
-						zxingWindow.Torch(formsView.IsTorchOn);
-						break;
-					case nameof(ZXingScannerView.IsScanning):
-						if (formsView.IsScanning)
-							zxingWindow.StartScanning(formsView.RaiseScanResult, formsView.Options);
-						else
-							zxingWindow.StopScanning();
+						zxingWindow.TorchAsync(formsView.IsTorchOn);
 						break;
 					case nameof(ZXingScannerView.IsAnalyzing):
-						if (formsView.IsAnalyzing)
-							zxingWindow.ResumeAnalysis();
-						else
-							zxingWindow.PauseAnalysis();
+						zxingWindow.IsAnalyzing = formsView.IsAnalyzing;
 						break;
 				}
 			}

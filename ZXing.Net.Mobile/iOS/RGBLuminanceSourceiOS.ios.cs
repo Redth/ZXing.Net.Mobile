@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using UIKit;
 using CoreGraphics;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class RGBLuminanceSourceiOS : RGBLuminanceSource
 	{

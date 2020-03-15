@@ -4,9 +4,9 @@ using Android.Hardware;
 using Android.Util;
 using Java.IO;
 
-namespace ZXing.Mobile.CameraAccess
+namespace ZXing.UI
 {
-	public class Torch
+	internal class Torch
 	{
 		readonly CameraController cameraController;
 		readonly Context context;

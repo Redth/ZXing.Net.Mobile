@@ -9,37 +9,27 @@ using AVFoundation;
 using CoreGraphics;
 
 using ZXing;
+using System.Threading.Tasks;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public class AVCaptureScannerViewController : UIViewController, IScannerViewController
+	public class AVCaptureScannerViewController : UIViewController, IScannerView
 	{
 		AVCaptureScannerView scannerView;
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => Scanner?.ScanningOptions ?? options;
-			set
-			{
-				if (Scanner != null)
-					Scanner.ScanningOptions = value;
-				options = value;
-			}
-		}
-		public MobileBarcodeScanner Scanner { get; private set; }
+		public BarcodeScanningOptions Options { get; }
 
-		public ScannerOverlaySettings<UIView> OverlaySettings { get; private set; }
+		public BarcodeScannerOverlay<UIView> Overlay { get; }
 
 		UIActivityIndicatorView loadingView;
 		UIView loadingBg;
 
-		internal AVCaptureScannerViewController(MobileBarcodeScanner scanner, ScannerOverlaySettings<UIView> overlaySettings)
+		internal AVCaptureScannerViewController(BarcodeScanningOptions options, BarcodeScannerOverlay<UIView> overlay)
 		{
-			OverlaySettings = overlaySettings;
-			Scanner = scanner;
+			Options = options;
+			Overlay = overlay;
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
 
@@ -49,9 +39,6 @@ namespace ZXing.Mobile
 
 		public UIViewController AsViewController()
 			=> this;
-
-		public void Cancel()
-			=> InvokeOnMainThread(() => scannerView.Stop());
 
 		UIStatusBarStyle originalStatusBarStyle = UIStatusBarStyle.Default;
 
@@ -75,35 +62,31 @@ namespace ZXing.Mobile
 			View.AddSubview(loadingBg);
 			loadingView.StartAnimating();
 
-			scannerView = new AVCaptureScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), OverlaySettings, this)
+			scannerView = new AVCaptureScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), Options, Overlay)
 			{
 				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
 			};
-			scannerView.OnCancelButtonPressed += () =>
-				Scanner.Cancel();
 
 			View.AddSubview(scannerView);
 			View.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 		}
 
-		public void Torch(bool on)
-			=> scannerView?.Torch(on);
+		public Task TorchAsync(bool on)
+			=> scannerView?.TorchAsync(on);
 
-		public void ToggleTorch()
-			=> scannerView?.ToggleTorch();
+		public Task ToggleTorchAsync()
+			=> scannerView?.ToggleTorchAsync();
 
 		public bool IsTorchOn
 			=> scannerView?.IsTorchOn ?? false;
 
-		public bool IsAnalyzing => scannerView?.IsAnalyzing ?? false;
+		public bool IsAnalyzing
+		{
+			get => scannerView?.IsAnalyzing ?? false;
+			set { if (scannerView != null) scannerView.IsAnalyzing = value; }
+		}
 
 		public bool HasTorch => scannerView?.HasTorch ?? false;
-
-		public void PauseAnalysis()
-			=> scannerView?.PauseAnalysis();
-
-		public void ResumeAnalysis()
-			=> scannerView?.ResumeAnalysis();
 
 		public override void ViewDidAppear(bool animated)
 		{
@@ -117,7 +100,7 @@ namespace ZXing.Mobile
 			else
 				UIApplication.SharedApplication.SetStatusBarStyle(UIStatusBarStyle.BlackTranslucent, false);
 
-			Console.WriteLine("Starting to scan...");
+			Logger.Info("Starting to scan...");
 
 			scannerView.OnBarcodeScanned += OnBarcodeScanned;
 		}
@@ -141,8 +124,8 @@ namespace ZXing.Mobile
 
 		public override bool ShouldAutorotate()
 		{
-			if (ScanningOptions.AutoRotate != null)
-				return (bool)ScanningOptions.AutoRotate;
+			if (Options.AutoRotate != null && Options.AutoRotate.HasValue)
+				return Options.AutoRotate.Value;
 
 			return false;
 		}
@@ -150,11 +133,11 @@ namespace ZXing.Mobile
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations()
 			=> UIInterfaceOrientationMask.All;
 
-		public void AutoFocus()
-			=> scannerView?.AutoFocus();
+		public Task AutoFocusAsync()
+			=> scannerView?.AutoFocusAsync();
 
-		public void AutoFocus(int x, int y)
-			=> scannerView?.AutoFocus(x, y);
+		public Task AutoFocusAsync(int x, int y)
+			=> scannerView?.AutoFocusAsync(x, y);
 
 		//void HandleOnScannerSetupComplete()
 		//{

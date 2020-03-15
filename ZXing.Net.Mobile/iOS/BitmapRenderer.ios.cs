@@ -8,7 +8,7 @@ using UIKit;
 
 using ZXing.Common;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class BitmapRenderer : IBarcodeRenderer<UIImage>
 	{

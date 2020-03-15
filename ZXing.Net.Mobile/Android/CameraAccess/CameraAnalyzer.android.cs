@@ -5,36 +5,33 @@ using System.Threading.Tasks;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
 
-namespace ZXing.Mobile.CameraAccess
+namespace ZXing.UI
 {
-	public class CameraAnalyzer
+	internal class CameraAnalyzer
 	{
 		readonly CameraController cameraController;
 		readonly CameraEventsListener cameraEventListener;
 		Task processingTask;
 		DateTime lastPreviewAnalysis = DateTime.UtcNow;
 		bool wasScanned;
-		IScannerSessionHost scannerHost;
-		Action<ZXing.Result[]> resultHandler;
+		
+		public Action<ZXing.Result[]> ResultHandler { get; }
+		public BarcodeScanningOptions Options { get; }
 
-		public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost, Action<ZXing.Result[]> resultHandler)
+
+		public CameraAnalyzer(SurfaceView surfaceView, BarcodeScanningOptions options, Action<ZXing.Result[]> resultHandler)
 		{
-			this.scannerHost = scannerHost;
-			this.resultHandler = resultHandler;
+			Options = options;
+
+			ResultHandler = resultHandler;
 			cameraEventListener = new CameraEventsListener();
-			cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
+			cameraController = new CameraController(surfaceView, cameraEventListener, options);
 			Torch = new Torch(cameraController, surfaceView.Context);
 		}
 
 		public Torch Torch { get; }
 
-		public bool IsAnalyzing { get; private set; }
-
-		public void PauseAnalysis()
-			=> IsAnalyzing = false;
-
-		public void ResumeAnalysis()
-			=> IsAnalyzing = true;
+		public bool IsAnalyzing { get; set; }
 
 		public void ShutdownCamera()
 		{
@@ -49,11 +46,11 @@ namespace ZXing.Mobile.CameraAccess
 			cameraController.SetupCamera();
 		}
 
-		public void AutoFocus()
-			=> cameraController.AutoFocus();
+		public Task AutoFocusAsync()
+			=> cameraController.AutoFocusAsync();
 
-		public void AutoFocus(int x, int y)
-			=> cameraController.AutoFocus(x, y);
+		public Task AutoFocusAsync(int x, int y)
+			=> cameraController.AutoFocusAsync(x, y);
 
 		public void RefreshCamera()
 			=> cameraController.RefreshCamera();
@@ -71,11 +68,11 @@ namespace ZXing.Mobile.CameraAccess
 					return false;
 
 				var elapsedTimeMs = (DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds;
-				if (elapsedTimeMs < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
+				if (elapsedTimeMs < Options.DelayBetweenAnalyzingFrames)
 					return false;
 
 				// Delay a minimum between scans
-				if (wasScanned && elapsedTimeMs < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
+				if (wasScanned && elapsedTimeMs < Options.DelayBetweenContinuousScans)
 					return false;
 
 				return true;
@@ -98,7 +95,7 @@ namespace ZXing.Mobile.CameraAccess
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex);
+					Logger.Error(ex);
 				}
 			}).ContinueWith(task =>
 			{
@@ -113,7 +110,7 @@ namespace ZXing.Mobile.CameraAccess
 			var width = cameraParameters.PreviewSize.Width;
 			var height = cameraParameters.PreviewSize.Height;
 
-			var barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
+			var barcodeReader = Options.BuildBarcodeReader();
 
 			var rotate = false;
 			var newWidth = width;
@@ -136,7 +133,7 @@ namespace ZXing.Mobile.CameraAccess
 			if (rotate)
 				fast = fast.rotateCounterClockwise();
 
-			if (scannerHost.ScanningOptions.ScanMultiple)
+			if (Options.ScanMultiple)
 				results = barcodeReader.DecodeMultiple(fast);
 			else
 				results = new[] { barcodeReader.Decode(fast) };
@@ -154,7 +151,7 @@ namespace ZXing.Mobile.CameraAccess
 				Logger.Info("Barcode Found");
 
 				wasScanned = true;
-				resultHandler?.Invoke(results);
+				ResultHandler?.Invoke(results);
 				return;
 			}
 		}

@@ -6,7 +6,7 @@ using ElmSharp;
 using Tizen.Multimedia;
 using Tizen.Multimedia.Vision;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	class TizenBarcodeAnalyzer
 	{

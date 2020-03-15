@@ -7,12 +7,13 @@ using System.Reflection;
 using Foundation;
 using ZXing.Net.Mobile.Forms.iOS;
 using UIKit;
+using ZXing.UI;
 
-[assembly: ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
+[assembly: ExportRenderer(typeof(ZXing.Net.Mobile.Forms.ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.iOS
 {
 	[Preserve(AllMembers = true)]
-	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingScannerView>
+	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.UI.ZXingScannerView>
 	{
 		// No-op to be called from app to prevent linker from stripping this out    
 		public static void Init()
@@ -41,7 +42,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
 			{
 				if (Control == null)
 				{
-					var ctrl = new ZXing.Mobile.ZXingScannerView();
+					var ctrl = new ZXing.UI.ZXingScannerView();
 					SetNativeControl(ctrl);
 				}
 
@@ -52,32 +53,23 @@ namespace ZXing.Net.Mobile.Forms.iOS
 			base.OnElementChanged(e);
 		}
 
-		private void Control_OnBarcodeScanned(object sender, ZXing.Mobile.BarcodeScannedEventArgs e)
+		private void Control_OnBarcodeScanned(object sender, ZXing.UI.BarcodeScannedEventArgs e)
 			=> Element?.RaiseOnBarcodeScanned(e.Results);
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
 
-			if (zxingView == null)
+			if (Control == null)
 				return;
 
 			switch (e.PropertyName)
 			{
 				case nameof(ZXingScannerView.IsTorchOn):
-					zxingView.Torch(formsView.IsTorchOn);
-					break;
-				case nameof(ZXingScannerView.IsScanning):
-					if (formsView.IsScanning)
-						zxingView.StartScanning(formsView.RaiseScanResult, formsView.Options);
-					else
-						zxingView.Stop();
+					Control.TorchAsync(Element?.IsTorchOn ?? false);
 					break;
 				case nameof(ZXingScannerView.IsAnalyzing):
-					if (formsView.IsAnalyzing)
-						zxingView.ResumeAnalysis();
-					else
-						zxingView.PauseAnalysis();
+					Control.IsAnalyzing = Element.IsAnalyzing;
 					break;
 			}
 		}
@@ -86,7 +78,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
 		{
 			base.TouchesEnded(touches, evt);
 
-			zxingView?.AutoFocus();
+			Control?.AutoFocusAsync();
 		}
 
 		public override void LayoutSubviews()
@@ -99,7 +91,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
 				o = ViewController.InterfaceOrientation;
 
 			// Tell the native view to rotate
-			zxingView?.DidRotate(o);
+			Control?.DidRotate(o);
 		}
 	}
 }

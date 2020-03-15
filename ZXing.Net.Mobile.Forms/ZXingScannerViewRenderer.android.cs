@@ -9,7 +9,7 @@ using Android.Views;
 using System.ComponentModel;
 using System.Reflection;
 using Android.Widget;
-using ZXing.Mobile;
+using ZXing.UI;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 
@@ -17,7 +17,7 @@ using System.Linq.Expressions;
 namespace ZXing.Net.Mobile.Forms.Android
 {
 	[Preserve(AllMembers = true)]
-	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXing.Mobile.ZXingSurfaceView>
+	public class ZXingScannerViewRenderer : ViewRenderer<ZXingScannerView, ZXingSurfaceView>
 	{
 		public ZXingScannerViewRenderer(global::Android.Content.Context context)
 			: base(context)
@@ -30,18 +30,13 @@ namespace ZXing.Net.Mobile.Forms.Android
 			var temp = DateTime.Now;
 		}
 
-		protected ZXingScannerView formsView;
-
-		protected ZXingSurfaceView zxingSurface;
-		internal Task<bool> requestPermissionsTask;
-
 		protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
 		{
 			base.OnElementChanged(e);
 
 			if (e.OldElement != null)
 			{
-				e.OldElement.AutoFocusRequested -= FormsView_AutoFocusRequested;
+				e.OldElement.AutoFocusRequested -= Element_AutoFocusRequested;
 
 				// Unsubscribe from event handlers and cleanup any resources
 				if (Control != null)
@@ -56,51 +51,45 @@ namespace ZXing.Net.Mobile.Forms.Android
 			{
 				if (Control == null)
 				{
-					var ctrl = new ZXing.Mobile.ZXingSurfaceView(Context);
+					var ctrl = new ZXingSurfaceView(Context);
 					SetNativeControl(ctrl);
 				}
 
 				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
-				e.NewElement.AutoFocusRequested += FormsView_AutoFocusRequested;
+				e.NewElement.AutoFocusRequested += Element_AutoFocusRequested;
 			}
 
 			base.OnElementChanged(e);
 		}
 
-		private void Control_OnBarcodeScanned(object sender, ZXing.Mobile.BarcodeScannedEventArgs e)
+		void Element_AutoFocusRequested(int x, int y)
+		{
+			if (Control != null)
+			{
+				if (x < 0 && y < 0)
+					Control.AutoFocusAsync();
+				else
+					Control.AutoFocusAsync(x, y);
+			}
+		}
+
+		void Control_OnBarcodeScanned(object sender, BarcodeScannedEventArgs e)
 			=> Element?.RaiseOnBarcodeScanned(e.Results);
-
-		
-				// Process requests for autofocus
-				//formsView.AutoFocusRequested += (x, y) =>
-				//{
-				//	if (zxingSurface != null)
-				//	{
-				//		if (x < 0 && y < 0)
-				//			zxingSurface.AutoFocus();
-				//		else
-				//			zxingSurface.AutoFocus(x, y);
-				//	}
-				//};
-
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
 
-			if (zxingSurface == null)
+			if (Control == null)
 				return;
 
 			switch (e.PropertyName)
 			{
 				case nameof(ZXingScannerView.IsTorchOn):
-					zxingSurface.Torch(formsView.IsTorchOn);
+					Control?.TorchAsync(Element?.IsTorchOn ?? false);
 					break;
 				case nameof(ZXingScannerView.IsAnalyzing):
-					if (formsView.IsAnalyzing)
-						zxingSurface.ResumeAnalysis();
-					else
-						zxingSurface.PauseAnalysis();
+					Control.IsAnalyzing = Element.IsAnalyzing;
 					break;
 			}
 		}
@@ -110,10 +99,10 @@ namespace ZXing.Net.Mobile.Forms.Android
 			var x = e.GetX();
 			var y = e.GetY();
 
-			if (zxingSurface != null)
+			if (Control != null)
 			{
-				zxingSurface.AutoFocus((int)x, (int)y);
-				System.Diagnostics.Debug.WriteLine("Touch: x={0}, y={1}", x, y);
+				Control.AutoFocusAsync((int)x, (int)y);
+				Logger.Info($"Touch: x={x}, y={y}");
 			}
 			return base.OnTouchEvent(e);
 		}

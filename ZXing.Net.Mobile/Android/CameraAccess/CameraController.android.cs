@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Android.Content;
 using Android.Graphics;
 using Android.Hardware;
@@ -10,24 +11,26 @@ using Android.Views;
 using ApxLabs.FastAndroidCamera;
 using Camera = Android.Hardware.Camera;
 
-namespace ZXing.Mobile.CameraAccess
+namespace ZXing.UI
 {
-	public class CameraController
+	internal class CameraController
 	{
 		readonly Context context;
 		readonly ISurfaceHolder holder;
 		readonly SurfaceView surfaceView;
 		readonly CameraEventsListener cameraEventListener;
 		int cameraId;
-		IScannerSessionHost scannerHost;
+		
+		public BarcodeScanningOptions Options { get; }
 
-		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
+		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, BarcodeScanningOptions options)
 		{
+			Options = options;
+
 			context = surfaceView.Context;
 			holder = surfaceView.Holder;
 			this.surfaceView = surfaceView;
 			this.cameraEventListener = cameraEventListener;
-			this.scannerHost = scannerHost;
 		}
 
 		public Camera Camera { get; private set; }
@@ -101,15 +104,13 @@ namespace ZXing.Mobile.CameraAccess
 			var currentFocusMode = Camera.GetParameters().FocusMode;
 			if (currentFocusMode == Camera.Parameters.FocusModeAuto
 				|| currentFocusMode == Camera.Parameters.FocusModeMacro)
-				AutoFocus();
+				AutoFocusAsync();
 		}
 
-		public void AutoFocus()
-		{
-			AutoFocus(0, 0, false);
-		}
+		public Task AutoFocusAsync()
+			=> AutoFocusAsync(0, 0, false);
 
-		public void AutoFocus(int x, int y)
+		public Task AutoFocusAsync(int x, int y)
 		{
 			// The bounds for focus areas are actually -1000 to 1000
 			// So we need to translate the touch coordinates to this scale
@@ -117,7 +118,7 @@ namespace ZXing.Mobile.CameraAccess
 			var focusY = y / surfaceView.Height * 2000 - 1000;
 
 			// Call the autofocus with our coords
-			AutoFocus(focusX, focusY, true);
+			return AutoFocusAsync(focusX, focusY, true);
 		}
 
 		public void ShutdownCamera()
@@ -170,8 +171,8 @@ namespace ZXing.Mobile.CameraAccess
 
 					var whichCamera = CameraFacing.Back;
 
-					if (scannerHost.ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
-						scannerHost.ScanningOptions.UseFrontCameraIfAvailable.Value)
+					if (Options.UseFrontCameraIfAvailable.HasValue &&
+						Options.UseFrontCameraIfAvailable.Value)
 						whichCamera = CameraFacing.Front;
 
 					for (var i = 0; i < numCameras; i++)
@@ -220,7 +221,7 @@ namespace ZXing.Mobile.CameraAccess
 			parameters.PreviewFormat = ImageFormatType.Nv21;
 
 			var supportedFocusModes = parameters.SupportedFocusModes;
-			if (scannerHost.ScanningOptions.DisableAutofocus)
+			if (Options.DisableAutofocus)
 				parameters.FocusMode = Camera.Parameters.FocusModeFixed;
 			else if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
 				supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
@@ -257,7 +258,7 @@ namespace ZXing.Mobile.CameraAccess
 				});
 
 				// Try and get a desired resolution from the options selector
-				resolution = scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
+				resolution = Options.GetResolution(availableResolutions.ToList());
 
 				// If the user did not specify a resolution, let's try and find a suitable one
 				if (resolution == null)
@@ -301,14 +302,15 @@ namespace ZXing.Mobile.CameraAccess
 			SetCameraDisplayOrientation();
 		}
 
-		void AutoFocus(int x, int y, bool useCoordinates)
+		Task AutoFocusAsync(int x, int y, bool useCoordinates)
 		{
-			if (Camera == null) return;
+			if (Camera == null)
+				return Task.CompletedTask;
 
-			if (scannerHost.ScanningOptions.DisableAutofocus)
+			if (Options.DisableAutofocus)
 			{
 				Logger.Info("AutoFocus Disabled");
-				return;
+				return Task.CompletedTask;
 			}
 
 			var cameraParams = Camera.GetParameters();
@@ -359,6 +361,8 @@ namespace ZXing.Mobile.CameraAccess
 			{
 				Logger.Error(ex, "AutoFocus Failed");
 			}
+
+			return Task.CompletedTask;
 		}
 
 		void SetCameraDisplayOrientation()

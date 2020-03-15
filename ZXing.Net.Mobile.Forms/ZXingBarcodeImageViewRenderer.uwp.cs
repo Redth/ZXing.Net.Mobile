@@ -5,9 +5,9 @@ using ZXing.Net.Mobile.Forms.WindowsUniversal;
 using Xamarin.Forms.Platform.UWP;
 using System.ComponentModel;
 using System.Reflection;
-using ZXing.Mobile;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
+using ZXing.UI;
 
 [assembly: ExportRenderer(typeof(ZXingBarcodeImageView), typeof(ZXingBarcodeImageViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.WindowsUniversal

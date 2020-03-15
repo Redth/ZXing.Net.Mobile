@@ -1,5 +1,5 @@
 ﻿using Xamarin.Forms;
-using ZXing.Mobile;
+using ZXing.UI;
 
 namespace ZXing.Net.Mobile.Forms
 {
@@ -8,7 +8,7 @@ namespace ZXing.Net.Mobile.Forms
 		readonly ZXingScannerView zxing;
 		readonly ZXingDefaultOverlay defaultOverlay = null;
 
-		public ZXingScannerPage(MobileBarcodeScanningOptions options = null, View customOverlay = null)
+		public ZXingScannerPage(BarcodeScanningOptions options = null, View customOverlay = null)
 			: base()
 		{
 			zxing = new ZXingScannerView
@@ -21,7 +21,6 @@ namespace ZXing.Net.Mobile.Forms
 
 			zxing.SetBinding(ZXingScannerView.IsTorchOnProperty, new Binding(nameof(IsTorchOn)));
 			zxing.SetBinding(ZXingScannerView.IsAnalyzingProperty, new Binding(nameof(IsAnalyzing)));
-			zxing.SetBinding(ZXingScannerView.IsScanningProperty, new Binding(nameof(IsScanning)));
 			zxing.SetBinding(ZXingScannerView.HasTorchProperty, new Binding(nameof(HasTorch)));
 			zxing.SetBinding(ZXingScannerView.ResultProperty, new Binding(nameof(Result)));
 
@@ -92,7 +91,7 @@ namespace ZXing.Net.Mobile.Forms
 
 		#endregion
 
-		public delegate void ScanResultDelegate(Result result);
+		public delegate void ScanResultDelegate(Result[] result);
 		public event ScanResultDelegate OnScanResult;
 
 		public View Overlay { get; private set; }
@@ -101,32 +100,6 @@ namespace ZXing.Net.Mobile.Forms
 
 		public void ToggleTorch()
 			=> zxing?.ToggleTorch();
-
-		protected override void OnAppearing()
-		{
-			base.OnAppearing();
-
-			zxing.IsScanning = true;
-		}
-
-		protected override void OnDisappearing()
-		{
-			zxing.IsScanning = false;
-
-			base.OnDisappearing();
-		}
-
-		public void PauseAnalysis()
-		{
-			if (zxing != null)
-				zxing.IsAnalyzing = false;
-		}
-
-		public void ResumeAnalysis()
-		{
-			if (zxing != null)
-				zxing.IsAnalyzing = true;
-		}
 
 		public void AutoFocus()
 			=> zxing?.AutoFocus();
@@ -153,15 +126,6 @@ namespace ZXing.Net.Mobile.Forms
 			set => SetValue(IsAnalyzingProperty, value);
 		}
 
-		public static readonly BindableProperty IsScanningProperty =
-			BindableProperty.Create(nameof(IsScanning), typeof(bool), typeof(ZXingScannerPage), false);
-
-		public bool IsScanning
-		{
-			get => (bool)GetValue(IsScanningProperty);
-			set => SetValue(IsScanningProperty, value);
-		}
-
 		public static readonly BindableProperty HasTorchProperty =
 			BindableProperty.Create(nameof(HasTorch), typeof(bool), typeof(ZXingScannerPage), false);
 
@@ -172,11 +136,11 @@ namespace ZXing.Net.Mobile.Forms
 		}
 
 		public static readonly BindableProperty ResultProperty =
-			BindableProperty.Create(nameof(Result), typeof(Result), typeof(ZXingScannerPage), default(Result));
+			BindableProperty.Create(nameof(Result), typeof(Result[]), typeof(ZXingScannerPage), default(Result[]));
 
-		public Result Result
+		public Result[] Result
 		{
-			get => (Result)GetValue(ResultProperty);
+			get => (Result[])GetValue(ResultProperty);
 			set => SetValue(ResultProperty, value);
 		}
 	}

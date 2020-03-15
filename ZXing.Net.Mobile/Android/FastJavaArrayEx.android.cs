@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using ApxLabs.FastAndroidCamera;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public static class FastJavaArrayEx
 	{

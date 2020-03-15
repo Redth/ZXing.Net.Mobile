@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	/// <summary>
 	/// A smart class to encode some content to a barcode image

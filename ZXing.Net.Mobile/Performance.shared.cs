@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class PerformanceCounter
 	{
@@ -43,7 +43,7 @@ namespace ZXing.Mobile
 				msg += " {0}";
 
 			if (Debugger.IsAttached)
-				System.Diagnostics.Debug.WriteLine(msg, elapsed.TotalMilliseconds);
+				Logger.Info(string.Format(msg, elapsed.TotalMilliseconds));
 		}
 	}
 }

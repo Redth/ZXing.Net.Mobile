@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
@@ -8,40 +9,29 @@ using AndroidX.Fragment.App;
 using Android.Support.V4.App;
 #endif
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
 	public class ZXingScannerFragment : Fragment, IScannerView
 	{
-		internal ZXingScannerFragment(ZxingActivity parentActivity, ScannerOverlaySettings<Android.Views.View> overlaySettings)
+		internal ZXingScannerFragment(BarcodeScanningOptions options, BarcodeScannerOverlay<Android.Views.View> overlay)
 		{
-			ParentActivity = parentActivity;
-			OverlaySettings = overlaySettings;
+			Options = options ?? new BarcodeScanningOptions();
+			Overlay = overlay;
 		}
 
-		public ZXingScannerFragment(ScannerOverlaySettings<View> overlaySettings)
-			: this(null, overlaySettings) { }
+		public ZXingScannerFragment(BarcodeScannerOverlay<View> overlay)
+			: this(null, overlay) { }
 
 		public ZXingScannerFragment()
 			: this(null, null) { }
 
-		public ScannerOverlaySettings<Android.Views.View> OverlaySettings { get; private set; }
+		public BarcodeScannerOverlay<Android.Views.View> Overlay { get; }
 
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => ParentActivity != null ? ZxingActivity.ScanningOptions : options;
-			set
-			{
-				if (ParentActivity != null)
-					ZxingActivity.ScanningOptions = value;
-				else
-					options = value;
-			}
-		}
+		public BarcodeScanningOptions Options { get; }
 
 		FrameLayout frame;
 
-		internal ZxingActivity ParentActivity { get; private set; }
+		internal ZXingScannerActivity ParentActivity { get; private set; }
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
@@ -59,20 +49,20 @@ namespace ZXing.Mobile
 				frame.AddView(scanner, layoutParams);
 
 
-				if (OverlaySettings?.CustomOverlay == null)
+				if (Overlay?.CustomOverlay == null)
 				{
-					zxingOverlay = new ZxingOverlayView(Activity, OverlaySettings);
-					
+					zxingOverlay = new ZXingScannerOverlayView(Activity, Overlay);
+
 					frame.AddView(zxingOverlay, layoutParams);
 				}
 				else
 				{
-					frame.AddView(OverlaySettings.CustomOverlay, layoutParams);
+					frame.AddView(Overlay.CustomOverlay, layoutParams);
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Create Surface View Failed: " + ex);
+				Logger.Error(ex, "Create Surface View Failed");
 			}
 
 			return frame;
@@ -88,10 +78,10 @@ namespace ZXing.Mobile
 				// reattach scanner and overlay views.
 				frame.AddView(scanner, layoutParams);
 
-				if (OverlaySettings?.CustomOverlay == null)
+				if (Overlay?.CustomOverlay == null)
 					frame.AddView(zxingOverlay, layoutParams);
 				else
-					frame.AddView(OverlaySettings.CustomOverlay, layoutParams);
+					frame.AddView(Overlay.CustomOverlay, layoutParams);
 			}
 		}
 
@@ -99,15 +89,15 @@ namespace ZXing.Mobile
 		{
 			if (scanner != null)
 			{
-				scanner.StopScanning();
 				scanner.OnBarcodeScanned -= OnBarcodeScanned;
+				scanner.Dispose();
 				frame.RemoveView(scanner);
 			}
 
-			if (OverlaySettings?.CustomOverlay == null)
+			if (Overlay?.CustomOverlay == null)
 				frame.RemoveView(zxingOverlay);
 			else
-				frame.RemoveView(OverlaySettings.CustomOverlay);
+				frame.RemoveView(Overlay.CustomOverlay);
 
 			base.OnStop();
 		}
@@ -120,33 +110,28 @@ namespace ZXing.Mobile
 		}
 
 		ZXingSurfaceView scanner;
-		ZxingOverlayView zxingOverlay;
+		ZXingScannerOverlayView zxingOverlay;
 
-		public void Torch(bool on)
-			=> scanner?.Torch(on);
+		public Task TorchAsync(bool on)
+			=> scanner?.TorchAsync(on);
 
-		public void AutoFocus()
-			=> scanner?.AutoFocus();
+		public Task AutoFocusAsync()
+			=> scanner?.AutoFocusAsync();
 
-		public void AutoFocus(int x, int y)
-			=> scanner?.AutoFocus(x, y);
+		public Task AutoFocusAsync(int x, int y)
+			=> scanner?.AutoFocusAsync(x, y);
 
-		Action<Result> scanCallback;
-
-		public void PauseAnalysis()
-			=> scanner?.PauseAnalysis();
-
-		public void ResumeAnalysis()
-			=> scanner?.ResumeAnalysis();
-
-		public void ToggleTorch()
-			=> scanner?.ToggleTorch();
+		public Task ToggleTorchAsync()
+			=> scanner?.ToggleTorchAsync();
 
 		public bool IsTorchOn
 			=> scanner?.IsTorchOn ?? false;
 
 		public bool IsAnalyzing
-			=> scanner?.IsAnalyzing ?? false;
+		{
+			get => scanner?.IsAnalyzing ?? false;
+			set { if (scanner != null) scanner.IsAnalyzing = value; }
+		}
 
 		public bool HasTorch
 			=> scanner?.HasTorch ?? false;

@@ -15,29 +15,22 @@ using ObjCRuntime;
 using UIKit;
 
 using ZXing.Common;
-using ZXing.Mobile;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public class ZXingScannerView : UIView, IScannerSessionHost
+	public class ZXingScannerView : UIView, IScannerView
 	{
 		public delegate void ScannerSetupCompleteDelegate();
 		public event ScannerSetupCompleteDelegate OnScannerSetupComplete;
 
-		public ScannerOverlaySettings<UIView> OverlaySettings { get; private set; }
+		public BarcodeScanningOptions Options { get; }
 
-		public ZXingScannerView()
-			: this(null)
-		{ }
+		public BarcodeScannerOverlay<UIView> Overlay { get; }
 
-		public ZXingScannerView(ScannerOverlaySettings<UIView> overlaySettings)
-			: this(overlaySettings, null)
-		{ }
-
-		internal ZXingScannerView(ScannerOverlaySettings<UIView> overlaySettings, ZXingScannerViewController parentViewController)
+		public ZXingScannerView(BarcodeScanningOptions options = null, BarcodeScannerOverlay<UIView> overlay = null)
 		{
-			this.parentViewController = parentViewController;
-			OverlaySettings = overlaySettings;
+			Options = options;
+			Overlay = overlay;
 		}
 
 		public ZXingScannerView(IntPtr handle) : base(handle)
@@ -48,21 +41,12 @@ namespace ZXing.Mobile
 		{
 		}
 
-		public ZXingScannerView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings)
-			: this(frame, overlaySettings, null)
-		{
-		}
-
-		internal ZXingScannerView(CGRect frame, ScannerOverlaySettings<UIView> overlaySettings, ZXingScannerViewController parentViewController) 
+		internal ZXingScannerView(CGRect frame, BarcodeScanningOptions options, BarcodeScannerOverlay<UIView> overlay)
 			: base(frame)
-        {
-			this.parentViewController = parentViewController;
-			OverlaySettings = overlaySettings;
+		{
+			Options = options;
+			Overlay = overlay;
 		}
-
-
-
-		ZXingScannerViewController parentViewController;
 
 		AVCaptureSession session;
 		AVCaptureDevice captureDevice = null;
@@ -74,20 +58,6 @@ namespace ZXing.Mobile
 
 		UIView layerView;
 		UIView overlayView = null;
-
-		MobileBarcodeScanningOptions options = new MobileBarcodeScanningOptions();
-
-		public MobileBarcodeScanningOptions ScanningOptions
-		{
-			get => parentViewController?.ScanningOptions ?? options;
-			set
-			{
-				if (parentViewController != null)
-					parentViewController.ScanningOptions = value;
-				else
-					options = value;
-			}
-		}
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
@@ -104,13 +74,13 @@ namespace ZXing.Mobile
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview();
 
-			if (OverlaySettings?.CustomOverlay != null)
-				overlayView = OverlaySettings.CustomOverlay;
+			if (Overlay?.CustomOverlay != null)
+				overlayView = Overlay.CustomOverlay;
 			else
 			{
 				overlayView = new ZXingDefaultOverlayView(new CGRect(0, 0, Frame.Width, Frame.Height),
-					OverlaySettings,
-					() => OnCancelButtonPressed?.Invoke(), ToggleTorch);
+					Overlay,
+					() => Task.CompletedTask, ToggleTorchAsync);
 			}
 
 			if (overlayView != null)
@@ -120,7 +90,7 @@ namespace ZXing.Mobile
 			}
 
 			var total = DateTime.UtcNow - started;
-			Console.WriteLine("ZXingScannerView.Setup() took {0} ms.", total.TotalMilliseconds);
+			Logger.Info($"ZXingScannerView.Setup() took {total.TotalMilliseconds} ms.");
 		}
 
 
@@ -153,17 +123,17 @@ namespace ZXing.Mobile
 			foreach (var device in devices)
 			{
 				captureDevice = device;
-				if (ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
-					ScanningOptions.UseFrontCameraIfAvailable.Value &&
+				if (Options.UseFrontCameraIfAvailable.HasValue &&
+					Options.UseFrontCameraIfAvailable.Value &&
 					device.Position == AVCaptureDevicePosition.Front)
 
 					break; //Front camera successfully set
-				else if (device.Position == AVCaptureDevicePosition.Back && (!ScanningOptions.UseFrontCameraIfAvailable.HasValue || !ScanningOptions.UseFrontCameraIfAvailable.Value))
+				else if (device.Position == AVCaptureDevicePosition.Back && (!Options.UseFrontCameraIfAvailable.HasValue || !Options.UseFrontCameraIfAvailable.Value))
 					break; //Back camera succesfully set
 			}
 			if (captureDevice == null)
 			{
-				Console.WriteLine("No captureDevice - this won't work on the simulator, try a physical device");
+				Logger.Error("No captureDevice - this won't work on the simulator, try a physical device");
 				if (overlayView != null)
 				{
 					AddSubview(overlayView);
@@ -184,7 +154,7 @@ namespace ZXing.Mobile
 					availableResolutions.Add(cr.Value);
 			}
 
-			resolution = ScanningOptions.GetResolution(availableResolutions);
+			resolution = Options.GetResolution(availableResolutions);
 
 			// See if the user selected a resolution
 			if (resolution != null)
@@ -203,7 +173,7 @@ namespace ZXing.Mobile
 			var input = AVCaptureDeviceInput.FromDevice(captureDevice);
 			if (input == null)
 			{
-				Console.WriteLine("No input - this won't work on the simulator, try a physical device");
+				Logger.Error("No input - this won't work on the simulator, try a physical device");
 				if (overlayView != null)
 				{
 					AddSubview(overlayView);
@@ -263,9 +233,9 @@ namespace ZXing.Mobile
 			// configure the output
 			queue = new DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
 
-			var barcodeReader = ScanningOptions.BuildBarcodeReader();
+			var barcodeReader = Options.BuildBarcodeReader();
 
-			outputRecorder = new OutputRecorder(this, img =>
+			outputRecorder = new OutputRecorder(Options, img =>
 			{
 				var ls = img;
 
@@ -279,7 +249,7 @@ namespace ZXing.Mobile
 					if (shouldRotatePreviewBuffer)
 						ls = ls.rotateCounterClockwise();
 
-					var result = ScanningOptions.ScanMultiple
+					var result = Options.ScanMultiple
 						? barcodeReader.DecodeMultiple(ls)
 						: new[] { barcodeReader.Decode(ls) };
 
@@ -293,7 +263,7 @@ namespace ZXing.Mobile
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("DECODE FAILED: " + ex);
+					Logger.Error(ex, "DECODE FAILED");
 				}
 
 				return false;
@@ -327,7 +297,7 @@ namespace ZXing.Mobile
 				if (captureDevice.ExposurePointOfInterestSupported)
 					captureDeviceOriginalConfig.ExposurePointOfInterest = captureDevice.ExposurePointOfInterest;
 
-				if (ScanningOptions.DisableAutofocus)
+				if (Options.DisableAutofocus)
 				{
 					captureDevice.FocusMode = AVCaptureFocusMode.Locked;
 				}
@@ -363,7 +333,7 @@ namespace ZXing.Mobile
 				captureDevice.UnlockForConfiguration();
 			}
 			else
-				Console.WriteLine("Failed to Lock for Config: " + err.Description);
+				Logger.Warn("Failed to Lock for Config: " + err.Description);
 
 			PerformanceCounter.Stop(perf5, "PERF: Setup Focus in {0} ms.");
 
@@ -425,7 +395,7 @@ namespace ZXing.Mobile
 				//Lock device to config
 				if (device.LockForConfiguration(out err))
 				{
-					Console.WriteLine("Focusing at point: " + pointOfInterest.X + ", " + pointOfInterest.Y);
+					Logger.Info($"Focusing at point: {pointOfInterest.X}, {pointOfInterest.Y}");
 
 					//Focus at the point touched
 					device.FocusPointOfInterest = pointOfInterest;
@@ -437,13 +407,13 @@ namespace ZXing.Mobile
 
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate
 		{
-			public OutputRecorder(IScannerSessionHost scannerHost, Func<LuminanceSource, bool> handleImage) : base()
+			public OutputRecorder(BarcodeScanningOptions options, Func<LuminanceSource, bool> handleImage) : base()
 			{
 				this.handleImage = handleImage;
-				this.scannerHost = scannerHost;
+				this.options = options;
 			}
 
-			IScannerSessionHost scannerHost;
+			readonly BarcodeScanningOptions options;
 			Func<LuminanceSource, bool> handleImage;
 
 			DateTime lastAnalysis = DateTime.MinValue;
@@ -462,16 +432,16 @@ namespace ZXing.Mobile
 			{
 				var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
 
-				if (msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames
-					|| (wasScanned && msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
+				if (msSinceLastPreview < options.DelayBetweenAnalyzingFrames
+					|| (wasScanned && msSinceLastPreview < options.DelayBetweenContinuousScans)
 					|| working
 					|| CancelTokenSource.IsCancellationRequested)
 				{
 
-					if (msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
-						Console.WriteLine("Too soon between frames");
-					if (wasScanned && msSinceLastPreview < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
-						Console.WriteLine("Too soon since last scan");
+					if (msSinceLastPreview < options.DelayBetweenAnalyzingFrames)
+						Logger.Info("Too soon between frames");
+					if (wasScanned && msSinceLastPreview < options.DelayBetweenContinuousScans)
+						Logger.Info("Too soon since last scan");
 
 					if (sampleBuffer != null)
 					{
@@ -522,7 +492,7 @@ namespace ZXing.Mobile
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine(e);
+					Logger.Error(e);
 				}
 				finally
 				{
@@ -544,16 +514,14 @@ namespace ZXing.Mobile
 
 			Setup();
 
-			ScanningOptions = options ?? MobileBarcodeScanningOptions.Default;
-
-			Console.WriteLine("StartScanning");
+			Logger.Info("StartScanning");
 
 			InvokeOnMainThread(() =>
 			{
 				if (!SetupCaptureSession())
 				{
 					//Setup 'simulated' view:
-					Console.WriteLine("Capture Session FAILED");
+					Logger.Warn("Capture Session FAILED");
 				}
 
 				if (Runtime.Arch == Arch.SIMULATOR)
@@ -588,7 +556,7 @@ namespace ZXing.Mobile
 			if (stopped)
 				return;
 
-			Console.WriteLine("Stopping...");
+			Logger.Info("Stopping...");
 
 			if (outputRecorder != null)
 				outputRecorder.CancelTokenSource.Cancel();
@@ -639,13 +607,13 @@ namespace ZXing.Mobile
 			stopped = true;
 		}
 
-		public void PauseAnalysis()
-			=> analyzing = false;
+		public bool IsAnalyzing
+		{
+			get => analyzing;
+			set => analyzing = value;
+		}
 
-		public void ResumeAnalysis()
-			=> analyzing = true;
-
-		public void Torch(bool on)
+		public Task TorchAsync(bool on)
 		{
 			try
 			{
@@ -682,22 +650,19 @@ namespace ZXing.Mobile
 				torch = on;
 			}
 			catch { }
+
+			return Task.CompletedTask;
 		}
 
-		public void ToggleTorch()
-			=> Torch(!IsTorchOn);
+		public Task ToggleTorchAsync()
+			=> TorchAsync(!IsTorchOn);
 
-		public void AutoFocus()
-		{
-			//Doesn't do much on iOS :(
-		}
+		public Task AutoFocusAsync()
+			=> Task.CompletedTask;
 
-		public void AutoFocus(int x, int y)
-		{
-			//Doesn't do much on iOS :(
-		}
+		public Task AutoFocusAsync(int x, int y)
+			=> Task.CompletedTask;
 
-		public bool IsAnalyzing => analyzing;
 		public bool IsTorchOn => torch;
 
 		bool? hasTorch = null;

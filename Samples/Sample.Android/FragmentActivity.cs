@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZXing.Mobile;
+using ZXing.UI;
 using Android.OS;
 
 using Android.App;
@@ -41,16 +41,10 @@ namespace Sample.Android
 		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
 			=> Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-		protected override void OnPause()
-		{
-			scanFragment?.StopScanning();
-
-			base.OnPause();
-		}
 
 		void Scan()
 		{
-			var opts = new MobileBarcodeScanningOptions
+			var opts = new BarcodeScanningOptions
 			{
 				PossibleFormats = new List<ZXing.BarcodeFormat> {
 					ZXing.BarcodeFormat.QR_CODE
@@ -65,20 +59,6 @@ namespace Sample.Android
 					return null;
 				}
 			};
-
-			scanFragment.StartScanning(result =>
-			{
-
-				// Null result means scanning was cancelled
-				if (result == null || string.IsNullOrEmpty(result.Text))
-				{
-					Toast.MakeText(this, "Scanning Cancelled", ToastLength.Long).Show();
-					return;
-				}
-
-				// Otherwise, proceed with result
-				RunOnUiThread(() => Toast.MakeText(this, "Scanned: " + result.Text, ToastLength.Short).Show());
-			}, opts);
 		}
 	}
 }

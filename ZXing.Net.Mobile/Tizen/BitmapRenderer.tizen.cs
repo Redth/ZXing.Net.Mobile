@@ -3,11 +3,11 @@ using Tizen.Multimedia.Vision;
 using ZXing.Common;
 using ZXing.Rendering;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	class BitmapRenderer : IBarcodeRenderer<EvasImage>
+	public class BitmapRenderer : IBarcodeRenderer<EvasImage>
 	{
-        readonly EvasObject nativeParent;
+		readonly EvasObject nativeParent;
 
 		public BitmapRenderer(EvasObject nativeParent) : base()
 			=> this.nativeParent = nativeParent;

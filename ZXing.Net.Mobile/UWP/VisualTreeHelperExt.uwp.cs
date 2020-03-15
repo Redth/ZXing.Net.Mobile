@@ -2,9 +2,9 @@
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public static class VisualTreeHelperExt
+	internal static class VisualTreeHelperExt
 	{
 		// The method traverses the visual tree lazily, layer by layer
 		// and returns the objects of the desired type

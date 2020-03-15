@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using ZXing;
 
-namespace ZXing.Mobile
+namespace ZXing.UI
 {
-	public class MobileBarcodeScanningOptions
+	public class BarcodeScanningOptions
 	{
 		/// <summary>
 		/// Camera resolution selector delegate, must return the selected Resolution from the list of available resolutions
 		/// </summary>
 		public delegate CameraResolution CameraResolutionSelectorDelegate(List<CameraResolution> availableResolutions);
 
-		public MobileBarcodeScanningOptions()
+		public BarcodeScanningOptions()
 		{
 			PossibleFormats = new List<BarcodeFormat>();
 			//this.AutoRotate = true;
@@ -54,9 +54,6 @@ namespace ZXing.Mobile
 		public int InitialDelayBeforeAnalyzingFrames { get; set; }
 
 		public bool ScanMultiple { get; set; } = false;
-
-		public static MobileBarcodeScanningOptions Default
-			=> new MobileBarcodeScanningOptions();
 
 		public BarcodeReader BuildBarcodeReader()
 		{
