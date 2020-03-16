@@ -145,7 +145,7 @@ namespace ZXing.UI
 				Init();
 		}
 
-		public override async void OnWindowFocusChanged(bool hasWindowFocus)
+		public override void OnWindowFocusChanged(bool hasWindowFocus)
 		{
 			base.OnWindowFocusChanged(hasWindowFocus);
 
