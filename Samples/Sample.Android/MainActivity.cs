@@ -36,7 +36,10 @@ namespace Sample.Android
 			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
 			buttonScanDefaultView.Click += async delegate
 			{
-				var scanner = new BarcodeScanner(overlay:
+				var scanner = new BarcodeScanner(new BarcodeScanningOptions
+					{
+						ScanMultiple = true,
+					},
 					new BarcodeScannerOverlay
 					{
 						TopText ="Hold the camera up to the barcode\nAbout 6 inches away",
