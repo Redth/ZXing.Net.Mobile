@@ -112,8 +112,8 @@ namespace ZXing.Net.Mobile.Forms.Android
 					break;
 			}
 		}
-        
-        volatile bool isHandlingTouch = false;
+
+		volatile bool isHandlingTouch = false;
 
 		public override bool OnTouchEvent(MotionEvent e)
 		{
@@ -127,10 +127,7 @@ namespace ZXing.Net.Mobile.Forms.Android
 					var y = e.GetY();
 
 					if (Control != null)
-					{
-						Control.AutoFocusAsync((int)x, (int)y);
-						Logger.Info($"Touch: x={x}, y={y}");
-					}
+						Control.AutoFocus((int)x, (int)y);
 				}
 				finally
 				{
