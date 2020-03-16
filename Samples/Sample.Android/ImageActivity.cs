@@ -26,7 +26,7 @@ namespace Sample.Android
 
 			imageBarcode = FindViewById<ImageView>(Resource.Id.imageBarcode);
 
-			var barcodeWriter = new ZXing.Mobile.BarcodeWriter
+			var barcodeWriter = new ZXing.UI.BarcodeWriter
 			{
 				Format = ZXing.BarcodeFormat.QR_CODE,
 				Options = new ZXing.Common.EncodingOptions

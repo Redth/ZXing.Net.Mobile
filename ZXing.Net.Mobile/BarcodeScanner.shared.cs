@@ -28,7 +28,8 @@ namespace ZXing.UI
 				try
 				{
 					await CancelAsync();
-				} catch { }
+				}
+				catch { }
 
 				scanCompletionSource.TrySetResult(r);
 			});
@@ -71,6 +72,17 @@ namespace ZXing.UI
 
 		readonly BarcodeScannerOverlay overlay;
 		public BarcodeScannerOverlay Overlay => overlay;
+
+		public BarcodeScannerOverlay<TView> GetOverlay<TView>()
+		{
+			if (overlay == null)
+				return null;
+
+			if (overlay is BarcodeScannerOverlay<TView> vo)
+				return vo;
+
+			return overlay.WithView<TView>();
+		}
 	}
 
 	public enum LogLevel
@@ -106,7 +118,7 @@ namespace ZXing.UI
 		public static void Log(LogLevel logLevel, string message)
 		{
 			if ((int)logLevel <= (int)Level)
-            {
+			{
 				if (System.Diagnostics.Debugger.IsAttached)
 					System.Diagnostics.Debug.WriteLine(message);
 

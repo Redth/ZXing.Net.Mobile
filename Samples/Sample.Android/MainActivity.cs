@@ -5,8 +5,9 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 using ZXing;
-using ZXing.Mobile;
+using ZXing.UI;
 using System;
+using System.Linq;
 
 namespace Sample.Android
 {
@@ -19,8 +20,7 @@ namespace Sample.Android
 		Button buttonFragmentScanner;
 		Button buttonGenerate;
 
-		MobileBarcodeScanner scanner;
-
+		
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
@@ -31,40 +31,41 @@ namespace Sample.Android
 			SetContentView(Resource.Layout.Main);
 
 			//Create a new instance of our Scanner
-			scanner = new MobileBarcodeScanner();
+			
 
 			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
 			buttonScanDefaultView.Click += async delegate
 			{
+				var scanner = new BarcodeScanner(overlay:
+					new BarcodeScannerOverlay
+					{
+						TopText ="Hold the camera up to the barcode\nAbout 6 inches away",
+						BottomText = "Wait for the barcode to automatically scan!"
 
-				//Tell our scanner to use the default overlay
-				scanner.UseCustomOverlay = false;
-
-				//We can customize the top and bottom text of the default overlay
-				scanner.TopText = "Hold the camera up to the barcode\nAbout 6 inches away";
-				scanner.BottomText = "Wait for the barcode to automatically scan!";
+					});
 
 				//Start scanning
-				var result = await scanner.Scan();
+				var result = await scanner.ScanOnceAsync();
 
 				HandleScanResult(result);
 			};
 
 			buttonContinuousScan = FindViewById<Button>(Resource.Id.buttonScanContinuous);
-			buttonContinuousScan.Click += delegate
+			buttonContinuousScan.Click += async delegate
 			{
-
-				scanner.UseCustomOverlay = false;
-
-				//We can customize the top and bottom text of the default overlay
-				scanner.TopText = "Hold the camera up to the barcode\nAbout 6 inches away";
-				scanner.BottomText = "Wait for the barcode to automatically scan!";
-
-				var opt = new MobileBarcodeScanningOptions();
-				opt.DelayBetweenContinuousScans = 3000;
+				var scanner = new BarcodeScanner(
+					new BarcodeScanningOptions
+					{
+						DelayBetweenContinuousScans = 3000
+					},
+					new BarcodeScannerOverlay
+					{
+						TopText = "Hold the camera up to the barcode\nAbout 6 inches away",
+						BottomText = "Wait for the barcode to automatically scan!"
+					});
 
 				//Start scanning
-				scanner.ScanContinuously(opt, HandleScanResult);
+				await scanner.ScanContinuouslyAsync(r => HandleScanResult(r));
 			};
 
 			Button flashButton;
@@ -73,22 +74,28 @@ namespace Sample.Android
 			buttonScanCustomView = this.FindViewById<Button>(Resource.Id.buttonScanCustomView);
 			buttonScanCustomView.Click += async delegate
 			{
-
-				//Tell our scanner we want to use a custom overlay instead of the default
-				scanner.UseCustomOverlay = true;
-
 				//Inflate our custom overlay from a resource layout
 				zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlay, null);
 
+				var scanner = new BarcodeScanner(
+					new BarcodeScanningOptions
+					{
+						AutoRotate = true,
+						DelayBetweenContinuousScans = 3000
+					},
+					new BarcodeScannerOverlay<View>
+					{
+						CustomOverlay = zxingOverlay,
+						TopText = "Hold the camera up to the barcode\nAbout 6 inches away",
+						BottomText = "Wait for the barcode to automatically scan!"
+					});
+
 				//Find the button from our resource layout and wire up the click event
 				flashButton = zxingOverlay.FindViewById<Button>(Resource.Id.buttonZxingFlash);
-				flashButton.Click += (sender, e) => scanner.ToggleTorch();
-
-				//Set our custom overlay
-				scanner.CustomOverlay = zxingOverlay;
+				flashButton.Click += (sender, e) => scanner.ToggleTorchAsync();
 
 				//Start scanning!
-				var result = await scanner.Scan(new MobileBarcodeScanningOptions { AutoRotate = true });
+				var result = await scanner.ScanOnceAsync();
 
 				HandleScanResult(result);
 			};
@@ -106,12 +113,12 @@ namespace Sample.Android
 			};
 		}
 
-		void HandleScanResult(ZXing.Result result)
+		void HandleScanResult(ZXing.Result[] results)
 		{
 			var msg = "";
 
-			if (result != null && !string.IsNullOrEmpty(result.Text))
-				msg = "Found Barcode: " + result.Text;
+			if (results != null && results.Any(r => !string.IsNullOrEmpty(r.Text)))
+				msg = "Found Barcodes: " + string.Join("; ", results.Select(r => r.Text));
 			else
 				msg = "Scanning Canceled!";
 
@@ -130,19 +137,19 @@ namespace Sample.Android
 		{
 			var expectedFormat = BarcodeFormat.QR_CODE;
 			Enum.TryParse(param, out expectedFormat);
-			var opts = new MobileBarcodeScanningOptions
+			var opts = new BarcodeScanningOptions
 			{
 				PossibleFormats = new List<BarcodeFormat> { expectedFormat }
 			};
-			var barcodeScanner = new MobileBarcodeScanner();
+			var barcodeScanner = new BarcodeScanner(opts);
 
 			Console.WriteLine("Scanning " + expectedFormat);
 
 			//Start scanning
-			barcodeScanner.Scan(opts).ContinueWith(t =>
+			barcodeScanner.ScanOnceAsync().ContinueWith(t =>
 			{
 
-				var result = t.Result;
+				var result = t.Result?.FirstOrDefault();
 
 				var format = result?.BarcodeFormat.ToString() ?? string.Empty;
 				var value = result?.Text ?? string.Empty;

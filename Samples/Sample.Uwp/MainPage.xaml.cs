@@ -96,13 +96,13 @@ namespace Sample.Uwp
 					DelayBetweenContinuousScans = 3000,
 					AutoRotate = true
 				},
-				new BarcodeScannerOverlay
+				new BarcodeScannerOverlay<UIElement>
 				{
+					CustomOverlay = customOverlay,
 					TopText = "Hold camera up to barcode",
 					BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
 				})
 			{
-				CustomOverlay = customOverlay,
 				RootFrame = Frame,
 				Dispatcher = Dispatcher
 			};
