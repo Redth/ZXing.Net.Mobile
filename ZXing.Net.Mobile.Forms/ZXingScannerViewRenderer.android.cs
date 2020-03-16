@@ -94,18 +94,32 @@ namespace ZXing.Net.Mobile.Forms.Android
 			}
 		}
 
+		volatile bool isHandlingTouch = false;
+
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			var x = e.GetX();
-			var y = e.GetY();
-
-			if (Control != null)
+			if (!isHandlingTouch)
 			{
-				Control.AutoFocusAsync((int)x, (int)y);
-				Logger.Info($"Touch: x={x}, y={y}");
+				isHandlingTouch = true;
+
+				try
+				{
+					var x = e.GetX();
+					var y = e.GetY();
+
+					if (Control != null)
+					{
+						AsyncHelpers.RunSync(() => Control.AutoFocusAsync((int)x, (int)y));
+						Logger.Info($"Touch: x={x}, y={y}");
+					}
+				}
+				finally
+				{
+					isHandlingTouch = false;
+				}
 			}
+
 			return base.OnTouchEvent(e);
 		}
 	}
 }
-
