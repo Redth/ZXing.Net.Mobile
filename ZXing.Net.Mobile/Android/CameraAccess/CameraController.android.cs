@@ -20,7 +20,7 @@ namespace ZXing.UI
 		readonly SurfaceView surfaceView;
 		readonly CameraEventsListener cameraEventListener;
 		int cameraId;
-		
+
 		public BarcodeScanningOptions Options { get; }
 
 		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, BarcodeScanningOptions options)
@@ -232,6 +232,20 @@ namespace ZXing.UI
 				parameters.FocusMode = Camera.Parameters.FocusModeAuto;
 			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
 				parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+
+			// Set video stabilization enabled if supported
+			if (parameters.IsVideoStabilizationSupported)
+			{
+				if (!parameters.VideoStabilization)
+					parameters.VideoStabilization = true;
+			}
+
+			//// Set barcode scene mode if supported
+			if (parameters?.SupportedSceneModes?.Contains(Camera.Parameters.SceneModeBarcode) ?? false)
+			{
+				if (parameters.SceneMode != Camera.Parameters.SceneModeBarcode)
+					parameters.SceneMode = Camera.Parameters.SceneModeBarcode;
+			}
 
 			var selectedFps = parameters.SupportedPreviewFpsRange.FirstOrDefault();
 			if (selectedFps != null)
