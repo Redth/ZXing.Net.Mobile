@@ -43,7 +43,7 @@ namespace ZXing.UI
 
 			try
 			{
-				scanner = new ZXingSurfaceView(Activity);
+				scanner = new ZXingSurfaceView(Activity, Options, Overlay);
 				scanner.OnBarcodeScanned += OnBarcodeScanned;
 
 				frame.AddView(scanner, layoutParams);
