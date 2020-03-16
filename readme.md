@@ -73,7 +73,7 @@ ZXing.Net.Mobile.Forms.iOS.Platform.Init();
 In your main `Page`'s constructor, you should add:
 
 ```csharp
-ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+ZXing.Net.Mobile.Forms.WindowsUniversal.Platform.Init();
 ```
 
 If you notice that finishing scanning or pressing the back button is causing your Page to jump back further than you'd like, or if you're having trouble updating the UI of a Page after scanning is completed, you may need to set `NavigationCacheMode="Enabled"` within your Page's XAML `<Page ... />` element.
