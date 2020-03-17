@@ -122,4 +122,8 @@
 		<RemoveDir Directories="..\Samples\packages\zxing.net.mobile" />
 		<RemoveDir Directories="..\Samples\Sample.Forms\packages\zxing.net.mobile" />
 	</Target>
+
+	<Target Name="EnsureNuGetOutputPath" BeforeTargets="Restore;Build">
+		<MakeDir Directories="..\output" />
+	</Target>
 </Project>

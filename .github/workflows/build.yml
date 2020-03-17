@@ -17,7 +17,9 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.0
       - name: NuGet Restore
-        run: msbuild /t:Restore /p:Configuration=Release .\ZXing.Net.Mobile.sln
+        run: |
+        New-Item -ItemType Directory -Force -Path .\output
+        msbuild /t:Restore /p:Configuration=Release .\ZXing.Net.Mobile.sln
       - name: Build
         run: msbuild /t:Build /p:Configuration=Release .\ZXing.Net.Mobile.sln
       - name: Package NuGets
