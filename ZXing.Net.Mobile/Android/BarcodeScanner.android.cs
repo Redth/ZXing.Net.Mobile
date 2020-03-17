@@ -11,7 +11,7 @@ namespace ZXing.UI
 	{
 		TaskCompletionSource<Result[]> tcsScan;
 
-		
+
 		Context GetContext()
 			=> Xamarin.Essentials.Platform.CurrentActivity ?? Xamarin.Essentials.Platform.AppContext;
 
@@ -25,8 +25,9 @@ namespace ZXing.UI
 
 			scanIntent.AddFlags(ActivityFlags.NewTask);
 
-			ZXingScannerActivity.Overlay = Overlay.WithView<View>();
-			ZXingScannerActivity.Options = Options;
+			ZXingScannerActivity.CustomOverlay = CustomOverlay;
+			ZXingScannerActivity.Settings = Settings;
+			ZXingScannerActivity.DefaultOverlaySettings = DefaultOverlaySettings;
 
 			ZXingScannerActivity.BarcodeScannedHandler = r => scanHandler?.Invoke(r);
 
@@ -53,5 +54,13 @@ namespace ZXing.UI
 
 		internal bool PlatformIsTorchOn
 			=> ZXingScannerActivity.RequestIsTorchOn;
+	}
+
+	public partial class BarcodeScannerCustomOverlay
+	{
+		public BarcodeScannerCustomOverlay(View nativeView)
+			=> NativeView = nativeView;
+
+		public readonly View NativeView;
 	}
 }

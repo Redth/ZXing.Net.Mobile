@@ -97,16 +97,15 @@
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
     <Reference Include="MonoTouch.Dialog-1" />
-    <Reference Include="zxing, Version=0.16.5.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\ZXing.Net\zxing.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Essentials">
       <Version>1.5.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.TestCloud.Agent" Version="0.21.1" />
+    <PackageReference Include="ZXing.Net.Mobile">
+      <Version>3.0.0</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -165,11 +164,5 @@
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj">
-      <Project>{8b7a8ab6-35a4-4c9c-83e1-96ba8be3c941}</Project>
-      <Name>ZXing.Net.Mobile</Name>
-    </ProjectReference>
   </ItemGroup>
 </Project>

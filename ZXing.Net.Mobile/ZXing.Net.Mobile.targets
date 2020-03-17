@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<_ZXingNetMobileIsiOS Condition="'$(TargetFrameworkIdentifier)'=='Xamarin.iOS' And ('$(OutputType)' != 'Library' OR '$(IsAppExtension)'=='True')">True</_ZXingNetMobileIsiOS>
+		<_ZXingNetIsAndroid Condition="'$(AndroidApplication)' == 'True'">True</_ZXingNetIsAndroid>
+		<_ZXingNetIsUWP Condition="'$(TargetPlatformIdentifier)'=='UAP' And '$(OutputType)' == 'AppContainerExe'">True</_ZXingNetIsUWP>
+		<_ZXingNetIsTizen Condition="'$(TargetPlatformIdentifer)'=='Tizen'">True</_ZXingNetIsTizen>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<_ZXingImagesRootPath>$(MSBuildThisFileDirectory)\..\images\</_ZXingImagesRootPath>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(_ZXingNetMobileIsiOS)' == 'True'">
+		<BundleResource Include="$(_ZXingImagesRootPath)xamarinios10\torch.png">
+			<LogicalName>torch.png</LogicalName>
+			<Optimize>False</Optimize>
+		</BundleResource>
+		<BundleResource Include="$(_ZXingImagesRootPath)xamarinios10\torch@2x.png">
+			<LogicalName>torch@2x.png</LogicalName>
+			<Optimize>False</Optimize>
+		</BundleResource>
+		<BundleResource Include="$(_ZXingImagesRootPath)xamarinios10\torch@3x.png">
+			<LogicalName>torch@3x.png</LogicalName>
+			<Optimize>False</Optimize>
+		</BundleResource>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(_ZXingNetIsUWP)' == 'True'">
+		<ContentWithTargetPath Include="$(_ZXingImagesRootPath)uap10\torch.scale-100.png">
+			<TargetPath>torch.scale-100.png</TargetPath>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="$(_ZXingImagesRootPath)uap10\torch.scale-150.png">
+			<TargetPath>torch.scale-150.png</TargetPath>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="$(_ZXingImagesRootPath)uap10\torch.scale-200.png">
+			<TargetPath>torch.scale-200.png</TargetPath>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="$(_ZXingImagesRootPath)uap10\torch.scale-300.png">
+			<TargetPath>torch.scale-300.png</TargetPath>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="$(_ZXingImagesRootPath)uap10\torch.scale-400.png">
+			<TargetPath>torch.scale-400.png</TargetPath>
+		</ContentWithTargetPath>
+	</ItemGroup>
+
+</Project>

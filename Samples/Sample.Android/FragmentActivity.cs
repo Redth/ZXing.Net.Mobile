@@ -44,11 +44,13 @@ namespace Sample.Android
 
 		void Scan()
 		{
-			var opts = new BarcodeScanningOptions
+			var opts = new BarcodeScannerSettings(new ZXing.Common.DecodingOptions
 			{
 				PossibleFormats = new List<ZXing.BarcodeFormat> {
 					ZXing.BarcodeFormat.QR_CODE
 				},
+			})
+			{
 				CameraResolutionSelector = availableResolutions =>
 				{
 

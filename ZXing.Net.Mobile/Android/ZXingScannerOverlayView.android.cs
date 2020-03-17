@@ -34,11 +34,11 @@ namespace ZXing.UI
 		int scannerAlpha;
 		List<ZXing.ResultPoint> possibleResultPoints;
 
-		public new BarcodeScannerOverlay<View> Overlay { get; }
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
-		public ZXingScannerOverlayView(Context context, BarcodeScannerOverlay<View> overlay) : base(context)
+		public ZXingScannerOverlayView(Context context, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings) : base(context)
 		{
-			Overlay = overlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 
 			// Initialize these once for performance rather than calling them every time in onDraw().
 			paint = new Paint(PaintFlags.AntiAlias);
@@ -93,7 +93,7 @@ namespace ZXing.UI
 			textPaint.Color = Color.White;
 			textPaint.TextSize = 16 * scale;
 
-			var topText = Overlay?.TopText ?? string.Empty;
+			var topText = DefaultOverlaySettings?.TopText ?? string.Empty;
 			var topTextLayout = new StaticLayout(topText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
 			canvas.Save();
 			var topBounds = new Rect();
@@ -106,7 +106,7 @@ namespace ZXing.UI
 
 			canvas.Restore();
 
-			var bottomText = Overlay?.BottomText ?? string.Empty;
+			var bottomText = DefaultOverlaySettings?.BottomText ?? string.Empty;
 
 			var botTextLayout = new StaticLayout(bottomText, textPaint, canvas.Width, Android.Text.Layout.Alignment.AlignCenter, 1.0f, 0.0f, false);
 			canvas.Save();

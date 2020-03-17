@@ -39,7 +39,7 @@ namespace Sample.Uwp
 		async void buttonScanDefault_Click(object sender, RoutedEventArgs e)
 		{
 			//Create a new instance of our scanner
-			var scanner = new BarcodeScanner(overlay: new BarcodeScannerOverlay
+			var scanner = new BarcodeScanner(defaultOverlaySettings: new BarcodeScannerDefaultOverlaySettings
 			{
 				TopText = "Hold camera up to barcode",
 				BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
@@ -58,11 +58,11 @@ namespace Sample.Uwp
 		{
 			//Create a new instance of our scanner
 			var scanner = new BarcodeScanner(
-				new BarcodeScanningOptions
+				new BarcodeScannerSettings
 				{
-					DelayBetweenContinuousScans = 3000
+					DelayBetweenContinuousScans = TimeSpan.FromSeconds(3)
 				},
-				new BarcodeScannerOverlay
+				new BarcodeScannerDefaultOverlaySettings
 				{
 					TopText = "Hold camera up to barcode",
 					BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
@@ -91,21 +91,16 @@ namespace Sample.Uwp
 
 			//Create a new instance of our scanner
 			var scanner = new BarcodeScanner(
-				new BarcodeScanningOptions
+				new BarcodeScannerSettings
 				{
-					DelayBetweenContinuousScans = 3000,
+					DelayBetweenContinuousScans = TimeSpan.FromSeconds(3),
 					AutoRotate = true
 				},
-				new BarcodeScannerOverlay<UIElement>
+				new BarcodeScannerCustomOverlay(customOverlay))
 				{
-					CustomOverlay = customOverlay,
-					TopText = "Hold camera up to barcode",
-					BottomText = "Camera will automatically scan barcode\r\n\r\nPress the 'Back' button to Cancel"
-				})
-			{
-				RootFrame = Frame,
-				Dispatcher = Dispatcher
-			};
+					RootFrame = Frame,
+					Dispatcher = Dispatcher
+				};
 
 			//Wireup our buttons from the custom overlay
 			buttonCancel.Click += (s, e2) => scanner.CancelAsync();

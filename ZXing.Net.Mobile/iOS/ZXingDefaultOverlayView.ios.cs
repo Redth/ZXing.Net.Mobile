@@ -13,28 +13,16 @@ namespace ZXing.UI
 {
 	public class ZXingDefaultOverlayView : UIView
 	{
-		public ZXingDefaultOverlayView(CGRect frame, BarcodeScannerOverlay<UIView> overlay, Func<Task> onCancel, Func<Task> onTorch)
-			: this(frame, overlay?.TopText, overlay?.BottomText, overlay?.CancelButtonText, overlay?.FlashButtonText, onCancel, onTorch)
-		{ }
-
-		public ZXingDefaultOverlayView(CGRect frame, string topText,
-										string bottomText, string cancelText, string flashText,
-										Func<Task> onCancel, Func<Task> onTorch) : base(frame)
+		public ZXingDefaultOverlayView(CGRect frame, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings, Func<Task> onCancel, Func<Task> onTorch)
 		{
-			this.cancelText = cancelText ?? "Cancel";
-			this.flashText = flashText ?? "Flash";
-			this.topText = topText ?? "";
-			this.bottomText = bottomText ?? "";
+			DefaultOverlaySettings = defaultOverlaySettings;
 
 			this.onCancel = onCancel;
 			this.onTorch = onTorch;
 			Initialize();
 		}
 
-		readonly string cancelText;
-		readonly string flashText;
-		readonly string topText;
-		readonly string bottomText;
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		readonly Func<Task> onCancel;
 		readonly Func<Task> onTorch;
@@ -84,19 +72,19 @@ namespace ZXing.UI
 
 			var topTextLines = 1;
 
-			if (!string.IsNullOrEmpty(topText))
-				topTextLines = topText.Split('\n').Length;
+			if (!string.IsNullOrEmpty(DefaultOverlaySettings?.TopText))
+				topTextLines = DefaultOverlaySettings.TopText.Split('\n').Length;
 
 			var botTextLines = 1;
 
-			if (!string.IsNullOrEmpty(bottomText))
-				botTextLines = bottomText.Split('\n').Length;
+			if (!string.IsNullOrEmpty(DefaultOverlaySettings?.BottomText))
+				botTextLines = DefaultOverlaySettings.BottomText.Split('\n').Length;
 
 
 			textTop = new UILabel()
 			{
 				Frame = topBg.Frame,
-				Text = topText,
+				Text = DefaultOverlaySettings?.TopText ?? string.Empty,
 				Font = UIFont.SystemFontOfSize(13),
 				TextAlignment = UITextAlignment.Center,
 				TextColor = UIColor.White,
@@ -110,7 +98,7 @@ namespace ZXing.UI
 			textBottom = new UILabel()
 			{
 				Frame = bottomBg.Frame,
-				Text = bottomText,
+				Text = DefaultOverlaySettings?.BottomText ?? string.Empty,
 				Font = UIFont.SystemFontOfSize(13),
 				TextAlignment = UITextAlignment.Center,
 				TextColor = UIColor.White,
@@ -134,13 +122,13 @@ namespace ZXing.UI
 				var toolBar = new UIToolbar(new CGRect(0, Frame.Height - 44, Frame.Width, 44));
 
 				var buttons = new List<UIBarButtonItem>();
-				buttons.Add(new UIBarButtonItem(cancelText, UIBarButtonItemStyle.Done,
+				buttons.Add(new UIBarButtonItem(UIBarButtonSystemItem.Cancel,
 												delegate { onCancel(); }));
 
 				if (hasTorch)
 				{
 					buttons.Add(new UIBarButtonItem(UIBarButtonSystemItem.FlexibleSpace));
-					buttons.Add(new UIBarButtonItem(flashText, UIBarButtonItemStyle.Done,
+					buttons.Add(new UIBarButtonItem(UIBarButtonSystemItem.Search,
 													delegate { onTorch(); }));
 				}
 

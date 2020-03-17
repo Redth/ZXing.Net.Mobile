@@ -13,11 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="4.5.0.356" />
     <PackageReference Include="Xamarin.Essentials" Version="1.5.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj" />
-    <ProjectReference Include="..\..\..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj" />
+    <PackageReference Include="ZXing.Net.Mobile.Forms" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

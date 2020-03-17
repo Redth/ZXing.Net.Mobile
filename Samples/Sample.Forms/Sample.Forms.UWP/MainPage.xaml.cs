@@ -21,6 +21,8 @@ namespace Sample.Forms.UWP
 		{
 			this.InitializeComponent();
 
+			ZXing.Net.Mobile.Forms.WindowsUniversal.Platform.Init();
+
 			LoadApplication(new Sample.Forms.App());
 		}
 	}

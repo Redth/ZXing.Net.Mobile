@@ -19,7 +19,7 @@ namespace ZXing.UI
 
 		Task ToggleTorchAsync();
 
-		BarcodeScannerOverlay Overlay { get; }
+		BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		bool IsTorchOn { get; }
 

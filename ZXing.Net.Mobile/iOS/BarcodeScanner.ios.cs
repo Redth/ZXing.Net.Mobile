@@ -22,7 +22,7 @@ namespace ZXing.UI
 
 		internal void PlatformScan(Action<Result[]> scanHandler)
 		{
-			var useAVCaptureEngine = Options?.UseNativeScanning ?? false;
+			var useAVCaptureEngine = Settings?.UseNativeScanning ?? false;
 
 			try
 			{
@@ -33,7 +33,7 @@ namespace ZXing.UI
 				var allRequestedFormatsSupported = true;
 
 				if (useAVCaptureEngine)
-					allRequestedFormatsSupported = AVCaptureScannerView.SupportsAllRequestedBarcodeFormats(Options.PossibleFormats);
+					allRequestedFormatsSupported = AVCaptureScannerView.SupportsAllRequestedBarcodeFormats(Settings.DecodingOptions.PossibleFormats);
 
 				if (weakAppController.TryGetTarget(out var appController))
 				{
@@ -41,13 +41,9 @@ namespace ZXing.UI
 
 					appController?.InvokeOnMainThread(() =>
 					{
-						var overlay = Overlay?.WithView<UIView>();
-						if (overlay != null)
-							overlay.CustomOverlay = this.CustomOverlay;
-
 						if (useAVCaptureEngine && is7orgreater && allRequestedFormatsSupported)
 						{
-							viewController = new AVCaptureScannerViewController(Options, overlay);
+							viewController = new AVCaptureScannerViewController(Settings, DefaultOverlaySettings, CustomOverlay);
 						}
 						else
 						{
@@ -56,7 +52,7 @@ namespace ZXing.UI
 							else if (useAVCaptureEngine && !allRequestedFormatsSupported)
 								Logger.Error("Not all requested barcode formats were supported by AVCapture, using ZXing instead");
 
-							viewController = new ZXingScannerViewController(Options, overlay);
+							viewController = new ZXingScannerViewController(Settings, DefaultOverlaySettings, CustomOverlay);
 						}
 
 						viewController.OnBarcodeScanned += (s, e) => scanHandler(e.Results);
@@ -104,7 +100,13 @@ namespace ZXing.UI
 
 		bool PlatformIsTorchOn
 			=> viewController.IsTorchOn;
+	}
 
-		public UIView CustomOverlay { get; set; }
+	public partial class BarcodeScannerCustomOverlay
+	{
+		public BarcodeScannerCustomOverlay(UIView nativeView)
+			=> NativeView = nativeView;
+
+		public readonly UIView NativeView;
 	}
 }

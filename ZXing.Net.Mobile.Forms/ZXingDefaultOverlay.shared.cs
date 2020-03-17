@@ -8,9 +8,9 @@ namespace ZXing.Net.Mobile.Forms
 	{
 		readonly Label topText;
 		readonly Label botText;
-		readonly Button flash;
+		readonly ImageButton flash;
 
-		public delegate void FlashButtonClickedDelegate(Button sender, EventArgs e);
+		public delegate void FlashButtonClickedDelegate(object sender, EventArgs e);
 		public event FlashButtonClickedDelegate FlashButtonClicked;
 
 		public ZXingDefaultOverlay()
@@ -71,19 +71,17 @@ namespace ZXing.Net.Mobile.Forms
 			botText.SetBinding(Label.TextProperty, new Binding(nameof(BottomText)));
 			Children.Add(botText, 0, 2);
 
-			flash = new Button
+			flash = new ImageButton
 			{
 				HorizontalOptions = LayoutOptions.End,
 				VerticalOptions = LayoutOptions.Start,
-				Text = "Flash",
-				TextColor = Color.White,
+				Margin = new Thickness(0, 10, 10, 0),
+				Source = FileImageSource.FromFile("torch.png"),
+				BackgroundColor = Color.Transparent,
 				AutomationId = "zxingDefaultOverlay_FlashButton",
 			};
-			flash.SetBinding(Button.IsVisibleProperty, new Binding(nameof(ShowFlashButton)));
-			flash.Clicked += (sender, e) =>
-			{
-				FlashButtonClicked?.Invoke(flash, e);
-			};
+			flash.SetBinding(ImageButton.IsVisibleProperty, new Binding(nameof(ShowFlashButton)));
+			flash.Clicked += (sender, e) => FlashButtonClicked?.Invoke(flash, e);
 
 			Children.Add(flash, 0, 0);
 		}

@@ -6,8 +6,9 @@ using CoreGraphics;
 using UIKit;
 
 using ZXing;
-using ZXing.Mobile;
+using ZXing.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sample.iOS
 {
@@ -17,77 +18,73 @@ namespace Sample.iOS
 		{
 		}
 
-		MobileBarcodeScanner scanner;
 		CustomOverlayView customOverlay;
 
 		public override void ViewDidLoad()
 		{
-			//Create a new instance of our scanner
-			scanner = new MobileBarcodeScanner(this.NavigationController);
-
 			Root = new RootElement("ZXing.Net.Mobile") {
 				new Section {
 
 					new StyledStringElement ("Scan with Default View", async () => {
-						//Tell our scanner to use the default overlay
-						scanner.UseCustomOverlay = false;
-						//We can customize the top and bottom text of the default overlay
-						scanner.TopText = "Hold camera up to barcode to scan";
-						scanner.BottomText = "Barcode will automatically scan";
+						var scanner = new BarcodeScanner(defaultOverlaySettings: new BarcodeScannerDefaultOverlaySettings
+						{
+							TopText= "Hold camera up to barcode to scan",
+							BottomText = "Barcode will automatically scan"
+						});
 
 						//Start scanning
-						var result = await scanner.Scan ();
+						var results = await scanner.ScanOnceAsync();
 
-						HandleScanResult(result);
+						HandleScanResult(results);
 					}),
 
-					new StyledStringElement ("Scan Continuously", () => {
-						//Tell our scanner to use the default overlay
-						scanner.UseCustomOverlay = false;
+					new StyledStringElement ("Scan Continuously", async () => {
 
-						//Tell our scanner to use our custom overlay
-						scanner.UseCustomOverlay = true;
-						scanner.CustomOverlay = customOverlay;
+						var scanner = new BarcodeScanner(
+							new BarcodeScannerSettings {
+								DelayBetweenContinuousScans = TimeSpan.FromSeconds(3),
+							}, new BarcodeScannerCustomOverlay(customOverlay));
 
-
-						var opt = new MobileBarcodeScanningOptions ();
-						opt.DelayBetweenContinuousScans = 3000;
-
+						
 						//Start scanning
-						scanner.ScanContinuously (opt, false, HandleScanResult);
+						await scanner.ScanContinuouslyAsync(HandleScanResult);
 					}),
 
 					new StyledStringElement ("Scan with Custom View", async () => {
+
 						//Create an instance of our custom overlay
 						customOverlay = new CustomOverlayView();
+
+						var scanner = new BarcodeScanner(
+							new BarcodeScannerSettings { AutoRotate = true },
+							new BarcodeScannerCustomOverlay(customOverlay));
+
 						//Wireup the buttons from our custom overlay
-						customOverlay.ButtonTorch.TouchUpInside += delegate {
-							scanner.ToggleTorch();
+						customOverlay.ButtonTorch.TouchUpInside += async delegate {
+							await scanner.ToggleTorchAsync();
 						};
-						customOverlay.ButtonCancel.TouchUpInside += delegate {
-							scanner.Cancel();
+						customOverlay.ButtonCancel.TouchUpInside += async delegate {
+							await scanner.CancelAsync();
 						};
 
-						//Tell our scanner to use our custom overlay
-						scanner.UseCustomOverlay = true;
-						scanner.CustomOverlay = customOverlay;
+						var results = await scanner.ScanOnceAsync();
 
-						var result = await scanner.Scan (new MobileBarcodeScanningOptions { AutoRotate = true });
-
-						HandleScanResult(result);
+						HandleScanResult(results);
 					}),
 
 					new StyledStringElement ("Scan with AVCapture Engine", async () => {
-						//Tell our scanner to use the default overlay
-						scanner.UseCustomOverlay = false;
-						//We can customize the top and bottom text of the default overlay
-						scanner.TopText = "Hold camera up to barcode to scan";
-						scanner.BottomText = "Barcode will automatically scan";
-
+						var scanner = new BarcodeScanner(
+							new BarcodeScannerSettings { UseNativeScanning = true },
+							new BarcodeScannerDefaultOverlaySettings
+							{
+								TopText = "Hold camera up to barcode to scan",
+								BottomText = "Barcode will automatically scan"
+							});
+						
 						//Start scanning
-						var result = await scanner.Scan (true);
+						var results = await scanner.ScanOnceAsync();
 
-						HandleScanResult (result);
+						HandleScanResult (results);
 					}),
 
 					new StyledStringElement ("Generate Barcode", () => {
@@ -97,12 +94,12 @@ namespace Sample.iOS
 			};
 		}
 
-		void HandleScanResult(ZXing.Result result)
+		void HandleScanResult(ZXing.Result[] results)
 		{
 			var msg = "";
 
-			if (result != null && !string.IsNullOrEmpty(result.Text))
-				msg = "Found Barcode: " + result.Text;
+			if (results != null && results.Any(r => !string.IsNullOrEmpty(r.Text)))
+				msg = "Found Barcodes: " + string.Join("; ", results.Select(r => r.Text));
 			else
 				msg = "Scanning Canceled!";
 
@@ -117,21 +114,23 @@ namespace Sample.iOS
 		{
 			var expectedFormat = BarcodeFormat.QR_CODE;
 			Enum.TryParse(param, out expectedFormat);
-			var opts = new MobileBarcodeScanningOptions
-			{
-				PossibleFormats = new List<BarcodeFormat> { expectedFormat }
-			};
 
 			//Create a new instance of our scanner
-			scanner = new MobileBarcodeScanner(this.NavigationController);
-			scanner.UseCustomOverlay = false;
+			var scanner = new BarcodeScanner(
+				new BarcodeScannerSettings(
+					new ZXing.Common.DecodingOptions
+					{
+						PossibleFormats = new[] { expectedFormat }
+					}));
 
 			Console.WriteLine("Scanning " + expectedFormat);
 
 			//Start scanning
-			scanner.Scan(opts).ContinueWith(t =>
+			scanner.ScanOnceAsync().ContinueWith(t =>
 			{
-				var result = t.Result;
+				var results = t.Result;
+
+				var result = results.FirstOrDefault();
 
 				var format = result?.BarcodeFormat.ToString() ?? string.Empty;
 				var value = result?.Text ?? string.Empty;

@@ -26,49 +26,67 @@ namespace ZXing.Net.Mobile.Forms.Tizen
 			zxingWindow?.Dispose();
 			base.Dispose(disposing);
 		}
-		
+
 		protected override void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
 		{
-			base.OnElementChanged(e);
-			formsView = Element;
-
-			if (zxingWindow == null)
+			if (e.OldElement != null)
 			{
-				formsView.AutoFocusRequested += (x, y) =>
+				// Unsubscribe from event handlers and cleanup any resources
+				if (Control != null)
 				{
-					if (zxingWindow != null)
-					{
-						if (x < 0 && y < 0)
-							zxingWindow.AutoFocusAsync();
-						else
-							zxingWindow.AutoFocusAsync(x, y);
-					}
-				};
-				
-				zxingWindow = new ZXing.UI.ZXingMediaView(Xamarin.Forms.Forms.NativeParent, zxingWindow.Options);
-				zxingWindow.Show();
-				base.SetNativeControl(zxingWindow);
-
-				if (!formsView.IsAnalyzing)
-					zxingWindow.IsAnalyzing = false;
-				if (formsView.IsTorchOn)
-					zxingWindow.TorchAsync(formsView.IsTorchOn);
+					Control.OnBarcodeScanned -= Control_OnBarcodeScanned;
+					Control.Dispose();
+					SetNativeControl(null);
+				}
 			}
+
+			if (e.NewElement != null)
+			{
+				if (Control == null)
+				{
+					var ctrl = new ZXingMediaView(Xamarin.Forms.Forms.NativeParent, e.NewElement?.Settings);
+					ctrl.Show();
+					SetNativeControl(ctrl);
+
+					if (!e.NewElement.IsAnalyzing)
+						Control.IsAnalyzing = false;
+					if (Control.IsTorchOn)
+						Control.TorchAsync(Control.IsTorchOn);
+
+					Control.OnBarcodeScanned += Control_OnBarcodeScanned;
+
+					e.NewElement.AutoFocusHandler = (x, y) =>
+					{
+						if (Control != null)
+						{
+							if (x < 0 && y < 0)
+								Control.AutoFocusAsync();
+							else
+								Control.AutoFocusAsync(x, y);
+						}
+					};
+				}
+			}
+
+			base.OnElementChanged(e);
 		}
+
+		void Control_OnBarcodeScanned(object sender, BarcodeScannedEventArgs e)
+			=> Element?.RaiseOnBarcodeScanned(e.Results);
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
-			
-			if (zxingWindow != null)
+
+			if (Control != null)
 			{
 				switch (e.PropertyName)
 				{
 					case nameof(ZXingScannerView.IsTorchOn):
-						zxingWindow.TorchAsync(formsView.IsTorchOn);
+						Control?.TorchAsync(Control?.IsTorchOn ?? false);
 						break;
 					case nameof(ZXingScannerView.IsAnalyzing):
-						zxingWindow.IsAnalyzing = formsView.IsAnalyzing;
+						Control.IsAnalyzing = formsView.IsAnalyzing;
 						break;
 				}
 			}

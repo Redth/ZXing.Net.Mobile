@@ -13,25 +13,21 @@ namespace ZXing.UI
 {
 	public class ZXingScannerFragment : Fragment, IScannerView
 	{
-		internal ZXingScannerFragment(BarcodeScanningOptions options, BarcodeScannerOverlay<Android.Views.View> overlay)
+		public ZXingScannerFragment(BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options ?? new BarcodeScanningOptions();
-			Overlay = overlay;
+			Settings = settings ?? new BarcodeScannerSettings();
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 		}
 
-		public ZXingScannerFragment(BarcodeScannerOverlay<View> overlay)
-			: this(null, overlay) { }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
 
-		public ZXingScannerFragment()
-			: this(null, null) { }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<Android.Views.View> Overlay { get; }
-
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		FrameLayout frame;
 
-		internal ZXingScannerActivity ParentActivity { get; private set; }
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
@@ -43,21 +39,21 @@ namespace ZXing.UI
 
 			try
 			{
-				scanner = new ZXingSurfaceView(Activity, Options, Overlay);
+				scanner = new ZXingSurfaceView(Activity, Settings);
 				scanner.OnBarcodeScanned += OnBarcodeScanned;
 
 				frame.AddView(scanner, layoutParams);
 
 
-				if (Overlay?.CustomOverlay == null)
+				if (CustomOverlay?.NativeView == null)
 				{
-					zxingOverlay = new ZXingScannerOverlayView(Activity, Overlay);
+					zxingOverlay = new ZXingScannerOverlayView(Activity, DefaultOverlaySettings);
 
 					frame.AddView(zxingOverlay, layoutParams);
 				}
 				else
 				{
-					frame.AddView(Overlay.CustomOverlay, layoutParams);
+					frame.AddView(CustomOverlay.NativeView, layoutParams);
 				}
 			}
 			catch (Exception ex)
@@ -78,10 +74,10 @@ namespace ZXing.UI
 				// reattach scanner and overlay views.
 				frame.AddView(scanner, layoutParams);
 
-				if (Overlay?.CustomOverlay == null)
+				if (CustomOverlay?.NativeView == null)
 					frame.AddView(zxingOverlay, layoutParams);
 				else
-					frame.AddView(Overlay.CustomOverlay, layoutParams);
+					frame.AddView(CustomOverlay.NativeView, layoutParams);
 			}
 		}
 
@@ -94,10 +90,10 @@ namespace ZXing.UI
 				frame.RemoveView(scanner);
 			}
 
-			if (Overlay?.CustomOverlay == null)
+			if (CustomOverlay?.NativeView == null)
 				frame.RemoveView(zxingOverlay);
 			else
-				frame.RemoveView(Overlay.CustomOverlay);
+				frame.RemoveView(CustomOverlay.NativeView);
 
 			base.OnStop();
 		}

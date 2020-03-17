@@ -18,11 +18,14 @@ namespace ZXing.UI
 
 		Grid rootGrid;
 
-		public BarcodeScanningOptions Options
-			=> pageParameters?.Options ?? new BarcodeScanningOptions();
+		public BarcodeScannerSettings Settings
+			=> pageParameters?.Settings ?? new BarcodeScannerSettings();
 
-		public BarcodeScannerOverlay<UIElement> Overlay
-			=> pageParameters?.Overlay;
+		public BarcodeScannerCustomOverlay CustomOverlay
+			=> pageParameters?.CustomOverlay;
+
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings
+			=> pageParameters?.DefaultOverlaySettings;
 
 		ScanPageNavigationParameters pageParameters;
 
@@ -45,7 +48,7 @@ namespace ZXing.UI
 
 			pageParameters = p;
 
-			scannerControl = new ZXingScannerUserControl(Options, Overlay);
+			scannerControl = new ZXingScannerUserControl(Settings, DefaultOverlaySettings, CustomOverlay);
 			scannerControl.OnBarcodeScanned += ScannerControl_OnBarcodeScanned;
 			
 			pageParameters.AutoFocusHandler = () => scannerControl?.AutoFocusAsync();
@@ -113,16 +116,20 @@ namespace ZXing.UI
 
 	public class ScanPageNavigationParameters
 	{
-		public ScanPageNavigationParameters(BarcodeScanningOptions options, BarcodeScannerOverlay<UIElement> overlay)
+		public ScanPageNavigationParameters(BarcodeScannerSettings options = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options ?? new BarcodeScanningOptions();
-			Overlay = overlay;
+			Settings = options ?? new BarcodeScannerSettings();
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 		}
 
 		public Action<Result[]> BarcodeScannedHandler { get; set; }
 
-		public BarcodeScanningOptions Options { get; }
-		public BarcodeScannerOverlay<UIElement> Overlay { get; }
+		public BarcodeScannerSettings Settings { get; }
+		
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
+		
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		public Func<bool, Task> TorchHandler { get; set; }
 

@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <RestoreNoCache>true</RestoreNoCache>
+    <RestorePackagesPath>..\packages</RestorePackagesPath>
+  </PropertyGroup>
+</Project>

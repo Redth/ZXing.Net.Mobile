@@ -14,11 +14,7 @@ namespace ZXing.UI
 
 		void PlatformInit()
 		{
-			var overlay = Overlay?.WithView<Container>();
-			if (overlay != null)
-				overlay.CustomOverlay = CustomOverlay;
-
-			zxingScannerWindow = new ZxingScannerWindow(Options, overlay);
+			zxingScannerWindow = new ZxingScannerWindow(Settings, DefaultOverlaySettings, CustomOverlay);
 			MainWindow = zxingScannerWindow;
 		}
 
@@ -52,7 +48,13 @@ namespace ZXing.UI
 
 		Task PlatformTorchAsync(bool on)
 			=> zxingScannerWindow?.TorchAsync(on);
+	}
 
-		public Container CustomOverlay { get; set; }
+	public partial class BarcodeScannerCustomOverlay
+	{
+		public BarcodeScannerCustomOverlay(Container nativeView)
+			=> NativeView = nativeView;
+
+		public readonly Container NativeView;
 	}
 }

@@ -23,14 +23,17 @@ namespace ZXing.UI
 		public delegate void ScannerSetupCompleteDelegate();
 		public event ScannerSetupCompleteDelegate OnScannerSetupComplete;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<UIView> Overlay { get; }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
 
-		public ZXingScannerView(BarcodeScanningOptions options = null, BarcodeScannerOverlay<UIView> overlay = null)
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
+
+		public ZXingScannerView(BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options;
-			Overlay = overlay;
+			Settings = settings;
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 		}
 
 		public ZXingScannerView(IntPtr handle) : base(handle)
@@ -41,11 +44,12 @@ namespace ZXing.UI
 		{
 		}
 
-		internal ZXingScannerView(CGRect frame, BarcodeScanningOptions options, BarcodeScannerOverlay<UIView> overlay)
+		public ZXingScannerView(CGRect frame, BarcodeScannerSettings settings, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 			: base(frame)
 		{
-			Options = options;
-			Overlay = overlay;
+			Settings = settings;
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 		}
 
 		AVCaptureSession session;
@@ -74,12 +78,12 @@ namespace ZXing.UI
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview();
 
-			if (Overlay?.CustomOverlay != null)
-				overlayView = Overlay.CustomOverlay;
+			if (CustomOverlay?.NativeView != null)
+				overlayView = CustomOverlay.NativeView;
 			else
 			{
 				overlayView = new ZXingDefaultOverlayView(new CGRect(0, 0, Frame.Width, Frame.Height),
-					Overlay,
+					DefaultOverlaySettings,
 					() => Task.CompletedTask, ToggleTorchAsync);
 			}
 
@@ -123,12 +127,12 @@ namespace ZXing.UI
 			foreach (var device in devices)
 			{
 				captureDevice = device;
-				if (Options.UseFrontCameraIfAvailable.HasValue &&
-					Options.UseFrontCameraIfAvailable.Value &&
+				if (Settings.UseFrontCameraIfAvailable.HasValue &&
+					Settings.UseFrontCameraIfAvailable.Value &&
 					device.Position == AVCaptureDevicePosition.Front)
 
 					break; //Front camera successfully set
-				else if (device.Position == AVCaptureDevicePosition.Back && (!Options.UseFrontCameraIfAvailable.HasValue || !Options.UseFrontCameraIfAvailable.Value))
+				else if (device.Position == AVCaptureDevicePosition.Back && (!Settings.UseFrontCameraIfAvailable.HasValue || !Settings.UseFrontCameraIfAvailable.Value))
 					break; //Back camera succesfully set
 			}
 			if (captureDevice == null)
@@ -154,7 +158,7 @@ namespace ZXing.UI
 					availableResolutions.Add(cr.Value);
 			}
 
-			resolution = Options.GetResolution(availableResolutions);
+			resolution = Settings.GetResolution(availableResolutions);
 
 			// See if the user selected a resolution
 			if (resolution != null)
@@ -233,9 +237,9 @@ namespace ZXing.UI
 			// configure the output
 			queue = new DispatchQueue("ZxingScannerView"); // (Guid.NewGuid().ToString());
 
-			var barcodeReader = Options.BuildBarcodeReader();
+			var barcodeReader = Settings.BuildBarcodeReader();
 
-			outputRecorder = new OutputRecorder(Options, img =>
+			outputRecorder = new OutputRecorder(Settings, img =>
 			{
 				var ls = img;
 
@@ -249,7 +253,7 @@ namespace ZXing.UI
 					if (shouldRotatePreviewBuffer)
 						ls = ls.rotateCounterClockwise();
 
-					var result = Options.ScanMultiple
+					var result = Settings.DecodeMultipleBarcodes
 						? barcodeReader.DecodeMultiple(ls)
 						: new[] { barcodeReader.Decode(ls) };
 
@@ -302,7 +306,7 @@ namespace ZXing.UI
 				if (captureDevice.ExposurePointOfInterestSupported)
 					captureDeviceOriginalConfig.ExposurePointOfInterest = captureDevice.ExposurePointOfInterest;
 
-				if (Options.DisableAutofocus)
+				if (Settings.DisableAutofocus)
 				{
 					captureDevice.FocusMode = AVCaptureFocusMode.Locked;
 				}
@@ -412,13 +416,13 @@ namespace ZXing.UI
 
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate
 		{
-			public OutputRecorder(BarcodeScanningOptions options, Func<LuminanceSource, bool> handleImage) : base()
+			public OutputRecorder(BarcodeScannerSettings options, Func<LuminanceSource, bool> handleImage) : base()
 			{
 				this.handleImage = handleImage;
 				this.options = options;
 			}
 
-			readonly BarcodeScanningOptions options;
+			readonly BarcodeScannerSettings options;
 			Func<LuminanceSource, bool> handleImage;
 
 			DateTime lastAnalysis = DateTime.MinValue;
@@ -435,7 +439,7 @@ namespace ZXing.UI
 
 			public override void DidOutputSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
 			{
-				var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
+				var msSinceLastPreview = DateTime.UtcNow - lastAnalysis;
 
 				if (msSinceLastPreview < options.DelayBetweenAnalyzingFrames
 					|| (wasScanned && msSinceLastPreview < options.DelayBetweenContinuousScans)

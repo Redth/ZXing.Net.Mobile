@@ -68,9 +68,11 @@ namespace ZXing.UI
 			=> IsTorchOnHandler?.Invoke() ?? false;
 
 
-		public static BarcodeScanningOptions Options { get; set; }
+		public static BarcodeScannerSettings Settings { get; set; }
 
-		public static BarcodeScannerOverlay<Android.Views.View> Overlay { get; set; }
+		public static BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; set; }
+
+		public static BarcodeScannerCustomOverlay CustomOverlay { get; set; }
 
 		ZXingScannerFragment scannerFragment;
 
@@ -83,12 +85,12 @@ namespace ZXing.UI
 			Window.AddFlags(WindowManagerFlags.Fullscreen); //to show
 			Window.AddFlags(WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
 
-			if (Options.AutoRotate.HasValue && !Options.AutoRotate.Value)
+			if (Settings.AutoRotate.HasValue && !Settings.AutoRotate.Value)
 				RequestedOrientation = ScreenOrientation.Nosensor;
 
 			SetContentView(ZXing.Net.Mobile.Resource.Layout.zxingscanneractivitylayout);
 
-			scannerFragment = new ZXingScannerFragment(Options, Overlay);
+			scannerFragment = new ZXingScannerFragment(Settings, DefaultOverlaySettings, CustomOverlay);
             scannerFragment.OnBarcodeScanned += ScannerFragment_OnBarcodeScanned;
 
 			SupportFragmentManager.BeginTransaction()
@@ -121,8 +123,8 @@ namespace ZXing.UI
 			IsAnalyzingRequestedGetHandler = null;
 			IsAnalyzingRequestedSetHandler = null;
 
-			Options = null;
-			Overlay = null;
+			Settings = null;
+			CustomOverlay = null;
 
 			base.OnDestroy();
 		}

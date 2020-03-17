@@ -24,6 +24,7 @@ TestResults
 
 #NuGet
 packages/
+output/
 
 Libraries/
 Documentation/

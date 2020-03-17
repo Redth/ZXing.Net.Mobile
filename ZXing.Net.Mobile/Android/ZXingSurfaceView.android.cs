@@ -10,17 +10,15 @@ namespace ZXing.UI
 {
 	public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView
 	{
-		public ZXingSurfaceView(Context context, BarcodeScanningOptions options = null, BarcodeScannerOverlay<View> overlay = null)
+		public ZXingSurfaceView(Context context, BarcodeScannerSettings settings = null)
 			: base(context)
 		{
-			Options = options ?? new BarcodeScanningOptions();
-			Overlay = overlay;
+			Settings = settings ?? new BarcodeScannerSettings();
 
 			Init();
 		}
 
-		public BarcodeScanningOptions Options { get; }
-		public new BarcodeScannerOverlay<View> Overlay { get; }
+		public BarcodeScannerSettings Settings { get; }
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
@@ -32,7 +30,7 @@ namespace ZXing.UI
 		void Init()
 		{
 			if (cameraAnalyzer == null)
-				cameraAnalyzer = new CameraAnalyzer(this, Options,
+				cameraAnalyzer = new CameraAnalyzer(this, Settings,
 					r => OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(r)));
 
 			cameraAnalyzer.IsAnalyzing = true;

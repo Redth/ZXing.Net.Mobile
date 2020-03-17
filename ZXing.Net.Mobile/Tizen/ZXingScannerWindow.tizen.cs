@@ -8,9 +8,11 @@ namespace ZXing.UI
 	{
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<Container> Overlay { get; }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
+
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		ZXingMediaView zxingMediaView;
 		Background overlayBackground;
@@ -19,14 +21,12 @@ namespace ZXing.UI
 			: this(null, null)
 		{ }
 
-		public ZxingScannerWindow(BarcodeScannerOverlay<Container> overlaySettings)
-			: this(null, overlaySettings)
-		{ }
-
-		public ZxingScannerWindow(BarcodeScanningOptions options = null, BarcodeScannerOverlay<Container> overlay = null) : base("ZXingScannerWindow")
+		public ZxingScannerWindow(BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null) : base("ZXingScannerWindow")
 		{
-			Options = options ?? new BarcodeScanningOptions();
-			Overlay = overlay;
+			Settings = settings ?? new BarcodeScannerSettings();
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
+
 			AvailableRotations = DisplayRotation.Degree_0 | DisplayRotation.Degree_180 | DisplayRotation.Degree_270 | DisplayRotation.Degree_90;
 			BackButtonPressed += (s, ex) =>
 			{
@@ -37,15 +37,15 @@ namespace ZXing.UI
 			var showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);
 			showCallback.On += (s, e) =>
 			{
-				if (Overlay?.CustomOverlay != null)
+				if (CustomOverlay?.NativeView != null)
 				{
-					overlayBackground.SetContent(Overlay.CustomOverlay);
-					Overlay.CustomOverlay.Show();
+					overlayBackground.SetContent(CustomOverlay.NativeView);
+					CustomOverlay.NativeView.Show();
 				}
 				else
 				{
 					var defaultOverlay = new ZXingDefaultOverlay(this);
-					defaultOverlay.SetText(Overlay?.TopText ?? string.Empty, Overlay?.BottomText ?? string.Empty);
+					defaultOverlay.SetText(DefaultOverlaySettings?.TopText ?? string.Empty, DefaultOverlaySettings?.BottomText ?? string.Empty);
 					overlayBackground.SetContent(defaultOverlay);
 					defaultOverlay.Show();
 				}
@@ -73,7 +73,7 @@ namespace ZXing.UI
 			oConformant.Show();
 			oConformant.SetContent(overlayBackground);
 
-			zxingMediaView = new ZXingMediaView(this, Options)
+			zxingMediaView = new ZXingMediaView(this, Settings)
 			{
 				AlignmentX = -1,
 				AlignmentY = -1,

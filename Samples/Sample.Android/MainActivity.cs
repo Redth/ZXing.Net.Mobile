@@ -20,7 +20,7 @@ namespace Sample.Android
 		Button buttonFragmentScanner;
 		Button buttonGenerate;
 
-		
+
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
@@ -31,18 +31,18 @@ namespace Sample.Android
 			SetContentView(Resource.Layout.Main);
 
 			//Create a new instance of our Scanner
-			
+
 
 			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
 			buttonScanDefaultView.Click += async delegate
 			{
-				var scanner = new BarcodeScanner(new BarcodeScanningOptions
+				var scanner = new BarcodeScanner(new BarcodeScannerSettings
+				{
+					DecodeMultipleBarcodes = true,
+				},
+					new BarcodeScannerDefaultOverlaySettings
 					{
-						ScanMultiple = true,
-					},
-					new BarcodeScannerOverlay
-					{
-						TopText ="Hold the camera up to the barcode\nAbout 6 inches away",
+						TopText = "Hold the camera up to the barcode\nAbout 6 inches away",
 						BottomText = "Wait for the barcode to automatically scan!"
 
 					});
@@ -57,11 +57,11 @@ namespace Sample.Android
 			buttonContinuousScan.Click += async delegate
 			{
 				var scanner = new BarcodeScanner(
-					new BarcodeScanningOptions
+					new BarcodeScannerSettings
 					{
-						DelayBetweenContinuousScans = 3000
+						DelayBetweenContinuousScans = TimeSpan.FromSeconds(3)
 					},
-					new BarcodeScannerOverlay
+					new BarcodeScannerDefaultOverlaySettings
 					{
 						TopText = "Hold the camera up to the barcode\nAbout 6 inches away",
 						BottomText = "Wait for the barcode to automatically scan!"
@@ -81,17 +81,12 @@ namespace Sample.Android
 				zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlay, null);
 
 				var scanner = new BarcodeScanner(
-					new BarcodeScanningOptions
+					new BarcodeScannerSettings
 					{
 						AutoRotate = true,
-						DelayBetweenContinuousScans = 3000
+						DelayBetweenContinuousScans = TimeSpan.FromSeconds(3)
 					},
-					new BarcodeScannerOverlay<View>
-					{
-						CustomOverlay = zxingOverlay,
-						TopText = "Hold the camera up to the barcode\nAbout 6 inches away",
-						BottomText = "Wait for the barcode to automatically scan!"
-					});
+					new BarcodeScannerCustomOverlay (zxingOverlay));
 
 				//Find the button from our resource layout and wire up the click event
 				flashButton = zxingOverlay.FindViewById<Button>(Resource.Id.buttonZxingFlash);
@@ -140,11 +135,12 @@ namespace Sample.Android
 		{
 			var expectedFormat = BarcodeFormat.QR_CODE;
 			Enum.TryParse(param, out expectedFormat);
-			var opts = new BarcodeScanningOptions
-			{
-				PossibleFormats = new List<BarcodeFormat> { expectedFormat }
-			};
-			var barcodeScanner = new BarcodeScanner(opts);
+
+			var barcodeScanner = new BarcodeScanner(
+				new BarcodeScannerSettings(new ZXing.Common.DecodingOptions
+				{
+					PossibleFormats = new[] { expectedFormat }
+				}));
 
 			Console.WriteLine("Scanning " + expectedFormat);
 

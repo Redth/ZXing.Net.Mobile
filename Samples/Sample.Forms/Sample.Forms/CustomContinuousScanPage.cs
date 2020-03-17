@@ -15,7 +15,7 @@ namespace Sample.Forms
 
 		public CustomContinuousScanPage() : base()
 		{
-			zxing = new ZXingScannerView
+			zxing = new ZXingScannerView()
 			{
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				VerticalOptions = LayoutOptions.FillAndExpand,

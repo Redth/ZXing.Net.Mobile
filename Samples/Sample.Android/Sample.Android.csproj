@@ -50,9 +50,6 @@
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
     <Reference Include="Mono.Android.Export" />
-    <Reference Include="zxing">
-      <HintPath>..\..\ZXing.Net\zxing.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Resources\Resource.designer.cs" />
@@ -78,12 +75,6 @@
     <AndroidResource Include="Resources\layout\ImageActivity.axml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj">
-      <Project>{8b7a8ab6-35a4-4c9c-83e1-96ba8be3c941}</Project>
-      <Name>ZXing.Net.Mobile</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
@@ -95,6 +86,9 @@
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
       <Version>1.5.1</Version>
+    </PackageReference>
+    <PackageReference Include="ZXing.Net.Mobile">
+      <Version>3.0.0</Version>
     </PackageReference>
   </ItemGroup>
 </Project>

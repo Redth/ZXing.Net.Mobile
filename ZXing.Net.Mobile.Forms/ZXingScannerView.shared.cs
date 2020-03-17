@@ -9,37 +9,36 @@ namespace ZXing.Net.Mobile.Forms
 	{
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public event Action<int, int> AutoFocusRequested;
+		internal Action<int, int> AutoFocusHandler;
 
 		public ZXingScannerView()
+			: this(null)
 		{
+		}
+
+		public ZXingScannerView(BarcodeScannerSettings settings)
+		{
+			Settings = settings ?? new BarcodeScannerSettings();
 			VerticalOptions = LayoutOptions.FillAndExpand;
 			HorizontalOptions = LayoutOptions.FillAndExpand;
 		}
 
+		public BarcodeScannerSettings Settings { get; }
+
 		public void RaiseOnBarcodeScanned(Result[] results)
 		{
 			OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(results));
-			ScanResultCommand?.Execute(results);
+			BarcodeScannedCommand?.Execute(results);
 		}
 
 		public void ToggleTorch()
 			=> IsTorchOn = !IsTorchOn;
 
 		public void AutoFocus()
-			=> AutoFocusRequested?.Invoke(-1, -1);
+			=> AutoFocusHandler?.Invoke(-1, -1);
 
 		public void AutoFocus(int x, int y)
-			=> AutoFocusRequested?.Invoke(x, y);
-
-		public static readonly BindableProperty OptionsProperty =
-			BindableProperty.Create(nameof(Options), typeof(BarcodeScanningOptions), typeof(ZXingScannerView), new BarcodeScanningOptions());
-
-		public BarcodeScanningOptions Options
-		{
-			get => (BarcodeScanningOptions)GetValue(OptionsProperty);
-			set => SetValue(OptionsProperty, value);
-		}
+			=> AutoFocusHandler?.Invoke(x, y);
 
 		public static readonly BindableProperty IsTorchOnProperty =
 			BindableProperty.Create(nameof(IsTorchOn), typeof(bool), typeof(ZXingScannerView), false);
@@ -64,20 +63,12 @@ namespace ZXing.Net.Mobile.Forms
 			set => SetValue(IsAnalyzingProperty, value);
 		}
 
-		public static readonly BindableProperty ResultProperty =
-			BindableProperty.Create(nameof(Result), typeof(Result), typeof(ZXingScannerView), default(Result));
-		public Result Result
+		public static readonly BindableProperty BarcodeScannedCommandProperty =
+			BindableProperty.Create(nameof(BarcodeScannedCommand), typeof(ICommand), typeof(ZXingScannerView), default(ICommand));
+		public ICommand BarcodeScannedCommand
 		{
-			get => (Result)GetValue(ResultProperty);
-			set => SetValue(ResultProperty, value);
-		}
-
-		public static readonly BindableProperty ScanResultCommandProperty =
-			BindableProperty.Create(nameof(ScanResultCommand), typeof(ICommand), typeof(ZXingScannerView), default(ICommand));
-		public ICommand ScanResultCommand
-		{
-			get => (ICommand)GetValue(ScanResultCommandProperty);
-			set => SetValue(ScanResultCommandProperty, value);
+			get => (ICommand)GetValue(BarcodeScannedCommandProperty);
+			set => SetValue(BarcodeScannedCommandProperty, value);
 		}
 	}
 }

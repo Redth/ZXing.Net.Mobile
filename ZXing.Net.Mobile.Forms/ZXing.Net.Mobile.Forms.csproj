@@ -33,6 +33,9 @@
 		<DebugType>portable</DebugType>
 		<Configurations>Debug;Release</Configurations>
 		<IncludeProjectPriFile>false</IncludeProjectPriFile>
+		<PackageOutputPath>..\output\</PackageOutputPath>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
 		<DebugSymbols>true</DebugSymbols>
@@ -105,4 +108,9 @@
 			<HintPath>..\ZXing.Net\zxing.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+	<!-- Clean up the cached nuget package from the samples so they use the latest -->
+	<Target Name="ClearNuGetOutput" AfterTargets="Pack">
+		<RemoveDir Directories="..\Samples\packages\zxing.net.mobile.forms" />
+		<RemoveDir Directories="..\Samples\Sample.Forms\packages\zxing.net.mobile.forms" />
+	</Target>
 </Project>

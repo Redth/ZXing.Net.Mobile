@@ -1,5 +1,5 @@
 ﻿using System;
-using ZXing.Mobile;
+using ZXing.UI;
 using UIKit;
 using CoreGraphics;
 

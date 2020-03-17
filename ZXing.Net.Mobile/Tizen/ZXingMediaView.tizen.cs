@@ -13,24 +13,24 @@ namespace ZXing.UI
 		ZXingScannerCamera zxingScannerCamera;
 		EvasObjectEvent showCallback;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public ZXingMediaView(EvasObject parent, BarcodeScanningOptions options) : base(parent)
+		public ZXingMediaView(EvasObject parent, BarcodeScannerSettings settings) : base(parent)
 		{
-			Options = options ?? new BarcodeScanningOptions();
+			Settings = settings ?? new BarcodeScannerSettings();
 
 			AlignmentX = -1;
 			AlignmentY = -1;
 			WeightX = 1;
 			WeightY = 1;
 
-			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this, Options);
+			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this, Settings);
 
 			showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);
 			showCallback.On += (s, e) =>
 			{
 				if (zxingScannerCamera == null)
-					zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this);
+					zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this, Settings);
 			};
 
 			StartScanning();

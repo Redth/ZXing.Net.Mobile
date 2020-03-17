@@ -22,7 +22,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 		{
 			if (e.OldElement != null)
 			{
-				e.OldElement.AutoFocusRequested -= FormsView_AutoFocusRequested;
+				e.OldElement.AutoFocusHandler = null;
 
 				// Unsubscribe from event handlers and cleanup any resources
 				if (Control != null)
@@ -42,7 +42,7 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 				}
 
 				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
-				e.NewElement.AutoFocusRequested += FormsView_AutoFocusRequested;
+				e.NewElement.AutoFocusHandler = async (x, y) => await Control.AutoFocusAsync(x, y);
 			}
 
 			base.OnElementChanged(e);
@@ -68,9 +68,6 @@ namespace ZXing.Net.Mobile.Forms.WindowsUniversal
 					break;
 			}
 		}
-
-		void FormsView_AutoFocusRequested(int x, int y)
-			=> Control.AutoFocusAsync(x, y);
 
 		//protected override void OnDisconnectVisualChildren()
 		//{

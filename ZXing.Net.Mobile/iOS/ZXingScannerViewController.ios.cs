@@ -21,14 +21,17 @@ namespace ZXing.UI
 		UIActivityIndicatorView loadingView;
 		UIView loadingBg;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<UIView> Overlay { get; }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
 
-		public ZXingScannerViewController(BarcodeScanningOptions options, BarcodeScannerOverlay<UIView> overlay)
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
+
+		public ZXingScannerViewController(BarcodeScannerSettings options, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options;
-			Overlay = overlay;
+			Settings = options;
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
 
@@ -57,7 +60,7 @@ namespace ZXing.UI
 			View.AddSubview(loadingBg);
 			loadingView.StartAnimating();
 
-			scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), Options, Overlay)
+			scannerView = new ZXingScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), Settings, DefaultOverlaySettings, CustomOverlay)
 			{
 				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
 			};
@@ -133,14 +136,14 @@ namespace ZXing.UI
 			=> scannerView?.DidRotate(this.InterfaceOrientation);
 
 		public override bool ShouldAutorotate()
-			=> Options?.AutoRotate ?? false;
+			=> Settings?.AutoRotate ?? false;
 
 		public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations()
 			=> UIInterfaceOrientationMask.All;
 
 		[Obsolete("Deprecated in iOS6. Replace it with both GetSupportedInterfaceOrientations and PreferredInterfaceOrientationForPresentation")]
 		public override bool ShouldAutorotateToInterfaceOrientation(UIInterfaceOrientation toInterfaceOrientation)
-			=> Options?.AutoRotate ?? false;
+			=> Settings?.AutoRotate ?? false;
 
 		void HandleOnScannerSetupComplete()
 			=> BeginInvokeOnMainThread(() =>

@@ -19,17 +19,20 @@ namespace ZXing.UI
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<UIView> Overlay { get; }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
+
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		UIActivityIndicatorView loadingView;
 		UIView loadingBg;
 
-		internal AVCaptureScannerViewController(BarcodeScanningOptions options, BarcodeScannerOverlay<UIView> overlay)
+		public AVCaptureScannerViewController(BarcodeScannerSettings options = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options;
-			Overlay = overlay;
+			Settings = options;
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 
 			var appFrame = UIScreen.MainScreen.ApplicationFrame;
 
@@ -62,7 +65,7 @@ namespace ZXing.UI
 			View.AddSubview(loadingBg);
 			loadingView.StartAnimating();
 
-			scannerView = new AVCaptureScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), Options, Overlay)
+			scannerView = new AVCaptureScannerView(new CGRect(0, 0, View.Frame.Width, View.Frame.Height), Settings, DefaultOverlaySettings, CustomOverlay)
 			{
 				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
 			};
@@ -124,8 +127,8 @@ namespace ZXing.UI
 
 		public override bool ShouldAutorotate()
 		{
-			if (Options.AutoRotate != null && Options.AutoRotate.HasValue)
-				return Options.AutoRotate.Value;
+			if (Settings.AutoRotate != null && Settings.AutoRotate.HasValue)
+				return Settings.AutoRotate.Value;
 
 			return false;
 		}

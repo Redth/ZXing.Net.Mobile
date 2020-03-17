@@ -9,16 +9,9 @@ namespace ZXing.UI
 {
 	public partial class BarcodeScanner
 	{
-		public BarcodeScanner(BarcodeScanningOptions options, BarcodeScannerOverlay overlay, UIElement customOverlay)
-			: this(options, overlay.WithView<UIElement>(customOverlay))
-		{
-		}
-
 		public CoreDispatcher Dispatcher { get; set; }
 
 		public Frame RootFrame { get; set; }
-
-		public UIElement CustomOverlay { get; set; }
 
 		ScanPageNavigationParameters navigationParameters;
 
@@ -32,7 +25,7 @@ namespace ZXing.UI
 
 			await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
 			{
-				navigationParameters = new ScanPageNavigationParameters(Options, GetOverlay<UIElement>());
+				navigationParameters = new ScanPageNavigationParameters(Settings, DefaultOverlaySettings, CustomOverlay);
 				navigationParameters.BarcodeScannedHandler = r => scanHandler(r);
 				rootFrame.Navigate(typeof(ZXingScannerPage), navigationParameters);
 			});
@@ -70,5 +63,13 @@ namespace ZXing.UI
 			get => navigationParameters?.IsAnalyzingGetHandler() ?? false;
 			set => navigationParameters?.IsAnalyzingSetHandler(value);
 		}
+	}
+
+	public partial class BarcodeScannerCustomOverlay
+	{
+		public BarcodeScannerCustomOverlay(UIElement nativeView)
+			=> NativeView = nativeView;
+
+		public readonly UIElement NativeView;
 	}
 }

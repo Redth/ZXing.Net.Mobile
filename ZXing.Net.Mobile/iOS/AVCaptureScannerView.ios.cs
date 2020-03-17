@@ -19,14 +19,17 @@ namespace ZXing.UI
 {
 	public class AVCaptureScannerView : UIView, IScannerView
 	{
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<UIView> Overlay { get; }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
+		
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
-		public AVCaptureScannerView(BarcodeScanningOptions options = null, BarcodeScannerOverlay<UIView> overlay = null)
+		public AVCaptureScannerView(BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options ?? new BarcodeScanningOptions();
-			Overlay = overlay;
+			Settings = settings ?? new BarcodeScannerSettings();
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 		}
 
 		public AVCaptureScannerView(IntPtr handle) : base(handle)
@@ -37,11 +40,12 @@ namespace ZXing.UI
 		{
 		}
 
-		internal AVCaptureScannerView(CGRect frame, BarcodeScanningOptions options = null, BarcodeScannerOverlay<UIView> overlay = null)
+		public AVCaptureScannerView(CGRect frame, BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 			: base(frame)
 		{
-			Options = options;
-			Overlay = overlay;
+			Settings = settings;
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 		}
 
 		AVCaptureSession session;
@@ -64,12 +68,12 @@ namespace ZXing.UI
 			if (overlayView != null)
 				overlayView.RemoveFromSuperview();
 
-			if (Overlay?.CustomOverlay != null)
-				overlayView = Overlay?.CustomOverlay;
+			if (CustomOverlay?.NativeView != null)
+				overlayView = CustomOverlay?.NativeView;
 			else
 			{
 				overlayView = new ZXingDefaultOverlayView(new CGRect(0, 0, this.Frame.Width, this.Frame.Height),
-					Overlay,
+					DefaultOverlaySettings,
 					() => Task.CompletedTask, ToggleTorchAsync);
 			}
 
@@ -128,12 +132,12 @@ namespace ZXing.UI
 			foreach (var device in devices)
 			{
 				captureDevice = device;
-				if (Options.UseFrontCameraIfAvailable.HasValue &&
-					Options.UseFrontCameraIfAvailable.Value &&
+				if (Settings.UseFrontCameraIfAvailable.HasValue &&
+					Settings.UseFrontCameraIfAvailable.Value &&
 					device.Position == AVCaptureDevicePosition.Front)
 
 					break; //Front camera successfully set
-				else if (device.Position == AVCaptureDevicePosition.Back && (!Options.UseFrontCameraIfAvailable.HasValue || !Options.UseFrontCameraIfAvailable.Value))
+				else if (device.Position == AVCaptureDevicePosition.Back && (!Settings.UseFrontCameraIfAvailable.HasValue || !Settings.UseFrontCameraIfAvailable.Value))
 					break; //Back camera succesfully set
 			}
 			if (captureDevice == null)
@@ -159,7 +163,7 @@ namespace ZXing.UI
 					availableResolutions.Add(cr.Value);
 			}
 
-			resolution = Options.GetResolution(availableResolutions);
+			resolution = Settings.GetResolution(availableResolutions);
 
 			// See if the user selected a resolution
 			if (resolution != null)
@@ -199,10 +203,10 @@ namespace ZXing.UI
 				if (!analyzing)
 					return;
 
-				var msSinceLastPreview = (DateTime.UtcNow - lastAnalysis).TotalMilliseconds;
+				var msSinceLastPreview = DateTime.UtcNow - lastAnalysis;
 
-				if (msSinceLastPreview < Options.DelayBetweenAnalyzingFrames
-					|| (wasScanned && msSinceLastPreview < Options.DelayBetweenContinuousScans)
+				if (msSinceLastPreview < Settings.DelayBetweenAnalyzingFrames
+					|| (wasScanned && msSinceLastPreview < Settings.DelayBetweenContinuousScans)
 					|| working)
 					return;
 
@@ -237,7 +241,7 @@ namespace ZXing.UI
 							scannedResults.Add(rs);
 						}
 
-						if (!Options.ScanMultiple)
+						if (!Settings.DecodeMultipleBarcodes)
 							break;
 					}
 
@@ -254,11 +258,11 @@ namespace ZXing.UI
 			session.AddOutput(metadataOutput);
 
 			//Setup barcode formats
-			if (Options?.PossibleFormats?.Any() ?? false)
+			if (Settings?.DecodingOptions?.PossibleFormats?.Any() ?? false)
 			{
 				var formats = AVMetadataObjectType.None;
 
-				foreach (var f in Options.PossibleFormats)
+				foreach (var f in Settings?.DecodingOptions?.PossibleFormats)
 					formats |= AVCaptureBarcodeFormatFromZXingBarcodeFormat(f);
 
 				formats &= ~AVMetadataObjectType.None;

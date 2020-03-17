@@ -7,11 +7,8 @@ using Android.App;
 using Xamarin.Forms.Platform.Android;
 using Android.Views;
 using System.ComponentModel;
-using System.Reflection;
-using Android.Widget;
 using ZXing.UI;
 using System.Threading.Tasks;
-using System.Linq.Expressions;
 
 [assembly: ExportRenderer(typeof(ZXingScannerView), typeof(ZXingScannerViewRenderer))]
 namespace ZXing.Net.Mobile.Forms.Android
@@ -36,7 +33,7 @@ namespace ZXing.Net.Mobile.Forms.Android
 
 			if (e.OldElement != null)
 			{
-				e.OldElement.AutoFocusRequested -= Element_AutoFocusRequested;
+				e.OldElement.AutoFocusHandler = null;
 
 				// Unsubscribe from event handlers and cleanup any resources
 				if (Control != null)
@@ -56,21 +53,10 @@ namespace ZXing.Net.Mobile.Forms.Android
 				}
 
 				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
-				e.NewElement.AutoFocusRequested += Element_AutoFocusRequested;
+				e.NewElement.AutoFocusHandler = async (x, y) => await AutoFocus(x, y);
 			}
 
 			base.OnElementChanged(e);
-		}
-
-		void Element_AutoFocusRequested(int x, int y)
-		{
-			if (Control != null)
-			{
-				if (x < 0 && y < 0)
-					Control.AutoFocusAsync();
-				else
-					Control.AutoFocusAsync(x, y);
-			}
 		}
 
 		void Control_OnBarcodeScanned(object sender, BarcodeScannedEventArgs e)
@@ -102,24 +88,28 @@ namespace ZXing.Net.Mobile.Forms.Android
 			{
 				isHandlingTouch = true;
 
-				try
-				{
-					var x = e.GetX();
-					var y = e.GetY();
+				var x = (int)e.GetX();
+				var y = (int)e.GetY();
 
-					if (Control != null)
-					{
-						AsyncHelpers.RunSync(() => Control.AutoFocusAsync((int)x, (int)y));
-						Logger.Info($"Touch: x={x}, y={y}");
-					}
-				}
-				finally
+				if (Control != null)
 				{
-					isHandlingTouch = false;
+					Logger.Info($"Touch: x={x}, y={y}");
+					AutoFocus(x, y).ContinueWith(t =>
+					{
+						isHandlingTouch = false;
+					});
 				}
 			}
 
 			return base.OnTouchEvent(e);
+		}
+
+		async Task AutoFocus(int x, int y)
+		{
+			if (x < 0 && y < 0)
+				await Control?.AutoFocusAsync();
+			else
+				await Control?.AutoFocusAsync(x, y);
 		}
 	}
 }

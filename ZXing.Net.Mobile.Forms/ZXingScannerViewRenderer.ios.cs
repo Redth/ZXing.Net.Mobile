@@ -27,8 +27,6 @@ namespace ZXing.Net.Mobile.Forms.iOS
 
 			if (e.OldElement != null)
 			{
-				//e.OldElement.AutoFocusRequested -= FormsView_AutoFocusRequested;
-
 				// Unsubscribe from event handlers and cleanup any resources
 				if (Control != null)
 				{
@@ -47,13 +45,12 @@ namespace ZXing.Net.Mobile.Forms.iOS
 				}
 
 				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
-				//e.NewElement.AutoFocusRequested += FormsView_AutoFocusRequested;
 			}
 
 			base.OnElementChanged(e);
 		}
 
-		private void Control_OnBarcodeScanned(object sender, ZXing.UI.BarcodeScannedEventArgs e)
+		void Control_OnBarcodeScanned(object sender, ZXing.UI.BarcodeScannedEventArgs e)
 			=> Element?.RaiseOnBarcodeScanned(e.Results);
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)

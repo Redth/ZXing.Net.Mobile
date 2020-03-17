@@ -14,12 +14,12 @@ namespace ZXing.UI
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
 		public bool IsTorchOn
 		{
-			get => Settings.FlashMode == CameraFlashMode.On;
-			set => Settings.FlashMode = value ? CameraFlashMode.On : CameraFlashMode.Off;
+			get => base.Settings.FlashMode == CameraFlashMode.On;
+			set => base.Settings.FlashMode = value ? CameraFlashMode.On : CameraFlashMode.Off;
 		}
 
 		public bool HasTorch
@@ -43,15 +43,15 @@ namespace ZXing.UI
 			: this(device, mediaView, null)
 		{ }
 
-		internal ZXingScannerCamera(CameraDevice device, MediaView mediaView, BarcodeScanningOptions options) : base(device)
+		internal ZXingScannerCamera(CameraDevice device, MediaView mediaView, BarcodeScannerSettings settings) : base(device)
 		{
-			Options = options ?? new BarcodeScanningOptions();
+			Settings = settings ?? new BarcodeScannerSettings();
 			Display = new Display(mediaView);
-			Settings.ImageQuality = 100;
-			Settings.PreviewPixelFormat = Capabilities.SupportedPreviewPixelFormats.FirstOrDefault();
-			Settings.PreviewResolution = Settings.RecommendedPreviewResolution;
-			Settings.CapturePixelFormat = CameraPixelFormat.Nv12;
-			Settings.CaptureResolution = Capabilities.SupportedCaptureResolutions.FirstOrDefault();
+			base.Settings.ImageQuality = 100;
+			base.Settings.PreviewPixelFormat = Capabilities.SupportedPreviewPixelFormats.FirstOrDefault();
+			base.Settings.PreviewResolution = base.Settings.RecommendedPreviewResolution;
+			base.Settings.CapturePixelFormat = CameraPixelFormat.Nv12;
+			base.Settings.CaptureResolution = Capabilities.SupportedCaptureResolutions.FirstOrDefault();
 			DisplaySettings.Rotation = Rotation.Rotate270;
 
 			FocusStateChanged += FocusStateChangedHandler;
@@ -70,7 +70,7 @@ namespace ZXing.UI
 			if (!isDisposed && State == CameraState.Preview)
 			{
 				if (torchFlag)
-					Settings.FlashMode = torchMode;
+					base.Settings.FlashMode = torchMode;
 				torchFlag = false;
 			}
 		}
@@ -79,8 +79,8 @@ namespace ZXing.UI
 		{
 			if (!isDisposed)
 			{
-				if (Options?.DelayBetweenContinuousScans > 0)
-					await Task.Delay(Options.DelayBetweenContinuousScans);
+				if (Settings?.DelayBetweenContinuousScans > TimeSpan.Zero)
+					await Task.Delay(Settings.DelayBetweenContinuousScans);
 
 				StartPreview();
 			}
@@ -91,7 +91,7 @@ namespace ZXing.UI
 			if (!IsAnalyzing)
 				return;
 
-			var result = await TizenBarcodeAnalyzer.AnalyzeBarcodeAsync(e.MainImage, Options?.ScanMultiple ?? false);
+			var result = await TizenBarcodeAnalyzer.AnalyzeBarcodeAsync(e.MainImage, Settings?.DecodeMultipleBarcodes ?? false);
 
 			if (result != null && result.Length > 0)
 			{
@@ -129,9 +129,9 @@ namespace ZXing.UI
 
 		public Task ToggleTorchAsync()
 		{
-			torchMode = (Settings.FlashMode == CameraFlashMode.Off ? CameraFlashMode.On : CameraFlashMode.Off);
+            torchMode = (base.Settings.FlashMode == CameraFlashMode.Off ? CameraFlashMode.On : CameraFlashMode.Off);
 			if (State == CameraState.Preview)
-				Settings.FlashMode = torchMode;
+				base.Settings.FlashMode = torchMode;
 			else
 				torchFlag = true;
 
@@ -142,7 +142,7 @@ namespace ZXing.UI
 		{
 			torchMode = on ? CameraFlashMode.On : CameraFlashMode.Off;
 			if (State == CameraState.Preview)
-				Settings.FlashMode = torchMode;
+				base.Settings.FlashMode = torchMode;
 			else
 				torchFlag = true;
 
@@ -151,8 +151,8 @@ namespace ZXing.UI
 
 		public Task AutoFocusAsync()
 		{
-			Settings.ClearFocusArea();
-			Settings.AutoFocusMode = CameraAutoFocusMode.Normal;
+			base.Settings.ClearFocusArea();
+			base.Settings.AutoFocusMode = CameraAutoFocusMode.Normal;
 
 			return Task.CompletedTask;
 		}
@@ -160,7 +160,7 @@ namespace ZXing.UI
 		public async Task AutoFocusAsync(int x, int y)
 		{
 			await AutoFocusAsync();
-			Settings.SetAutoFocusArea(x, y);
+			base.Settings.SetAutoFocusArea(x, y);
 		}
 	}
 }

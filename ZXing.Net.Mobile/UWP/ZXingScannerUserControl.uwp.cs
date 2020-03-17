@@ -29,9 +29,11 @@ namespace ZXing.UI
 		Grid gridDefaultOverlay;
 		TextBlock bottomText;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Settings { get; }
 
-		public BarcodeScannerOverlay<UIElement> Overlay { get; }
+		public BarcodeScannerCustomOverlay CustomOverlay { get; }
+
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings { get; }
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
@@ -59,10 +61,11 @@ namespace ZXing.UI
 		public async Task AutoFocusAsync(int x, int y)
 			=> await AutoFocusAsync(x, y, true);
 
-		public ZXingScannerUserControl(BarcodeScanningOptions options = null, BarcodeScannerOverlay<UIElement> overlay = null)
+		public ZXingScannerUserControl(BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
 		{
-			Options = options ?? new BarcodeScanningOptions();
-			Overlay = overlay;
+			Settings = settings ?? new BarcodeScannerSettings();
+			CustomOverlay = customOverlay;
+			DefaultOverlaySettings = defaultOverlaySettings;
 
 			rootGrid = new Grid { VerticalAlignment = VerticalAlignment.Stretch, HorizontalAlignment = HorizontalAlignment.Stretch };
 
@@ -110,7 +113,7 @@ namespace ZXing.UI
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.WrapWholeWords,
 				Foreground = new SolidColorBrush(Colors.White),
-				Text = overlay?.TopText ?? string.Empty
+				Text = DefaultOverlaySettings?.TopText ?? string.Empty
 			};
 			topBorder.Child = topText;
 			gridDefaultOverlay.Children.Add(topBorder);
@@ -161,7 +164,7 @@ namespace ZXing.UI
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.WrapWholeWords,
 				Foreground = new SolidColorBrush(Colors.White),
-				Text = overlay?.BottomText ?? string.Empty
+				Text = DefaultOverlaySettings?.BottomText ?? string.Empty
 			};
 			botBorder.Child = bottomText;
 			gridDefaultOverlay.Children.Add(botBorder);
@@ -219,10 +222,10 @@ namespace ZXing.UI
 
 			IsAnalyzing = true;
 
-			if (Overlay?.CustomOverlay != null)
+			if (CustomOverlay?.NativeView != null)
 			{
 				gridCustomOverlay.Children.Clear();
-				gridCustomOverlay.Children.Add(Overlay.CustomOverlay);
+				gridCustomOverlay.Children.Add(CustomOverlay.NativeView);
 
 				gridCustomOverlay.Visibility = Visibility.Visible;
 				gridDefaultOverlay.Visibility = Visibility.Collapsed;
@@ -234,7 +237,7 @@ namespace ZXing.UI
 			}
 
 			// Find which device to use
-			var preferredCamera = await GetFilteredCameraOrDefaultAsync(Options);
+			var preferredCamera = await GetFilteredCameraOrDefaultAsync(Settings);
 			if (preferredCamera == null)
 			{
 				var error = "No camera available";
@@ -312,7 +315,7 @@ namespace ZXing.UI
 				Logger.Info($"Camera Preview Resolution: {vp.Width}x{vp.Height}");
 				availableResolutions.Add(new CameraResolution { Width = (int)vp.Width, Height = (int)vp.Height });
 			}
-			var previewResolution =  Options?.CameraResolutionSelector?.Invoke(availableResolutions);
+			var previewResolution =  Settings?.CameraResolutionSelector?.Invoke(availableResolutions);
 
 			if (availableResolutions == null || availableResolutions.Count < 1)
 			{
@@ -365,17 +368,17 @@ namespace ZXing.UI
 
 			await SetupAutoFocus();
 
-			var zxing = Options.BuildBarcodeReader();
+			var zxing = Settings.BuildBarcodeReader();
 
 			timerPreview = new Timer(async (state) =>
 			{
 
-				var delay = Options.DelayBetweenAnalyzingFrames;
+				var delay = Settings.DelayBetweenAnalyzingFrames;
 
 				if (stopping || processing || !IsAnalyzing
 				|| (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
 				{
-					timerPreview.Change(delay, Timeout.Infinite);
+					timerPreview.Change(delay, TimeSpan.FromMilliseconds(-1));
 					return;
 				}
 
@@ -404,7 +407,7 @@ namespace ZXing.UI
 					// Try decoding the image
 					if (luminanceSource != null)
 					{
-						results = Options?.ScanMultiple ?? false
+						results = Settings?.DecodeMultipleBarcodes ?? false
 							? zxing.DecodeMultiple(luminanceSource)
 							: new[] { zxing.Decode(luminanceSource) };
 					}
@@ -421,7 +424,7 @@ namespace ZXing.UI
 
 					if (filteredResults.Any())
 					{
-						delay = Options.DelayBetweenContinuousScans;
+						delay = Settings.DelayBetweenContinuousScans;
 
 						OnBarcodeScanned?.Invoke(this, new BarcodeScannedEventArgs(filteredResults));
 					}
@@ -429,12 +432,12 @@ namespace ZXing.UI
 
 				processing = false;
 
-				timerPreview.Change(delay, Timeout.Infinite);
+				timerPreview.Change(delay, TimeSpan.FromMilliseconds(-1));
 
-			}, null, Options.InitialDelayBeforeAnalyzingFrames, Timeout.Infinite);
+			}, null, Settings.InitialDelayBeforeAnalyzingFrames, TimeSpan.FromMilliseconds(-1));
 		}
 
-		async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(BarcodeScanningOptions options)
+		async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync(BarcodeScannerSettings options)
 		{
 			var videoCaptureDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
 
@@ -487,7 +490,7 @@ namespace ZXing.UI
 
 				var focusSettings = new FocusSettings();
 
-				if (Options.DisableAutofocus)
+				if (Settings.DisableAutofocus)
 				{
 					focusSettings.Mode = FocusMode.Manual;
 					focusSettings.Distance = ManualFocusDistance.Nearest;
@@ -526,7 +529,7 @@ namespace ZXing.UI
 
 		public async Task AutoFocusAsync(int x, int y, bool useCoordinates)
 		{
-			if (Options.DisableAutofocus)
+			if (Settings.DisableAutofocus)
 				return;
 
 			if (IsFocusSupported && mediaCapture?.CameraStreamState == CameraStreamState.Streaming)
@@ -609,8 +612,8 @@ namespace ZXing.UI
 					await TorchAsync(false);
 				if (isMediaCaptureInitialized)
 					await mediaCapture.StopPreviewAsync();
-				if (Overlay?.CustomOverlay != null)
-					gridCustomOverlay.Children.Remove(Overlay.CustomOverlay);
+				if (CustomOverlay?.NativeView != null)
+					gridCustomOverlay.Children.Remove(CustomOverlay.NativeView);
 			}
 			catch { }
 			finally

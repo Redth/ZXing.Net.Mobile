@@ -67,7 +67,7 @@ namespace Sample.Forms
 				};
 				customOverlay.Children.Add(torch);
 
-				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScanningOptions { AutoRotate = true }, customOverlay: customOverlay);
+				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScannerSettings { AutoRotate = true }, customOverlay: customOverlay);
 				scanPage.OnBarcodeScanned += (s, e) =>
 				{
 					Device.BeginInvokeOnMainThread(async () =>
@@ -88,7 +88,7 @@ namespace Sample.Forms
 			};
 			buttonScanContinuously.Clicked += async delegate
 			{
-				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScanningOptions { DelayBetweenContinuousScans = 3000 });
+				scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScannerSettings { DelayBetweenContinuousScans = TimeSpan.FromSeconds(3) });
 				scanPage.OnBarcodeScanned += (s, e) =>
 					Device.BeginInvokeOnMainThread(async () =>
 					{

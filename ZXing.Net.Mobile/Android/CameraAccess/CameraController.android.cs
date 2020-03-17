@@ -21,9 +21,9 @@ namespace ZXing.UI
 		readonly CameraEventsListener cameraEventListener;
 		int cameraId;
 
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Options { get; }
 
-		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, BarcodeScanningOptions options)
+		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, BarcodeScannerSettings options)
 		{
 			Options = options;
 

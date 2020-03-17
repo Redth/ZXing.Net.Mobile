@@ -1,16 +1,30 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using ZXing.OneD;
 
 namespace ZXing.UI
 {
 	public partial class BarcodeScanner : IBarcodeScanner
 	{
-		public BarcodeScanner(BarcodeScanningOptions options = null, BarcodeScannerOverlay overlay = null)
+		public BarcodeScanner(BarcodeScannerSettings settings)
+			: this(settings, null, null)
 		{
-			this.options = options ?? new BarcodeScanningOptions();
-			this.overlay = overlay;
+		}
+
+		public BarcodeScanner(BarcodeScannerSettings settings, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings)
+			: this(settings, defaultOverlaySettings, null)
+		{
+		}
+
+		public BarcodeScanner(BarcodeScannerSettings settings, BarcodeScannerCustomOverlay customOverlay)
+			: this(settings, null, customOverlay)
+		{
+		}
+
+		public BarcodeScanner(BarcodeScannerSettings settings = null, BarcodeScannerDefaultOverlaySettings defaultOverlaySettings = null, BarcodeScannerCustomOverlay customOverlay = null)
+		{
+			this.settings = settings ?? new BarcodeScannerSettings();
+			this.defaultOverlaySettings = defaultOverlaySettings;
+			this.customOverlay = customOverlay;
 			Init();
 		}
 
@@ -67,22 +81,14 @@ namespace ZXing.UI
 			set => PlatformIsAnalyzing = value;
 		}
 
-		readonly BarcodeScanningOptions options;
-		public BarcodeScanningOptions Options => options;
+		readonly BarcodeScannerSettings settings;
+		public BarcodeScannerSettings Settings => settings;
 
-		readonly BarcodeScannerOverlay overlay;
-		public BarcodeScannerOverlay Overlay => overlay;
+		readonly BarcodeScannerDefaultOverlaySettings defaultOverlaySettings;
+		public BarcodeScannerDefaultOverlaySettings DefaultOverlaySettings => defaultOverlaySettings;
 
-		public BarcodeScannerOverlay<TView> GetOverlay<TView>()
-		{
-			if (overlay == null)
-				return null;
-
-			if (overlay is BarcodeScannerOverlay<TView> vo)
-				return vo;
-
-			return overlay.WithView<TView>();
-		}
+		readonly BarcodeScannerCustomOverlay customOverlay;
+		public BarcodeScannerCustomOverlay CustomOverlay => CustomOverlay;
 	}
 
 	public enum LogLevel
@@ -127,32 +133,21 @@ namespace ZXing.UI
 		}
 	}
 
-	public class BarcodeScannerOverlay<TView> : BarcodeScannerOverlay
+	public partial class BarcodeScannerCustomOverlay
 	{
-		public TView CustomOverlay { get; set; }
+		public BarcodeScannerCustomOverlay()
+		{
+		}
 	}
 
-	public class BarcodeScannerOverlay
+	public class BarcodeScannerDefaultOverlaySettings
 	{
-		public BarcodeScannerOverlay<TView> WithView<TView>()
-			=> WithView<TView>(default);
-
-		public BarcodeScannerOverlay<TView> WithView<TView>(TView customOverlay)
-			=> new BarcodeScannerOverlay<TView>
-			{
-				CustomOverlay = customOverlay,
-				TopText = this.TopText,
-				BottomText = this.BottomText,
-				FlashButtonText = this.FlashButtonText,
-				CancelButtonText = this.CancelButtonText
-			};
-
 		public string TopText { get; set; }
 
 		public string BottomText { get; set; }
 
-		public string FlashButtonText { get; set; }
+		public bool ShowFlashButton { get; set; }
 
-		public string CancelButtonText { get; set; }
+		public bool ShowCancelButton { get; set; }
 	}
 }

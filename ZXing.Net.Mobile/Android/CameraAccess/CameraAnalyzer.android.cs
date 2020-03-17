@@ -17,10 +17,10 @@ namespace ZXing.UI
 		bool wasScanned;
 		
 		public Action<ZXing.Result[]> ResultHandler { get; }
-		public BarcodeScanningOptions Options { get; }
+		public BarcodeScannerSettings Options { get; }
 
 
-		public CameraAnalyzer(SurfaceView surfaceView, BarcodeScanningOptions options, Action<ZXing.Result[]> resultHandler)
+		public CameraAnalyzer(SurfaceView surfaceView, BarcodeScannerSettings options, Action<ZXing.Result[]> resultHandler)
 		{
 			Options = options;
 
@@ -68,7 +68,7 @@ namespace ZXing.UI
 				if (processingTask != null && !processingTask.IsCompleted)
 					return false;
 
-				var elapsedTimeMs = (DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds;
+				var elapsedTimeMs = DateTime.UtcNow - lastPreviewAnalysis;
 				if (elapsedTimeMs < Options.DelayBetweenAnalyzingFrames)
 					return false;
 
@@ -134,7 +134,7 @@ namespace ZXing.UI
 			if (rotate)
 				fast = fast.rotateCounterClockwise();
 
-			if (Options.ScanMultiple)
+			if (Options.DecodeMultipleBarcodes)
 				results = barcodeReader.DecodeMultiple(fast);
 			else
 				results = new[] { barcodeReader.Decode(fast) };

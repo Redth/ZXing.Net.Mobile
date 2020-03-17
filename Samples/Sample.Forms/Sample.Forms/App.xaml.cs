@@ -32,26 +32,22 @@ namespace Sample.Forms
 		{
 			var expectedFormat = ZXing.BarcodeFormat.QR_CODE;
 			Enum.TryParse(param, out expectedFormat);
-			var opts = new ZXing.UI.BarcodeScanningOptions
-			{
-				PossibleFormats = new List<ZXing.BarcodeFormat> { expectedFormat }
-			};
-
+			
 			System.Diagnostics.Debug.WriteLine("Scanning " + expectedFormat);
 
-			var scanPage = new ZXingScannerPage(opts);
-			scanPage.OnScanResult += (result) =>
+			var scanPage = new ZXingScannerPage(new ZXing.UI.BarcodeScannerSettings(new ZXing.Common.DecodingOptions
 			{
-				if (result != null && result.Length > 0 && result[0] != null)
+				PossibleFormats = new[] { expectedFormat }
+			}));
+			scanPage.OnBarcodeScanned += (s, e) =>
+			{
+				Device.BeginInvokeOnMainThread(() =>
 				{
-					Device.BeginInvokeOnMainThread(() =>
-					{
-						var str = result.Select(r => $"{r.Text} | {r.BarcodeFormat}");
+					var str = string.Join("; ", e.Results.Select(r => $"{r.Text} | {r.BarcodeFormat}"));
 
-						MainPage.Navigation.PopAsync();
-						MainPage.DisplayAlert("Barcode Result(s)", string.Join("; ", str), "OK");
-					});
-				}
+					MainPage.Navigation.PopAsync();
+					MainPage.DisplayAlert("Barcode Result(s)", string.Join("; ", str), "OK");
+				});
 			};
 
 			MainPage.Navigation.PushAsync(scanPage);

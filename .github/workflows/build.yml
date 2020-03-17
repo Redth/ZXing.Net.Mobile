@@ -27,8 +27,8 @@ jobs:
             $pkgVer = $env:GITHUB_REF.Substring($env:GITHUB_REF.LastIndexOf('/') + 1)
           }
           New-Item -ItemType Directory -Force -Path .\artifacts
-          msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj
-          msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj
+          msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /p:RepositoryBranch=$GITHUB_REF /p:RepositoryCommit=$GITHUB_SHA .\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj
+          msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /p:RepositoryBranch=$GITHUB_REF /p:RepositoryCommit=$GITHUB_SHA .\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1
         with:
