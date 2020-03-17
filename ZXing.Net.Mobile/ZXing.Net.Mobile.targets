@@ -5,7 +5,7 @@
 		<_ZXingNetMobileIsiOS Condition="'$(TargetFrameworkIdentifier)'=='Xamarin.iOS' And ('$(OutputType)' != 'Library' OR '$(IsAppExtension)'=='True')">True</_ZXingNetMobileIsiOS>
 		<_ZXingNetIsAndroid Condition="'$(AndroidApplication)' == 'True'">True</_ZXingNetIsAndroid>
 		<_ZXingNetIsUWP Condition="'$(TargetPlatformIdentifier)'=='UAP' And '$(OutputType)' == 'AppContainerExe'">True</_ZXingNetIsUWP>
-		<_ZXingNetIsTizen Condition="'$(TargetPlatformIdentifer)'=='Tizen'">True</_ZXingNetIsTizen>
+		<_ZXingNetIsTizen Condition="'$(TargetPlatformIdentifer)'=='Tizen' Or '$(TargetPlatformIdentifer)'=='tizen'">True</_ZXingNetIsTizen>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -45,4 +45,9 @@
 		</ContentWithTargetPath>
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(_ZXingNetIsTizen)' == 'True'">
+		<TizenTpkUserIncludeFiles Include="$(_ZXingImagesRootPath)tizen40\torch.png">
+			<TizenTpkSubDir>res</TizenTpkSubDir>
+		</TizenTpkUserIncludeFiles>
+	</ItemGroup>
 </Project>

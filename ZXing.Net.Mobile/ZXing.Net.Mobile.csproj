@@ -58,6 +58,7 @@
 		<None Include="ZXing.Net.Mobile.targets" Pack="True" PackagePath="buildTransitive\" />
 		<None Include="UWP\*.png" Pack="True" PackagePath="images\uap10\" />
 		<None Include="iOS\*.png" Pack="True" PackagePath="images\xamarinios10\" />
+		<None Include="Tizen\*.png" Pack="True" PackagePath="images\tizen40\" />
 	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<Compile Include="**\*.netstandard.cs" />
