@@ -24,6 +24,8 @@ namespace ZXing.UI
 			WeightX = 1;
 			WeightY = 1;
 
+			var pr = Xamarin.Essentials.Permissions.RequestAsync<Xamarin.Essentials.Permissions.Camera>().Result;
+
 			zxingScannerCamera = new ZXingScannerCamera(CameraDevice.Rear, this, Settings);
 
 			showCallback = new EvasObjectEvent(this, EvasObjectCallbackType.Show);

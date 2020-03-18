@@ -7,14 +7,13 @@ namespace ZXing.UI
 {
 	class ZXingScannerCamera : Camera, IScannerView, IDisposable
 	{
-		Action<Result> resultHandler;
 		bool isDisposed;
 		bool torchFlag;
 		CameraFlashMode torchMode;
 
 		public event EventHandler<BarcodeScannedEventArgs> OnBarcodeScanned;
 
-		public BarcodeScannerSettings Settings { get; }
+		public new BarcodeScannerSettings Settings { get; }
 
 		public bool IsTorchOn
 		{
@@ -52,7 +51,11 @@ namespace ZXing.UI
 			base.Settings.PreviewResolution = base.Settings.RecommendedPreviewResolution;
 			base.Settings.CapturePixelFormat = CameraPixelFormat.Nv12;
 			base.Settings.CaptureResolution = Capabilities.SupportedCaptureResolutions.FirstOrDefault();
+			base.Settings.ClearFocusArea();
+			base.Settings.AutoFocusMode = CameraAutoFocusMode.Normal;
+
 			DisplaySettings.Rotation = Rotation.Rotate270;
+			
 
 			FocusStateChanged += FocusStateChangedHandler;
 			Capturing += CapturingHandler;

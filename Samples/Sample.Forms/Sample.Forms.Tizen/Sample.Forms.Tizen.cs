@@ -10,16 +10,10 @@ namespace FormsSample.Tizen
 		{
 			base.OnCreate();
 
-			var result = PrivacyPrivilegeManager.CheckPermission("http://tizen.org/privilege/camera");
-			
-			switch (result)
-			{
-				case CheckResult.Allow:
-					LoadApplication(new App());
-					break;
-				default:
-					break;
-			}
+			LoadApplication(new App());
+
+			var cameraPermission = "http://tizen.org/privilege/camera";
+			PrivacyPrivilegeManager.RequestPermission(cameraPermission);
 		}
 
 		static void Main(string[] args)
