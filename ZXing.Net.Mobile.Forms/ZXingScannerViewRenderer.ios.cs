@@ -30,6 +30,7 @@ namespace ZXing.Net.Mobile.Forms.iOS
 				// Unsubscribe from event handlers and cleanup any resources
 				if (Control != null)
 				{
+					Control.Stop();
 					Control.OnBarcodeScanned -= Control_OnBarcodeScanned;
 					Control.Dispose();
 					SetNativeControl(null);
@@ -42,6 +43,8 @@ namespace ZXing.Net.Mobile.Forms.iOS
 				{
 					var ctrl = new ZXing.UI.ZXingScannerView();
 					SetNativeControl(ctrl);
+
+					ctrl.Start();
 				}
 
 				Control.OnBarcodeScanned += Control_OnBarcodeScanned;
