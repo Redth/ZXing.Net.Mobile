@@ -11,11 +11,18 @@ using Android.Support.V4.App;
 namespace ZXing.Mobile
 {
 	public class ZXingScannerFragment : Fragment, IZXingScanner<View>, IScannerView
-	{
+	{		
 		public ZXingScannerFragment()
-		{
-			UseCustomOverlayView = false;
-		}
+        {
+
+        }
+
+        public ZXingScannerFragment(View customOverlayView = null, bool useCustomOverlay = true, View scanAreaView = null)
+        {
+			UseCustomOverlayView = useCustomOverlay;
+            CustomOverlayView = customOverlayView;
+            CustomOverlayScanAreaView = scanAreaView;
+        }
 
 		FrameLayout frame;
 
@@ -27,7 +34,7 @@ namespace ZXing.Mobile
 
 			try
 			{
-				scanner = new ZXingSurfaceView(Activity, ScanningOptions);
+				scanner = new ZXingSurfaceView(Activity, ScanningOptions, CustomOverlayView, CustomOverlayScanAreaView);
 
 				frame.AddView(scanner, layoutParams);
 
@@ -96,14 +103,15 @@ namespace ZXing.Mobile
 			return layoutParams;
 		}
 
-		public View CustomOverlayView { get; set; }
+		public View CustomOverlayView { get; set; }		
+		public View CustomOverlayScanAreaView { get; set; }
 		public bool UseCustomOverlayView { get; set; }
 		public MobileBarcodeScanningOptions ScanningOptions { get; set; }
 		public string TopText { get; set; }
 		public string BottomText { get; set; }
 
 		ZXingSurfaceView scanner;
-		ZxingOverlayView zxingOverlay;
+		ZxingOverlayView zxingOverlay;		
 
 		public void Torch(bool on)
 			=> scanner?.Torch(on);

@@ -8,6 +8,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
+using Xamarin.Essentials;
 using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile.CameraAccess
@@ -32,7 +33,7 @@ namespace ZXing.Mobile.CameraAccess
 
 		public Camera Camera { get; private set; }
 
-		public int LastCameraDisplayOrientationDegree { get; private set; }
+        public int CurrentCameraDisplayRotationDegree { get; private set; }
 
 		public void RefreshCamera()
 		{
@@ -369,64 +370,62 @@ namespace ZXing.Mobile.CameraAccess
 			}
 		}
 
-		void SetCameraDisplayOrientation()
-		{
-			var degrees = GetCameraDisplayOrientation();
-			LastCameraDisplayOrientationDegree = degrees;
+        void SetCameraDisplayOrientation()
+        {
+            int currentDegrees;
+            int correctedDegrees;
+            
+            currentDegrees = GetCurrentCameraDisplayDegrees();            
+            CurrentCameraDisplayRotationDegree = currentDegrees;            
 
-			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Changing Camera Orientation to: " + degrees);
+            correctedDegrees = GetCorrectedCameraDisplayDegrees(currentDegrees);
+            Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Changing Camera Orientation to: " + correctedDegrees);
 
-			try
-			{
-				Camera.SetDisplayOrientation(degrees);
-			}
-			catch (Exception ex)
-			{
-				Android.Util.Log.Error(MobileBarcodeScanner.TAG, ex.ToString());
-			}
-		}
+            try
+            {
+                Camera.SetDisplayOrientation(correctedDegrees);
+            }
+            catch (Exception ex)
+            {
+                Android.Util.Log.Error(MobileBarcodeScanner.TAG, ex.ToString());
+            }
+        }
 
-		int GetCameraDisplayOrientation()
-		{
-			int degrees;
-			var windowManager = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
-			var display = windowManager.DefaultDisplay;
-			var rotation = display.Rotation;
+        int GetCorrectedCameraDisplayDegrees(int degrees)
+        {
+            var info = new Camera.CameraInfo();
+            Camera.GetCameraInfo(cameraId, info);
 
-			switch (rotation)
-			{
-				case SurfaceOrientation.Rotation0:
-					degrees = 0;
-					break;
-				case SurfaceOrientation.Rotation90:
-					degrees = 90;
-					break;
-				case SurfaceOrientation.Rotation180:
-					degrees = 180;
-					break;
-				case SurfaceOrientation.Rotation270:
-					degrees = 270;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+            int correctedDegrees;
+            if (info.Facing == CameraFacing.Front)
+            {
+                correctedDegrees = (info.Orientation + degrees) % 360;
+                correctedDegrees = (360 - correctedDegrees) % 360; // compensate the mirror
+            }
+            else
+            {
+                // back-facing
+                correctedDegrees = (info.Orientation - degrees + 360) % 360;
+            }
 
-			var info = new Camera.CameraInfo();
-			Camera.GetCameraInfo(cameraId, info);
+            return correctedDegrees;
+        }
 
-			int correctedDegrees;
-			if (info.Facing == CameraFacing.Front)
-			{
-				correctedDegrees = (info.Orientation + degrees) % 360;
-				correctedDegrees = (360 - correctedDegrees) % 360; // compensate the mirror
-			}
-			else
-			{
-				// back-facing
-				correctedDegrees = (info.Orientation - degrees + 360) % 360;
-			}
-
-			return correctedDegrees;
-		}
-	}
+        int GetCurrentCameraDisplayDegrees()
+        {            
+            switch (DeviceDisplay.MainDisplayInfo.Rotation)
+            {
+                case DisplayRotation.Rotation0:
+                    return 0;                    
+                case DisplayRotation.Rotation90:
+                    return 90;                    
+                case DisplayRotation.Rotation180:
+                    return 180;                    
+                case DisplayRotation.Rotation270:
+                    return 270;                    
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
 }

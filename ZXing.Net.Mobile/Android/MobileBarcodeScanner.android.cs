@@ -21,6 +21,7 @@ namespace ZXing.Mobile
 		}
 
 		public Android.Views.View CustomOverlay { get; set; }
+		public Android.Views.View CustomOverlayScanAreaView { get; set; }
 
 		bool torch = false;
 
@@ -37,6 +38,7 @@ namespace ZXing.Mobile
 
 			scanIntent.AddFlags(ActivityFlags.NewTask);
 
+			ZxingActivity.CustomOverlayScanAreaView = this.CustomOverlayScanAreaView;
 			ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
 			ZxingActivity.CustomOverlayView = this.CustomOverlay;
 			ZxingActivity.ScanningOptions = options;
@@ -65,7 +67,7 @@ namespace ZXing.Mobile
 				var scanIntent = new Intent(ctx, typeof(ZxingActivity));
 
 				scanIntent.AddFlags(ActivityFlags.NewTask);
-
+				ZxingActivity.CustomOverlayScanAreaView = this.CustomOverlayScanAreaView;
 				ZxingActivity.UseCustomOverlayView = this.UseCustomOverlay;
 				ZxingActivity.CustomOverlayView = this.CustomOverlay;
 				ZxingActivity.ScanningOptions = options;

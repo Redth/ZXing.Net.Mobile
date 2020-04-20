@@ -10,6 +10,19 @@ namespace ZXing.Mobile
 {
 	public class ZXingSurfaceView : SurfaceView, ISurfaceHolderCallback, IScannerView, IScannerSessionHost
 	{
+		public View CustomOverlay { get; private set; }
+		public View CustomScanArea { get; private set; }
+		public bool UsingCustomScanArea { get { return CustomOverlay != null; } }
+
+		public ZXingSurfaceView(Context context, MobileBarcodeScanningOptions options = null, View customOverlay = null, View customScanArea = null)
+			: base(context)
+		{
+			ScanningOptions = options ?? new MobileBarcodeScanningOptions();
+			CustomOverlay = customOverlay;
+			CustomScanArea = customScanArea;
+			Init();
+		}
+
 		public ZXingSurfaceView(Context context, MobileBarcodeScanningOptions options)
 			: base(context)
 		{
