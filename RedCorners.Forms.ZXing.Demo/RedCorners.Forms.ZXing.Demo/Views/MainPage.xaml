@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<rf:ContentPage2
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rf="clr-namespace:RedCorners.Forms;assembly=RedCorners.Forms"
+    xmlns:vm="clr-namespace:RedCorners.Forms.ZXing.Demo.ViewModels"
+    xmlns:zx="clr-namespace:ZXing.Net.Mobile.Forms;assembly=RedCorners.Forms.ZXing"
+    mc:Ignorable="d"
+    x:Class="RedCorners.Forms.ZXing.Demo.Views.MainPage">
+    <ContentPage.BindingContext>
+        <vm:MainViewModel />
+    </ContentPage.BindingContext>
+
+    <rf:TitledContentView Title="RedCorners.Forms.ZXing.Demo" BackCommand="{Binding ShowSideBarCommand}" IsBackButtonVisible="False">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <zx:ZXingScannerView 
+                x:Name="scannerView" 
+                BackgroundColor="Red" 
+                HorizontalOptions="Fill" 
+                VerticalOptions="Fill" 
+                IsTorchOn="{Binding IsTorchOn}"
+                />
+
+            <StackLayout BackgroundColor="Yellow" VerticalOptions="Start">
+                <StackLayout Orientation="Horizontal">
+                    <Label Text="Torch" />
+                    <Switch IsToggled="{Binding IsTorchOn}" />
+                </StackLayout>
+                <Button x:Name="btnCapture" Text="Capture" />
+                <Label x:Name="lblBarcode" TextColor="Black" VerticalOptions="Start" />
+            </StackLayout>
+
+
+            <Image x:Name="img" Grid.Row="1" HorizontalOptions="Fill" VerticalOptions="Fill" />
+        </Grid>
+        
+        <rf:TitledContentView.Overlay>
+            <rf:SideBar ContentSize="2*">
+                <Frame Padding="0" BackgroundColor="#333333" HasShadow="True" CornerRadius="0">
+                    <StackLayout Padding="30, 40">
+                        <Image Source="icon" HorizontalOptions="Center" HeightRequest="128" WidthRequest="128" />
+                        <Label Text="RedCorners.Forms.ZXing.Demo" FontSize="Large" TextColor="White" HorizontalTextAlignment="Center" />
+                        <rf:HorizontalLine />
+                        <Button Text="Hide" Command="{Binding HideSideBarCommand}" />
+                    </StackLayout>
+                </Frame>
+            </rf:SideBar>
+        </rf:TitledContentView.Overlay>
+    </rf:TitledContentView>
+</rf:ContentPage2>

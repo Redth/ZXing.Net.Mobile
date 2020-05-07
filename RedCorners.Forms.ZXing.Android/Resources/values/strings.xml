@@ -1,0 +1,4 @@
+<resources>
+    <string name="hello">Hello World, Click Me!</string>
+    <string name="app_name">RedCorners.Forms.ZXing.Android</string>
+</resources>
