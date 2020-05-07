@@ -620,7 +620,7 @@ namespace ZXing.Mobile
 				{
 					device.LockForConfiguration(out var err);
 
-					if (err != null)
+					if (err == null)
 					{
 						if (on)
 						{
