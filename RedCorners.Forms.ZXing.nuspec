@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>RedCorners.Forms.ZXing</id>
+    <version>8.47.1-alpha</version>
+    <title>RedCorners.Forms.ZXing</title>
+    <authors>NeatCapital OÜ based on Redth/ZXing.Net.Mobile</authors>
+    <owners>NeatCapital OÜ</owners>
+    <projectUrl>https://redcorners.com/forms</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Fork of Redth/ZXing.Net.Mobile adding extra camera features.</description>
+    <releaseNotes>Fork of Redth/ZXing.Net.Mobile adding extra camera features.</releaseNotes>
+    <tags>Xamarin.Forms Xamarin Android iOS Barcode</tags>
+
+    <dependencies>
+	  <group targetFramework="MonoAndroid90">
+          <dependency id="FastAndroidCamera" version="2.0.0" />
+          <dependency id="Xamarin.Android.Support.v7.AppCompat" version="28.0.0.3" />
+		  <dependency id="Xamarin.Essentials" version="1.5.3.1" />
+		  <dependency id="Xamarin.Forms" version="4.6.0.726" />
+          <dependency id="ZXing.Net" version="0.16.5" />
+      </group>
+	  
+	  <group targetFramework="Xamarin.iOS10">
+		  <dependency id="Xamarin.Essentials" version="1.5.3.1" />
+		  <dependency id="Xamarin.Forms" version="4.6.0.726" />
+          <dependency id="ZXing.Net" version="0.16.5" />
+	  </group>
+    </dependencies>
+    
+    <license type="file">LICENSE.txt</license>
+  </metadata>
+
+  <files>
+    <file src="LICENSE.txt" target="" />
+	<file 
+      src="RedCorners.Forms.ZXing.Android\bin\Release\RedCorners.Forms.ZXing.dll" 
+      target="lib\MonoAndroid90\RedCorners.Forms.ZXing.dll" />
+	  
+    <file 
+      src="RedCorners.Forms.ZXing.iOS\bin\Release\RedCorners.Forms.ZXing.dll" 
+      target="lib\Xamarin.iOS10\RedCorners.Forms.ZXing.dll" />
+  </files>
+
+</package>

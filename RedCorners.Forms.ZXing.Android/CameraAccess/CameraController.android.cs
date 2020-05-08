@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Android.Content;
 using Android.Graphics;
 using Android.Hardware;
+using Android.Media;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
+using Java.IO;
 using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile.CameraAccess
@@ -438,6 +441,7 @@ namespace ZXing.Mobile.CameraAccess
 			Camera.TakePicture(null, null, this);
 			while (_capturePath != null)
 				await Task.Yield();
+			Camera.StartPreview();
         }
 
         public void OnPictureTaken(byte[] data, Camera _)
@@ -446,7 +450,44 @@ namespace ZXing.Mobile.CameraAccess
 				throw new ArgumentNullException(nameof(_capturePath));
 
 			System.IO.File.WriteAllBytes(_capturePath, data);
+
+			var cameraOrientation = GetCameraDisplayOrientation();
+			//var ei = new ExifInterface(_capturePath);
+			//var orientation = (Orientation) ei.GetAttributeInt(ExifInterface.TagOrientation,
+			//									 -1);
+
+			var bitmap = BitmapFactory.DecodeFile(_capturePath);
+			RotateImage(bitmap, cameraOrientation);
+			//switch (orientation)
+			//{
+
+			//	case Orientation.Rotate90:
+			//		RotateImage(bitmap, 90);
+			//		break;
+
+			//	case Orientation.Rotate180:
+			//		RotateImage(bitmap, 180);
+			//		break;
+
+			//	case Orientation.Rotate270:
+			//		RotateImage(bitmap, 270);
+			//		break;
+			//}
+
 			_capturePath = null;
-        }
-    }
+		}
+
+		public void RotateImage(Bitmap source, float angle)
+		{
+			var matrix = new Matrix();
+			matrix.PostRotate(angle);
+			var bmp = Bitmap.CreateBitmap(source, 0, 0, source.Width, source.Height,
+									   matrix, true);
+
+			using (var fs = new FileStream(_capturePath, FileMode.OpenOrCreate, FileAccess.Write))
+			{
+				bmp.Compress(Bitmap.CompressFormat.Jpeg, 100, fs);
+			}
+		}
+	}
 }
