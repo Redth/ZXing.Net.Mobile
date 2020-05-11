@@ -87,17 +87,23 @@ namespace ZXing.Mobile
 
         ZXingScannerFragment scannerFragment;
 
-        protected override void OnCreate (Bundle bundle)
+        protected override void OnCreate(Bundle bundle)
         {
-            base.OnCreate (bundle);
+            base.OnCreate(bundle);
 
-            this.RequestWindowFeature (WindowFeatures.NoTitle);
+            this.RequestWindowFeature(WindowFeatures.NoTitle);
 
-            this.Window.AddFlags (WindowManagerFlags.Fullscreen); //to show
-            this.Window.AddFlags (WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
+            if (this.Window != null)
+            {
+                this.Window.AddFlags(WindowManagerFlags.Fullscreen); //to show
+                this.Window.AddFlags(WindowManagerFlags.KeepScreenOn); //Don't go to sleep while scanning
+            }
 
-            if (ScanningOptions.AutoRotate.HasValue && !ScanningOptions.AutoRotate.Value)
-                RequestedOrientation = ScreenOrientation.Nosensor;
+            if (ScanningOptions != null)
+            {
+                if (ScanningOptions.AutoRotate.HasValue && !ScanningOptions.AutoRotate.Value)
+                    RequestedOrientation = ScreenOrientation.Nosensor;
+            }
 
             SetContentView (Resource.Layout.zxingscanneractivitylayout);
 
