@@ -109,9 +109,9 @@ namespace ZXing.Mobile.CameraAccess
 
 		void DecodeFrame(FastJavaByteArray fastArray)
 		{
-			var cameraPreviewSize = cameraController.Camera.GetParameters().PreviewSize;
-			var width = cameraPreviewSize.Width;
-			var height = cameraPreviewSize.Height;
+			var resolution = cameraController.CameraResolution;
+			var width = resolution.Width;
+			var height = resolution.Height;
 
 			var rotate = false;
 			var newWidth = width;
