@@ -53,6 +53,9 @@
 		<None Include="..\Art\ZXing.Net.Mobile-Icon.png" PackagePath="icon.png" Pack="true" />
 		<Compile Include="**\*.shared.cs" />
 		<Compile Include="**\*.shared.*.cs" />
+		<Compile Include="iOS\Helpers\Rect.cs">
+		  <SubType></SubType>
+		</Compile>
 	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<Compile Include="**\*.netstandard.cs" />
@@ -126,5 +129,8 @@
 		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\uap10.0.16299" />
 		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\xamarinios10" />
 		<None Include="..\ZXing.Net\zxing.dll" Pack="True" PackagePath="lib\xamarinmac20" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="iOS\Helpers\" />
 	</ItemGroup>
 </Project>

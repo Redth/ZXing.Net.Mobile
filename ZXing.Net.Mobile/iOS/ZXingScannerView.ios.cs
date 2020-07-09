@@ -14,9 +14,6 @@ using CoreVideo;
 using ObjCRuntime;
 using UIKit;
 
-using ZXing.Common;
-using ZXing.Mobile;
-
 namespace ZXing.Mobile
 {
 	public class ZXingScannerView : UIView, IZXingScanner<UIView>, IScannerSessionHost
@@ -232,8 +229,8 @@ namespace ZXing.Mobile
 
 			var barcodeReader = ScanningOptions.BuildBarcodeReader();
 
-			outputRecorder = new OutputRecorder(this, img =>
-			{
+			outputRecorder = new OutputRecorder(shouldRotatePreviewBuffer, this, (img ) =>
+            {
 				var ls = img;
 
 				if (!IsAnalyzing)
@@ -242,10 +239,6 @@ namespace ZXing.Mobile
 				try
 				{
 					var perfDecode = PerformanceCounter.Start();
-
-					if (shouldRotatePreviewBuffer)
-						ls = ls.rotateCounterClockwise();
-
 					var result = barcodeReader.Decode(ls);
 
 					PerformanceCounter.Stop(perfDecode, "Decode Time: {0} ms");
@@ -402,14 +395,16 @@ namespace ZXing.Mobile
 
 		public class OutputRecorder : AVCaptureVideoDataOutputSampleBufferDelegate
 		{
-			public OutputRecorder(IScannerSessionHost scannerHost, Func<LuminanceSource, bool> handleImage) : base()
+			public OutputRecorder(bool shouldRotateCounterClockwise, IScannerSessionHost scannerHost, Func<LuminanceSource, bool> handleImage) : base()
 			{
-				this.handleImage = handleImage;
+                this.shouldRotateCounterClockwise = shouldRotateCounterClockwise;
+                this.handleImage = handleImage;
 				this.scannerHost = scannerHost;
 			}
 
 			IScannerSessionHost scannerHost;
-			Func<LuminanceSource, bool> handleImage;
+            Func<LuminanceSource, bool> handleImage;
+            readonly bool shouldRotateCounterClockwise;
 
 			DateTime lastAnalysis = DateTime.MinValue;
 			volatile bool working = false;
@@ -463,11 +458,14 @@ namespace ZXing.Mobile
 						// Let's access the raw underlying data and create a luminance source from it
 						unsafe
 						{
-							var rawData = (byte*)pixelBuffer.BaseAddress.ToPointer();
-							var rawDatalen = (int)(pixelBuffer.Height * pixelBuffer.Width * 4); //This drops 8 bytes from the original length to give us the expected length
-
-							luminanceSource = new CVPixelBufferBGRA32LuminanceSource(rawData, rawDatalen, (int)pixelBuffer.Width, (int)pixelBuffer.Height);
-						}
+							var rawData = new Span<byte>(pixelBuffer.BaseAddress.ToPointer(), (int)(pixelBuffer.Width * pixelBuffer.Height * 4));
+							luminanceSource = new CVPixelBufferBGRA32LuminanceSource(
+								rawData,
+								shouldRotateCounterClockwise,
+								(int)pixelBuffer.Width,
+								(int)pixelBuffer.Height,
+								scannerHost.ScanningOptions.ScanningArea);
+                        }
 
 						if (handleImage(luminanceSource))
 							wasScanned = true;
