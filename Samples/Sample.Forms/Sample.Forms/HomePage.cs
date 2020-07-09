@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using ZXing;
+using ZXing.Mobile;
 using ZXing.Net.Mobile.Forms;
 
 namespace Sample.Forms
@@ -17,6 +19,7 @@ namespace Sample.Forms
 		Button buttonScanContinuousCustomPage;
 		Button buttonScanCustomPage;
 		Button buttonGenerateBarcode;
+		Button buttonScanMiddle1D;
 		
 
 		public HomePage() : base()
@@ -130,8 +133,36 @@ namespace Sample.Forms
 				await Navigation.PushAsync(new BarcodePage());
 			};
 
+			buttonScanMiddle1D = new Button
+			{
+				Text = "Scan 1D only in the middle (Android and iOS only)",
+				AutomationId = "barcodeMiddleScan1D"
+			};
+			buttonScanMiddle1D.Clicked += async delegate
+			{
+				scanPage = new ZXingScannerPage(new MobileBarcodeScanningOptions
+				{
+					ScanningArea = ScanningArea.From(0f, 0.49f, 1f, 0.51f),
+					PossibleFormats = new List<BarcodeFormat> { BarcodeFormat.All_1D }
+				});
+				
+				scanPage.OnScanResult += (result) =>
+				{
+					scanPage.IsScanning = false;
+
+					Device.BeginInvokeOnMainThread(async () =>
+					{
+						await Navigation.PopAsync();
+						await DisplayAlert("Scanned Barcode", result.Text, "OK");
+					});
+				};
+
+				await Navigation.PushAsync(scanPage);
+			};
+
 			var stack = new StackLayout();
 			stack.Children.Add(buttonScanDefaultOverlay);
+			stack.Children.Add(buttonScanMiddle1D);
 			stack.Children.Add(buttonScanCustomOverlay);
 			stack.Children.Add(buttonScanContinuously);
 			stack.Children.Add(buttonScanCustomPage);
