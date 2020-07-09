@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.AccessControl;
 using System.Threading.Tasks;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
@@ -163,8 +161,7 @@ namespace ZXing.Mobile.CameraAccess
 			fastArray = null;
 
 			PerformanceCounter.Stop(start,
-				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees +
-				", rotate: " +
+				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
 				rotate + ")");
 
 			if (result != null)

@@ -230,7 +230,7 @@ namespace ZXing.Mobile
 			var barcodeReader = ScanningOptions.BuildBarcodeReader();
 
 			outputRecorder = new OutputRecorder(shouldRotatePreviewBuffer, this, (img ) =>
-            {
+			{
 				var ls = img;
 
 				if (!IsAnalyzing)
@@ -397,14 +397,14 @@ namespace ZXing.Mobile
 		{
 			public OutputRecorder(bool shouldRotateCounterClockwise, IScannerSessionHost scannerHost, Func<LuminanceSource, bool> handleImage) : base()
 			{
-                this.shouldRotateCounterClockwise = shouldRotateCounterClockwise;
-                this.handleImage = handleImage;
+				this.shouldRotateCounterClockwise = shouldRotateCounterClockwise;
+				this.handleImage = handleImage;
 				this.scannerHost = scannerHost;
 			}
 
 			IScannerSessionHost scannerHost;
-            Func<LuminanceSource, bool> handleImage;
-            readonly bool shouldRotateCounterClockwise;
+			Func<LuminanceSource, bool> handleImage; 
+			readonly bool shouldRotateCounterClockwise;
 
 			DateTime lastAnalysis = DateTime.MinValue;
 			volatile bool working = false;
@@ -458,9 +458,9 @@ namespace ZXing.Mobile
 						// Let's access the raw underlying data and create a luminance source from it
 						unsafe
 						{
-							var rawData = new Span<byte>(pixelBuffer.BaseAddress.ToPointer(), (int)(pixelBuffer.Width * pixelBuffer.Height * 4));
+							var rawData = new Span<byte>(pixelBuffer.BaseAddress.ToPointer(), (int)(pixelBuffer.Width * pixelBuffer.Height * 4)); 
 							luminanceSource = new CVPixelBufferBGRA32LuminanceSource(
-								rawData,
+								rawData, 
 								shouldRotateCounterClockwise,
 								(int)pixelBuffer.Width,
 								(int)pixelBuffer.Height,
