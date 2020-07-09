@@ -21,12 +21,19 @@ namespace ZXing.Mobile
 			InitialDelayBeforeAnalyzingFrames = 300;
 			DelayBetweenContinuousScans = 1000;
 			UseNativeScanning = false;
-		}
+            ScanningArea = ScanningArea.Default;
+        }
 
 		public CameraResolutionSelectorDelegate CameraResolutionSelector { get; set; }
 
 		public IEnumerable<BarcodeFormat> PossibleFormats { get; set; }
 
+		/// <summary>
+        /// Narrow chosen scanning area.<br/>
+		/// <b>Works only on iOS and Android</b>
+        /// </summary>
+        public ScanningArea ScanningArea { get; set; }
+        
 		public bool? TryHarder { get; set; }
 
 		public bool? PureBarcode { get; set; }
