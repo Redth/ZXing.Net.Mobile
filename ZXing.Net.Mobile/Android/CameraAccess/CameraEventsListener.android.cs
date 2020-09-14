@@ -10,11 +10,14 @@ namespace ZXing.Mobile.CameraAccess
 
 		public void OnPreviewFrame(IntPtr data, Camera camera)
 		{
-			using (var fastArray = new FastJavaByteArray(data))
+			if (data != null && data != IntPtr.Zero)
 			{
-				OnPreviewFrameReady?.Invoke(this, fastArray);
+				using (var fastArray = new FastJavaByteArray(data))
+				{
+					OnPreviewFrameReady?.Invoke(this, fastArray);
 
-				camera.AddCallbackBuffer(fastArray);
+					camera.AddCallbackBuffer(fastArray);
+				}
 			}
 		}
 
