@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
@@ -112,8 +111,6 @@ namespace ZXing.Mobile.CameraAccess
 			var width = cameraParameters.PreviewSize.Width;
 			var height = cameraParameters.PreviewSize.Height;
 
-			var barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
-
 			var rotate = false;
 			var newWidth = width;
 			var newHeight = height;
@@ -131,10 +128,33 @@ namespace ZXing.Mobile.CameraAccess
 			ZXing.Result result = null;
 			var start = PerformanceCounter.Start();
 
-			LuminanceSource fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
+			var scanningRect = scannerHost.ScanningOptions.ScanningArea;
 			if (rotate)
-				fast = fast.rotateCounterClockwise();
+			{
+				scanningRect = scanningRect.RotateCounterClockwise();
+			}
 
+			var left = (int) (width * scanningRect.StartX);
+			var top = (int) (height * scanningRect.StartY);
+			var endHeight = (int) (scanningRect.EndY * height) - top;
+			var endWidth = (int) (scanningRect.EndX * width) - left;
+
+			LuminanceSource fast =
+				new FastJavaByteArrayYUVLuminanceSource(
+					fastArray,
+					width,
+					height,
+					left,
+					top,
+					endWidth,
+					endHeight);
+
+			if (rotate)
+			{
+				fast = fast.rotateCounterClockwise();
+			}
+
+			var barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
 			result = barcodeReader.Decode(fast);
 
 			fastArray.Dispose();

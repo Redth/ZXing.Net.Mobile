@@ -45,7 +45,10 @@ namespace Sample.Android
 				scanner.BottomText = "Wait for the barcode to automatically scan!";
 
 				//Start scanning
-				var result = await scanner.Scan();
+				var result = await scanner.Scan( new MobileBarcodeScanningOptions 
+				{ 
+					ScanningArea = ScanningArea.From(0f, 0.49f, 1f, 0.51f)
+				});
 
 				HandleScanResult(result);
 			};
