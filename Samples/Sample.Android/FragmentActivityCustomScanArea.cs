@@ -1,31 +1,22 @@
+﻿using System;
 using System.Collections.Generic;
+using ZXing.Mobile;
+using Android.OS;
+
 using Android.App;
+using Android.Widget;
 using Android.Content.PM;
 using Android.Views;
-using Android.Widget;
-using Android.OS;
-using ZXing;
-using ZXing.Mobile;
-using System;
 using Xamarin.Essentials;
+using Android.Content;
 using AndroidX.ConstraintLayout.Widget;
 
 namespace Sample.Android
 {
-	[Activity(Label = "ZXing.Net.Mobile", MainLauncher = true, Theme = "@style/Theme.AppCompat.Light", ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.KeyboardHidden)]
-	public class Activity1 : AndroidX.AppCompat.App.AppCompatActivity
-	{
-		Button buttonScanCustomView;
-		Button buttonScanCustomAreaView;
-		Button buttonScanDefaultView;
-		Button buttonContinuousScan;
-		Button buttonFragmentScanner;
-        Button buttonFragmentScannerCustomArea;
-		Button buttonGenerate;
-
-		MobileBarcodeScanner scanner;
-
-        //custom scan area variables
+    [Activity(Label = "ZXing.Net.Mobile", Theme = "@style/Theme.AppCompat.Light", ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.KeyboardHidden)]
+    public class FragmentActivityCustomScanArea : AndroidX.Fragment.App.FragmentActivity
+    {
+		ZXingScannerFragment scanFragment;
         Button buttonRectangle;
         Button buttonSquare;
         Button buttonRandom;
@@ -35,90 +26,23 @@ namespace Sample.Android
         View scanArea;
         bool scanAreaIsRectangle = true;
         bool isScanAreaCentered = false;
-        const int FRAGMENT_SCAN_REQUEST = 1;
-        public const string RESULT_EXTRA_NAME = "scanResultText";
 
-		protected override void OnCreate(Bundle bundle)
+        protected override void OnCreate (Bundle savedInstanceState)
 		{
-			base.OnCreate(bundle);
+			base.OnCreate (savedInstanceState);
 
-			Xamarin.Essentials.Platform.Init(Application);
+            SetContentView (Resource.Layout.FragmentActivity);
 
-			// Set our view from the "main" layout resource
-			SetContentView(Resource.Layout.Main);
+		}
 
-			//Create a new instance of our Scanner
-			scanner = new MobileBarcodeScanner();
+        protected override void OnResume ()
+        {
+            base.OnResume ();
 
-			buttonScanDefaultView = this.FindViewById<Button>(Resource.Id.buttonScanDefaultView);
-			buttonScanDefaultView.Click += async delegate
-			{
 
-				//Tell our scanner to use the default overlay
-				scanner.UseCustomOverlay = false;
-
-				//We can customize the top and bottom text of the default overlay
-				scanner.TopText = "Hold the camera up to the barcode\nAbout 6 inches away";
-				scanner.BottomText = "Wait for the barcode to automatically scan!";
-
-				//Start scanning
-				var result = await scanner.Scan();
-
-				HandleScanResult(result);
-			};
-
-			buttonContinuousScan = FindViewById<Button>(Resource.Id.buttonScanContinuous);
-			buttonContinuousScan.Click += delegate
-			{
-
-				scanner.UseCustomOverlay = false;
-
-				//We can customize the top and bottom text of the default overlay
-				scanner.TopText = "Hold the camera up to the barcode\nAbout 6 inches away";
-				scanner.BottomText = "Wait for the barcode to automatically scan!";
-
-				var opt = new MobileBarcodeScanningOptions();
-				opt.DelayBetweenContinuousScans = 3000;
-
-				//Start scanning
-				scanner.ScanContinuously(opt, HandleScanResult);
-			};
-
-			Button flashButton;
-			View zxingOverlay;
-
-			buttonScanCustomView = this.FindViewById<Button>(Resource.Id.buttonScanCustomView);
-			buttonScanCustomView.Click += async delegate
-			{
-
-				//Tell our scanner we want to use a custom overlay instead of the default
-				scanner.UseCustomOverlay = true;
-
-				//Inflate our custom overlay from a resource layout
-				zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlay, null);
-
-				//Find the button from our resource layout and wire up the click event
-				flashButton = zxingOverlay.FindViewById<Button>(Resource.Id.buttonZxingFlash);
-				flashButton.Click += (sender, e) => scanner.ToggleTorch();
-
-				//Set our custom overlay
-				scanner.CustomOverlay = zxingOverlay;
-                scanner.UseCustomOverlay = true;
-
-				//Start scanning!
-				var result = await scanner.Scan(new MobileBarcodeScanningOptions { AutoRotate = true });
-
-				HandleScanResult(result);
-			};
-
-			buttonScanCustomAreaView = this.FindViewById<Button>(Resource.Id.buttonScanCustomAreaView);
-			buttonScanCustomAreaView.Click += async delegate {
-
-				//Tell our scanner we want to use a custom overlay instead of the default
-				scanner.UseCustomOverlay = true;
-
-				//Inflate our custom overlay from a resource layout
-				zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlayCustomScanArea, null);                
+            if (scanFragment == null)
+            {
+                var zxingOverlay = LayoutInflater.FromContext(this).Inflate(Resource.Layout.ZxingOverlayCustomScanArea, null);
                 scanArea = zxingOverlay.FindViewById<View>(Resource.Id.scanView);
 
                 //Find all the buttons and wire up their events
@@ -131,98 +55,63 @@ namespace Sample.Android
 
                 buttonRectangle.Click += Rectangle_Click;
                 buttonSquare.Click += Square_Click;
-                scanViewPosition.Click += ScanViewPosition_Click;                
+                scanViewPosition.Click += ScanViewPosition_Click;
                 buttonIncrease.Click += ButtonIncrease_Click;
                 buttonDecrease.Click += ButtonDecrease_Click;
                 buttonRandom.Click += ButtonRandom_Click;
 
-                //Set our custom overlay and custom scan area
-                scanner.CustomOverlay = zxingOverlay;
-                scanner.UseCustomOverlay = true;
-                scanner.CustomOverlayScanAreaView = scanArea;
+                scanFragment = new ZXingScannerFragment(zxingOverlay, true, scanArea);                   
 
-                //Start scanning!
-                var result = await scanner.Scan(new MobileBarcodeScanningOptions { AutoRotate = true });
+                SupportFragmentManager.BeginTransaction()
+                    .Replace(Resource.Id.fragment_container, scanFragment)
+                    .Commit();
+            }
 
-				HandleScanResult(result);
-			};
+                Scan();
+        }
 
-			buttonFragmentScanner = FindViewById<Button>(Resource.Id.buttonFragment);
-			buttonFragmentScanner.Click += delegate
-			{
-				StartActivity(typeof(FragmentActivity));
-			};
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+            => Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-            buttonFragmentScannerCustomArea = FindViewById<Button>(Resource.Id.buttonFragmentCustomArea);
-            buttonFragmentScannerCustomArea.Click += delegate {                                
-                StartActivityForResult(typeof(FragmentActivityCustomScanArea), FRAGMENT_SCAN_REQUEST);                                    
+        protected override void OnPause()
+        {
+            scanFragment?.StopScanning();
+
+            base.OnPause();
+        }
+
+        void Scan ()
+        {
+            var opts = new MobileBarcodeScanningOptions {
+                
+                CameraResolutionSelector = availableResolutions => {
+
+                    foreach (var ar in availableResolutions) {
+                        Console.WriteLine ("Resolution: " + ar.Width + "x" + ar.Height);
+                    }
+                    return null;
+                }
             };
 
-			buttonGenerate = FindViewById<Button>(Resource.Id.buttonGenerate);
-			buttonGenerate.Click += delegate
-			{
-				StartActivity(typeof(ImageActivity));
-			};
-		}
+            scanFragment.StartScanning(result => {
 
-		void HandleScanResult(ZXing.Result result)
-		{
-			var msg = "";
-
-			if (result != null && !string.IsNullOrEmpty(result.Text))
-				msg = "Found Barcode: " + result.Text;
-			else
-				msg = "Scanning Canceled!";
-
-			RunOnUiThread(() => Toast.MakeText(this, msg, ToastLength.Short).Show());
-		}
-
-		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
-		{
-			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-		}
-
-		[Java.Interop.Export("UITestBackdoorScan")]
-		public Java.Lang.String UITestBackdoorScan(string param)
-		{
-			var expectedFormat = BarcodeFormat.QR_CODE;
-			Enum.TryParse(param, out expectedFormat);
-			var opts = new MobileBarcodeScanningOptions
-			{
-				PossibleFormats = new List<BarcodeFormat> { expectedFormat }
-			};
-			var barcodeScanner = new MobileBarcodeScanner();
-
-			Console.WriteLine("Scanning " + expectedFormat);
-
-			//Start scanning
-			barcodeScanner.Scan(opts).ContinueWith(t =>
-			{
-
-				var result = t.Result;
-
-				var format = result?.BarcodeFormat.ToString() ?? string.Empty;
-				var value = result?.Text ?? string.Empty;
-
-				RunOnUiThread(() =>
-				{
-
-					AlertDialog dialog = null;
-					dialog = new AlertDialog.Builder(this)
-									.SetTitle("Barcode Result")
-									.SetMessage(format + "|" + value)
-									.SetNeutralButton("OK", (sender, e) =>
-									{
-										dialog.Cancel();
-									}).Create();
-					dialog.Show();
-				});
-			});
-
-			return new Java.Lang.String();
-		}
+                var resultIntent = new Intent();
+                string resultText;
+                // Null result means scanning was cancelled
+                if (result == null || string.IsNullOrEmpty (result.Text)) {
+                    resultText = "";
+                }
+               else
+                {
+                    resultText = result.Text;
+                }
+                // Otherwise, proceed with result
+                
+                resultIntent.PutExtra(Activity1.RESULT_EXTRA_NAME, resultText);
+                SetResult(Result.Ok, resultIntent);
+                Finish();
+            }, opts);
+        }
 
         void ButtonRandom_Click(object sender, EventArgs e)
         {
@@ -309,7 +198,7 @@ namespace Sample.Android
             scanArea.LayoutParameters = layout;
         }
 
-        public int ConvertDpToPx(int dp)
+        int ConvertDpToPx(int dp)
         {
             var density = ApplicationContext.Resources
                                    .DisplayMetrics
@@ -425,5 +314,4 @@ namespace Sample.Android
         }
     }
 }
-
 

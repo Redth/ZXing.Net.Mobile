@@ -59,6 +59,8 @@ namespace ZXing.Mobile
 			=> ResumeAnalysisHandler?.Invoke();
 
 		public static View CustomOverlayView { get; set; }
+		
+		public static View CustomOverlayScanAreaView { get; set; }
 
 		public static bool UseCustomOverlayView { get; set; }
 
@@ -86,8 +88,16 @@ namespace ZXing.Mobile
 
 			SetContentView(ZXing.Net.Mobile.Resource.Layout.zxingscanneractivitylayout);
 
+            //since these are static the views may still exist if the MobileBarcodeScanner object is re-used
+            if (!UseCustomOverlayView)
+            {
+                CustomOverlayView = null;
+                CustomOverlayScanAreaView = null;
+            }
+
 			scannerFragment = new ZXingScannerFragment();
 			scannerFragment.CustomOverlayView = CustomOverlayView;
+			scannerFragment.CustomOverlayScanAreaView = CustomOverlayScanAreaView;
 			scannerFragment.UseCustomOverlayView = UseCustomOverlayView;
 			scannerFragment.TopText = TopText;
 			scannerFragment.BottomText = BottomText;

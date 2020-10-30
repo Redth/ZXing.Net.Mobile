@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:weightSum="5">
+    android:weightSum="7">
     <Button
         android:text="Scan with Default Overlay"
         android:layout_width="fill_parent"
@@ -23,10 +23,22 @@
         android:text="Scan with Custom Overlay"
         android:layout_weight="1" />
     <Button
+        android:id="@+id/buttonScanCustomAreaView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Scan with Custom Area Overlay"
+        android:layout_weight="1" />
+    <Button
         android:text="Fragment Scanner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/buttonFragment"
+        android:layout_weight="1" />
+        <Button
+        android:text="Fragment Scanner Custom Area Overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonFragmentCustomArea"
         android:layout_weight="1" />
     <Button
         android:text="Barcode Generator"
