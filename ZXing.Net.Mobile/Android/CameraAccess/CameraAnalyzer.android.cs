@@ -1,155 +1,146 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Android.Content;
+using Android.Hardware.Camera2;
+using Android.Hardware.Camera2.Params;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
+using ZXing.Common;
 
 namespace ZXing.Mobile.CameraAccess
 {
     public class CameraAnalyzer
-	{
-		readonly CameraController cameraController;
-		readonly CameraEventsListener cameraEventListener;
-		Task processingTask;
-		DateTime lastPreviewAnalysis = DateTime.UtcNow;
-		bool wasScanned;
-        readonly IScannerSessionHost scannerHost;
-		BarcodeReader barcodeReader;
+    {
+        readonly CameraController cameraController;
+        readonly CameraEventsListener cameraEventListener;
+        Task processingTask;
+        DateTime lastPreviewAnalysis = DateTime.UtcNow;
+        bool wasScanned;
+        IScannerSessionHost scannerHost;
+        CameraManager cameraManager;
 
-		public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
-		{
-			this.scannerHost = scannerHost;
-			cameraEventListener = new CameraEventsListener();
-			cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
-			Torch = new Torch(cameraController, surfaceView.Context);
-		}
+        public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
+        {
+            this.scannerHost = scannerHost;
+            cameraEventListener = new CameraEventsListener();
+            cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
+            Torch = new Torch(cameraController, surfaceView.Context);
+            cameraManager = (CameraManager)surfaceView.Context.GetSystemService(Context.CameraService);
+        }
 
-		public Action<Result> BarcodeFound;
+        public Action<Result> BarcodeFound;
 
-		public Torch Torch { get; }
+        public Torch Torch { get; }
 
-		public bool IsAnalyzing { get; private set; }
+        public bool IsAnalyzing { get; private set; }
 
-		public void PauseAnalysis()
-			=> IsAnalyzing = false;
+        public void PauseAnalysis()
+            => IsAnalyzing = false;
 
-		public void ResumeAnalysis()
-			=> IsAnalyzing = true;
+        public void ResumeAnalysis()
+            => IsAnalyzing = true;
 
-		public void ShutdownCamera()
-		{
-			IsAnalyzing = false;
-			cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
-			cameraController.ShutdownCamera();
-		}
+        public void ShutdownCamera()
+        {
+            IsAnalyzing = false;
+            cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
+            cameraController.ShutdownCamera();
+        }
 
-		public void SetupCamera()
-		{
-			cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
-			cameraController.SetupCamera();
-			barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
-		}
+        public void SetupCamera(int width, int height)
+        {
+            cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
+            cameraController.SetupCamera(width, height);
+        }
 
-		public void AutoFocus()
-			=> cameraController.AutoFocus();
+        public void AutoFocus()
+            => cameraController.AutoFocus();
 
-		public void AutoFocus(int x, int y)
-			=> cameraController.AutoFocus(x, y);
+        public void AutoFocus(int x, int y)
+            => cameraController.AutoFocus(x, y);
 
-		public void RefreshCamera()
-			=> cameraController.RefreshCamera();
+        public void RefreshCamera(int width, int height)
+        {
+            cameraController.RefreshCamera(width, height);
+        }
 
-		bool CanAnalyzeFrame
-		{
-			get
-			{
-				if (!IsAnalyzing)
-					return false;
+        bool CanAnalyzeFrame
+        {
+            get
+            {
+                if (!IsAnalyzing)
+                    return false;
 
-				//Check and see if we're still processing a previous frame
-				// todo: check if we can run as many as possible or mby run two analyzers at once (Vision + ZXing)
-				if (processingTask != null && !processingTask.IsCompleted)
-					return false;
+                //Check and see if we're still processing a previous frame
+                // todo: check if we can run as many as possible or mby run two analyzers at once (Vision + ZXing)
+                if (processingTask != null && !processingTask.IsCompleted)
+                    return false;
 
-				var elapsedTimeMs = (DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds;
-				if (elapsedTimeMs < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
-					return false;
+                var elapsedTimeMs = (DateTime.UtcNow - lastPreviewAnalysis).TotalMilliseconds;
+                if (elapsedTimeMs < scannerHost.ScanningOptions.DelayBetweenAnalyzingFrames)
+                    return false;
 
-				// Delay a minimum between scans
-				if (wasScanned && elapsedTimeMs < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
-					return false;
+                // Delay a minimum between scans
+                if (wasScanned && elapsedTimeMs < scannerHost.ScanningOptions.DelayBetweenContinuousScans)
+                    return false;
 
-				return true;
-			}
-		}
+                return true;
+            }
+        }
 
-		void HandleOnPreviewFrameReady(object sender, FastJavaByteArray fastArray)
-		{
-			if (!CanAnalyzeFrame)
-				return;
+        void HandleOnPreviewFrameReady(object sender, byte[] fastArray)
+        {
+            if (!CanAnalyzeFrame)
+                return;
 
-			wasScanned = false;
-			lastPreviewAnalysis = DateTime.UtcNow;
+            wasScanned = false;
+            lastPreviewAnalysis = DateTime.UtcNow;
 
-			processingTask = Task.Run(() =>
-			{
-				try
-				{
-					DecodeFrame(fastArray);
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine(ex);
-				}
-			}).ContinueWith(task =>
-			{
-				if (task.IsFaulted)
-					Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "DecodeFrame exception occurs");
-			}, TaskContinuationOptions.OnlyOnFaulted);
-		}
+            processingTask = Task.Run(() =>
+            {
+                try
+                {
+                    DecodeFrame(fastArray);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }).ContinueWith(task =>
+            {
+                if (task.IsFaulted)
+                    Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "DecodeFrame exception occurs");
+            }, TaskContinuationOptions.OnlyOnFaulted);
+        }
 
-		void DecodeFrame(FastJavaByteArray fastArray)
-		{
-			var resolution = cameraController.CameraResolution;
-			var width = resolution.Width;
-			var height = resolution.Height;
+        void DecodeFrame(byte[] fastArray)
+        {
+            var previewSize = cameraController.IdealPhotoSize;
+            var width = previewSize.Width;
+            var height = previewSize.Height;
+            var barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
 
-			var rotate = false;
-			var newWidth = width;
-			var newHeight = height;
+            ZXing.Result result = null;
+            var start = PerformanceCounter.Start();
 
-			// use last value for performance gain
-			var cDegrees = cameraController.LastCameraDisplayOrientationDegree;
+            barcodeReader.AutoRotate = true;
 
-			if (cDegrees == 90 || cDegrees == 270)
-			{
-				rotate = true;
-				newWidth = height;
-				newHeight = width;
-			}
+            var source2 = new PlanarYUVLuminanceSource(fastArray, width, height, 0, 0, width, height, false);
 
-			var start = PerformanceCounter.Start();
+            result = barcodeReader.Decode(source2);
+            PerformanceCounter.Stop(start,
+                "Decode Time: {0} ms (width: " + width + ", height: " + height + ")");
 
-			LuminanceSource fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
-			if (rotate)
-				fast = fast.rotateCounterClockwise();
+            if (result != null)
+            {
+                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
 
-            var result = barcodeReader.Decode(fast);
-
-			fastArray.Dispose();
-			fastArray = null;
-
-			PerformanceCounter.Stop(start,
-				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
-				rotate + ")");
-
-			if (result != null)
-			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
-
-				wasScanned = true;
-				BarcodeFound?.Invoke(result);
-				return;
-			}
-		}
-	}
+                wasScanned = true;
+                BarcodeFound?.Invoke(result);
+                return;
+            }
+        }
+    }
 }
