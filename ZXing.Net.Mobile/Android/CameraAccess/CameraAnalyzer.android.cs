@@ -49,10 +49,10 @@ namespace ZXing.Mobile.CameraAccess
             cameraController.ShutdownCamera();
         }
 
-        public void SetupCamera(int width, int height)
+        public void SetupCamera()
         {
             cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
-            cameraController.SetupCamera(width, height);
+            cameraController.SetupCamera();
         }
 
         public void AutoFocus()
@@ -61,9 +61,9 @@ namespace ZXing.Mobile.CameraAccess
         public void AutoFocus(int x, int y)
             => cameraController.AutoFocus(x, y);
 
-        public void RefreshCamera(int width, int height)
+        public void RefreshCamera()
         {
-            cameraController.RefreshCamera(width, height);
+            cameraController.RefreshCamera();
         }
 
         bool CanAnalyzeFrame

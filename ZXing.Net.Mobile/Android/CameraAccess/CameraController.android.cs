@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Android.Content;
 using Android.Graphics;
-using Android.Hardware;
 using Android.Hardware.Camera2;
 using Android.Hardware.Camera2.Params;
 using Android.Media;
 using Android.OS;
-using Android.Runtime;
 using Android.Util;
 using Android.Views;
-using ApxLabs.FastAndroidCamera;
 using Java.Lang;
-using Java.Util.Concurrent;
 
 namespace ZXing.Mobile.CameraAccess
 {
@@ -28,16 +23,13 @@ namespace ZXing.Mobile.CameraAccess
         readonly CameraStateCallback cameraStateCallback;
 
         CameraManager cameraManager;
-        private Size[] supportedJpegSizes;
-        private Size idealPhotoSize;
-        private ImageReader imageReader;
-        private bool flashSupported;
-        private Handler backgroundHandler;
-        private CaptureRequest.Builder previewBuilder;
-        private CameraCaptureSession previewSession;
-        private CaptureRequest previewRequest;
-        private HandlerThread backgroundThread;
-        private int? lastCameraDisplayOrientationDegree;
+        ImageReader imageReader;
+        bool flashSupported;
+        Handler backgroundHandler;
+        CaptureRequest.Builder previewBuilder;
+        CameraCaptureSession previewSession;
+        CaptureRequest previewRequest;
+        HandlerThread backgroundThread;
 
         public string CameraId { get; private set; }
 
@@ -45,22 +37,7 @@ namespace ZXing.Mobile.CameraAccess
 
         public CameraDevice Camera { get; private set; }
 
-        public Size PreviewSize { get; private set; }
-
         public Size IdealPhotoSize { get; private set; }
-
-        public int LastCameraDisplayOrientationDegree
-        {
-            get
-            {
-                if (lastCameraDisplayOrientationDegree is null)
-                {
-                    lastCameraDisplayOrientationDegree = GetCameraDisplayOrientation();
-                }
-
-                return lastCameraDisplayOrientationDegree.Value;
-            }
-        }
 
         public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
         {
@@ -95,21 +72,22 @@ namespace ZXing.Mobile.CameraAccess
             };
         }
 
-        public void RefreshCamera(int width, int height)
+        public void RefreshCamera()
         {
             if (Camera is null || previewRequest is null || previewSession is null || previewBuilder is null) return;
-            SetUpCameraOutputs(width, height);
+
+            SetUpCameraOutputs();
             previewRequest.Dispose();
             previewSession.Dispose();
             previewBuilder.Dispose();
             StartPreview();
         }
 
-        public void SetupCamera(int width, int height)
+        public void SetupCamera()
         {
             StartBackgroundThread();
 
-            OpenCamera(width, height);
+            OpenCamera();
         }
 
         public void ShutdownCamera()
@@ -136,74 +114,30 @@ namespace ZXing.Mobile.CameraAccess
             AutoFocus(focusX, focusY, true);
         }
 
-        int GetCameraDisplayOrientation()
-        {
-            int degrees;
-            var windowManager = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
-            var display = windowManager.DefaultDisplay;
-            var rotation = display.Rotation;
-
-            switch (rotation)
-            {
-                case SurfaceOrientation.Rotation0:
-                    degrees = 0;
-                    break;
-                case SurfaceOrientation.Rotation90:
-                    degrees = 90;
-                    break;
-                case SurfaceOrientation.Rotation180:
-                    degrees = 180;
-                    break;
-                case SurfaceOrientation.Rotation270:
-                    degrees = 270;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
-            var facing = (int)characteristics.Get(CameraCharacteristics.LensFacing);
-            var orientation = (int)characteristics.Get(CameraCharacteristics.SensorOrientation);
-            int correctedDegrees;
-            if (facing == (int)CameraFacing.Front)
-            {
-                correctedDegrees = (orientation + degrees) % 360;
-                correctedDegrees = (360 - correctedDegrees) % 360; // compensate the mirror
-            }
-            else
-            {
-                // back-facing
-                correctedDegrees = (orientation - degrees + 360) % 360;
-            }
-
-            return correctedDegrees;
-        }
-
         void AutoFocus(int x, int y, bool useCoordinates)
         {
             if (Camera == null) return;
 
-            if (scannerHost.ScanningOptions.DisableAutofocus)
-            {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Disabled");
-                return;
-            }
-
-            var characteristics = cameraManager.GetCameraCharacteristics(CameraId.ToString());
-            var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
-            var supportedFocusModes = ((int[])characteristics
-                .Get(CameraCharacteristics.ControlAfAvailableModes))
-                .Select(x => (ControlAFMode)x);
-
-            Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
-
             try
             {
+                if (scannerHost.ScanningOptions.DisableAutofocus)
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Disabled");
+                    return;
+                }
+
+                var characteristics = cameraManager.GetCameraCharacteristics(CameraId.ToString());
+                var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
+                var supportedFocusModes = ((int[])characteristics
+                    .Get(CameraCharacteristics.ControlAfAvailableModes))
+                    .Select(x => (ControlAFMode)x);
+
+                Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Requested");
+
                 // If we want to use coordinates
                 // Also only if our camera supports Auto focus mode
                 // Since FocusAreas only really work with FocusModeAuto set
-                if (useCoordinates
-                    && supportedFocusModes.Contains(ControlAFMode.Auto))
+                if (useCoordinates && supportedFocusModes.Contains(ControlAFMode.Auto))
                 {
                     // Let's give the touched area a 20 x 20 minimum size rect to focus on
                     // So we'll offset -10 from the center of the touch and then
@@ -237,62 +171,72 @@ namespace ZXing.Mobile.CameraAccess
 
                 // Finally autofocus (weather we used focus areas or not)
                 previewBuilder.Set(CaptureRequest.ControlAfTrigger, (int)ControlAFTrigger.Start);
+
+                UpdatePreview();
             }
             catch (System.Exception ex)
             {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
+                Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus Failed: {0}", ex);
             }
         }
 
-        void SetUpCameraOutputs(int width, int height)
+        void SetUpCameraOutputs()
         {
-            cameraManager = (CameraManager)context.GetSystemService(Context.CameraService);
-
-            var cameraIds = cameraManager.GetCameraIdList();
-
-            CameraId = cameraIds[0];
-
-            for (var i = 0; i < cameraIds.Length; i++)
+            try
             {
-                var cameraCharacteristics = cameraManager.GetCameraCharacteristics(cameraIds[i]);
+                cameraManager = (CameraManager)context.GetSystemService(Context.CameraService);
 
-                var facing = (Integer)cameraCharacteristics.Get(CameraCharacteristics.LensFacing);
-                if (facing != null && facing == (Integer.ValueOf((int)LensFacing.Back)))
+                var cameraIds = cameraManager.GetCameraIdList();
+
+                CameraId = cameraIds[0];
+
+                var whichCamera = LensFacing.Back;
+
+                if (scannerHost.ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
+                    scannerHost.ScanningOptions.UseFrontCameraIfAvailable.Value)
+                    whichCamera = LensFacing.Front;
+
+                for (var i = 0; i < cameraIds.Length; i++)
                 {
-                    CameraId = cameraIds[i];
+                    var cameraCharacteristics = cameraManager.GetCameraCharacteristics(cameraIds[i]);
 
-                    //Phones like Galaxy S10 have 2 or 3 frontal cameras usually the one with flash is the one
-                    //that should be chosen, if not It will select the first one and that can be the fish
-                    //eye camera
-                    if (HasFLash(cameraCharacteristics))
+                    var facing = (Integer)cameraCharacteristics.Get(CameraCharacteristics.LensFacing);
+                    if (facing != null && facing.IntValue() == (int)whichCamera)
+                    {
+                        CameraId = cameraIds[i];
                         break;
+                    }
                 }
+
+                var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
+                var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
+                Size[] supportedSizes = null;
+
+                if (characteristics != null)
+                    supportedSizes = ((StreamConfigurationMap)characteristics
+                        .Get(CameraCharacteristics.ScalerStreamConfigurationMap))
+                        .GetOutputSizes((int)ImageFormatType.Yuv420888);
+
+                if (supportedSizes is null || supportedSizes.Length == 0)
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG, "Failed to get supported output sizes");
+                    return;
+                }
+
+                // 1050 and 1400 are a random guess which work pretty good
+                var idealSize = GetOptimalSize(supportedSizes, 1050, 1400);
+                imageReader = ImageReader.NewInstance(idealSize.Width, idealSize.Height, ImageFormatType.Yuv420888, 5);
+
+                flashSupported = HasFLash(characteristics);
+
+                imageReader.SetOnImageAvailableListener(cameraEventListener, backgroundHandler);
+
+                IdealPhotoSize = idealSize;
             }
-
-            var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
-            var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
-
-            if (supportedJpegSizes == null && characteristics != null)
+            catch (System.Exception ex)
             {
-                supportedJpegSizes = ((StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap)).GetOutputSizes((int)ImageFormatType.Yuv420888);
+                Log.Debug(MobileBarcodeScanner.TAG, "Could not setup camera outputs" + ex);
             }
-
-            if (supportedJpegSizes != null && supportedJpegSizes.Length > 0)
-            {
-                idealPhotoSize = GetOptimalSize(supportedJpegSizes, 1050, 1400); //MAGIC NUMBER WHICH HAS PROVEN TO BE THE BEST
-            }
-
-            imageReader = ImageReader.NewInstance(idealPhotoSize.Width, idealPhotoSize.Height, ImageFormatType.Yuv420888, 5);
-
-            flashSupported = HasFLash(characteristics);
-
-            imageReader.SetOnImageAvailableListener(cameraEventListener, backgroundHandler);
-
-            IdealPhotoSize = idealPhotoSize;
-
-            PreviewSize = GetOptimalSize(map.GetOutputSizes(Class.FromType(typeof(SurfaceTexture))), width, height);
-
-            lastCameraDisplayOrientationDegree = null;
         }
 
         bool HasFLash(CameraCharacteristics characteristics)
@@ -308,81 +252,96 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
-        public void OpenCamera(int width, int height)
+        public void OpenCamera()
         {
             if (context == null || OpeningCamera)
             {
                 return;
             }
 
-            OpeningCamera = true;
+            try
+            {
+                OpeningCamera = true;
 
-            SetUpCameraOutputs(width, height);
+                SetUpCameraOutputs();
 
-            cameraManager.OpenCamera(CameraId, cameraStateCallback, backgroundHandler);
+                cameraManager.OpenCamera(CameraId, cameraStateCallback, backgroundHandler);
+            }
+            catch (System.Exception ex)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Error on opening camera" + ex);
+            }
         }
 
         public void StartPreview()
         {
-            if (Camera == null || PreviewSize == null) return;
+            if (Camera is null || holder is null || imageReader is null || backgroundHandler is null) return;
 
-            previewBuilder = Camera.CreateCaptureRequest(CameraTemplate.Preview);
-            previewBuilder.AddTarget(holder.Surface);
-            previewBuilder.AddTarget(imageReader.Surface);
+            try
+            {
+                previewBuilder = Camera.CreateCaptureRequest(CameraTemplate.Preview);
+                previewBuilder.AddTarget(holder.Surface);
+                previewBuilder.AddTarget(imageReader.Surface);
 
-            var surfaces = new List<Surface>();
-            surfaces.Add(holder.Surface);
-            surfaces.Add(imageReader.Surface);
+                var surfaces = new List<Surface>();
+                surfaces.Add(holder.Surface);
+                surfaces.Add(imageReader.Surface);
 
-            Camera.CreateCaptureSession(surfaces,
-                new CameraCaptureStateListener
-                {
-                    OnConfigureFailedAction = session =>
+                Camera.CreateCaptureSession(surfaces,
+                    new CameraCaptureStateListener
                     {
+                        OnConfigureFailedAction = session =>
+                        {
+                        },
+                        OnConfiguredAction = session =>
+                        {
+                            previewSession = session;
+                            UpdatePreview();
+                        }
                     },
-                    OnConfiguredAction = session =>
-                    {
-                        previewSession = session;
-                        UpdatePreview();
-                    }
-                },
-                backgroundHandler);
+                    backgroundHandler);
+            }
+            catch (System.Exception ex)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Error on starting preview" + ex);
+            }
         }
 
         void UpdatePreview()
         {
-            if (Camera == null || previewSession == null) return;
+            if (Camera is null || previewSession is null) return;
 
-            // Reset the auto-focus trigger
-            previewBuilder.Set(CaptureRequest.ControlAfMode, (int)ControlAFMode.ContinuousPicture);
-            //SetAutoFlash(previewBuilder);
-
-            previewRequest = previewBuilder.Build();
-            previewSession.SetRepeatingRequest(previewRequest, null, backgroundHandler);
+            try
+            {
+                previewRequest = previewBuilder.Build();
+                previewSession.SetRepeatingRequest(previewRequest, null, backgroundHandler);
+            }
+            catch (System.Exception ex)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Error on updating preview" + ex);
+            }
         }
 
-        Size GetOptimalSize(IList<Size> sizes, int h, int w)
+        Size GetOptimalSize(IList<Size> sizes, int width, int height)
         {
-            var AspectTolerance = 0.1;
-            var targetRatio = (double)w / h;
+            if (sizes is null) return null;
 
-            if (sizes == null)
-            {
-                return null;
-            }
+            var aspectTolerance = 0.1;
+            var targetRatio = (double)width / height;
 
             Size optimalSize = null;
             var minDiff = double.MaxValue;
-            var targetHeight = h;
+            var targetHeight = height;
 
-            while (optimalSize == null)
+            while (optimalSize is null)
             {
                 foreach (var size in sizes)
                 {
                     var ratio = (double)size.Width / size.Height;
 
-                    if (System.Math.Abs(ratio - targetRatio) > AspectTolerance)
+                    if (System.Math.Abs(ratio - targetRatio) > aspectTolerance)
                         continue;
+
                     if (System.Math.Abs(size.Height - targetHeight) < minDiff)
                     {
                         optimalSize = size;
@@ -391,88 +350,54 @@ namespace ZXing.Mobile.CameraAccess
                 }
 
                 if (optimalSize == null)
-                    AspectTolerance += 0.1f;
+                    aspectTolerance += 0.1f;
             }
 
             return optimalSize;
         }
 
-        public void SetAutoFlash(CaptureRequest.Builder requestBuilder)
-        {
-            if (flashSupported)
-            {
-                requestBuilder.Set(CaptureRequest.ControlAeMode, (int)ControlAEMode.OnAutoFlash);
-            }
-        }
-
         void StartBackgroundThread()
         {
-            backgroundThread = new HandlerThread("CameraBackground");
+            backgroundThread = new HandlerThread("CameraBackgroundThread");
             backgroundThread.Start();
             backgroundHandler = new Handler(backgroundThread.Looper);
         }
 
         public void EnableTorch(bool state)
         {
-            if (state)
+            try
             {
-                previewBuilder.Set(CaptureRequest.ControlAeMode, (int)ControlAEMode.On);
-                previewBuilder.Set(CaptureRequest.FlashMode, (int)FlashMode.Torch);
-            }
-            else
-            {
-                previewBuilder.Set(CaptureRequest.FlashMode, (int)FlashMode.Off);
-            }
+                if (!flashSupported || previewBuilder is null) return;
 
-            UpdatePreview();
+                if (state)
+                {
+                    previewBuilder.Set(CaptureRequest.ControlAeMode, (int)ControlAEMode.On);
+                    previewBuilder.Set(CaptureRequest.FlashMode, (int)FlashMode.Torch);
+                }
+                else
+                    previewBuilder.Set(CaptureRequest.FlashMode, (int)FlashMode.Off);
+
+                UpdatePreview();
+            }
+            catch (System.Exception ex)
+            {
+                Log.Debug(MobileBarcodeScanner.TAG, "Error on enabling torch" + ex);
+            }
         }
 
         void StopBackgroundThread()
         {
-            if (backgroundHandler == null || backgroundThread == null) return;
-
-            backgroundThread.QuitSafely();
             try
             {
-                backgroundThread.Join();
+                backgroundThread?.QuitSafely();
+                backgroundThread?.Join();
                 backgroundThread = null;
                 backgroundHandler = null;
             }
-            catch (InterruptedException e)
+            catch (InterruptedException ex)
             {
-                e.PrintStackTrace();
+                Log.Debug(MobileBarcodeScanner.TAG, "Error stopping background threads: " + ex);
             }
         }
-    }
-
-    public class CameraCaptureStateListener : CameraCaptureSession.StateCallback
-    {
-        public Action<CameraCaptureSession> OnConfigureFailedAction;
-
-        public Action<CameraCaptureSession> OnConfiguredAction;
-
-        public override void OnConfigureFailed(CameraCaptureSession session)
-        {
-            OnConfigureFailedAction?.Invoke(session);
-        }
-
-        public override void OnConfigured(CameraCaptureSession session)
-        {
-            OnConfiguredAction?.Invoke(session);
-        }
-    }
-
-    public class CameraStateCallback : CameraDevice.StateCallback
-    {
-        public Action<CameraDevice> OnDisconnectedAction;
-        public Action<CameraDevice, Android.Hardware.Camera2.CameraError> OnErrorAction;
-        public Action<CameraDevice> OnOpenedAction;
-
-        public override void OnDisconnected(CameraDevice camera) => OnDisconnectedAction?.Invoke(camera);
-
-        public override void OnError(CameraDevice camera, [GeneratedEnum] Android.Hardware.Camera2.CameraError error) => OnErrorAction?.Invoke(camera, error);
-
-        public override void OnOpened(CameraDevice camera)
-            => OnOpenedAction?.Invoke(camera);
     }
 }

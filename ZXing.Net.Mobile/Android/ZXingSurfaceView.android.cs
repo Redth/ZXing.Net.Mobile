@@ -43,7 +43,7 @@ namespace ZXing.Mobile
         {
             await PermissionsHandler.RequestPermissionsAsync();
 
-            cameraAnalyzer.SetupCamera(Width, Height);
+            cameraAnalyzer.SetupCamera();
 
             surfaceCreated = true;
             surfaceCreatedResetEvent.Set();
@@ -52,7 +52,7 @@ namespace ZXing.Mobile
         public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
         {
             holder.SetFixedSize(wx, hx);
-            cameraAnalyzer.RefreshCamera(wx, hx);
+            cameraAnalyzer.RefreshCamera();
         }
 
         public async void SurfaceDestroyed(ISurfaceHolder holder)
@@ -165,7 +165,7 @@ namespace ZXing.Mobile
 
             //only refresh the camera if the surface has already been created. Fixed #569
             if (surfaceCreated)
-                cameraAnalyzer.RefreshCamera(Width, Height);
+                cameraAnalyzer.RefreshCamera();
         }
     }
 }
