@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Android.Content;
 using Android.Graphics;
 using Android.Hardware.Camera2;
@@ -273,12 +274,50 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
+        private Size GetOptimalPreviewSize(SurfaceView surface)
+        {
+            var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
+            var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
+            var availableSizes = ((StreamConfigurationMap)characteristics
+                        .Get(CameraCharacteristics.ScalerStreamConfigurationMap))
+                        .GetOutputSizes(Class.FromType(typeof(ISurfaceHolder)));
+
+            var aspectRatio = (double)surface.Height / (double)surface.Width;
+            var availableAspectRatios = availableSizes.Select(x => (x, (double)x.Width / (double)x.Height));
+
+            var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
+            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - surface.Width)).ThenBy(x => System.Math.Abs(x.x.Height - surface.Height)).Take(5);
+            return bestMatches.OrderByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height).First().x;
+        }
+
         public void StartPreview()
         {
             if (Camera is null || holder is null || imageReader is null || backgroundHandler is null) return;
 
             try
             {
+                var optimalPreviewSize = GetOptimalPreviewSize(surfaceView);
+
+                if (Looper.MyLooper() == Looper.MainLooper)
+                {
+                    holder.SetFixedSize(optimalPreviewSize.Width, optimalPreviewSize.Height);
+                }
+                else
+                {
+                    var sizeSetResetEvent = new ManualResetEventSlim(false);
+                    using (var handler = new Handler(Looper.MainLooper))
+                    {
+                        handler.Post(() =>
+                        {
+                            holder.SetFixedSize(optimalPreviewSize.Width, optimalPreviewSize.Height);
+                            sizeSetResetEvent.Set();
+                        });
+                    }
+
+                    sizeSetResetEvent.Wait();
+                    sizeSetResetEvent.Reset();
+                }
+
                 previewBuilder = Camera.CreateCaptureRequest(CameraTemplate.Preview);
                 previewBuilder.AddTarget(holder.Surface);
                 previewBuilder.AddTarget(imageReader.Surface);

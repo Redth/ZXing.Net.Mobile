@@ -51,7 +51,6 @@ namespace ZXing.Mobile
 
         public async void SurfaceChanged(ISurfaceHolder holder, Format format, int wx, int hx)
         {
-            holder.SetFixedSize(wx, hx);
             cameraAnalyzer.RefreshCamera();
         }
 
