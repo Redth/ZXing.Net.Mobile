@@ -225,6 +225,7 @@ namespace ZXing.Mobile.CameraAccess
                 }
 
                 // 1050 and 1400 are a random guess which work pretty good
+                // inspired from https://github.com/vtserej/Camera2Forms/blob/master/Camera2Forms/Camera2Forms.Android/Camera2/CameraDroid.cs#L162
                 var idealSize = GetOptimalSize(supportedSizes, 1050, 1400);
                 imageReader = ImageReader.NewInstance(idealSize.Width, idealSize.Height, ImageFormatType.Yuv420888, 5);
 
@@ -274,7 +275,7 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
-        private Size GetOptimalPreviewSize(SurfaceView surface)
+        Size GetOptimalPreviewSize(SurfaceView surface)
         {
             var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
             var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);

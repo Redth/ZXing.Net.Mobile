@@ -25,10 +25,6 @@ namespace ZXing.Mobile.CameraAccess
                 var yuvBytes = ImageToByteArray(image);
                 OnPreviewFrameReady?.Invoke(this, yuvBytes);
             }
-            catch (Exception ex)
-            {
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Could not start preview session");
-            }
             finally
             {
                 image?.Close();

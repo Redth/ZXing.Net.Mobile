@@ -90,7 +90,7 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
-        void HandleOnPreviewFrameReady(object sender, byte[] fastArray)
+        void HandleOnPreviewFrameReady(object sender, byte[] data)
         {
             if (!CanAnalyzeFrame)
                 return;
@@ -102,7 +102,7 @@ namespace ZXing.Mobile.CameraAccess
             {
                 try
                 {
-                    DecodeFrame(fastArray);
+                    DecodeFrame(data);
                 }
                 catch (Exception ex)
                 {
@@ -115,7 +115,7 @@ namespace ZXing.Mobile.CameraAccess
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        void DecodeFrame(byte[] fastArray)
+        void DecodeFrame(byte[] data)
         {
             var previewSize = cameraController.IdealPhotoSize;
             var width = previewSize.Width;
@@ -127,9 +127,9 @@ namespace ZXing.Mobile.CameraAccess
 
             barcodeReader.AutoRotate = true;
 
-            var source2 = new PlanarYUVLuminanceSource(fastArray, width, height, 0, 0, width, height, false);
+            var source = new PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false);
 
-            result = barcodeReader.Decode(source2);
+            result = barcodeReader.Decode(source);
             PerformanceCounter.Stop(start,
                 "Decode Time: {0} ms (width: " + width + ", height: " + height + ")");
 
