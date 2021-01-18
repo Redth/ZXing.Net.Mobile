@@ -2,11 +2,7 @@ using System;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
-#if __ANDROID_29__
 using AndroidX.Fragment.App;
-#else
-using Android.Support.V4.App;
-#endif
 
 namespace ZXing.Mobile
 {
