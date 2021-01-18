@@ -1,6 +1,6 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.23">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.Mac20;MonoAndroid90;MonoAndroid10.0;tizen40</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.Mac20;MonoAndroid10.0;tizen40</TargetFrameworks>
 		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
 		<AssemblyName>ZXing.Net.Mobile.Forms</AssemblyName>
 		<RootNamespace>ZXing.Net.Mobile.Forms</RootNamespace>
@@ -58,7 +58,7 @@
 		<Compile Include="**\*.netstandard.*.cs" />
 	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
-		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9" />
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" />
 		<Compile Include="**\*.uwp.cs" />
 		<Compile Include="**\*.uwp.*.cs" />
 		<SDKReference Include="WindowsMobile, Version=10.0.16299.0">
@@ -69,14 +69,7 @@
 		<Compile Include="**\*.android.cs" />
 		<Compile Include="**\*.android.*.cs" />
 		<AndroidResource Include="Resources\xml\*.xml" />
-	</ItemGroup>
-	<!-- NOTE: When Android 11.x comes out we neeed to make this check more robust -->
-	<ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) And '$(TargetFramework)' != 'MonoAndroid10.0'">
-		<PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
-	</ItemGroup>
-	<!-- NOTE: When Android 11.x comes out we neeed to make this check more robust -->
-	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid10.0'">
-		<PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.1.0" />
+		<PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.2.0.6" />
 	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<Compile Include="**\*.ios.cs" />
@@ -89,13 +82,14 @@
 		<Compile Include="**\*.macos.*.cs" />
 	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
-		<PackageReference Include="Tizen.NET" Version="5.0.0.14562" />
+		<PackageReference Include="Tizen.NET" Version="8.0.0.15631" />
 		<Compile Include="**\*.tizen.cs" />
 		<Compile Include="**\*.tizen.*.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Xamarin.Essentials" Version="1.5.1" />
-		<PackageReference Include="Xamarin.Forms" Version="4.5.0.356" />
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.6.0" />
+		<PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj" />

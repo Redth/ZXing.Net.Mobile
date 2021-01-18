@@ -15,11 +15,7 @@ using Android.Runtime;
 using Android.Widget;
 
 using ZXing;
-#if __ANDROID_29__
 using AndroidX.Fragment.App;
-#else
-using Android.Support.V4.App;
-#endif
 
 using System.Linq;
 using System.Threading.Tasks;

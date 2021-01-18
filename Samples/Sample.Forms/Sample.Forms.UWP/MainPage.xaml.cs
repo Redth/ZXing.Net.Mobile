@@ -22,6 +22,10 @@ namespace Sample.Forms.UWP
 			this.InitializeComponent();
 
 			LoadApplication(new Sample.Forms.App());
+
+			ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+			ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingBarcodeImageViewRenderer.Init();
+
 		}
 	}
 }
