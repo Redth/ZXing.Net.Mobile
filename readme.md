@@ -44,12 +44,13 @@ Xamarin.Essentials.Platform.Init(Application);
 ZXing.Net.Mobile.Forms.Android.Platform.Init();
 ```
 
-ZXing.Net.Mobile for Xamarin.Forms also handles the new Android permission request model for you, but you will need to add the following override implementation to your main `Activity` as well:
+ZXing.Net.Mobile for Xamarin.Forms also handles the new Android permission request model for you via Xamarin.Essentials, but you will need to add the following override implementation to your main `Activity` as well:
 
 ```csharp
 public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
 {
-    global::ZXing.Net.Mobile.Android.PermissionsHandler.OnRequestPermissionsResult (requestCode, permissions, grantResults);           
+    Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 ```
 
