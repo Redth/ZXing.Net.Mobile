@@ -46,6 +46,12 @@ namespace ZXing.Mobile
 				Console.WriteLine("Create Surface View Failed: " + ex);
 			}
 
+			// Someone tried to call StartScanning before we were ready. Call it again.
+			if (scanCallback != null)
+			{
+				StartScanning(scanCallback, ScanningOptions);
+			}
+
 			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "ZXingScannerFragment->OnResume exit");
 
 			return frame;
