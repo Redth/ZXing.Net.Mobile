@@ -10,7 +10,7 @@ jobs:
     build:
       name: Build
       env:
-        NUPKG_MAJOR: 3.0
+        NUPKG_MAJOR: 3.1
       runs-on: windows-latest
       steps:
       - name: Checkout
