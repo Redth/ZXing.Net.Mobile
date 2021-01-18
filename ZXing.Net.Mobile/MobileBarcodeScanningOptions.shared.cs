@@ -58,9 +58,9 @@ namespace ZXing.Mobile
 			get { return new MobileBarcodeScanningOptions(); }
 		}
 
-		public BarcodeReader BuildBarcodeReader()
+		public BarcodeReaderGeneric BuildBarcodeReader()
 		{
-			var reader = new BarcodeReader();
+			var reader = new BarcodeReaderGeneric();
 			if (TryHarder.HasValue)
 				reader.Options.TryHarder = TryHarder.Value;
 			if (PureBarcode.HasValue)

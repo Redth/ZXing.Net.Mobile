@@ -5,15 +5,15 @@ using ApxLabs.FastAndroidCamera;
 
 namespace ZXing.Mobile.CameraAccess
 {
-    public class CameraAnalyzer
+	public class CameraAnalyzer
 	{
 		readonly CameraController cameraController;
 		readonly CameraEventsListener cameraEventListener;
 		Task processingTask;
 		DateTime lastPreviewAnalysis = DateTime.UtcNow;
 		bool wasScanned;
-        readonly IScannerSessionHost scannerHost;
-		BarcodeReader barcodeReader;
+		readonly IScannerSessionHost scannerHost;
+		BarcodeReaderGeneric barcodeReader;
 
 		public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
 		{
@@ -133,7 +133,7 @@ namespace ZXing.Mobile.CameraAccess
 			if (rotate)
 				fast = fast.rotateCounterClockwise();
 
-            var result = barcodeReader.Decode(fast);
+			var result = barcodeReader.Decode(fast);
 
 			fastArray.Dispose();
 			fastArray = null;
