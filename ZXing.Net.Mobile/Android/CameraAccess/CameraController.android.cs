@@ -32,6 +32,8 @@ namespace ZXing.Mobile.CameraAccess
 
 		public Camera Camera { get; private set; }
 
+		public CameraResolution CameraResolution { get; private set; }
+
 		public int LastCameraDisplayOrientationDegree { get; private set; }
 
 		public void RefreshCamera()
@@ -301,6 +303,8 @@ namespace ZXing.Mobile.CameraAccess
 			{
 				Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
 					"Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+
+				CameraResolution = resolution;
 				parameters.SetPreviewSize(resolution.Width, resolution.Height);
 			}
 
