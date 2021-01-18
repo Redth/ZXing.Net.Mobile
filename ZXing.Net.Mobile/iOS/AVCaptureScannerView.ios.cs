@@ -376,7 +376,7 @@ namespace ZXing.Mobile
 
 			Setup();
 
-			ScanningOptions = options;
+			ScanningOptions = options ?? new MobileBarcodeScanningOptions();
 			resultCallback = scanResultHandler;
 
 			InvokeOnMainThread(() =>
