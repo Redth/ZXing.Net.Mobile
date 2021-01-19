@@ -106,13 +106,8 @@ namespace ZXing.Mobile.CameraAccess
 
         public void AutoFocus(int x, int y)
         {
-            // The bounds for focus areas are actually -1000 to 1000
-            // So we need to translate the touch coordinates to this scale
-            var focusX = x / surfaceView.Width * 2000 - 1000;
-            var focusY = y / surfaceView.Height * 2000 - 1000;
-
             // Call the autofocus with our coords
-            AutoFocus(focusX, focusY, true);
+            AutoFocus(x, y, true);
         }
 
         void AutoFocus(int x, int y, bool useCoordinates)
@@ -145,16 +140,6 @@ namespace ZXing.Mobile.CameraAccess
                     // make a rect of 20 to give an area to focus on based on the center of the touch
                     x = x - 10;
                     y = y - 10;
-
-                    // Ensure we don't go over the -1000 to 1000 limit of focus area
-                    if (x >= 1000)
-                        x = 980;
-                    if (x < -1000)
-                        x = -1000;
-                    if (y >= 1000)
-                        y = 980;
-                    if (y < -1000)
-                        y = -1000;
 
                     // Explicitly set FocusModeAuto since Focus areas only work with this setting
                     previewBuilder.Set(CaptureRequest.ControlAfMode, (int)ControlAFMode.Auto);
