@@ -8,6 +8,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
+using Xamarin.Essentials;
 using Camera = Android.Hardware.Camera;
 
 namespace ZXing.Mobile.CameraAccess
@@ -20,6 +21,7 @@ namespace ZXing.Mobile.CameraAccess
 		readonly CameraEventsListener cameraEventListener;
 		int cameraId;
 		IScannerSessionHost scannerHost;
+		bool needResetCameraBuffers = false;
 
 		public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
 		{
@@ -35,21 +37,47 @@ namespace ZXing.Mobile.CameraAccess
 		public CameraResolution CameraResolution { get; private set; }
 
 		public int LastCameraDisplayOrientationDegree { get; private set; }
+		public static int LastPreviewWidth { get; private set; }
+		public static int LastPreviewHeight { get; private set; }
 
 		public void RefreshCamera()
 		{
 			if (holder == null) return;
 
-			ApplyCameraSettings();
-
 			try
 			{
+				ApplyCameraSettings();
+
 				Camera.SetPreviewDisplay(holder);
+
+				//if ApplyCameraSettings detected a resolution change
+				//the camera was re-created and we need to reset the buffer and re-set the preview callback
+				if (needResetCameraBuffers)
+				{
+					SetupCameraBuffers();
+					Camera.SetNonMarshalingPreviewCallback(cameraEventListener);
+					needResetCameraBuffers = false;
+				}
 				Camera.StartPreview();
 			}
 			catch (Exception ex)
 			{
 				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, ex.ToString());
+			}
+		}
+
+		void SetupCameraBuffers()
+		{
+			var previewParameters = Camera.GetParameters();
+			var previewSize = previewParameters.PreviewSize;
+			var bitsPerPixel = ImageFormat.GetBitsPerPixel(previewParameters.PreviewFormat);
+
+			var bufferSize = (previewSize.Width * previewSize.Height * bitsPerPixel) / 8;
+			const int NUM_PREVIEW_BUFFERS = 5;
+			for (uint i = 0; i < NUM_PREVIEW_BUFFERS; ++i)
+			{
+				using (var buffer = new FastJavaByteArray(bufferSize))
+					Camera.AddCallbackBuffer(buffer);
 			}
 		}
 
@@ -64,29 +92,14 @@ namespace ZXing.Mobile.CameraAccess
 
 			if (Camera == null) return;
 
-			perf = PerformanceCounter.Start();
-			ApplyCameraSettings();
+			perf = PerformanceCounter.Start();			
 
 			try
 			{
+				ApplyCameraSettings();
 				Camera.SetPreviewDisplay(holder);
-
-
-				var previewParameters = Camera.GetParameters();
-				var previewSize = previewParameters.PreviewSize;
-				var bitsPerPixel = ImageFormat.GetBitsPerPixel(previewParameters.PreviewFormat);
-
-
-				var bufferSize = (previewSize.Width * previewSize.Height * bitsPerPixel) / 8;
-				const int NUM_PREVIEW_BUFFERS = 5;
-				for (uint i = 0; i < NUM_PREVIEW_BUFFERS; ++i)
-				{
-					using (var buffer = new FastJavaByteArray(bufferSize))
-						Camera.AddCallbackBuffer(buffer);
-				}
-
+				SetupCameraBuffers();
 				Camera.StartPreview();
-
 				Camera.SetNonMarshalingPreviewCallback(cameraEventListener);
 			}
 			catch (Exception ex)
@@ -215,6 +228,41 @@ namespace ZXing.Mobile.CameraAccess
 			}
 		}
 
+		CameraResolution GetResolutionForCameraPreview(IList<Camera.Size> supportedPreviewSizes)
+		{
+			CameraResolution resolution = null;
+
+			if (supportedPreviewSizes != null)
+			{
+				var availableResolutions = supportedPreviewSizes.Select(sps => new CameraResolution
+				{
+					Width = sps.Width,
+					Height = sps.Height
+				});
+
+				// Try and get a desired resolution from the options selector
+				resolution = scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
+
+				// If the user did not specify a resolution, let's try and find a suitable one
+				if (resolution == null)
+				{
+					resolution = GetOptimalResolutionForCameraPreview(supportedPreviewSizes);
+				}
+			}
+
+			// Google Glass requires this fix to display the camera output correctly
+			if (Build.Model.Contains("Glass"))
+			{
+				resolution = new CameraResolution
+				{
+					Width = 640,
+					Height = 360
+				};
+			}
+
+			return resolution;
+		}
+
 		void ApplyCameraSettings()
 		{
 			if (Camera == null)
@@ -226,6 +274,23 @@ namespace ZXing.Mobile.CameraAccess
 			if (Camera == null) return;
 
 			var parameters = Camera.GetParameters();
+
+			//Get the resolution first to see if it has changed
+			//if it has changed the camera needs to be destroyed and re-created
+			//so that the buffer size can be updated
+			//because GetOptimalResolutionForCameraPreview uses the SurfaceView size and its dimensions
+			//will likely change upon rotation especially when using a ZXingScannerFragment            
+			var resolution = GetResolutionForCameraPreview(parameters.SupportedPreviewSizes);
+			if (LastPreviewWidth != 0 && LastPreviewHeight != 0 && (resolution.Width != LastPreviewWidth || resolution.Height != LastPreviewHeight))
+			{
+				needResetCameraBuffers = true;
+				ShutdownCamera();
+				LastPreviewHeight = 0;
+				LastPreviewWidth = 0;
+				ApplyCameraSettings();
+				return;
+			}
+
 			parameters.PreviewFormat = ImageFormatType.Nv21;
 
 			var supportedFocusModes = parameters.SupportedFocusModes;
@@ -254,45 +319,9 @@ namespace ZXing.Mobile.CameraAccess
 				parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
 			}
 
-			CameraResolution resolution = null;
-			var supportedPreviewSizes = parameters.SupportedPreviewSizes;
-			if (supportedPreviewSizes != null)
-			{
-				var availableResolutions = supportedPreviewSizes.Select(sps => new CameraResolution
-				{
-					Width = sps.Width,
-					Height = sps.Height
-				});
-
-				// Try and get a desired resolution from the options selector
-				resolution = scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
-
-				// If the user did not specify a resolution, let's try and find a suitable one
-				if (resolution == null)
-				{
-					foreach (var sps in supportedPreviewSizes)
-					{
-						if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
-						{
-							resolution = new CameraResolution
-							{
-								Width = sps.Width,
-								Height = sps.Height
-							};
-							break;
-						}
-					}
-				}
-			}
-
 			// Google Glass requires this fix to display the camera output correctly
 			if (Build.Model.Contains("Glass"))
 			{
-				resolution = new CameraResolution
-				{
-					Width = 640,
-					Height = 360
-				};
 				// Glass requires 30fps
 				parameters.SetPreviewFpsRange(30000, 30000);
 			}
@@ -300,16 +329,67 @@ namespace ZXing.Mobile.CameraAccess
 			// Hopefully a resolution was selected at some point
 			if (resolution != null)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
-					"Selected Resolution: " + resolution.Width + "x" + resolution.Height);
-
+				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
 				CameraResolution = resolution;
+
 				parameters.SetPreviewSize(resolution.Width, resolution.Height);
+				LastPreviewWidth = resolution.Width;
+				LastPreviewHeight = resolution.Height;
 			}
 
 			Camera.SetParameters(parameters);
-
 			SetCameraDisplayOrientation();
+		}
+
+		/// <summary>
+		/// Determines the resolution to use for the camera preview that maintains the closest available
+		/// aspect ratio to the surface view the camera is being displayed on.
+		/// using the surface view is especially important if a fragment is being used which may have a much different ratio than the main display        
+		/// </summary>
+		/// <param name="availableResolutions">Contains all available combinations that camera can use.  Dimensions are assuming the camera is in landscape orientation</param>
+		/// <returns></returns>
+		CameraResolution GetOptimalResolutionForCameraPreview(IList<Camera.Size> availableResolutions)
+		{
+			CameraResolution res = null;
+			var sortedOptimalResolultionResults = new SortedDictionary<double, CameraResolution>();
+
+			var surfaceViewRatio = surfaceView.Height / (double)surfaceView.Width;
+
+			//the SupportedPreviewSizes from the camera are already sorted highest resolution to smallest,
+			//but in case a non-sorted list is passed in, sort them
+			var sortedResolutions = availableResolutions.OrderByDescending(r => r.Height).ToList();
+			for (var i = 0; i < sortedResolutions.Count; i++)
+			{
+				double resolutionDifference;
+				var r = sortedResolutions[i];
+
+				//The Android.Hardware.Camera.Size class assumes all dimensions are with respect to a landscape orientation
+				//so if orientation is portrait switch them
+				var orientationHeight = r.Width;
+				var orientationWidth = r.Height;
+
+				//and if its landscape leave alone
+				if (DeviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Landscape)
+				{
+					orientationHeight = r.Height;
+					orientationWidth = r.Width;
+				}
+
+				var cameraDisplayAspectRatio = orientationHeight / orientationWidth;
+
+				resolutionDifference = Math.Abs(surfaceViewRatio - cameraDisplayAspectRatio);
+
+				//since the Android.Hardware.Camera API lives in the UpsideDown world switch the width/height back
+				if (DeviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Portrait)
+					res = new CameraResolution() { Width = (int)orientationHeight, Height = (int)orientationWidth };
+				else res = new CameraResolution() { Width = (int)orientationWidth, Height = (int)orientationHeight };
+
+				//there may be resolutions available that have the same aspect ratio.  
+				//by using the sorted list we will guarantee that we are getting the best resolution available
+				if (!sortedOptimalResolultionResults.ContainsKey(resolutionDifference))
+					sortedOptimalResolultionResults.Add(resolutionDifference, res);
+			}
+			return sortedOptimalResolultionResults.First().Value;
 		}
 
 		void AutoFocus(int x, int y, bool useCoordinates)
