@@ -20,6 +20,7 @@ namespace ZXing.Mobile.CameraAccess
         bool wasScanned;
         IScannerSessionHost scannerHost;
         CameraManager cameraManager;
+        BarcodeReader barcodeReader;
 
         public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
         {
@@ -63,6 +64,7 @@ namespace ZXing.Mobile.CameraAccess
 
         public void RefreshCamera()
         {
+            barcodeReader = null;
             cameraController.RefreshCamera();
         }
 
@@ -120,8 +122,14 @@ namespace ZXing.Mobile.CameraAccess
             var previewSize = cameraController.IdealPhotoSize;
             var width = previewSize.Width;
             var height = previewSize.Height;
-            var barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
 
+            if (barcodeReader == null)
+            {
+                barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
+
+                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Created Barcode Reader");
+            }
+            
             ZXing.Result result = null;
             var start = PerformanceCounter.Start();
 
