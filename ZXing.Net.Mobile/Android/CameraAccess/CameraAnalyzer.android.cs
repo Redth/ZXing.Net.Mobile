@@ -6,7 +6,6 @@ using Android.Content;
 using Android.Hardware.Camera2;
 using Android.Hardware.Camera2.Params;
 using Android.Views;
-using ApxLabs.FastAndroidCamera;
 using ZXing.Common;
 
 namespace ZXing.Mobile.CameraAccess
@@ -18,9 +17,8 @@ namespace ZXing.Mobile.CameraAccess
         Task processingTask;
         DateTime lastPreviewAnalysis = DateTime.UtcNow;
         bool wasScanned;
-        IScannerSessionHost scannerHost;
-        CameraManager cameraManager;
-        BarcodeReader barcodeReader;
+        readonly IScannerSessionHost scannerHost;
+        BarcodeReaderGeneric barcodeReader;
 
         public CameraAnalyzer(SurfaceView surfaceView, IScannerSessionHost scannerHost)
         {
@@ -28,7 +26,6 @@ namespace ZXing.Mobile.CameraAccess
             cameraEventListener = new CameraEventsListener();
             cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
             Torch = new Torch(cameraController, surfaceView.Context);
-            cameraManager = (CameraManager)surfaceView.Context.GetSystemService(Context.CameraService);
         }
 
         public Action<Result> BarcodeFound;
@@ -53,6 +50,10 @@ namespace ZXing.Mobile.CameraAccess
         public void SetupCamera()
         {
             cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
+
+            barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
+            Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Created Barcode Reader");
+
             cameraController.SetupCamera();
         }
 
@@ -64,7 +65,6 @@ namespace ZXing.Mobile.CameraAccess
 
         public void RefreshCamera()
         {
-            barcodeReader = null;
             cameraController.RefreshCamera();
         }
 
@@ -122,22 +122,14 @@ namespace ZXing.Mobile.CameraAccess
             var previewSize = cameraController.IdealPhotoSize;
             var width = previewSize.Width;
             var height = previewSize.Height;
-
-            if (barcodeReader == null)
-            {
-                barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
-
-                Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Created Barcode Reader");
-            }
             
-            ZXing.Result result = null;
             var start = PerformanceCounter.Start();
 
             barcodeReader.AutoRotate = true;
 
             var source = new PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false);
 
-            result = barcodeReader.Decode(source);
+            var result = barcodeReader.Decode(source);
             PerformanceCounter.Stop(start,
                 "Decode Time: {0} ms (width: " + width + ", height: " + height + ")");
 
