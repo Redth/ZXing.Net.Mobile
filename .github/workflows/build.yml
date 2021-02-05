@@ -4,23 +4,21 @@ on:
   pull_request:
   push:
   release:
-    types: [published]
+    types: [published,prereleased]
     
 jobs:
     build:
       name: Build
       env:
-        NUPKG_MAJOR: 3.0
+        NUPKG_MAJOR: 3.1
       runs-on: windows-latest
       steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.0
-      - name: NuGet Restore
-        run: msbuild /t:Restore /p:Configuration=Release .\ZXing.Net.Mobile.sln
+        uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
-        run: msbuild /t:Build /p:Configuration=Release .\ZXing.Net.Mobile.sln
+        run: msbuild /r /t:Build /p:Configuration=Release .\ZXing.Net.Mobile.sln
       - name: Package NuGets
         run: |
           $pkgVer = ($env:NUPKG_MAJOR + "-alpha" + $env:GITHUB_RUN_ID)
@@ -36,8 +34,8 @@ jobs:
           name: NuGet
           path: .\artifacts
 
-    publish-gh:
-      name: Publish to GitHub Packages
+    publish-nuget:
+      name: Publish NuGet Packages
       needs: build
       runs-on: windows-latest
       if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'release')
@@ -51,27 +49,13 @@ jobs:
           with:
             nuget-api-key: ${{ secrets.NUGET_API_KEY }}
             nuget-version: 'latest'
-        - name: Push NuGet
+        - name: Push to GitHub Packages
           run: |
             nuget sources add -Name "GPR" -Source "https://nuget.pkg.github.com/Redth/index.json" -UserName Redth -Password ${{ secrets.GITHUB_TOKEN }}
-            nuget setApiKey ${{ secrets.NUGET_API_KEY }} -Source "GPR"
+            nuget setApiKey ${{ secrets.NUGET_API_KEY }} --source "GPR" --skip-duplicate
             nuget push NuGet\*.nupkg -Source "GPR"
-    
-    publish-nugetorg:
-      name: Publish to NuGet.org
-      needs: build
-      runs-on: windows-latest
-      if: github.event_name == 'release'
-      steps:
-        - name: Download Artifacts
-          uses: actions/download-artifact@v1
-          with:
-            name: NuGet
-        - name: Setup NuGet
-          uses: nuget/setup-nuget@v1
-          with:
-            nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-            nuget-version: 'latest'
-        - name: Push NuGet
+        - name: Push to NuGet.org
+          if: github.event_name == 'release'
           run: |
             nuget push NuGet\*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_ORG_API_KEY }}
+
