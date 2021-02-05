@@ -22,40 +22,19 @@ namespace ZXing.Mobile.CameraAccess
             Image image = null;
             try
             {
-                //Returns a yuv420888 image
                 image = reader.AcquireLatestImage();
 
                 if (image is null) return;
 
-                //On Pixel5, the original Yuv42088 to nv21 conversion fails
-                //var yuvBytes = ImageToByteArray(image);
                 var yuvBytes = Yuv420888toNv21(image);
-
                 OnPreviewFrameReady?.Invoke(this, yuvBytes);
 
-                //To check that the yuv conversion is correct, you can save a jpg version
-                //SaveJpegBytes(yuvBytes, image.Width, image.Height);
             }
             finally
             {
                 image?.Close();
             }
         }
-
-        //Use this to save the converted yuv image to external storage
-        //You may need to include Permissions.StorageWrite in PermissionsHandler.android.cs and in the manifest
-        //void SaveJpegBytes(byte[] yuvBytes, int width, int height)
-        //{
-        //    var dcimDir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
-        //    var filename = System.IO.Path.Combine(dcimDir, $"nv21-output.jpg");
-
-        //    //Convert the nv21 bytes to a jpeg
-        //    var stream = new MemoryStream();
-        //    var yuvImage = new YuvImage(yuvBytes, ImageFormatType.Nv21, width, height, null);
-        //    yuvImage.CompressToJpeg(new Rect(0, 0, width, height), 50, stream);
-
-        //    System.IO.File.WriteAllBytes(filename, stream.ToArray());
-        //}
 
         //https://stackoverflow.com/questions/52726002/camera2-captured-picture-conversion-from-yuv-420-888-to-nv21
         byte[] Yuv420888toNv21(Image image)
@@ -135,27 +114,6 @@ namespace ZXing.Mobile.CameraAccess
             }
 
             return nv21;
-        }
-
-        //Convert to NV21
-        byte[] ImageToByteArray(Image image)
-        {
-            byte[] result;
-            var yBuffer = image.GetPlanes()[0].Buffer;
-            var uBuffer = image.GetPlanes()[1].Buffer;
-            var vBuffer = image.GetPlanes()[2].Buffer;
-
-            var ySize = yBuffer.Remaining();
-            var uSize = uBuffer.Remaining();
-            var vSize = vBuffer.Remaining();
-
-            result = new byte[ySize + uSize + vSize];
-
-            yBuffer.Get(result, 0, ySize);
-            vBuffer.Get(result, ySize, vSize);
-            uBuffer.Get(result, ySize + vSize, uSize);
-
-            return result;
         }
     }
 }
