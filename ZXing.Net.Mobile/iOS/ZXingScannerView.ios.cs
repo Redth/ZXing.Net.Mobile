@@ -562,12 +562,14 @@ namespace ZXing.Mobile
 			// Revert camera settings to original
 			if (captureDevice != null && captureDevice.LockForConfiguration(out var err))
 			{
-				captureDevice.FocusMode = captureDeviceOriginalConfig.FocusMode;
 				captureDevice.ExposureMode = captureDeviceOriginalConfig.ExposureMode;
 				captureDevice.WhiteBalanceMode = captureDeviceOriginalConfig.WhiteBalanceMode;
 
 				if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0) && captureDevice.AutoFocusRangeRestrictionSupported)
 					captureDevice.AutoFocusRangeRestriction = captureDeviceOriginalConfig.AutoFocusRangeRestriction;
+
+				if (captureDevice.IsFocusModeSupported(captureDeviceOriginalConfig.FocusMode))
+					captureDevice.FocusMode = captureDeviceOriginalConfig.FocusMode;
 
 				if (captureDevice.FocusPointOfInterestSupported)
 					captureDevice.FocusPointOfInterest = captureDeviceOriginalConfig.FocusPointOfInterest;
