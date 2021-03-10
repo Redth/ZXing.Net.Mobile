@@ -309,6 +309,9 @@ namespace ZXing.Mobile.CameraAccess
                     sizeSetResetEvent.Reset();
                 }
 
+                // This is needed bc otherwise the preview is sometimes distorted
+                System.Threading.Thread.Sleep(30);
+
                 previewBuilder = Camera.CreateCaptureRequest(CameraTemplate.Preview);
                 previewBuilder.AddTarget(holder.Surface);
                 previewBuilder.AddTarget(imageReader.Surface);
