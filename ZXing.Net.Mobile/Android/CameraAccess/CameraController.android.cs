@@ -8,6 +8,7 @@ using Android.Hardware.Camera2;
 using Android.Hardware.Camera2.Params;
 using Android.Media;
 using Android.OS;
+using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Java.Lang;
@@ -209,9 +210,11 @@ namespace ZXing.Mobile.CameraAccess
                     return;
                 }
 
-                // 1050 and 1400 are a random guess which work pretty good
-                // inspired from https://github.com/vtserej/Camera2Forms/blob/master/Camera2Forms/Camera2Forms.Android/Camera2/CameraDroid.cs#L162
-                var idealSize = GetOptimalSize(supportedSizes, 1050, 1400);
+                var wm = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
+                var display = wm.DefaultDisplay;
+                var point = new Point();
+                display.GetSize(point);
+                var idealSize = point.X > point.Y ? GetOptimalSize(supportedSizes, point.X, point.Y) : GetOptimalSize(supportedSizes, point.Y, point.X);
                 imageReader = ImageReader.NewInstance(idealSize.Width, idealSize.Height, ImageFormatType.Yuv420888, 5);
 
                 flashSupported = HasFLash(characteristics);
@@ -262,17 +265,19 @@ namespace ZXing.Mobile.CameraAccess
 
         Size GetOptimalPreviewSize(SurfaceView surface)
         {
+            var width = surface.Width > surface.Height ? surface.Width : surface.Height;
+            var height = surface.Width > surface.Height ? surface.Height : surface.Width;
             var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
             var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
             var availableSizes = ((StreamConfigurationMap)characteristics
                         .Get(CameraCharacteristics.ScalerStreamConfigurationMap))
                         .GetOutputSizes(Class.FromType(typeof(ISurfaceHolder)));
 
-            var aspectRatio = (double)surface.Height / (double)surface.Width;
+            var aspectRatio = (double)width / (double)height;
             var availableAspectRatios = availableSizes.Select(x => (x, (double)x.Width / (double)x.Height));
 
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
-            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - surface.Width)).ThenBy(x => System.Math.Abs(x.x.Height - surface.Height)).Take(5);
+            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(5);
             return bestMatches.OrderByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height).First().x;
         }
 
@@ -351,34 +356,12 @@ namespace ZXing.Mobile.CameraAccess
         {
             if (sizes is null) return null;
 
-            var aspectTolerance = 0.1;
-            var targetRatio = (double)width / height;
+            var aspectRatio = (double)width / (double)height;
+            var availableAspectRatios = sizes.Select(x => (x, (double)x.Width / (double)x.Height));
 
-            Size optimalSize = null;
-            var minDiff = double.MaxValue;
-            var targetHeight = height;
-
-            while (optimalSize is null)
-            {
-                foreach (var size in sizes)
-                {
-                    var ratio = (double)size.Width / size.Height;
-
-                    if (System.Math.Abs(ratio - targetRatio) > aspectTolerance)
-                        continue;
-
-                    if (System.Math.Abs(size.Height - targetHeight) < minDiff)
-                    {
-                        optimalSize = size;
-                        minDiff = System.Math.Abs(size.Height - targetHeight);
-                    }
-                }
-
-                if (optimalSize == null)
-                    aspectTolerance += 0.1f;
-            }
-
-            return optimalSize;
+            var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
+            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(5);
+            return bestMatches.OrderByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height).First().x;
         }
 
         void StartBackgroundThread()

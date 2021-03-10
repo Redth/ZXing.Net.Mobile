@@ -122,7 +122,7 @@ namespace ZXing.Mobile.CameraAccess
             var previewSize = cameraController.IdealPhotoSize;
             var width = previewSize.Width;
             var height = previewSize.Height;
-            
+
             var start = PerformanceCounter.Start();
 
             barcodeReader.AutoRotate = true;
