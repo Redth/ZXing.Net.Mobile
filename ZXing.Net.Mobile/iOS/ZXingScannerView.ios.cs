@@ -13,7 +13,6 @@ using CoreMedia;
 using CoreVideo;
 using ObjCRuntime;
 using UIKit;
-
 using ZXing.Common;
 using ZXing.Mobile;
 
@@ -42,7 +41,7 @@ namespace ZXing.Mobile
 		AVCaptureVideoDataOutput output;
 		OutputRecorder outputRecorder;
 		DispatchQueue queue;
-		Action<ZXing.Result> resultCallback;
+		Action<IScanResult> resultCallback;
 		volatile bool stopped = true;
 
 		UIView layerView;
@@ -252,7 +251,7 @@ namespace ZXing.Mobile
 
 					if (result != null)
 					{
-						resultCallback(result);
+						resultCallback(new ScanResult(result, null));
 						return true;
 					}
 				}
@@ -498,7 +497,7 @@ namespace ZXing.Mobile
 		}
 
 		#region IZXingScanner implementation
-		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
+		public void StartScanning(Action<IScanResult> scanResultHandler, MobileBarcodeScanningOptions options = null)
 		{
 			if (!stopped)
 				return;

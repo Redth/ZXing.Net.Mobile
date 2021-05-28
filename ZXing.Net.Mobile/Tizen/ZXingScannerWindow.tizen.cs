@@ -5,7 +5,7 @@ namespace ZXing.Mobile
 {
 	class ZxingScannerWindow : Window
 	{
-		public Action<Result> ScanCompletedHandler { get; set; }
+		public Action<IScanResult> ScanCompletedHandler { get; set; }
 		public bool ScanContinuously { get; set; }
 
 		public MobileBarcodeScanningOptions ScanningOptions {

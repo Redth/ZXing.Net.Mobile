@@ -27,10 +27,10 @@ namespace ZXing.Mobile
 		Context GetContext(Context context)
 			=> Xamarin.Essentials.Platform.CurrentActivity ?? Xamarin.Essentials.Platform.AppContext;
 
-		internal void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		internal void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 			=> ScanContinuously(null, options, scanHandler);
 
-		public void ScanContinuously(Context context, MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		public void ScanContinuously(Context context, MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 		{
 			var ctx = GetContext(context);
 			var scanIntent = new Intent(ctx, typeof(ZxingActivity));
@@ -44,16 +44,16 @@ namespace ZXing.Mobile
 			ZxingActivity.TopText = TopText;
 			ZxingActivity.BottomText = BottomText;
 
-			ZxingActivity.ScanCompletedHandler = (Result result)
+			ZxingActivity.ScanCompletedHandler = (IScanResult result)
 				=> scanHandler?.Invoke(result);
 
 			ctx.StartActivity(scanIntent);
 		}
 
-		internal Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		internal Task<IScanResult> PlatformScan(MobileBarcodeScanningOptions options)
 			=> Scan(null, options);
 
-		public Task<Result> Scan(Context context, MobileBarcodeScanningOptions options)
+		public Task<IScanResult> Scan(Context context, MobileBarcodeScanningOptions options)
 		{
 			var ctx = GetContext(context);
 
@@ -73,11 +73,11 @@ namespace ZXing.Mobile
 				ZxingActivity.TopText = TopText;
 				ZxingActivity.BottomText = BottomText;
 
-				Result scanResult = null;
+				IScanResult scanResult = null;
 
 				ZxingActivity.CanceledHandler = () => waitScanResetEvent.Set();
 
-				ZxingActivity.ScanCompletedHandler = (Result result) =>
+				ZxingActivity.ScanCompletedHandler = (IScanResult result) =>
 				{
 					scanResult = result;
 					waitScanResetEvent.Set();

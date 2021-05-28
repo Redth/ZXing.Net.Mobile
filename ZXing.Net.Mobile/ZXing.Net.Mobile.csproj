@@ -52,7 +52,7 @@
 		<None Include="..\Art\ZXing.Net.Mobile-Icon.png" PackagePath="icon.png" Pack="true" />
 		<Compile Include="**\*.shared.cs" />
 		<Compile Include="**\*.shared.*.cs" />
-	</ItemGroup>
+  </ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
 		<Compile Include="**\*.netstandard.cs" />
 		<Compile Include="**\*.netstandard.*.cs" />

@@ -5,10 +5,10 @@ namespace ZXing.Mobile
 {
 	public partial class MobileBarcodeScanner : MobileBarcodeScannerBase
 	{
-		public override Task<Result> Scan(MobileBarcodeScanningOptions options)
+		public override Task<IScanResult> Scan(MobileBarcodeScanningOptions options)
 			=> PlatformScan(options);
 
-		public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		public override void ScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 			=> PlatformScanContinuously(options, scanHandler);
 
 		public override void Cancel()

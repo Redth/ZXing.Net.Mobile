@@ -24,7 +24,7 @@ namespace ZXing.Mobile
 
 		public Frame RootFrame { get; set; }
 
-		async void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		async void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 		{
 			//Navigate: /ZxingSharp.WindowsPhone;component/Scan.xaml
 			var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
@@ -42,12 +42,12 @@ namespace ZXing.Mobile
 			});
 		}
 
-		async Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		async Task<IScanResult> PlatformScan(MobileBarcodeScanningOptions options)
 		{
 			var rootFrame = RootFrame ?? Window.Current.Content as Frame ?? ((FrameworkElement)Window.Current.Content).GetFirstChildOfType<Frame>();
 			var dispatcher = Dispatcher ?? Window.Current.Dispatcher;
 
-			var tcsScanResult = new TaskCompletionSource<Result>();
+			var tcsScanResult = new TaskCompletionSource<IScanResult>();
 
 			await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
 			{

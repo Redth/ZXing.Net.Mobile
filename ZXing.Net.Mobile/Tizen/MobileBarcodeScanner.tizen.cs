@@ -33,12 +33,12 @@ namespace ZXing.Mobile
 		void PlatformResumeAnalysis()
 			=> zxingScannerWindow.ResumeAnalysis();
 
-		Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		Task<IScanResult> PlatformScan(MobileBarcodeScanningOptions options)
 		{
 			var task = Task.Factory.StartNew(() =>
 			{
 				var waitScanResetEvent = new ManualResetEvent(false);
-				Result result = null;
+				IScanResult result = null;
 
 				zxingScannerWindow.ScanningOptions = options;
 				zxingScannerWindow.ScanContinuously = false;
@@ -47,7 +47,7 @@ namespace ZXing.Mobile
 				zxingScannerWindow.TopText = TopText;
 				zxingScannerWindow.BottomText = BottomText;
 
-				zxingScannerWindow.ScanCompletedHandler = (Result r) =>
+				zxingScannerWindow.ScanCompletedHandler = (IScanResult r) =>
 				{
 					result = r;
 					waitScanResetEvent.Set();
@@ -59,7 +59,7 @@ namespace ZXing.Mobile
 			return task;
 		}
 
-		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 		{
 			zxingScannerWindow.UseCustomOverlayView = UseCustomOverlay;
 			zxingScannerWindow.CustomOverlayView = CustomOverlay;
@@ -67,7 +67,7 @@ namespace ZXing.Mobile
 			zxingScannerWindow.ScanContinuously = true;
 			zxingScannerWindow.TopText = TopText;
 			zxingScannerWindow.BottomText = BottomText;
-			zxingScannerWindow.ScanCompletedHandler = (Result r) =>
+			zxingScannerWindow.ScanCompletedHandler = (IScanResult r) =>
 			{
 				scanHandler?.Invoke(r);
 			};

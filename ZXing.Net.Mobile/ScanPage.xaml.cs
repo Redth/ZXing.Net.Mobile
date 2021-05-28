@@ -117,9 +117,9 @@ namespace ZXing.Mobile
 		public bool IsTorchOn
 			=> scannerControl.IsTorchOn;
 
-		public Task<Result> Scan(MobileBarcodeScanningOptions options)
+		public Task<IScanResult> Scan(MobileBarcodeScanningOptions options)
 		{
-			var tcsResult = new TaskCompletionSource<Result>();
+			var tcsResult = new TaskCompletionSource<IScanResult>();
 
 			scannerControl.ContinuousScanning = false;
 			scannerControl.StartScanning(r =>
@@ -132,16 +132,16 @@ namespace ZXing.Mobile
 			return tcsResult.Task;
 		}
 
-		public Task<Result> Scan()
+		public Task<IScanResult> Scan()
 			=> Scan(new MobileBarcodeScanningOptions());
 
-		public void ScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		public void ScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 		{
 			scannerControl.ContinuousScanning = true;
 			scannerControl.StartScanning(scanHandler, options ?? Parameters?.Options);
 		}
 
-		public void ScanContinuously(Action<Result> scanHandler)
+		public void ScanContinuously(Action<IScanResult> scanHandler)
 			=> ScanContinuously(new MobileBarcodeScanningOptions(), scanHandler);
 
 		public void Cancel()
@@ -169,7 +169,7 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanner Scanner { get; set; }
 		public bool ContinuousScanning { get; set; }
 		public MobileBarcodeScanningOptions Options { get; set; }
-		public Action<ZXing.Result> ResultHandler { get; set; }
+		public Action<IScanResult> ResultHandler { get; set; }
 
 		public Action CameraInitialized { get; set; }
 		public Action<IEnumerable<string>> CameraError { get; set; }

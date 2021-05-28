@@ -7,7 +7,7 @@ namespace ZXing.Mobile
 {
 	class ZXingScannerCamera : Camera
 	{
-		Action<Result> resultHandler;
+		Action<IScanResult> resultHandler;
 		bool isDisposed;
 		bool torchFlag;
 		CameraFlashMode torchMode;
@@ -70,7 +70,7 @@ namespace ZXing.Mobile
 			var result = await TizenBarcodeAnalyzer.AnalyzeBarcodeAsync(e.MainImage);
 			
 			if (result != null)
-				resultHandler?.Invoke(result);
+				resultHandler?.Invoke(new ScanResult(result, null));
 		}
 
 		void FocusStateChangedHandler(object sender, CameraFocusStateChangedEventArgs e)
@@ -79,7 +79,7 @@ namespace ZXing.Mobile
 				StartCapture();
 		}
 
-		public void Scan(Action<Result> scanResultHandler)
+		public void Scan(Action<IScanResult> scanResultHandler)
 		{
 			resultHandler = scanResultHandler;
 			StartFocusing(true);

@@ -52,7 +52,7 @@ namespace ZXing.Mobile
 		public void ResumeAnalysis()
 			=> zxingScannerCamera?.ResumeAnalysis();
 
-		public void StartScanning(Action<Result> scanResultHandler, MobileBarcodeScanningOptions options = null)
+		public void StartScanning(Action<IScanResult> scanResultHandler, MobileBarcodeScanningOptions options = null)
 		{
 			IsAnalyzing = true;
 			Show();

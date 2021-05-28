@@ -7,10 +7,10 @@ namespace ZXing.Mobile
 	{
 		NotSupportedException ex = new NotSupportedException("MobileBarcodeScanner is unsupported on this platform.");
 
-		Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		Task<IScanResult> PlatformScan(MobileBarcodeScanningOptions options)
 			=> throw ex;
 
-		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 			=> throw ex;
 
 		void PlatformCancel()

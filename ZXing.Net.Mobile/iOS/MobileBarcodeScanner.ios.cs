@@ -20,20 +20,20 @@ namespace ZXing.Mobile
 		public MobileBarcodeScanner()
 			=> weakAppController = new WeakReference<UIViewController>(Xamarin.Essentials.Platform.GetCurrentUIViewController());
 
-		public Task<Result> Scan(bool useAVCaptureEngine)
+		public Task<IScanResult> Scan(bool useAVCaptureEngine)
 			=> Scan(new MobileBarcodeScanningOptions(), useAVCaptureEngine);
 
 
-		Task<Result> PlatformScan(MobileBarcodeScanningOptions options)
+		Task<IScanResult> PlatformScan(MobileBarcodeScanningOptions options)
 			=> Scan(options, false);
 
-		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<Result> scanHandler)
+		void PlatformScanContinuously(MobileBarcodeScanningOptions options, Action<IScanResult> scanHandler)
 			=> InternalScanContinuously(options, false, scanHandler);
 
-		public void ScanContinuously(MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<Result> scanHandler)
+		public void ScanContinuously(MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<IScanResult> scanHandler)
 			=> InternalScanContinuously(options, useAVCaptureEngine, scanHandler);
 
-		void InternalScanContinuously(MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<Result> scanHandler)
+		void InternalScanContinuously(MobileBarcodeScanningOptions options, bool useAVCaptureEngine, Action<IScanResult> scanHandler)
 		{
 			try
 			{
@@ -92,13 +92,13 @@ namespace ZXing.Mobile
 			}
 		}
 
-		public Task<Result> Scan(MobileBarcodeScanningOptions options, bool useAVCaptureEngine) => Task.Factory.StartNew(() =>
+		public Task<IScanResult> Scan(MobileBarcodeScanningOptions options, bool useAVCaptureEngine) => Task.Factory.StartNew(() =>
 		{
 			try
 			{
 				scanResultResetEvent.Reset();
 
-				Result result = null;
+				IScanResult result = null;
 
 				var sv = new Version(0, 0, 0);
 				Version.TryParse(UIDevice.CurrentDevice.SystemVersion, out sv);

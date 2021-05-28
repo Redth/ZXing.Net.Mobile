@@ -87,11 +87,8 @@
 		<Compile Include="**\*.tizen.*.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Xamarin.Essentials" Version="1.6.0" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
 		<PackageReference Include="Xamarin.Forms" Version="5.0.0.1874" />
 		<PackageReference Include="ZXing.Net" Version="0.16.6" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj" />
 	</ItemGroup>
 </Project>
