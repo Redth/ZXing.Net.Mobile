@@ -364,7 +364,8 @@ namespace ZXing.Mobile.CameraAccess
 
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
             var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(5);
-            return bestMatches.OrderByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height).First().x;
+            var orderedMatches = bestMatches.OrderBy(x => x.x.Width).ThenBy(x => x.x.Height);
+            return orderedMatches.First().x;
         }
 
         void StartBackgroundThread()
