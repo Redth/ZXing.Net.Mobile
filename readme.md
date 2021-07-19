@@ -68,6 +68,11 @@ In your `AppDelegate`'s `FinishedLaunching (..)` implementation, call:
 ZXing.Net.Mobile.Forms.iOS.Platform.Init();
 ```
 
+Also, add the following permission on your Info.plist file:
+```
+<key>NSCameraUsageDescription</key>
+<string>Require access to camera to scan barcodes</string>
+```
 
 ##### Windows Universal UWP
 
