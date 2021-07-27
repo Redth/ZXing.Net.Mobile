@@ -6,6 +6,7 @@ using Android.Graphics;
 using Android.Hardware;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Views;
 using ApxLabs.FastAndroidCamera;
 using Camera = Android.Hardware.Camera;
@@ -217,99 +218,106 @@ namespace ZXing.Mobile.CameraAccess
 
 		void ApplyCameraSettings()
 		{
-			if (Camera == null)
-			{
-				OpenCamera();
-			}
+            try
+            {
+                if (Camera == null)
+                {
+                    OpenCamera();
+                }
 
-			// do nothing if something wrong with camera
-			if (Camera == null) return;
+                // do nothing if something wrong with camera
+                if (Camera == null) return;
 
-			var parameters = Camera.GetParameters();
-			parameters.PreviewFormat = ImageFormatType.Nv21;
+                var parameters = Camera.GetParameters();
+                parameters.PreviewFormat = ImageFormatType.Nv21;
 
-			var supportedFocusModes = parameters.SupportedFocusModes;
-			if (scannerHost.ScanningOptions.DisableAutofocus)
-				parameters.FocusMode = Camera.Parameters.FocusModeFixed;
-			else if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
-				supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
-				parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
-			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
-				parameters.FocusMode = Camera.Parameters.FocusModeContinuousVideo;
-			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
-				parameters.FocusMode = Camera.Parameters.FocusModeAuto;
-			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
-				parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+                var supportedFocusModes = parameters.SupportedFocusModes;
+                if (scannerHost.ScanningOptions.DisableAutofocus)
+                    parameters.FocusMode = Camera.Parameters.FocusModeFixed;
+                else if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich &&
+                         supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousPicture))
+                    parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
+                else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
+                    parameters.FocusMode = Camera.Parameters.FocusModeContinuousVideo;
+                else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
+                    parameters.FocusMode = Camera.Parameters.FocusModeAuto;
+                else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
+                    parameters.FocusMode = Camera.Parameters.FocusModeFixed;
 
-			var selectedFps = parameters.SupportedPreviewFpsRange.FirstOrDefault();
-			if (selectedFps != null)
-			{
-				// This will make sure we select a range with the highest maximum fps
-				// which still has the lowest minimum fps (Widest Range)
-				foreach (var fpsRange in parameters.SupportedPreviewFpsRange)
-				{
-					if (fpsRange[1] > selectedFps[1] || fpsRange[1] == selectedFps[1] && fpsRange[0] < selectedFps[0])
-						selectedFps = fpsRange;
-				}
-				parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
-			}
+                var selectedFps = parameters.SupportedPreviewFpsRange.FirstOrDefault();
+                if (selectedFps != null)
+                {
+                    // This will make sure we select a range with the highest maximum fps
+                    // which still has the lowest minimum fps (Widest Range)
+                    foreach (var fpsRange in parameters.SupportedPreviewFpsRange)
+                    {
+                        if (fpsRange[1] > selectedFps[1] || fpsRange[1] == selectedFps[1] && fpsRange[0] < selectedFps[0])
+                            selectedFps = fpsRange;
+                    }
+                    parameters.SetPreviewFpsRange(selectedFps[0], selectedFps[1]);
+                }
 
-			CameraResolution resolution = null;
-			var supportedPreviewSizes = parameters.SupportedPreviewSizes;
-			if (supportedPreviewSizes != null)
-			{
-				var availableResolutions = supportedPreviewSizes.Select(sps => new CameraResolution
-				{
-					Width = sps.Width,
-					Height = sps.Height
-				});
+                CameraResolution resolution = null;
+                var supportedPreviewSizes = parameters.SupportedPreviewSizes;
+                if (supportedPreviewSizes != null)
+                {
+                    var availableResolutions = supportedPreviewSizes.Select(sps => new CameraResolution
+                    {
+                        Width = sps.Width,
+                        Height = sps.Height
+                    });
 
-				// Try and get a desired resolution from the options selector
-				resolution = scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
+                    // Try and get a desired resolution from the options selector
+                    resolution = scannerHost.ScanningOptions.GetResolution(availableResolutions.ToList());
 
-				// If the user did not specify a resolution, let's try and find a suitable one
-				if (resolution == null)
-				{
-					foreach (var sps in supportedPreviewSizes)
-					{
-						if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
-						{
-							resolution = new CameraResolution
-							{
-								Width = sps.Width,
-								Height = sps.Height
-							};
-							break;
-						}
-					}
-				}
-			}
+                    // If the user did not specify a resolution, let's try and find a suitable one
+                    if (resolution == null)
+                    {
+                        foreach (var sps in supportedPreviewSizes)
+                        {
+                            if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
+                            {
+                                resolution = new CameraResolution
+                                {
+                                    Width = sps.Width,
+                                    Height = sps.Height
+                                };
+                                break;
+                            }
+                        }
+                    }
+                }
 
-			// Google Glass requires this fix to display the camera output correctly
-			if (Build.Model.Contains("Glass"))
-			{
-				resolution = new CameraResolution
-				{
-					Width = 640,
-					Height = 360
-				};
-				// Glass requires 30fps
-				parameters.SetPreviewFpsRange(30000, 30000);
-			}
+                // Google Glass requires this fix to display the camera output correctly
+                if (Build.Model.Contains("Glass"))
+                {
+                    resolution = new CameraResolution
+                    {
+                        Width = 640,
+                        Height = 360
+                    };
+                    // Glass requires 30fps
+                    parameters.SetPreviewFpsRange(30000, 30000);
+                }
 
-			// Hopefully a resolution was selected at some point
-			if (resolution != null)
-			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG,
-					"Selected Resolution: " + resolution.Width + "x" + resolution.Height);
+                // Hopefully a resolution was selected at some point
+                if (resolution != null)
+                {
+                    Log.Debug(MobileBarcodeScanner.TAG,
+                        "Selected Resolution: " + resolution.Width + "x" + resolution.Height);
 
-				CameraResolution = resolution;
-				parameters.SetPreviewSize(resolution.Width, resolution.Height);
-			}
+                    CameraResolution = resolution;
+                    parameters.SetPreviewSize(resolution.Width, resolution.Height);
+                }
 
-			Camera.SetParameters(parameters);
+                Camera.SetParameters(parameters);
 
-			SetCameraDisplayOrientation();
+                SetCameraDisplayOrientation();
+            }
+            catch (Exception e)
+            {
+                //This is added to catch and eat get parameter failed exception from Camera module occuring when using the prism library 
+            }
 		}
 
 		void AutoFocus(int x, int y, bool useCoordinates)
