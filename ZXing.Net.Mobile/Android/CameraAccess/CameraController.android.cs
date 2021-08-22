@@ -236,6 +236,8 @@ namespace ZXing.Mobile.CameraAccess
 				parameters.FocusMode = Camera.Parameters.FocusModeContinuousPicture;
 			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeContinuousVideo))
 				parameters.FocusMode = Camera.Parameters.FocusModeContinuousVideo;
+			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeMacro))
+				parameters.FocusMode = Camera.Parameters.FocusModeMacro;
 			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeAuto))
 				parameters.FocusMode = Camera.Parameters.FocusModeAuto;
 			else if (supportedFocusModes.Contains(Camera.Parameters.FocusModeFixed))
