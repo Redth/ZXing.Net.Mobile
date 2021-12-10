@@ -25,6 +25,8 @@ namespace ZXing.Net.Mobile.Forms.iOS
 
 		protected override async void OnElementChanged(ElementChangedEventArgs<ZXingScannerView> e)
 		{
+			if (Element is null) return;
+
 			AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight;
 
 			formsView = Element;
