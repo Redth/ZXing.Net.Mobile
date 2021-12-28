@@ -163,9 +163,6 @@ namespace ZXing.Mobile.CameraAccess
 
 			result = barcodeReader.Decode(fast);
 
-			fastArray.Dispose();
-			fastArray = null;
-
 			PerformanceCounter.Stop(start,
 				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
 				rotate + ")");
