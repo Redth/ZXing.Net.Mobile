@@ -38,7 +38,7 @@ jobs:
       name: Publish NuGet Packages
       needs: build
       runs-on: windows-latest
-      if: github.ref == 'refs/heads/master-publish' && (github.event_name == 'push' || github.event_name == 'release')
+      if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'release')
       steps:
         - name: Download Artifacts
           uses: actions/download-artifact@v1
