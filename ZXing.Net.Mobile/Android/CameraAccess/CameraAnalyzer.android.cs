@@ -144,21 +144,51 @@ namespace ZXing.Mobile.CameraAccess
 				newHeight = width;
 			}
 
+			ZXing.Result result = null;
 			var start = PerformanceCounter.Start();
 
-			LuminanceSource fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width, height); // _area.Left, _area.Top, _area.Width, _area.Height);
+			var scanningRect = scannerHost.ScanningOptions.ScanningArea;
+			LuminanceSource fast;
+
+			if (scanningRect.IsFullFrame())
+			{
+				fast = new FastJavaByteArrayYUVLuminanceSource(fastArray, width, height, 0, 0, width,
+					height); // _area.Left, _area.Top, _area.Width, _area.Height);
+			}
+			else
+			{
+				if (rotate)
+					scanningRect = scanningRect.RotateCounterClockwise();
+
+				var left = (int) (width * scanningRect.StartX);
+				var top = (int) (height * scanningRect.StartY);
+				var endHeight = (int) (scanningRect.EndY * height) - top;
+				var endWidth = (int) (scanningRect.EndX * width) - left;
+
+				fast = new FastJavaByteArrayYUVLuminanceSource(
+					fastArray,
+					width,
+					height,
+					left,
+					top,
+					endWidth,
+					endHeight);
+			}
+
 			if (rotate)
 				fast = fast.rotateCounterClockwise();
 
-			var result = barcodeReader.Decode(fast);
+			result = barcodeReader.Decode(fast);
 
 			PerformanceCounter.Stop(start,
 				"Decode Time: {0} ms (width: " + width + ", height: " + height + ", degrees: " + cDegrees + ", rotate: " +
 				rotate + ")");
 
+            PerformanceCounter.Stop(start, null);
+
 			if (result != null)
 			{
-				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Barcode Found");
+				Android.Util.Log.Debug(MobileBarcodeScanner.TAG, $"Barcode Found {result.Text}");
 
 				wasScanned = true;
 				BarcodeFound?.Invoke(result);
