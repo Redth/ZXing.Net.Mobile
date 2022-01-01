@@ -53,9 +53,10 @@ namespace Sample.Android
 			var opts = new MobileBarcodeScanningOptions
 			{
 				PossibleFormats = new List<ZXing.BarcodeFormat> {
-					ZXing.BarcodeFormat.QR_CODE
+					ZXing.BarcodeFormat.All_1D
 				},
-				CameraResolutionSelector = availableResolutions =>
+				ScanningArea = ScanningArea.From(0f, 0.49f, 1f, 0.51f),
+			    CameraResolutionSelector = availableResolutions =>
 				{
 
 					foreach (var ar in availableResolutions)
@@ -63,7 +64,8 @@ namespace Sample.Android
 						Console.WriteLine("Resolution: " + ar.Width + "x" + ar.Height);
 					}
 					return null;
-				}
+				},
+                AutoRotate = true
 			};
 
 			scanFragment.StartScanning(result =>

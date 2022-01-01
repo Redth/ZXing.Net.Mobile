@@ -39,6 +39,9 @@ namespace ZXing.Mobile
 		{
 			var elapsed = Stop(guid);
 
+            if (msg == null)
+                return;
+
 			if (!msg.Contains("{0}"))
 				msg += " {0}";
 

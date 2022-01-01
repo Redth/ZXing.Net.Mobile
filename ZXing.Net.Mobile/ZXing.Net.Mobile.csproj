@@ -108,4 +108,10 @@
 		<PackageReference Include="Xamarin.Essentials" Version="1.6.0" />
 		<PackageReference Include="ZXing.Net" Version="0.16.6" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="ScanningArea.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Include="ScanningArea.cs" />
+	</ItemGroup>
 </Project>
