@@ -599,6 +599,7 @@ namespace ZXing.Mobile
 					break;
 				case BarcodeFormat.ITF:
 					formats |= AVMetadataObjectType.ITF14Code;
+					formats |= AVMetadataObjectType.Interleaved2of5Code;
 					break;
 				case BarcodeFormat.CODABAR:
 				case BarcodeFormat.MAXICODE:
