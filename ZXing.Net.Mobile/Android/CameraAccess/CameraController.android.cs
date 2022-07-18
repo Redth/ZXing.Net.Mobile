@@ -304,38 +304,20 @@ namespace ZXing.Mobile.CameraAccess
 
             try
             {
-                var optimalPreviewSize = GetOptimalPreviewSize(surfaceView);
-
-                if (Looper.MyLooper() == Looper.MainLooper)
-                {
-                    holder.SetFixedSize(optimalPreviewSize.Width, optimalPreviewSize.Height);
-                }
-                else
-                {
-                    var sizeSetResetEvent = new ManualResetEventSlim(false);
-                    using (var handler = new Handler(Looper.MainLooper))
-                    {
-                        handler.Post(() =>
-                        {
-                            holder.SetFixedSize(optimalPreviewSize.Width, optimalPreviewSize.Height);
-                            sizeSetResetEvent.Set();
-                        });
-                    }
-
-                    sizeSetResetEvent.Wait();
-                    sizeSetResetEvent.Reset();
-                }
-
                 // This is needed bc otherwise the preview is sometimes distorted
                 System.Threading.Thread.Sleep(30);
 
-                previewBuilder = Camera.CreateCaptureRequest(CameraTemplate.Preview);
-                previewBuilder.AddTarget(holder.Surface);
-                previewBuilder.AddTarget(imageReader.Surface);
+                var surfaces = new List<Surface>
+                {
+                    holder.Surface,
+                    imageReader.Surface
+                };
 
-                var surfaces = new List<Surface>();
-                surfaces.Add(holder.Surface);
-                surfaces.Add(imageReader.Surface);
+                previewBuilder = Camera.CreateCaptureRequest(CameraTemplate.Preview);
+                foreach (var surface in surfaces)
+                {
+                    previewBuilder.AddTarget(surface);
+                }
 
                 Camera.CreateCaptureSession(surfaces,
                     new CameraCaptureStateListener
