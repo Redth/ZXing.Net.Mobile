@@ -39,7 +39,9 @@ namespace ZXing.Mobile.CameraAccess
 
         public CameraDevice Camera { get; private set; }
 
-        public Size IdealPhotoSize { get; private set; }
+        public Size DisplaySize { get; private set; }
+
+        public int SensorRotation { get; private set; }
 
         public CameraController(SurfaceView surfaceView, CameraEventsListener cameraEventListener, IScannerSessionHost scannerHost)
         {
@@ -214,14 +216,15 @@ namespace ZXing.Mobile.CameraAccess
                 var display = wm.DefaultDisplay;
                 var point = new Point();
                 display.GetSize(point);
-                var idealSize = point.X > point.Y ? GetOptimalSize(supportedSizes, point.X, point.Y) : GetOptimalSize(supportedSizes, point.Y, point.X);
-                imageReader = ImageReader.NewInstance(idealSize.Width, idealSize.Height, ImageFormatType.Yuv420888, 5);
+                DisplaySize = new Size(point.X, point.Y);
+
+                imageReader = ImageReader.NewInstance(DisplaySize.Width, DisplaySize.Height, ImageFormatType.Yuv420888, 5);
 
                 flashSupported = HasFLash(characteristics);
+                SensorRotation = GetSensorRotation(characteristics);
 
                 imageReader.SetOnImageAvailableListener(cameraEventListener, backgroundHandler);
 
-                IdealPhotoSize = idealSize;
             }
             catch (System.Exception ex)
             {
@@ -239,6 +242,20 @@ namespace ZXing.Mobile.CameraAccess
             else
             {
                 return (bool)available;
+            }
+        }
+
+        int GetSensorRotation(CameraCharacteristics characteristics)
+        {
+            var rotation = (int?)characteristics.Get(CameraCharacteristics.SensorOrientation);
+            if (rotation == null)
+            {
+                return 0;
+            }
+            else
+            {
+
+                return rotation.Value;
             }
         }
 

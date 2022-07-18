@@ -1,9 +1,5 @@
 ﻿using System;
-using System.IO;
-using Android.Content;
-using Android.Graphics;
 using Android.Media;
-using Java.Lang;
 using Java.Nio;
 using static Android.Media.ImageReader;
 
@@ -11,7 +7,7 @@ namespace ZXing.Mobile.CameraAccess
 {
     public class CameraEventsListener : Java.Lang.Object, IOnImageAvailableListener
     {
-        public event EventHandler<byte[]> OnPreviewFrameReady;
+        public event EventHandler<(byte[] Nv21, int Width, int Height)> OnPreviewFrameReady;
 
         public CameraEventsListener()
         {
@@ -25,10 +21,10 @@ namespace ZXing.Mobile.CameraAccess
                 image = reader.AcquireLatestImage();
 
                 if (image is null) return;
-
                 var yuvBytes = Yuv420888toNv21(image);
 
-                OnPreviewFrameReady?.Invoke(this, yuvBytes);
+
+                OnPreviewFrameReady?.Invoke(this, (yuvBytes, image.Width, image.Height));
             }
             finally
             {
