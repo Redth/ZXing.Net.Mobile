@@ -220,7 +220,7 @@ namespace ZXing.Mobile.CameraAccess
 
                 imageReader = ImageReader.NewInstance(DisplaySize.Width, DisplaySize.Height, ImageFormatType.Yuv420888, 5);
 
-                flashSupported = HasFLash(characteristics);
+                flashSupported = HasFlash(characteristics);
                 SensorRotation = GetSensorRotation(characteristics);
 
                 imageReader.SetOnImageAvailableListener(cameraEventListener, backgroundHandler);
@@ -232,7 +232,7 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
-        bool HasFLash(CameraCharacteristics characteristics)
+        bool HasFlash(CameraCharacteristics characteristics)
         {
             var available = (Java.Lang.Boolean)characteristics.Get(CameraCharacteristics.FlashInfoAvailable);
             if (available == null)
