@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net.Http;
 using Android.Graphics;
+using ZXing.Mobile.CameraAccess;
 
 namespace ZXing.Net.Mobile.Android
 {
@@ -33,6 +34,9 @@ namespace ZXing.Net.Mobile.Android
             var jpeg = NV21toJPEG(data, width, height);
             SendBytesToEndpoint(jpeg, endpoint);
         }
+
+        public static void SendNV21toJPEGToEndpoint(CapturedImageData data, string endpoint)
+            => SendNV21toJPEGToEndpoint(data.Matrix, data.Width, data.Height, endpoint);
 
         static HttpClient GetHttpClient()
         {

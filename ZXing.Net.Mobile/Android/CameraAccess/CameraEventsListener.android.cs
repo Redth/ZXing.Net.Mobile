@@ -7,7 +7,7 @@ namespace ZXing.Mobile.CameraAccess
 {
     public class CameraEventsListener : Java.Lang.Object, IOnImageAvailableListener
     {
-        public event EventHandler<(byte[] Nv21, int Width, int Height)> OnPreviewFrameReady;
+        public event EventHandler<CapturedImageData> OnPreviewFrameReady;
 
         public CameraEventsListener()
         {
@@ -21,10 +21,9 @@ namespace ZXing.Mobile.CameraAccess
                 image = reader.AcquireLatestImage();
 
                 if (image is null) return;
-                var yuvBytes = Yuv420888toNv21(image);
 
-
-                OnPreviewFrameReady?.Invoke(this, (yuvBytes, image.Width, image.Height));
+                var bytes = Yuv420888toNv21(image);
+                OnPreviewFrameReady?.Invoke(null, new CapturedImageData(bytes, image.Width, image.Height));
             }
             finally
             {
@@ -70,7 +69,6 @@ namespace ZXing.Mobile.CameraAccess
                 for (; pos < ySize; pos += width)
                 {
                     yBufferPos += rowStride;
-
                     Array.Copy(yArray, yBufferPos, nv21, pos, width);
                 }
             }

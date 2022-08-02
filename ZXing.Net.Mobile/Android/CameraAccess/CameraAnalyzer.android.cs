@@ -89,7 +89,7 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
-        void HandleOnPreviewFrameReady(object sender, (byte[] Nv21, int Width, int Height) data)
+        void HandleOnPreviewFrameReady(object sender, CapturedImageData data)
         {
             if (!CanAnalyzeFrame)
                 return;
@@ -114,13 +114,9 @@ namespace ZXing.Mobile.CameraAccess
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        void DecodeFrame((byte[] Nv21, int Width, int Height) data)
+        void DecodeFrame(CapturedImageData data)
         {
             var sensorRotation = cameraController.SensorRotation;
-
-            var start = PerformanceCounter.Start();
-            LuminanceSource source = new PlanarYUVLuminanceSource(data.Nv21, data.Width, data.Height, 0, 0, data.Width, data.Height, false);
-
             if (!barcodeReader.AutoRotate && context.Resources.Configuration.Orientation == Android.Content.Res.Orientation.Portrait && sensorRotation != 0)
             {
                 switch (sensorRotation)
@@ -136,17 +132,20 @@ namespace ZXing.Mobile.CameraAccess
                         break;
                 }
             }
-            var initPerformance = PerformanceCounter.Stop(start);
 
+            var start = PerformanceCounter.Start();
+            LuminanceSource source = new PlanarYUVLuminanceSource(data.Matrix, data.Width, data.Height, 0, 0, data.Width, data.Height, false);
+            var initPerformance = PerformanceCounter.Stop(start);
             start = PerformanceCounter.Start();
             var result = barcodeReader.Decode(source);
             Android.Util.Log.Debug(
                 MobileBarcodeScanner.TAG,
-                "Decode Time: {0} ms (width: {1}, height: {2}, AutoRotation: {3}), Source setup: {4} ms",
+                "Decode Time: {0} ms (width: {1}, height: {2}, AutoRotation: {3}, SensorRotation: {4}), Source setup: {5} ms",
                 PerformanceCounter.Stop(start).Milliseconds,
                 data.Width,
                 data.Height,
                 barcodeReader.AutoRotate,
+                sensorRotation,
                 initPerformance.Milliseconds);
 
             if (result != null)
