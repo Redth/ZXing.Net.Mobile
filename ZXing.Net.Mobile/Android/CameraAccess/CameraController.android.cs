@@ -32,6 +32,7 @@ namespace ZXing.Mobile.CameraAccess
         CameraCaptureSession previewSession;
         CaptureRequest previewRequest;
         HandlerThread backgroundThread;
+        Size[] supportedSizes;
 
         public string CameraId { get; private set; }
 
@@ -40,6 +41,8 @@ namespace ZXing.Mobile.CameraAccess
         public CameraDevice Camera { get; private set; }
 
         public Size DisplaySize { get; private set; }
+
+        public Size IdealPhotoSize { get; private set; }
 
         public int SensorRotation { get; private set; }
 
@@ -139,6 +142,7 @@ namespace ZXing.Mobile.CameraAccess
                 // Since FocusAreas only really work with FocusModeAuto set
                 if (supportedFocusModes.Contains(ControlAFMode.ContinuousVideo))
                 {
+                    previewBuilder.Set(CaptureRequest.ControlAfTrigger, (int)ControlAFTrigger.Cancel);
                     previewBuilder.Set(CaptureRequest.ControlAfMode, (int)ControlAFMode.ContinuousVideo);
                 }
                 else if (useCoordinates && supportedFocusModes.Contains(ControlAFMode.Auto))
@@ -161,10 +165,10 @@ namespace ZXing.Mobile.CameraAccess
                     {
                         new MeteringRectangle(x, y, x + 20, y + 20, 1000)
                     });
-                }
 
-                // Finally autofocus (weather we used focus areas or not)
-                previewBuilder.Set(CaptureRequest.ControlAfTrigger, (int)ControlAFTrigger.Start);
+                    // Finally autofocus (weather we used focus areas or not)
+                    previewBuilder.Set(CaptureRequest.ControlAfTrigger, (int)ControlAFTrigger.Start);
+                }
 
                 UpdatePreview();
             }
@@ -204,9 +208,8 @@ namespace ZXing.Mobile.CameraAccess
 
                 var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
                 var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
-                Size[] supportedSizes = null;
 
-                if (characteristics != null)
+                if (characteristics != null && supportedSizes == null)
                     supportedSizes = ((StreamConfigurationMap)characteristics
                         .Get(CameraCharacteristics.ScalerStreamConfigurationMap))
                         .GetOutputSizes((int)ImageFormatType.Yuv420888);
@@ -223,7 +226,9 @@ namespace ZXing.Mobile.CameraAccess
                 display.GetSize(point);
                 DisplaySize = new Size(point.X, point.Y);
 
-                imageReader = ImageReader.NewInstance(DisplaySize.Width, DisplaySize.Height, ImageFormatType.Yuv420888, 5);
+                IdealPhotoSize = DisplaySize.Width > DisplaySize.Height ? GetOptimalSize(supportedSizes, DisplaySize) : GetOptimalSize(supportedSizes, DisplaySize, true);
+
+                imageReader = ImageReader.NewInstance(IdealPhotoSize.Width, IdealPhotoSize.Height, ImageFormatType.Yuv420888, 5);
 
                 flashSupported = HasFlash(characteristics);
                 SensorRotation = GetSensorRotation(characteristics);
@@ -287,6 +292,11 @@ namespace ZXing.Mobile.CameraAccess
 
         Size GetOptimalPreviewSize(SurfaceView surface)
         {
+            if (IdealPhotoSize != null)
+            {
+                return IdealPhotoSize;
+            }
+
             var width = surface.Width > surface.Height ? surface.Width : surface.Height;
             var height = surface.Width > surface.Height ? surface.Height : surface.Width;
             var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
@@ -303,12 +313,40 @@ namespace ZXing.Mobile.CameraAccess
             return bestMatches.OrderByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height).First().x;
         }
 
+        void SetupHolderSize()
+        {
+            if (Camera is null || holder is null || imageReader is null || backgroundHandler is null) return;
+
+            var optimalPreviewSize = GetOptimalPreviewSize(surfaceView);
+            if (Looper.MyLooper() == Looper.MainLooper)
+            {
+                holder.SetFixedSize(optimalPreviewSize.Width, optimalPreviewSize.Height);
+            }
+            else
+            {
+                var sizeSetResetEvent = new ManualResetEventSlim(false);
+                using (var handler = new Handler(Looper.MainLooper))
+                {
+                    handler.Post(() =>
+                    {
+                        holder.SetFixedSize(optimalPreviewSize.Width, optimalPreviewSize.Height);
+                        sizeSetResetEvent.Set();
+                    });
+                }
+
+                sizeSetResetEvent.Wait();
+                sizeSetResetEvent.Reset();
+            }
+        }
+
         public void StartPreview()
         {
             if (Camera is null || holder is null || imageReader is null || backgroundHandler is null) return;
 
             try
             {
+                SetupHolderSize();
+
                 // This is needed bc otherwise the preview is sometimes distorted
                 System.Threading.Thread.Sleep(30);
 
@@ -332,6 +370,9 @@ namespace ZXing.Mobile.CameraAccess
                         },
                         OnConfiguredAction = session =>
                         {
+                            if (previewSession != null)
+                                previewSession.Dispose();
+
                             previewSession = session;
                             UpdatePreview();
                         }
@@ -350,6 +391,11 @@ namespace ZXing.Mobile.CameraAccess
 
             try
             {
+                SetupHolderSize();
+
+                if (previewRequest != null)
+                    previewRequest.Dispose();
+
                 previewRequest = previewBuilder.Build();
                 previewSession.SetRepeatingRequest(previewRequest, null, backgroundHandler);
             }
@@ -358,6 +404,8 @@ namespace ZXing.Mobile.CameraAccess
                 Log.Debug(MobileBarcodeScanner.TAG, "Error on updating preview" + ex);
             }
         }
+
+        Size GetOptimalSize(IList<Size> sizes, Size displaySize, bool flipWidthWithHeight = false) => flipWidthWithHeight ? GetOptimalSize(sizes, displaySize.Height, displaySize.Width) : GetOptimalSize(sizes, displaySize.Width, displaySize.Height);
 
         Size GetOptimalSize(IList<Size> sizes, int width, int height)
         {
