@@ -137,7 +137,11 @@ namespace ZXing.Mobile.CameraAccess
                 // If we want to use coordinates
                 // Also only if our camera supports Auto focus mode
                 // Since FocusAreas only really work with FocusModeAuto set
-                if (useCoordinates && supportedFocusModes.Contains(ControlAFMode.Auto))
+                if (supportedFocusModes.Contains(ControlAFMode.ContinuousVideo))
+                {
+                    previewBuilder.Set(CaptureRequest.ControlAfMode, (int)ControlAFMode.ContinuousVideo);
+                }
+                else if (useCoordinates && supportedFocusModes.Contains(ControlAFMode.Auto))
                 {
                     // Let's give the touched area a 20 x 20 minimum size rect to focus on
                     // So we'll offset -10 from the center of the touch and then
