@@ -65,6 +65,7 @@ namespace ZXing.Mobile.CameraAccess
                 {
                     Camera = camera;
                     StartPreview();
+                    AutoFocus();
                     OpeningCamera = false;
                 },
                 OnDisconnectedAction = camera =>
