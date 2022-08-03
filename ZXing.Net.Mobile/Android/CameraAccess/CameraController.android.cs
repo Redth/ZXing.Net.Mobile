@@ -228,7 +228,7 @@ namespace ZXing.Mobile.CameraAccess
 
                 IdealPhotoSize = DisplaySize.Width > DisplaySize.Height ? GetOptimalSize(supportedSizes, DisplaySize) : GetOptimalSize(supportedSizes, DisplaySize, true);
 
-                imageReader = ImageReader.NewInstance(IdealPhotoSize.Width, IdealPhotoSize.Height, ImageFormatType.Yuv420888, 5);
+                imageReader = ImageReader.NewInstance(IdealPhotoSize.Width, IdealPhotoSize.Height, ImageFormatType.Yuv420888, 3);
 
                 flashSupported = HasFlash(characteristics);
                 SensorRotation = GetSensorRotation(characteristics);
