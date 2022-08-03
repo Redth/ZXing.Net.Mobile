@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Android.Content;
 using Android.Views;
+using ZXing.Net.Mobile.Android;
 
 namespace ZXing.Mobile.CameraAccess
 {
@@ -117,30 +118,15 @@ namespace ZXing.Mobile.CameraAccess
         void DecodeFrame(CapturedImageData data)
         {
             var sensorRotation = cameraController.SensorRotation;
-            if (!barcodeReader.AutoRotate && context.Resources.Configuration.Orientation == Android.Content.Res.Orientation.Portrait && sensorRotation != 0)
-            {
-                switch (sensorRotation)
-                {
-                    case 90:
-                        source = source.rotateCounterClockwise().rotateCounterClockwise().rotateCounterClockwise();
-                        break;
-                    case 180:
-                        source = source.rotateCounterClockwise().rotateCounterClockwise();
-                        break;
-                    case 270:
-                        source = source.rotateCounterClockwise();
-                        break;
-                }
-            }
-
             var start = PerformanceCounter.Start();
-            LuminanceSource source = new PlanarYUVLuminanceSource(data.Matrix, data.Width, data.Height, 0, 0, data.Width, data.Height, false);
+            var source = new PlanarNV21LuminanceSource(sensorRotation, data.Matrix, data.Width, data.Height, true);
+
             var initPerformance = PerformanceCounter.Stop(start);
             start = PerformanceCounter.Start();
             var result = barcodeReader.Decode(source);
             Android.Util.Log.Debug(
                 MobileBarcodeScanner.TAG,
-                "Decode Time: {0} ms (width: {1}, height: {2}, AutoRotation: {3}, SensorRotation: {4}), Source setup: {5} ms",
+                "Decode Time: {0} ms (Width: {1}, Height: {2}, AutoRotation: {3}, SensorRotation: {4}), Source setup: {5} ms",
                 PerformanceCounter.Stop(start).Milliseconds,
                 data.Width,
                 data.Height,
