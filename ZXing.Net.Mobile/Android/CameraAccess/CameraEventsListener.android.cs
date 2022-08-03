@@ -40,10 +40,11 @@ namespace ZXing.Mobile.CameraAccess
             var uvSize = width * height / 4;
 
             var nv21 = new byte[ySize + uvSize * 2];
+            var planes = image.GetPlanes();
 
-            var yBuffer = image.GetPlanes()[0].Buffer; // Y
-            var uBuffer = image.GetPlanes()[1].Buffer; // U
-            var vBuffer = image.GetPlanes()[2].Buffer; // V
+            var yBuffer = planes[0].Buffer; // Y
+            var uBuffer = planes[1].Buffer; // U
+            var vBuffer = planes[2].Buffer; // V
 
             var yArray = new byte[yBuffer.Limit()];
             yBuffer.Get(yArray, 0, yArray.Length);
@@ -54,7 +55,7 @@ namespace ZXing.Mobile.CameraAccess
             var vArray = new byte[vBuffer.Limit()];
             vBuffer.Get(vArray, 0, vArray.Length);
 
-            var rowStride = image.GetPlanes()[0].RowStride;
+            var rowStride = planes[0].RowStride;
             var pos = 0;
 
             if (rowStride == width)
@@ -73,8 +74,8 @@ namespace ZXing.Mobile.CameraAccess
                 }
             }
 
-            rowStride = image.GetPlanes()[2].RowStride;
-            var pixelStride = image.GetPlanes()[2].PixelStride;
+            rowStride = planes[2].RowStride;
+            var pixelStride = planes[2].PixelStride;
 
             if (pixelStride == 2 && rowStride == width && uArray[0] == vArray[1])
             {
