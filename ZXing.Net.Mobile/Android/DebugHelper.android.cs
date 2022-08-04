@@ -10,6 +10,9 @@ namespace ZXing.Net.Mobile.Android
     // This is a simple helping class to use with the ImageReceiver Tool
     public static class DebugHelper
     {
+        static int sendThreshold = 18;
+        static int sendCount;
+
         // Used to check NV21 Output
         static byte[] NV21toJPEG(byte[] nv21, int width, int height)
         {
@@ -21,22 +24,39 @@ namespace ZXing.Net.Mobile.Android
             }
         }
 
-        public static void SendBytesToEndpoint(byte[] data, string endpoint)
+        public static void SendBytesToEndpoint(byte[] data, string endpoint, bool ignoreThreshold = false, params (string Key, string Value)[] headers)
         {
+            if (!ignoreThreshold)
+            {
+                if (sendCount < sendThreshold)
+                {
+                    sendCount++;
+                    return;
+                }
+
+                sendCount = 0;
+            }
+
             var httpClient = GetHttpClient();
             var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
             request.Content = new ByteArrayContent(data);
+
+            foreach (var header in headers)
+            {
+                httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
+            }
+
             httpClient.SendAsync(request);
         }
 
-        public static void SendNV21toJPEGToEndpoint(byte[] data, int width, int height, string endpoint)
+        public static void SendNV21toJPEGToEndpoint(byte[] data, int width, int height, string endpoint, bool ignoreThreshold = false, params (string Key, string Value)[] headers)
         {
             var jpeg = NV21toJPEG(data, width, height);
-            SendBytesToEndpoint(jpeg, endpoint);
+            SendBytesToEndpoint(jpeg, endpoint, ignoreThreshold, headers);
         }
 
-        public static void SendNV21toJPEGToEndpoint(CapturedImageData data, string endpoint)
-            => SendNV21toJPEGToEndpoint(data.Matrix, data.Width, data.Height, endpoint);
+        public static void SendNV21toJPEGToEndpoint(CapturedImageData data, string endpoint, bool ignoreThreshold = false, params (string Key, string Value)[] headers)
+            => SendNV21toJPEGToEndpoint(data.Matrix, data.Width, data.Height, endpoint, ignoreThreshold, headers);
 
         static HttpClient GetHttpClient()
         {
