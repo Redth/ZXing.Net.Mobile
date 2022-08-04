@@ -1,49 +1,75 @@
 ﻿using System;
+using Android.Content.Res;
 
 namespace ZXing.Net.Mobile.Android
 {
     public class PlanarNV21LuminanceSource : BaseLuminanceSource
     {
-        int sensorRotation = 0;
+        DeviceOrientationData orientationData = null;
 
         public override bool CropSupported => false;
 
         public override bool RotateSupported => true;
 
-        public int CurrentRotation { get; private set; }
 
-        public PlanarNV21LuminanceSource(int sensorRotation, byte[] nv21Data, int width, int height, bool correctToSensorOrientation = true)
+        public PlanarNV21LuminanceSource(byte[] nv21Data, int width, int height, DeviceOrientationData orientationData, bool useOrientationDataToCorrect)
             : base(width, height)
         {
-            this.sensorRotation = sensorRotation;
+            this.orientationData = orientationData;
             base.luminances = nv21Data;
             Width = width;
             Height = height;
 
-            if (correctToSensorOrientation)
+            if (useOrientationDataToCorrect && orientationData == null)
+                throw new ArgumentNullException($"{orientationData} can't be null when correction is requested");
+
+            if (orientationData != null && useOrientationDataToCorrect)
                 ValidateRotation();
+        }
+
+        public PlanarNV21LuminanceSource(byte[] nv21Data, int width, int height)
+            : this(nv21Data, width, height, null, false)
+        {
         }
 
         void ValidateRotation()
         {
-            if (sensorRotation % 90 != 0) // we don't support weird sensor orientations 
+            if (orientationData.SensorRotation % 90 != 0) // we don't support weird sensor orientations 
             {
                 return;
             }
 
-            if (sensorRotation != CurrentRotation)
+            var rotateBy = 0;
+            if (orientationData.OrientationMode == Orientation.Landscape)
             {
-                var rotateResult = RotateNV21(luminances, Width, Height, sensorRotation);
-                luminances = rotateResult.NV21;
-                Width = rotateResult.Width;
-                Height = rotateResult.Height;
-
-                CurrentRotation = sensorRotation;
+                if (orientationData.DeviceOrientation >= 180) // Navigation on the left, Header on the left (270°)
+                {
+                    rotateBy = 270; // 270 + 90 = 360 || 360 zeros out so nothing to do
+                }
+                else if (orientationData.DeviceOrientation < 180) // Navigation on the left, Header on the Right (90°)
+                {
+                    rotateBy = 90;
+                }
             }
+            else
+            {
+                if (orientationData.DeviceOrientation > 90) // Upside down and not landscape mode
+                {
+                    rotateBy = 180;
+                }
+            }
+
+            rotateBy += orientationData.SensorRotation;
+            rotateBy %= 360;
+
+            var rotateResult = RotateNV21(luminances, Width, Height, rotateBy);
+            luminances = rotateResult.NV21;
+            Width = rotateResult.Width;
+            Height = rotateResult.Height;
         }
 
         protected override LuminanceSource CreateLuminanceSource(byte[] newLuminances, int width, int height)
-            => new PlanarNV21LuminanceSource(0, newLuminances, width, height);
+            => new PlanarNV21LuminanceSource(newLuminances, width, height, orientationData, false);
 
         public override LuminanceSource rotateCounterClockwise() => GetRotatedLuminanceSource(270);
 
@@ -72,7 +98,7 @@ namespace ZXing.Net.Mobile.Android
             var frameSize = width * height;
             var swap = rotation % 180 != 0;
             var xflip = rotation % 270 != 0;
-            var yflip = rotation > 180;
+            var yflip = rotation >= 180;
 
             for (var row = 0; row < height; row++)
             {

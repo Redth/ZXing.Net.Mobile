@@ -11,6 +11,7 @@ namespace ZXing.Mobile.CameraAccess
         readonly Context context;
         readonly CameraController cameraController;
         readonly CameraEventsListener cameraEventListener;
+        readonly DeviceOrientationEventListener orientationEventListener;
         Task processingTask;
         DateTime lastPreviewAnalysis = DateTime.UtcNow;
         bool wasScanned;
@@ -22,6 +23,7 @@ namespace ZXing.Mobile.CameraAccess
             context = surfaceView.Context;
             this.scannerHost = scannerHost;
             cameraEventListener = new CameraEventsListener();
+            orientationEventListener = new DeviceOrientationEventListener(context, Android.Hardware.SensorDelay.Normal);
             cameraController = new CameraController(surfaceView, cameraEventListener, scannerHost);
             Torch = new Torch(cameraController, surfaceView.Context);
         }
@@ -42,12 +44,17 @@ namespace ZXing.Mobile.CameraAccess
         {
             IsAnalyzing = false;
             cameraEventListener.OnPreviewFrameReady -= HandleOnPreviewFrameReady;
+            orientationEventListener.Disable();
             cameraController.ShutdownCamera();
         }
 
         public void SetupCamera()
         {
             cameraEventListener.OnPreviewFrameReady += HandleOnPreviewFrameReady;
+            if (orientationEventListener.CanDetectOrientation())
+            {
+                orientationEventListener.Enable();
+            }
 
             barcodeReader = scannerHost.ScanningOptions.BuildBarcodeReader();
             Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "Created Barcode Reader");
@@ -117,10 +124,9 @@ namespace ZXing.Mobile.CameraAccess
 
         void DecodeFrame(CapturedImageData data)
         {
-            var sensorRotation = cameraController.SensorRotation;
+            var orientationData = new DeviceOrientationData(context.Resources.Configuration.Orientation, orientationEventListener.Orientation, cameraController.SensorRotation);
             var start = PerformanceCounter.Start();
-            var source = new PlanarNV21LuminanceSource(sensorRotation, data.Matrix, data.Width, data.Height, true);
-
+            var source = new PlanarNV21LuminanceSource(data.Matrix, data.Width, data.Height, orientationData, (!barcodeReader.AutoRotate && orientationEventListener.IsEnabled));
             var initPerformance = PerformanceCounter.Stop(start);
             start = PerformanceCounter.Start();
             var result = barcodeReader.Decode(source);
