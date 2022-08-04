@@ -132,12 +132,12 @@ namespace ZXing.Mobile.CameraAccess
             var result = barcodeReader.Decode(source);
             Android.Util.Log.Debug(
                 MobileBarcodeScanner.TAG,
-                "Decode Time: {0} ms (Width: {1}, Height: {2}, AutoRotation: {3}, SensorRotation: {4}), Source setup: {5} ms",
+                "Decode Time: {0} ms (Width: {1}, Height: {2}, Rotations (S/D): {3} / {4}), Source setup: {5} ms",
                 PerformanceCounter.Stop(start).Milliseconds,
                 data.Width,
                 data.Height,
-                barcodeReader.AutoRotate,
-                sensorRotation,
+                orientationData.SensorRotation,
+                orientationData.DeviceOrientation,
                 initPerformance.Milliseconds);
 
             if (result != null)
