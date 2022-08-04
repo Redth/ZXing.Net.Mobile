@@ -124,8 +124,8 @@ namespace ZXing.Mobile.CameraAccess
 
         void DecodeFrame(CapturedImageData data)
         {
-            var orientationData = new DeviceOrientationData(context.Resources.Configuration.Orientation, orientationEventListener.Orientation, cameraController.SensorRotation);
             var start = PerformanceCounter.Start();
+            var orientationData = new DeviceOrientationData(context.Resources.Configuration.Orientation, orientationEventListener.Orientation, cameraController.SensorRotation);
             var source = new PlanarNV21LuminanceSource(data.Matrix, data.Width, data.Height, orientationData, (!barcodeReader.AutoRotate && orientationEventListener.IsEnabled));
             var initPerformance = PerformanceCounter.Stop(start);
             start = PerformanceCounter.Start();
