@@ -53,14 +53,14 @@ namespace ZXing.Net.Mobile.Android
             }
             else
             {
-                if (orientationData.DeviceOrientation > 90) // Upside down and not landscape mode
+                if (orientationData.DeviceOrientation > 175 && orientationData.DeviceOrientation < 185) // Upside down and not landscape mode
                 {
                     rotateBy = 180;
                 }
             }
 
             rotateBy += orientationData.SensorRotation;
-            rotateBy %= 360;
+            rotateBy %= 360; // Normalize
 
             var rotateResult = RotateNV21(luminances, Width, Height, rotateBy);
             luminances = rotateResult.NV21;
