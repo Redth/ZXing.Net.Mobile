@@ -292,20 +292,20 @@ namespace ZXing.Mobile.CameraAccess
 
         Size GetOptimalPreviewSize(SurfaceView surface)
         {
-            if (IdealPhotoSize != null)
-            {
-                return IdealPhotoSize;
-            }
-
             var width = surface.Width > surface.Height ? surface.Width : surface.Height;
             var height = surface.Width > surface.Height ? surface.Height : surface.Width;
+            var aspectRatio = (double)width / (double)height;
+
+            if (IdealPhotoSize != null)
+            {
+                aspectRatio = (double)IdealPhotoSize.Width / (double)IdealPhotoSize.Height;
+            }
+
             var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
             var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
             var availableSizes = ((StreamConfigurationMap)characteristics
                         .Get(CameraCharacteristics.ScalerStreamConfigurationMap))
                         .GetOutputSizes(Class.FromType(typeof(ISurfaceHolder)));
-
-            var aspectRatio = (double)width / (double)height;
             var availableAspectRatios = availableSizes.Select(x => (x, (double)x.Width / (double)x.Height));
 
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
@@ -405,20 +405,22 @@ namespace ZXing.Mobile.CameraAccess
             }
         }
 
-        Size GetOptimalSize(IList<Size> sizes, Size displaySize, bool flipWidthWithHeight = false) => flipWidthWithHeight ? GetOptimalSize(sizes, displaySize.Height, displaySize.Width) : GetOptimalSize(sizes, displaySize.Width, displaySize.Height);
+        Size GetOptimalSize(IList<Size> sizes, Size referenceSize, bool flipWidthWithHeight = false) => flipWidthWithHeight ? GetOptimalSize(sizes, referenceSize.Height, referenceSize.Width) : GetOptimalSize(sizes, referenceSize.Width, referenceSize.Height);
 
         Size GetOptimalSize(IList<Size> sizes, int width, int height)
         {
-            const int minimumSize = 1000;
+            const int minimumSize = 550;
+            const int maximumSize = 1200;
             if (sizes is null) return null;
 
             var aspectRatio = (double)width / (double)height;
             var availableAspectRatios = sizes.Select(x => (x, (double)x.Width / (double)x.Height));
 
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
-            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(5);
+            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(10);
             var orderedMatches = bestMatches.OrderBy(x => x.x.Width).ThenBy(x => x.x.Height);
-            return orderedMatches.Where(x => x.x.Height > minimumSize || x.x.Width > minimumSize).First().x;
+            var matches = orderedMatches.Where(x => (x.x.Height >= minimumSize || x.x.Width >= minimumSize) && (x.x.Height <= maximumSize || x.x.Width <= maximumSize));
+            return matches.First().x;
         }
 
         void StartBackgroundThread()
