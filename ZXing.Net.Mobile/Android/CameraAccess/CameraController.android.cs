@@ -409,7 +409,7 @@ namespace ZXing.Mobile.CameraAccess
 
         Size GetOptimalSize(IList<Size> sizes, int width, int height)
         {
-            const int minimumSize = 550;
+            const int minimumSize = 500;
             const int maximumSize = 1200;
             if (sizes is null) return null;
 
@@ -419,7 +419,7 @@ namespace ZXing.Mobile.CameraAccess
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
             var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(10);
             var orderedMatches = bestMatches.OrderBy(x => x.x.Width).ThenBy(x => x.x.Height);
-            var matches = orderedMatches.Where(x => (x.x.Height >= minimumSize || x.x.Width >= minimumSize) && (x.x.Height <= maximumSize || x.x.Width <= maximumSize));
+            var matches = orderedMatches.Where(x => (x.x.Height >= minimumSize && x.x.Width >= minimumSize) && (x.x.Height <= maximumSize && x.x.Width <= maximumSize));
             return matches.First().x;
         }
 
