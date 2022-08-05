@@ -39,7 +39,6 @@ TestCloud/
 .vs/
 project.lock.json
 
-tools/
 .nugetapikey
 .mygetapikey
 *.xam

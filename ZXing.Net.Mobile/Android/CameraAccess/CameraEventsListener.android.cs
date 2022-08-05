@@ -1,29 +1,120 @@
 ﻿using System;
-using Android.Hardware;
-using ApxLabs.FastAndroidCamera;
+using Android.Media;
+using Java.Nio;
+using static Android.Media.ImageReader;
 
 namespace ZXing.Mobile.CameraAccess
 {
-	public class CameraEventsListener : Java.Lang.Object, INonMarshalingPreviewCallback, Camera.IAutoFocusCallback
-	{
-		public event EventHandler<FastJavaByteArray> OnPreviewFrameReady;
+    public class CameraEventsListener : Java.Lang.Object, IOnImageAvailableListener
+    {
+        public event EventHandler<CapturedImageData> OnPreviewFrameReady;
 
-		public void OnPreviewFrame(IntPtr data, Camera camera)
-		{
-			if (data != null && data != IntPtr.Zero)
-			{
-				using (var fastArray = new FastJavaByteArray(data))
-				{
-					OnPreviewFrameReady?.Invoke(this, fastArray);
+        public CameraEventsListener()
+        {
+        }
 
-					camera.AddCallbackBuffer(fastArray);
-				}
-			}
-		}
+        public void OnImageAvailable(ImageReader reader)
+        {
+            Image image = null;
+            try
+            {
+                image = reader.AcquireLatestImage();
 
-		public void OnAutoFocus(bool success, Camera camera)
-		{
-			Android.Util.Log.Debug(MobileBarcodeScanner.TAG, "AutoFocus {0}", success ? "Succeeded" : "Failed");
-		}
-	}
+                if (image is null) return;
+
+                var bytes = Yuv420888toNv21(image);
+                OnPreviewFrameReady?.Invoke(null, new CapturedImageData(bytes, image.Width, image.Height));
+            }
+            finally
+            {
+                image?.Close();
+            }
+        }
+
+        //https://stackoverflow.com/questions/52726002/camera2-captured-picture-conversion-from-yuv-420-888-to-nv21
+        byte[] Yuv420888toNv21(Image image)
+        {
+            var width = image.Width;
+            var height = image.Height;
+            var ySize = width * height;
+            var uvSize = width * height / 4;
+
+            var nv21 = new byte[ySize + uvSize * 2];
+            var planes = image.GetPlanes();
+
+            var yBuffer = planes[0].Buffer; // Y
+            var uBuffer = planes[1].Buffer; // U
+            var vBuffer = planes[2].Buffer; // V
+
+            var yArray = new byte[yBuffer.Limit()];
+            yBuffer.Get(yArray, 0, yArray.Length);
+
+            var uArray = new byte[uBuffer.Limit()];
+            uBuffer.Get(uArray, 0, uArray.Length);
+
+            var vArray = new byte[vBuffer.Limit()];
+            vBuffer.Get(vArray, 0, vArray.Length);
+
+            var rowStride = planes[0].RowStride;
+            var pos = 0;
+
+            if (rowStride == width)
+            {
+                // likely
+                Array.Copy(yArray, 0, nv21, 0, ySize);
+                pos += ySize;
+            }
+            else
+            {
+                var yBufferPos = -rowStride; // not an actual position
+                for (; pos < ySize; pos += width)
+                {
+                    yBufferPos += rowStride;
+                    Array.Copy(yArray, yBufferPos, nv21, pos, width);
+                }
+            }
+
+            rowStride = planes[2].RowStride;
+            var pixelStride = planes[2].PixelStride;
+
+            if (pixelStride == 2 && rowStride == width && uArray[0] == vArray[1])
+            {
+                // maybe V and U planes overlap as per NV21, which means vBuffer[1] is alias of uBuffer[0]
+                var savePixel = vArray[1];
+                try
+                {
+                    vArray[1] = (byte)~savePixel;
+                    if (uArray[0] == (sbyte)~savePixel)
+                    {
+                        vArray[1] = savePixel;
+                        Array.Copy(vArray, 0, nv21, ySize, 1);
+                        Array.Copy(vArray, 0, nv21, ySize + 1, uArray.Length);
+
+                        return nv21; // shortcut
+                    }
+                }
+                catch (ReadOnlyBufferException)
+                {
+                    // unfortunately, we cannot check if vBuffer and uBuffer overlap
+                }
+
+                // unfortunately, the check failed. We must save U and V pixel by pixel
+                vArray[1] = savePixel;
+            }
+
+            // other optimizations could check if (pixelStride == 1) or (pixelStride == 2),
+            // but performance gain would be less significant
+            for (var row = 0; row < height / 2; row++)
+            {
+                for (var col = 0; col < width / 2; col++)
+                {
+                    var vuPos = col * pixelStride + row * rowStride;
+                    nv21[pos++] = vArray[vuPos];
+                    nv21[pos++] = uArray[vuPos];
+                }
+            }
+
+            return nv21;
+        }
+    }
 }
