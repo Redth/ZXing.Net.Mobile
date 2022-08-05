@@ -128,6 +128,9 @@ namespace ZXing.Mobile.CameraAccess
             var orientationData = new DeviceOrientationData(context.Resources.Configuration.Orientation, orientationEventListener.Orientation, cameraController.SensorRotation);
             var source = new PlanarNV21LuminanceSource(data.Matrix, data.Width, data.Height, orientationData, (!barcodeReader.AutoRotate && orientationEventListener.IsEnabled));
             var initPerformance = PerformanceCounter.Stop(start);
+
+            //DebugHelper.SendNV21toJPEGToEndpoint(source.Matrix, source.Width, source.Height, "https://local.imagereceiver.ip:5390");
+
             start = PerformanceCounter.Start();
             var result = barcodeReader.Decode(source);
             Android.Util.Log.Debug(
