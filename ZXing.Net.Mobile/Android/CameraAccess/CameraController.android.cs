@@ -296,11 +296,6 @@ namespace ZXing.Mobile.CameraAccess
             var height = surface.Width > surface.Height ? surface.Height : surface.Width;
             var aspectRatio = (double)width / (double)height;
 
-            if (IdealPhotoSize != null)
-            {
-                aspectRatio = (double)IdealPhotoSize.Width / (double)IdealPhotoSize.Height;
-            }
-
             var characteristics = cameraManager.GetCameraCharacteristics(CameraId);
             var map = (StreamConfigurationMap)characteristics.Get(CameraCharacteristics.ScalerStreamConfigurationMap);
             var availableSizes = ((StreamConfigurationMap)characteristics
@@ -309,8 +304,9 @@ namespace ZXing.Mobile.CameraAccess
             var availableAspectRatios = availableSizes.Select(x => (x, (double)x.Width / (double)x.Height));
 
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
-            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(5);
-            return bestMatches.OrderByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height).First().x;
+            var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(availableSizes.Count() / 2);
+            var matches = bestMatches.OrderBy(m => m.Item2).ThenByDescending(x => x.x.Width).ThenByDescending(x => x.x.Height);
+            return matches.First().x;
         }
 
         void SetupHolderSize()
@@ -419,11 +415,11 @@ namespace ZXing.Mobile.CameraAccess
             var differences = availableAspectRatios.Select(x => (x.x, System.Math.Abs(x.Item2 - aspectRatio)));
             var bestMatches = differences.OrderBy(x => x.Item2).ThenBy(x => System.Math.Abs(x.x.Width - width)).ThenBy(x => System.Math.Abs(x.x.Height - height)).Take(sizes.Count / 2);
             var orderedMatches = bestMatches.OrderBy(x => x.x.Width).ThenBy(x => x.x.Height);
-            var matches = orderedMatches.Where(x => (x.x.Height >= minimumSize || x.x.Width >= minimumSize) && (x.x.Height <= maximumSize || x.x.Width <= maximumSize));
+            var matches = orderedMatches.Where(m => (m.x.Height >= minimumSize || m.x.Width >= minimumSize) && (m.x.Height <= maximumSize || m.x.Width <= maximumSize));
 
             if (matches.Count() == 0)
             {
-                return orderedMatches.First().x;
+                matches = orderedMatches;
             }
 
             return matches.First().x;
