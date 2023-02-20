@@ -1,10 +1,7 @@
 name: Build
 
 on:
-  pull_request:
-  push:
-  release:
-    types: [published,prereleased]
+    workflow_dispatch:
     
 jobs:
     build:
@@ -16,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.3.1
       - name: Build
         run: msbuild /r /t:Build /p:Configuration=Release .\ZXing.Net.Mobile.sln
       - name: Package NuGets
@@ -29,33 +26,7 @@ jobs:
           msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile\ZXing.Net.Mobile.csproj
           msbuild /t:Pack /p:Configuration=Release /p:PackageOutputPath=..\artifacts /p:PackageVersion=$pkgVer /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg .\ZXing.Net.Mobile.Forms\ZXing.Net.Mobile.Forms.csproj
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: NuGet
           path: .\artifacts
-
-    publish-nuget:
-      name: Publish NuGet Packages
-      needs: build
-      runs-on: windows-latest
-      if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event_name == 'release')
-      steps:
-        - name: Download Artifacts
-          uses: actions/download-artifact@v1
-          with:
-            name: NuGet
-        - name: Setup NuGet
-          uses: nuget/setup-nuget@v1
-          with:
-            nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-            nuget-version: 'latest'
-        - name: Push to GitHub Packages
-          run: |
-            nuget sources add -Name "GPR" -Source "https://nuget.pkg.github.com/Redth/index.json" -UserName Redth -Password ${{ secrets.GITHUB_TOKEN }}
-            nuget setApiKey ${{ secrets.NUGET_API_KEY }} --source "GPR" --skip-duplicate
-            nuget push NuGet\*.nupkg -Source "GPR"
-        - name: Push to NuGet.org
-          if: github.event_name == 'release'
-          run: |
-            nuget push NuGet\*.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_ORG_API_KEY }}
-
